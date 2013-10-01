@@ -1,0 +1,805 @@
+<html>
+
+<head>
+
+<title>Transcriber using D3js</title>
+    
+<script type="text/javascript" src="http://mbostock.github.com/d3/d3.v2.js"></script>
+
+<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/mootools/1.2.4/mootools-yui-compressed.js"></script>
+<script src="http://code.jquery.com/jquery-latest.js"></script>
+	
+	<script type="text/javascript">
+		jQuery.noConflict();
+	</script>
+	
+<!--<script type="text/javascript" src="d3.tip.js"></script>
+<script type="text/javascript" src="http://code.jquery.com/jquery-1.6.2.min.js"></script> 
+<script type="text/javascript" src="jquery.tipsy.js"></script>
+<link href="tipsy.css" rel="stylesheet" type="text/css" /> -->
+
+<style>
+
+	.chart {
+
+	  shape-rendering: crispEdges;
+
+	}
+
+
+	.mini text {
+
+	  font: 9px sans-serif; 
+
+	}
+
+
+	.main text {
+
+	  font: 12px sans-serif;  
+
+	}
+
+
+	.month text {
+
+	  text-anchor: start;
+
+	}
+
+
+	.todayLine {
+
+	  stroke: blue;
+
+	  stroke-width: 1.5;
+
+	}
+
+
+
+	.axis line, .axis path {
+
+	  stroke: black;
+
+	}
+
+
+
+	.miniItem {
+
+	  stroke-width: 6;  
+
+	}
+
+
+	/*
+	.item {
+
+	  stroke: gray;
+
+	  fill: #ddd;
+	}
+	*/
+	
+	.item {
+
+	  stroke: green;
+
+	  fill: #ddd;
+	}
+
+
+
+	.brush .extent {
+
+	  stroke: gray;
+
+	  fill: blue;
+
+	  fill-opacity: .165;
+
+	}
+
+#ruler { visibility: hidden; white-space: nowrap; }
+
+</style>
+
+</head>
+
+<body>
+
+
+	<span id="ruler"></span>
+
+	<script type="text/javascript">
+
+	String.prototype.visualLength = function()
+	{
+		var ruler = $("ruler");
+		ruler.innerHTML = this;
+		return ruler.offsetWidth;
+	}
+
+	function $(id)
+	{
+		return document.getElementById(id);
+	}
+
+	var formatTime = d3.time.format("%e %B");
+
+	//var div = d3.select("body").append("div")   
+	//    .attr("class", "tooltip")               
+	 //   .style("opacity", 0);
+
+
+	//phuong jouer
+
+	var tooltip = d3.select("body")
+		.append("div")
+		.style("position", "absolute")
+		.style("z-index", "10")
+		.style("visibility", "hidden")
+		.text(function(d) { return "d.desc"; });//"a simple tooltip");
+
+	tooltips = function (band) {//function (bandName) {
+
+        //var band = bands[bandName];
+
+        var tooltip = d3.select("body")
+            .append("div")
+            .attr("class", "tooltip");
+
+        function getHtml(element, d) {
+            var html;
+            if (element.attr("class") == "interval") {
+                html = d.label + "<br>" + toYear(d.start) + " - " + toYear(d.end);
+            } else {
+                html = "d.label" + "<br>" + toYear(d.start);//d.label + "<br>" + toYear(d.start);
+            }
+            return html;
+        }
+
+        function showTooltip (d) {
+
+            // var x = event.pageX < band.x + band.w / 2
+//                     ? event.pageX + 10
+//                     : event.pageX - 110,
+//                 y = event.pageY < band.y + band.h / 2
+//                     ? event.pageY + 30
+//                     : event.pageY - 30;
+
+			var x = event.pageX,
+			y = event.pageY;
+			
+            tooltip
+                .html(getHtml(d3.select(this), d))
+                .style("top", y + "px")
+                .style("left", x + "px")
+                .style("visibility", "visible");
+        }
+
+        function hideTooltip () {
+            tooltip.style("visibility", "hidden");
+        }
+
+      //  band.items
+      		
+            band.on("mouseover", showTooltip)
+            band.on("mouseout", hideTooltip);
+
+};
+
+
+// helper function to create dates prior to 1000
+
+var yr = function(year) {
+
+  	var date = new Date(2000,1,1);
+
+  	date.setFullYear(year);
+
+  	return date;
+
+}
+
+
+
+
+	// lanes is an array of lane objects that have the following properties
+
+	//    id:    the unique id for this swimlane
+
+	//    label: the text label for this swimlane
+
+	//    
+
+	// these determine how many horizontal lanes there will be in the chart
+
+	// and what their names will be
+
+	var lanes = [
+
+	  {id: 0, label: 'Chinese'}, 
+
+	  {id: 1, label: 'Japanese'}, 
+
+	  {id: 2, label: 'Korean'}
+
+	  ];
+
+
+
+	// items is an array of item objects that have the following properties
+
+	//    id:    the unique id for this item
+
+	//    lane:  the id of the lane that this item belongs in
+
+	//    desc:  the description for this item
+
+	//    start: the starting value for this item
+
+	//    end:   the end value for this item
+
+	//    class: the css class that should be applied to this item
+
+	//    
+
+	// these define the actual items that are displayed on the chart
+
+// 	var items = [
+// 
+// 	  {id: 0, lane: 0, desc: 'Qin: I would like to thank you for having invited me to your party ab abb abab', start: yr(5), end: yr(205), class: 'item'},
+// 
+// 	  {id: 1, lane: 0, desc: 'Jin', start: yr(265), end: yr(420), class: 'item'},
+//   
+// 	  {id: 2, lane: 1, desc: 'P je suis fatigue avec vous, merci de marcher correctement', start: yr(200), end: yr(400), class: 'item'},
+// 
+// 	  {id: 3, lane: 2, desc: 'je veux aller a NICE', start: yr(150), end: yr(280), class: 'item'}
+// 
+// 	];  
+
+var items = [
+
+	  {id: 0, lane: 0, desc: 'Qin: I would like to thank you for having invited me to your party ab abb abab', start: 5, end: 205, class: 'item'},
+
+	  {id: 1, lane: 0, desc: 'Jin', start: 265, end: 420, class: 'item'},
+  
+	  {id: 2, lane: 1, desc: 'P je suis fatigue avec vous, merci de marcher correctement', start: 200, end: 400, class: 'item'},
+
+	  {id: 3, lane: 2, desc: 'je veux aller a NICE', start: 150, end: 280, class: 'item'}
+
+	];  
+
+	///drawTimeline(lanes, lanes.length, items);
+
+//Here we start drawing
+function drawTimeline(lanes, laneLength, items){
+
+		// define the chart extents
+
+		var margin = {top: 20, right: 15, bottom: 15, left: 70}
+
+		  , width = 960 - margin.left - margin.right
+
+		  , height = 500 - margin.top - margin.bottom
+
+		  //, miniHeight = lanes.length * 12 + 50
+		  , miniHeight = laneLength * 12 + 50
+
+		  , mainHeight = height - miniHeight - 50;
+
+
+		var x = d3.time.scale()
+
+		  .domain([d3.min(items, function(d) { return d.start; }), //- 100000; }),
+
+			   d3.max(items, function(d) { return d.end; })])
+
+		  .range([0, width]);
+
+		var x1 = d3.time.scale().range([0, width]);
+
+		//phuong added
+		var cropLabelString = function(label, len){
+	
+			//console.log('label: ' + label + ' len: ' + len + 'len of label : ' + label.length + ' x1: ' + label.substring(0, 5));
+			if (label.length < 5)
+				return label;	
+			else
+				return label.substring(0, 5);
+		}
+		//end phuong added
+
+		var ext = d3.extent(lanes, function(d) { return d.id; });
+
+		var y1 = d3.scale.linear().domain([ext[0], ext[1] + 1]).range([0, mainHeight]);
+
+		var y2 = d3.scale.linear().domain([ext[0], ext[1] + 1]).range([0, miniHeight]);
+
+
+
+		var chart = d3.select('body')
+
+		  .append('svg:svg')
+
+		  .attr('width', width + margin.right + margin.left)
+
+		  .attr('height', height + margin.top + margin.bottom)
+
+		  .attr('class', 'chart');
+  
+			//.attr('class', 'chart')
+			//.call(tip);
+
+
+
+		chart.append('defs').append('clipPath')
+
+		  .attr('id', 'clip')
+
+		  .append('rect')
+
+			.attr('width', width)
+
+			.attr('height', mainHeight);
+
+
+
+		var main = chart.append('g')
+
+		  .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')')
+
+		  .attr('width', width)
+
+		  .attr('height', mainHeight)
+
+		  .attr('class', 'main');
+
+
+
+		var mini = chart.append('g')
+
+		  .attr('transform', 'translate(' + margin.left + ',' + (mainHeight + 60) + ')')
+
+		  .attr('width', width)
+
+		  .attr('height', miniHeight)
+
+		 .attr('class', 'mini');
+
+
+		// draw the lanes for the main chart
+
+		main.append('g').selectAll('.laneLines')
+
+		  .data(lanes)
+
+		  .enter().append('line')
+
+		  .attr('x1', 0)
+
+		  .attr('y1', function(d) { return d3.round(y1(d.id)) + 0.5; })
+
+		  .attr('x2', width)
+
+		  .attr('y2', function(d) { return d3.round(y1(d.id)) + 0.5; })
+
+		.attr('stroke', function(d) { return d.label === '' ? 'white' : 'blue'});//'lightgray' });
+  
+ 
+		//chi hien thi 3 chu dung dau dong
+		main.append('g').selectAll('.laneText')
+
+		  .data(lanes)
+
+		  .enter().append('text')
+
+		  .text(function(d) { return d.label; })
+
+		  .attr('x', -10)
+
+		  .attr('y', function(d) { return y1(d.id + .5); })
+
+		  .attr('dy', '0.5ex')
+
+		  .attr('text-anchor', 'end')
+
+		 .attr('class', 'laneText');
+		 // .attr('class', 'laneText')
+  
+
+		// draw the lanes for the mini chart
+
+		mini.append('g').selectAll('.laneLines')
+
+		  .data(lanes)
+
+		  .enter().append('line')
+
+		  .attr('x1', 0)
+
+		  .attr('y1', function(d) { return d3.round(y2(d.id)) + 0.5; })
+
+		  .attr('x2', width)
+
+		  .attr('y2', function(d) { return d3.round(y2(d.id)) + 0.5; })
+
+		  .attr('stroke', function(d) { return d.label === '' ? 'white' : 'lightgray' });
+		  //.attr('stroke', function(d) { return d.label === '' ? 'white' : 'lightgray' })
+	
+
+
+		mini.append('g').selectAll('.laneText')
+
+		  .data(lanes)
+
+		  .enter().append('text')
+
+		  .text(function(d) { return d.label; })
+
+		  .attr('x', -10)
+
+		  .attr('y', function(d) { return y2(d.id + .5); })
+
+		  .attr('dy', '0.5ex')
+
+		  .attr('text-anchor', 'end')
+
+		  .attr('class', 'laneText');
+		  //.attr('class', 'laneText')
+  
+		//tooltips(mini.append('g').selectAll('.laneText'));
+
+		// draw the x axis
+
+		var xDateAxis = d3.svg.axis()
+
+		  .scale(x)
+
+		  .orient('bottom');
+
+
+
+		var x1DateAxis = d3.svg.axis()
+
+		  .scale(x1)
+
+		  .orient('bottom');
+
+
+
+		main.append('g')
+
+		  .attr('transform', 'translate(0,' + mainHeight + ')')
+
+		  .attr('class', 'main axis date')
+
+		  .call(x1DateAxis);
+
+
+
+		mini.append('g')
+
+		  .attr('transform', 'translate(0,' + miniHeight + ')')
+
+		  .attr('class', 'axis date')
+
+		  .call(xDateAxis);
+
+
+
+		// draw the items
+
+		var itemRects = main.append('g')
+
+		  .attr('clip-path', 'url(#clip)');
+
+
+
+		mini.append('g').selectAll('miniItems')
+
+		  .data(getPaths(items))
+
+		  .enter().append('path')
+
+		  .attr('class', function(d) { return 'miniItem ' + d.class; })
+
+		  .attr('d', function(d) { return d.path; });
+		  //.attr('d', function(d) { return d.path; })
+  
+
+		// invisible hit area to move around the selection window
+
+		mini.append('rect')
+
+		  .attr('pointer-events', 'painted')
+
+		  .attr('width', width)
+
+		  .attr('height', miniHeight)
+
+		  .attr('visibility', 'hidden')
+
+		  .on('mouseup', moveBrush);	
+
+
+		// draw the selection area
+
+		var brush = d3.svg.brush()
+
+		  .x(x)
+
+		  //.extent([yr(150), yr(300)])
+		  .extent([150, 300])
+
+		  .on("brush", display);
+
+
+
+		mini.append('g')
+
+		  .attr('class', 'x brush')
+
+		  .call(brush)
+
+		  .selectAll('rect')
+
+			.attr('y', 1)
+
+			.attr('height', miniHeight - 1);
+
+
+
+		mini.selectAll('rect.background').remove();
+
+		display();
+
+
+
+		function display () {
+
+
+
+		  var rects, labels
+
+			, minExtent = brush.extent()[0]
+
+			, maxExtent = brush.extent()[1]
+
+			, visItems = items.filter(function (d) { return d.start < maxExtent && d.end > minExtent});
+
+
+
+		  mini.select('.brush').call(brush.extent([minExtent, maxExtent]));   
+
+
+
+		  x1.domain([minExtent, maxExtent]);
+
+
+
+		  // update the axis
+
+		  main.select('.main.axis.date').call(x1DateAxis);
+
+
+
+		  // upate the item rects
+
+		  rects = itemRects.selectAll('rect')
+
+			.data(visItems, function (d) { return d.id; })
+
+			.attr('x', function(d) { return x1(d.start); })
+
+			.attr('width', function(d) { return x1(d.end) - x1(d.start); });
+
+
+
+		  rects.enter().append('rect')
+
+			.attr('x', function(d) { return x1(d.start); })
+
+			.attr('y', function(d) { return y1(d.lane) + .1 * y1(1) + 0.5; })
+
+			.attr('width', function(d) { return x1(d.end) - x1(d.start); })
+
+			.attr('height', function(d) { return .8 * y1(1); })
+
+			//.attr('class', function(d) { return 'mainItem ' + d.class; });
+			.attr('class', function(d) { return 'mainItem ' + d.class; })
+	
+			//HERE is for tooltip
+			//.on('mouseover', tip.show)
+			//.on('mouseout', tip.hide);
+	
+			.on("mouseover", function(d){tooltip.text(d.desc); return tooltip.style("visibility", "visible");})
+			.on("mousemove", function(){return tooltip.style("top", (event.pageY-10)+"px").style("left",(event.pageX+10)+"px");})
+			.on("mouseout", function(){return tooltip.style("visibility", "hidden");});
+
+
+
+		  rects.exit().remove();
+
+
+
+		  // update the item labels
+
+		  labels = itemRects.selectAll('text')
+
+			.data(visItems, function (d) { return d.id; })
+
+			.attr('x', function(d) { return x1(Math.max(d.start, minExtent)) + 2; });
+
+		
+
+		  labels.enter().append('text')
+
+		//    .text(function (d) { return 'Item\n\n\n\n Id: ' + cropLabelString(d.desc, x1(d.end) - x1(d.start)); })//return 'Item\n\n\n\n Id: ' + d.id; })
+			.text(function (d) { return cropLabelString(d.desc, x1(d.end) - x1(d.start)); })//return 'Item\n\n\n\n Id: ' + d.id; })
+	
+			.attr('x', function(d) { return x1(Math.max(d.start, minExtent)) + 2; })
+
+			.attr('y', function(d) { return y1(d.lane) + .4 * y1(1) + 0.5; })
+			.attr("dx", 10) // padding-right
+		   .attr("dy", ".35em") // vertical-align: middle
+			.attr('text-anchor', 'start')//'start')
+
+			.attr('class', 'itemLabel');
+
+
+
+		  labels.exit().remove();
+
+		}
+
+
+
+		function moveBrush () {
+
+		  var origin = d3.mouse(this)
+
+			, point = x.invert(origin[0])
+
+			//Phuong, halfExtent = (brush.extent()[1].getTime() - brush.extent()[0].getTime()) / 2
+			, halfExtent = (300-150) / 2
+
+			, start = new Date(point.getTime() - halfExtent)
+
+			, end = new Date(point.getTime() + halfExtent);
+
+
+
+		  brush.extent([start,end]);
+
+		  display();
+
+		}
+
+
+
+		// generates a single path for each item class in the mini display
+
+		// ugly - but draws mini 2x faster than append lines or line generator
+
+		// is there a better way to do a bunch of lines as a single path with d3?
+
+		function getPaths(items) {
+
+		  var paths = {}, d, offset = .5 * y2(1) + 0.5, result = [];
+
+		  for (var i = 0; i < items.length; i++) {
+
+			d = items[i];
+
+			if (!paths[d.class]) paths[d.class] = ''; 
+
+			paths[d.class] += ['M',x(d.start),(y2(d.lane) + offset),'H',x(d.end)].join(' ');
+
+		  }
+
+
+
+		  for (var className in paths) {
+
+			result.push({class: className, path: paths[className]});
+
+		  }
+
+		  return result;
+
+		}
+
+} 
+
+</script>
+
+<script>
+	console.log("toi 0");
+	//This event is called when the DOM is fully loaded
+	// window.addEvent("domready",function(){
+// 	console.log("toi nn");
+// 		//Creating a new AJAX request that will request 'test.csv' from the current directory
+// 		var csvRequest = new Request.JSON({
+// //               url:"./data/test.csv",
+// 		//	url: "getData.php",
+// 			url: "getDataTranscriber.php",
+// 			method : "get",
+// 			//data: data,
+// 			async: false, 
+// 			onSuccess:function(response, responseText){
+// 				//The response text is available in the 'response' variable
+// 				//Set the value of the textarea with the id 'csvResponse' to the response
+// 				//$("csvResponse").value = response;//.annotations.annotation;
+// 				//var json = response.responseText.evalJSON();
+// 				//alert(json);
+// 				console.log("toi");
+// 				var response1 = jQuery.parseJSON(responseText);
+// 				console.log("toi1");
+// 				//var ab = JSON.parse(JSON.stringify(response));//
+// 				var ab = jQuery.parseJSON(response); 
+// 				console.log("toi2");
+// 				//console.log(response);
+// 				//console.log(ab);
+// 				get_response(ab);
+// 			}
+// 		}).send(); //Don't forget to send our request!
+// 		
+// 	});
+	jQuery.getJSON("/videos/2/modality/speaker", function(speaker) { 
+		console.log("ham get");
+		console.log(speaker);
+		get_response(speaker.annotation);
+	}); 
+		
+	//declare several variables used for visualizing data
+	var annType = []; //same same Lanes
+	var annTypeSwim = [];
+	var dataVisual = [];
+	var id = 0;
+		
+	get_response = function(obj) {
+		//console.log(obj);
+		
+		for (var i = 0; i < obj.length; i++) {
+			var jsonStr = '{';
+			//console.log(obj.annotations.annotation[i]["@attributes"].id);
+			var type = obj[i]['track']; //type of annotation
+			var begin = obj[i]['segment'].start;
+			var end = obj[i]['segment'].end;
+				
+			var contentAnn = obj[i].label;
+			var pos = annType.length; //id of lanes
+			
+			if(jQuery.inArray(type, annType) >= 0) {
+				pos = jQuery.inArray(type, annType);//indexOf(type);
+			}
+			else {
+				annType.push(type);//('"'+ type + '"');
+				var strType = '{';
+				strType = strType + '"id"' + ':' + pos + "," + '"label"' + ':' + '"' + type + '"' + '}';
+				strType = jQuery.parseJSON(strType);
+				annTypeSwim.push(strType);
+			}
+			//prepare an item : type: pos, id: contenAnn, begin: begin, end:end
+			jsonStr = jsonStr + '"id"' + ':' + id + "," + '"lane"' + ':' + pos + "," + '"desc"' + ':' + '"' + contentAnn + '"' + "," + '"start"' + 
+			':' + begin  + "," + '"end"' + ':' + end + "," + '"class"' + ':' + '"item"' + '}';
+			
+			id++;
+			//jsonStr = JSON.stringify(eval('('+jsonStr+')'));
+		//	console.log("jsonStr"); console.log(jsonStr);
+			jsonStr = jQuery.parseJSON(jsonStr);
+			dataVisual.push(jsonStr);
+		} //for i
+		//console.log("annTypeSwim"); console.log(annTypeSwim);
+		//console.log("dataVisual"); console.log(dataVisual);  	//for debugging
+		//console.log("view item"); console.log(items);
+		drawTimeline(annTypeSwim, annType.length, dataVisual);
+	};
+</script>
+
+</body>
+
+</html>

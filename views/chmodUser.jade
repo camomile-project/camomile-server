@@ -1,0 +1,8 @@
+form(id="chmod", method="POST", action="/chmodUser")
+	lable(for='username') User Name
+	input#username(type='text', name='username')
+	label(for='role') Change role (admin, user, supervisor):
+	input#password(type='text', name='role')
+	input(type="submit", value="Change its role")
+
+h1!=message

@@ -1,0 +1,102 @@
+<html>
+	<head>
+		<title>jsonp test</title>
+		<script src="http://code.jquery.com/jquery-1.6.2.min.js"></script>		
+		<script type="text/javascript">
+            $(function(){				
+                $('#select_post').click(function(e){
+                    e.preventDefault();
+                    console.log('select_link clicked');
+                    
+                     /*$.ajax({
+                        dataType: 'jsonp',
+                        data: "data=yeah",						
+                        jsonp: 'callback',
+                        url: 'http://localhost:3000/endpoint?callback=?',						
+                        success: function(data) {
+                            console.log('success');
+                            console.log(JSON.stringify(data));
+                        }
+                    });*/
+ 
+					var data = {};
+					data.id_corpus = "51f25444c021410802000001";
+					data.name = "BFMTV_BFMStory_2011-07-11_175900";
+					//data.name = "Unknown";
+					$.ajax({
+						type: 'POST',
+						data: JSON.stringify(data),
+				        contentType: 'application/json',
+                        url: 'http://localhost:3000/corpus/51f25444c021410802000001/media',						
+                        success: function(data) {
+                            console.log('success');
+                            console.log(JSON.stringify(data));
+                        }
+                    });
+ 
+					/*$.ajax('http://localhost:3000/endpoint', {
+					        type: 'POST',
+					        data: JSON.stringify(data),
+					        contentType: 'application/json',
+					        success: function() { console.log('success');},
+					        error  : function() { console.log('error');}
+					});*/
+                });				
+            });
+        </script>
+        
+        <script type="text/javascript">
+            $(function(){				
+                $('#select_update').click(function(e){
+                    e.preventDefault();
+                    console.log('select_link clicked');
+                    
+					var data = {};
+					//data.id_corpus = "51cd83579474ece703000002";
+					//data.name = "BFM";
+					data.name = "LCPUpdated2";
+					$.ajax({
+						type: "PUT",
+						data: JSON.stringify(data),
+				        contentType: 'application/json',
+                        url: 'http://localhost:3000/corpus/51cd83579474ece703000002/media/51d348f283851e7403000002',						
+                        success: function(data) {
+                            console.log('success');
+                            console.log(JSON.stringify(data));
+                        }
+                    });
+                });				
+            });
+        </script>
+
+		<script type="text/javascript">
+            $(function(){				
+                $('#select_delete').click(function(e){
+                    e.preventDefault();
+                    console.log('select_link clicked');
+                    
+					var data = {};
+					//data.id_corpus = "51cd83579474ece703000002";
+					//data.name = "BFM";
+					data.name = "LCPUpdated2";
+					$.ajax({
+						type: "DELETE",
+						data: JSON.stringify(data),
+				        contentType: 'application/json',
+                        url: 'http://localhost:3000/corpus/51cd83579474ece703000002/media/51eebdfa536fefca05000005',						
+                        success: function(data) {
+                            console.log('deleted successfully');
+                            console.log(JSON.stringify(data));
+                        }
+                    });
+                });				
+            });
+        </script>
+        
+    </head>
+    <body>
+        <div id="select_div"><a href="#" id="select_post">Click here to add a new media</a></div>
+        <div id="select_div1"><a href="#" id="select_update">Click here to update an existing media</a></div>
+        <div id="select_div2"><a href="#" id="select_delete">Click here to delete an existing media</a></div>        
+    </body>
+</html>
