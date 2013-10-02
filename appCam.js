@@ -105,5 +105,8 @@ routes.initialize(app);
 //finally boot up the server:
 http.createServer(app).listen(app.get('port'), process.env.IP, function(){
 	console.log('Express server listening on port ' + app.get('port'));
+	if(GLOBAL.no_auth == true){
+		console.log('be careful: any user can access the data without authentication');
+	}
 });
 

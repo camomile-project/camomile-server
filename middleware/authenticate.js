@@ -31,7 +31,10 @@ exports.authenticate = function(name, pass, fn) {
 
 exports.requiredAuthentication = function(role) {
 	return function(req, res, next) {
-		if(req.session.user && req.session.user.role === role) {
+		if (GLOBAL.no_auth){
+    		next();
+    	}
+		else if(req.session.user && req.session.user.role === role) {
 			next();
 		} else {
 			if(req.session.user && req.session.user.role == "supervisor" && role == "user")
@@ -69,7 +72,7 @@ exports.createRootUser = function(){
 	});
 }
 
-exports.signup = function(req, res){
+/*exports.signup = function(req, res){
     hash(req.body.password, function (err, salt, hash) {
         if (err) throw err;
         var user = new User({
@@ -89,7 +92,7 @@ exports.signup = function(req, res){
 			}
     	});
 	});
-}
+}*/
 
 exports.userExist = function(req, res, next) {
     User.count({
@@ -154,7 +157,10 @@ exports.login = function (req, res) {
 }
 
 exports.signup = function (req, res) {
-	console.log("req.body.role: " + req.body.role);
+	if (GLOBAL.no_auth){
+    	return res.send('Anonymous user is not allowed here');
+    }
+	//console.log("req.body.role: " + req.body.role);
     hash(req.body.password, function (err, salt, hash) {
         if (err) throw err;
         var user = new User({
