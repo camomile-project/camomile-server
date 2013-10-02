@@ -1,3 +1,10 @@
+if (process.argv.indexOf('--no-auth') > -1 ){
+  /**
+   * Indicates when to run without requiring auth for API
+   */
+  GLOBAL.no_auth = true;
+}
+
 var express = require('express'), 
     http = require('http'), 
     path = require('path'), 
@@ -27,8 +34,8 @@ var allowCrossDomain = function(req, res, next) {
 }
 
 // connect to the db:
-mongoose.connect('mongodb://localhost/sampledb');
-// mongoose.connect('mongodb://localhost/sampledbTAM');
+// mongoose.connect('mongodb://localhost/sampledb');
+mongoose.connect('mongodb://localhost/sampledbTAM');
 // mongoose.connect('mongodb://localhost/tmpCURL');
 mongoose.connection.on('open', function(){
 	console.log("Connected to Mongoose") ;

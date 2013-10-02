@@ -40,7 +40,7 @@ exports.requiredAuthentication = function(role) {
 				next();
 			else {
 				req.session.error = 'Access denied!';
-				res.redirect('/login');
+				res.redirect('login');
 			}
 		}
 	}
@@ -83,7 +83,7 @@ exports.signup = function(req, res){
 			if(newUser){
 				req.session.regenerate(function(){
 					req.session.user = newUser;//user;
-					req.session.success = 'Authenticated as ' + newUser.username + ' click to <a href="/logout">logout</a>.';
+					req.session.success = 'Authenticated as ' + newUser.username + ' click to <a href="logout">logout</a>.';
 					res.redirect('/');
 				})
 			}
@@ -99,7 +99,7 @@ exports.userExist = function(req, res, next) {
             next();
         } else {
             req.session.error = "This user already exists"
-            res.redirect("/signup");
+            res.redirect("signup");
         }
     });
 }
@@ -128,6 +128,9 @@ exports.createRootUser = function (){
 }
 
 exports.login = function (req, res) {
+	if (GLOBAL.no_auth){
+    	return res.send('Without requiring authentification for API');
+    }
 	var username = req.body.username,
 		pass = req.body.password;
 	if(username == undefined) { //login via a GET
@@ -140,12 +143,12 @@ exports.login = function (req, res) {
             req.session.regenerate(function () {
 
                 req.session.user = user;
-                req.session.success = 'Authenticated as ' + user.username + ' click to <a href="/logout">logout</a>.';
+                req.session.success = 'Authenticated as ' + user.username + ' click to <a href="logout">logout</a>.';
                 res.redirect('/');
             });
         } else {
             req.session.error = 'Authentication failed, please check your ' + ' username and password.';
-            res.redirect('/login');
+            res.redirect('login');
         }
     });
 }
@@ -168,7 +171,7 @@ exports.signup = function (req, res) {
                  if(newUser){ 
                     req.session.regenerate(function(){
                         req.session.user = newUser;//user;
-                        req.session.success = 'Authenticated as ' + newUser.username + ' click to <a href="/logout">logout</a>.';
+                        req.session.success = 'Authenticated as ' + newUser.username + ' click to <a href="logout">logout</a>.';
                         res.redirect('/');
                     })
                 }
@@ -178,6 +181,9 @@ exports.signup = function (req, res) {
 }
 
 exports.chmodUser = function (req, res) {
+	if (GLOBAL.no_auth){
+    	return res.send('Anonymous user is not allowed here');
+    }
 	var usrname = req.body.username,
 		newrole = req.body.role;
 	
@@ -220,11 +226,22 @@ exports.chmodUser = function (req, res) {
 }
 
 exports.racine = function (req, res) {
+    if (GLOBAL.no_auth){
+    	var user = {
+    		username: "anonymous",
+    		password: "anonymous",
+    		affiliation: "anonymous",
+    		role: "admin",
+    		salt: "anonymous",
+    		hash: "anonymous"
+    	};
+    	req.session.user = user;
+    }
     if (req.session.user) {
-        res.send("Welcome " + req.session.user.username + "<br>" + "<a href='/logout'>logout</a>");
+        res.send("Welcome " + req.session.user.username + "<br>" + "<a href='logout'>logout</a>");
     } else {
     	
-        res.send("<h1 ALIGN="+ "CENTER>" + "Welcome to Camomile project!</h1>" + "<br>" + "<h2>You have to log in to use the APIs</h2>" + "<br>" + "<a href='/login'> Login</a>" + "<br>" + "<a href='/signup'> Sign Up</a>");
+        res.send("<h1 ALIGN="+ "CENTER>" + "Welcome to Camomile project!</h1>" + "<br>" + "<h2>You have to log in to use the APIs</h2>" + "<br>" + "<a href='login'> Login</a>" + "<br>" + "<a href='signup'> Sign Up</a>");
     }
 }
 
@@ -237,12 +254,18 @@ exports.signupGET = function (req, res) {
 }
 
 exports.logoutGET = function (req, res) {
+	if (GLOBAL.no_auth){
+    	return res.send('This is an anonymous user');
+    }
     req.session.destroy(function () {
         res.redirect('/');
     });
 }
 
 exports.profile = function (req, res) {
+    if (GLOBAL.no_auth){
+    	return res.send('This is an anonymous user');
+    }
     var usrname = req.session.user.username;
     if(req.params.username != undefined){
     	usrname = req.params.username
@@ -254,7 +277,7 @@ exports.profile = function (req, res) {
 
     function (err, user) {
         if (user) {
- 			res.send("username: " + user.username + "<br>" + " Role: " + user.role + "<br>" + " affiliation: " + user.affiliation +'<br>'+ 'click to <a href="/logout">logout</a>');
+ 			res.send("username: " + user.username + "<br>" + " Role: " + user.role + "<br>" + " affiliation: " + user.affiliation +'<br>'+ 'click to <a href="logout">logout</a>');
         } else {
             return res.send('cannot find user');
         }
