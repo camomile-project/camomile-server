@@ -34,8 +34,9 @@ var allowCrossDomain = function(req, res, next) {
 }
 
 // connect to the db:
-// mongoose.connect('mongodb://localhost/sampledb');
-mongoose.connect('mongodb://localhost/sampledbTAM');
+ mongoose.connect('mongodb://localhost/sampledb');
+//mongoose.connect('mongodb://localhost/sampledbTAM');
+//mongoose.connect('mongodb://localhost/TAM');
 // mongoose.connect('mongodb://localhost/tmpCURL');
 mongoose.connection.on('open', function(){
 	console.log("Connected to Mongoose") ;

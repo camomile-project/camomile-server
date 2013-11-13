@@ -1,0 +1,10 @@
+form(id="addGroupRight2Resource", method="POST", action="addGroupRight2Resource")
+	lable(for='id1') ID of the resource being granted
+	input#id(type='text', name='id')
+	lable(for='groupLogin') Groupname
+	input#groupLogin(type='text', name='groupLogin')
+	lable(for='groupRight') Right (N, R, C, U, D, A)
+	input#groupRight(type='text', name='groupRight')
+	input(type="submit", value="Grant the right")
+
+h1!=message

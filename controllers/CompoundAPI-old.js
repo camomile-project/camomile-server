@@ -10,7 +10,6 @@ var Layer = require('../models/Layer').Layer; //get the layer model
 
 var Annotation = require('../models/Annotation').Annotation; //get the annotation model
 
-var ACLAPI = require('../controllers/ACLAPI');
 
 //test for deleting corpus
 //app.delete('/corpus/:id', 
@@ -20,10 +19,6 @@ exports.removeCorpus = function(req, res){
 			res.json(error); return;
 		}
 		else { //else 1
-			//already deleted this id, now remove it from the ACL
-			ACLAPI.removeAnACLEntry(data_id);
-			// end of removing from the ACL
-			
 			var listRemovedMediaId = [];
 			var listRemovedLayerId = [];	//keep all layer removed
 			var listRemovedAnnoId = [];	
@@ -48,14 +43,9 @@ exports.removeCorpus = function(req, res){
 						return;
 					}
 					//var listId = [];
-					//console.log("I am here, inside the removeAllMediaWithCorpusId, before docs.forEach");
+					console.log("I am here, inside the removeAllMediaWithCorpusId, before docs.forEach");
 					docs.forEach( function (doc) {
-					//	console.log("xoa"); console.log(doc);
-						
-						//already deleted this id, now remove it from the ACL
-						ACLAPI.removeAnACLEntry(doc._id);
-						// end of removing from the ACL
-					
+						console.log("xoa"); console.log(doc);
 						listRemovedMediaId.push({'id': doc._id});
 						doc.remove(); //will verify its order
 						rem.listMediaIDs.push({'id': doc._id});
@@ -73,11 +63,7 @@ exports.removeCorpus = function(req, res){
 								}
 								
 								doc1s.forEach( function (doc1) {
-									//console.log("xoa1"); console.log(doc1);
-									//already deleted this id, now remove it from the ACL
-									ACLAPI.removeAnACLEntry(doc1._id);
-									// end of removing from the ACL
-							
+									console.log("xoa1"); console.log(doc1);
 									listRemovedLayerId.push({'id': doc1._id});
 									doc1.remove();
 									
@@ -95,12 +81,7 @@ exports.removeCorpus = function(req, res){
 											}
 											
 											doc2s.forEach( function (doc2) {
-												//console.log("xoa2"); console.log(doc2);
-												
-												//already deleted this id, now remove it from the ACL
-												ACLAPI.removeAnACLEntry(doc2._id);
-												// end of removing from the ACL
-												
+												console.log("xoa2"); console.log(doc2);
 												listRemovedAnnoId.push({'id': doc2._id});
 												doc2.remove();
 											});		
@@ -129,10 +110,6 @@ exports.removeMedia = function(req, res){
 		}
 		else {
 			
-			//already deleted this id, now remove it from the ACL
-			ACLAPI.removeAnACLEntry(data._id);
-			// end of removing from the ACL
-			
 			var listRemovedLayerId = [];
 			var listRemovedAnnoId = [];
 			
@@ -150,11 +127,7 @@ exports.removeMedia = function(req, res){
 					}
 					
 					doc1s.forEach( function (doc1) {
-						//console.log("xoa1"); console.log(doc1);
-						//already deleted this id, now remove it from the ACL
-						ACLAPI.removeAnACLEntry(doc1._id);
-						// end of removing from the ACL
-			
+						console.log("xoa1"); console.log(doc1);
 						listRemovedLayerId.push({'id': doc1._id});
 						doc1.remove();
 						
@@ -172,10 +145,7 @@ exports.removeMedia = function(req, res){
 								}
 								
 								doc2s.forEach( function (doc2) {
-									//console.log("xoa2"); console.log(doc2);
-									//already deleted this id, now remove it from the ACL
-									ACLAPI.removeAnACLEntry(doc2._id);
-									// end of removing from the ACL
+									console.log("xoa2"); console.log(doc2);
 									listRemovedAnnoId.push({'id': doc2._id});
 									doc2.remove();
 								});		
@@ -187,6 +157,136 @@ exports.removeMedia = function(req, res){
 			res.json({"data":data, "listRemovedLayerId" : listRemovedLayerId});
 		} //else
 	}); //media function
+}
+
+//test for deleting corpus
+//app.delete('/corpus/:id_corpus/media/:id_media', 
+exports.removeMedia1 = function(req, res){
+	Media.remove({_id : req.params.id_media}, function(error, data){
+		if(error){
+			res.json(error);
+		}
+		else{
+			
+			var listRemovedLayerId = [];
+			
+			//delete the related layers
+			Layer.find({id_media : req.params.id_media}, function(err, docLayerMedia){
+				if(err) { 
+					res.json("error in deleting all layers of the media : " + req.params.id_media);
+					console.log(err); return;
+				}
+				if (!docs || !Array.isArray(docLayerMedia) || docLayerMedia.length === 0)
+				{
+					res.json(data);
+					console.log('no docs found'); return;
+				}
+			  	
+			  	docLayerMedia.forEach( function (docL) {
+			  		listRemovedLayerId.push(docL._id);
+					docL.remove();
+			  	});		
+			});
+			
+			if(listRemovedLayerId.length == 0) {
+				res.json(data); return;
+			}
+			else {
+				
+				var listRemovedIdAnno = [];	
+				for(var id in listRemovedLayerId) {
+					result = removeOneAnno(listRemovedLayerId[id]._id);
+					if(result.seccess == false) {
+						//res.json(data); break;
+					}
+					else {
+						listRemovedIdAnno.push[result._id];
+					}
+				} //for id
+				if(listRemovedIdAnno.length == 0) {
+					res.json(data); return;
+				}
+				else {
+					var rem = {
+						"data_media" : data,
+						"listLayerIDs" : listRemovedLayerId,
+						"listAnnoIDs" : listRemovedIdAnno
+					};
+					res.json(rem); return;
+				}
+			} //else
+		} //else above
+	}); //media function
+}
+
+removeAllMediaWithCorpusId = function(id){
+	var result;
+	console.log("toi here");
+	result = Media.find({id_corpus : id}, function(err, docs){
+		if(err) { 
+			console.log(err); 
+			return {'success' : false, 'data' : error}; return;
+		}
+		if (!docs || !Array.isArray(docs) || docs.length == 0)
+		{
+			return {'success' : true, 'data' : docs, 'listId' : []}; return;
+		}
+		var listId = [];
+		console.log("I am here, inside the removeAllMediaWithCorpusId, before docs.forEach");
+		docs.forEach( function (doc) {
+			console.log("xoa"); console.log(doc);
+			listId.push({'id': doc._id});
+			doc.remove();
+		});
+		return {'success' : true, 'data' : docs, 'listId' : listId}; return;	
+	});
+	return result;
+}
+
+
+removeAllLayersWithMediaId = function(id){
+	console.log('in function removeAllLayersWithMediaId');
+	var result;
+	result = Layer.find({id_media : id}, function(err, docs){
+		if(err) { 
+			res.json("error in deleting all annotations of the layer : " + id);
+			console.log(err); 
+			return {'success' : false, 'data' : error};
+		}
+		if (!docs || !Array.isArray(docs) || docs.length === 0)
+		{
+			return {'success' : true, 'data' : docs, 'listId' : []};
+		}
+		var listId = [];
+		docs.forEach( function (doc) {
+			listId.push({'id': doc._id});
+			doc.remove();
+		});
+		return {'success' : true, 'data' : docs, 'listId' : listId};			
+	});
+	return result;
+}
+
+removeAllAnnoWithLayerId = function(id){
+	var result;
+	result = Annotation.find({id_layer : id}, function(err, docs){
+		if(err) { 
+			res.json("error in deleting all annotations of the layer : " + id);
+			console.log(err); 
+			return {'success' : false, 'data' : error};
+		}
+		if (!docs || !Array.isArray(docs) || docs.length === 0)
+		{
+			return {'success' : true, 'data' : docs, 'listId' : []};
+		}
+		var listId = [];
+		docs.forEach( function (doc) {
+			listId.push({'id': doc._id});
+			doc.remove();
+		});
+		return {'success' : true, 'data' : docs, 'listId' : listId};			
+	});
+	return result;
 }
 
 
@@ -211,9 +311,6 @@ exports.removeLayer = function(req, res){
 		}
 		else // remove the annotations of this layer
 		{
-			//already deleted this id, now remove it from the ACL
-			ACLAPI.removeAnACLEntry(data._id);
-			// end of removing from the ACL
 			Annotation.find({id_layer : req.params.id_layer}, function(err, docs){
 				if(err) { 
 					res.json("error in deleting the annotations of the layer : " + req.params.id_layer);
@@ -229,9 +326,6 @@ exports.removeLayer = function(req, res){
 			  	
 			  	docs.forEach( function (doc) {
 			  		removedIdItem.push(doc._id);
-			  		//already deleted this id, now remove it from the ACL
-					ACLAPI.removeAnACLEntry(doc._id);
-					// end of removing from the ACL
 					doc.remove();
 			  	});
 			  	
@@ -252,9 +346,6 @@ exports.removeAnno = function(req, res){
 			res.json(error);
 		}
 		else {
-			//already deleted this id, now remove it from the ACL
-			ACLAPI.removeAnACLEntry(data._id);
-			// end of removing from the ACL
 			res.json(data);
 			console.log('already deleted one annotation');
 		}
@@ -301,12 +392,6 @@ exports.postAll = function(req, res){
 					//res.json(dataLayer);
 					//	}
 					//});//*/
-					
-					var connectedUser = req.session.user.username;
-					if(connectedUser == undefined)
-						connectedUser = "root";
-					ACLAPI.addUserRightGeneric(layer._id, connectedUser, 'A');
-					
 					//now we insert the annotation list into the annotation collection
 					var id_layer = layer._id; //get the new id_layer for this list of annotations
 					console.log('id_layer ' + id_layer);
@@ -342,7 +427,6 @@ exports.postAll = function(req, res){
 										console.log('Success on saving annotation data');
 										saved = true;
 										//res.json(dataLayer);
-										ACLAPI.addUserRightGeneric(anno._id, connectedUser, 'A');
 									}
 								});
 							}

@@ -11,7 +11,7 @@ Database and Models
 
 
 exports.UserSchema = UserSchema = new Schema({
-    username: {type:String, lowercase: true, trim: true, required: true},
+    username: {type:String, required: true},
    // password: String, //dont need to know, and should not know:D
     affiliation: String,
     role: String,
