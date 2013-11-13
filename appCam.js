@@ -54,7 +54,7 @@ keepSession = function (req, res, next) {
     next();
 }
 
-var sessionStore = new mongoStore({db: mongoose.connections[0].db, clear_interval: 60}, function(){
+var sessionStore = new mongoStore({mongoose_connection: mongoose.connection, db: mongoose.connections[0].db, clear_interval: 60}, function(){
                           console.log('connect mongodb session success...');
 });
 // configure all environments
