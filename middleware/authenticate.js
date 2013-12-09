@@ -587,53 +587,65 @@ exports.login = function (req, res) {
 		username = req.params.username;
 		pass = req.params.password;
 	}
-		
-	authenticateElem(username, pass, function (err, user) {
-        if (user) {
-            req.session.regenerate(function () {
+	if(username == undefined || pass == undefined) {
+		res.send(401, 'Authentication failed, please check your username or password');
+	}
+	else {
+		authenticateElem(username, pass, function (err, user) {
+			if (user) {
+				req.session.regenerate(function () {
 
-                req.session.user = user;
-                req.session.success = 'Authenticated as ' + user.username + ' click to <a href="logout">logout</a>.';
-                //res.redirect('/');
-                //res.redirect('/');
-                res.send(200, 'You have been successfully logged in');
-            });
-        } else {
-            req.session.error = 'Authentication failed, please check your ' + ' username and password.';
-            res.redirect('login');
-        }
-    });
+					req.session.user = user;
+					req.session.success = 'Authenticated as ' + user.username + ' click to <a href="logout">logout</a>.';
+					//res.redirect('/');
+					//res.redirect('/');
+					res.send(200, 'You have been successfully logged in');
+				});
+			} else {
+				req.session.error = 'Authentication failed, please check your ' + ' username and password.';
+				//res.redirect('login');
+				res.send(401, 'Authentication failed, please check your username or password');
+			}
+		});
+	}
 }
 
 exports.signup = function (req, res) {
 	if (GLOBAL.no_auth){
     	return res.send('Anonymous user is not allowed here');
     }
-	//console.log("req.body.role: " + req.body.role);
-    hash(req.body.password, function (err, salt, hash) {
-        if (err) throw err;
-        var user = new User({
-            username: req.body.username,
-//            password : req.body.password,
-            affiliation: req.body.affiliation,
-            role: req.body.role,
-            salt: salt,
-            hash: hash,
-        }).save(function (err, newUser) {
-            if (err) throw err;
-            //authenticate(newUser.username, newUser.password, function(err, user){
-//               if(user){
-                 if(newUser){ 
-                    /*req.session.regenerate(function(){
-                        req.session.user = newUser;//user;
-                        req.session.success = 'Authenticated as ' + newUser.username + ' click to <a href="logout">logout</a>.';
-                        res.redirect('/');
-                    })*/
-                    res.send(200, "the user is created successfully");
-                }
-            //});
-        });
-    });
+	if(req.body.password == undefined || req.body.username == undefined) {
+		res.send(404, "The username and/or password fields have not been filled up with data");
+	}
+	else {
+		var roleuser = req.body.role;
+		if(roleuser == undefined) roleuser = "user";
+		
+		hash(req.body.password, function (err, salt, hash) {
+			if (err) throw err;
+			var user = new User({
+				username: req.body.username,
+	//            password : req.body.password,
+				affiliation: req.body.affiliation,
+				role: roleuser,//req.body.role,
+				salt: salt,
+				hash: hash,
+			}).save(function (err, newUser) {
+				if (err) throw err;
+				//authenticate(newUser.username, newUser.password, function(err, user){
+	//               if(user){
+					 if(newUser){ 
+						/*req.session.regenerate(function(){
+							req.session.user = newUser;//user;
+							req.session.success = 'Authenticated as ' + newUser.username + ' click to <a href="logout">logout</a>.';
+							res.redirect('/');
+						})*/
+						res.send(200, "the user is successfully created");
+					}
+				//});
+			});
+		});
+	}//else
 }
 
 exports.chmodUser = function (req, res) {
@@ -647,7 +659,10 @@ exports.chmodUser = function (req, res) {
 		usrname = req.params.username;
 		newrole = req.params.role;
 	}
-	
+	//le 17/11/2013
+	if(usrname == undefined)
+		return res.send(404,'The field username has not been filled');
+		
 	if(usrname == "root") {
 		res.redirect('/');
 		return false;
@@ -739,18 +754,22 @@ exports.profile = function (req, res) {
     if(req.params.username != undefined){
     	usrname = req.params.username
     }
-    
-    User.findOne({
-        username: {$regex : new RegExp(usrname, "i")}
-    },
+    if(usrname != undefined){
+		User.findOne({
+			username: {$regex : new RegExp(usrname, "i")}
+		},
 
-    function (err, user) {
-        if (user) {
- 			res.send("username: " + user.username + "<br>" + " Role: " + user.role + "<br>" + " affiliation: " + user.affiliation +'<br>'+ 'click to <a href="logout">logout</a>');
-        } else {
-            return res.send('cannot find user');
-        }
-    });
+		function (err, user) {
+			if (user) {
+				res.send("username: " + user.username + "<br>" + " Role: " + user.role + "<br>" + " affiliation: " + user.affiliation +'<br>'+ 'click to <a href="logout">logout</a>');
+			} else {
+				return res.send('cannot find user');
+			}
+		});
+	}
+	else {
+		res.send(404, 'The username field has not been filled');
+	}
 }
 
 exports.listAllUsers = function (req, res) {
@@ -786,6 +805,9 @@ exports.addGroup = function (req, res) {
     	return res.send('Anonymous user is not allowed here');
     }
     else {
+    	if(req.body.groupname == undefined)
+    		return res.send(404, 'The groupname field has not been filled in');
+    		
     	Group.findOne({groupname : {$regex : new RegExp(req.body.groupname, "i")}}, function(error, group) {
     		if(error) res.send(error);
     		else if(group == null) {
@@ -888,6 +910,10 @@ exports.removeUserByName  = function (req, res) {
     	return res.send('Anonymous user is not allowed here');
     }
     else {
+    	var uname = req.body.username;
+    	if(uname == undefined)
+    		return res.send(404, 'The username field has not been filled in');
+    		
 		User.remove({username : {$regex : new RegExp(req.body.username, "i")}}, function(error, data){
 			if(error){					
 				console.log('Error in deleting one annotation');
@@ -906,6 +932,9 @@ exports.removeGroupByID  = function (req, res) {
     	return res.send('Anonymous user is not allowed here');
     }
     else {
+    	if(req.params.id == undefined)
+    		return res.send(404, 'The id parameter has not been sent');
+    		
 		Group.remove({_id : req.params.id}, function(error, data){
 			if(error){					
 				console.log('Error in deleting one annotation');
@@ -924,15 +953,19 @@ exports.removeGroupByName  = function (req, res) {
     	return res.send('Anonymous user is not allowed here');
     }
     else {
-		Group.remove({groupname : {$regex : new RegExp(req.body.groupname, "i")}}, function(error, data){
-			if(error){					
-				console.log('Error in deleting one annotation');
-				res.json(error);
-			}
-			else {
-				ACLAPI.removeAGroupFromALC(req.body.groupname);
-				res.send(data);
-			}
-		});
+    	var gname = req.body.groupname;
+    	if(gname != undefined) {
+			Group.remove({groupname : {$regex : new RegExp(req.body.groupname, "i")}}, function(error, data){
+				if(error){					
+					console.log('Error in deleting one annotation');
+					res.json(error);
+				}
+				else {
+					ACLAPI.removeAGroupFromALC(req.body.groupname);
+					res.send(data);
+				}
+			});
+		}
+		else res.send(404, "The groupname has not been filled up with data");
     }
 }

@@ -9,7 +9,8 @@ var mongoose = require('mongoose')
 exports.MediaSchema = MediaSchema = new Schema({
 	//_id: {type:mongoose.Schema.ObjectId, default: new mongoose.Types.ObjectId()},
 	id_corpus : {type : ObjectId, ref : 'CorpusSchema'}
-	, name: {type: String, required: true, trim: true} 	
+	, name: {type: String, required: true, trim: true}
+	, url : {type: String, default:""} 	
 }, { versionKey: false });
 
 exports.Media = Media = mongoose.model('Media', MediaSchema);

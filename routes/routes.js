@@ -123,6 +123,9 @@ exports.initialize = function(app){
 	app.get('/corpus/:id_corpus/media/:id_media', authenticate.requiredConsistentID("user", 'R', 3), 
 		authenticate.requiredAuthentication("user", 'R', 3), media.listWithId);
 	//-------------
+	app.get('/corpus/:id_corpus/media/:id_media/video', authenticate.requiredConsistentID("user", 'R', 3), 
+		authenticate.requiredAuthentication("user", 'R', 3), media.getVideo);
+	//-------------
 	//app.get('/corpus/:id_corpus/media/:id_media/layer', authenticate.requiredAuthentication("user"), layer.listAll);
 	app.get('/corpus/:id_corpus/media/:id_media/layer', 
 		authenticate.requiredConsistentID("user", 'R', 4-1), layer.listAll);

@@ -21,7 +21,7 @@ exports.removeCorpus = function(req, res){
 		}
 		else { //else 1
 			//already deleted this id, now remove it from the ACL
-			ACLAPI.removeAnACLEntry(data_id);
+			ACLAPI.removeAnACLEntry(data._id);
 			// end of removing from the ACL
 			
 			var listRemovedMediaId = [];
@@ -265,6 +265,12 @@ exports.removeAnno = function(req, res){
 //test for posting a compound layer: a layer with a list of detailed annotations
 //app.post('/corpus/:id_corpus/media/:id_media/layerAll', 
 exports.postAll = function(req, res){
+	if(req.body.layer_type == undefined || req.body.fragment_type == undefined 
+		|| req.body.data_type == undefined || req.body.source == undefined || req.body.history == undefined)
+		return res.send(404, "one or more data fields are not filled out properly");
+	if(req.body.annotation == undefined)
+		return res.send(404, "one or more data fields are not filled out properly");	
+	
 	Media.findById(req.params.id_media, function(error, data){
 		if(error){
 			res.json(error);
@@ -302,8 +308,10 @@ exports.postAll = function(req, res){
 					//	}
 					//});//*/
 					
-					var connectedUser = req.session.user.username;
-					if(connectedUser == undefined)
+					var connectedUser;
+					if(req.session.user)
+						connectedUser = req.session.user.username;
+					else
 						connectedUser = "root";
 					ACLAPI.addUserRightGeneric(layer._id, connectedUser, 'A');
 					

@@ -38,6 +38,9 @@ exports.listWithId = function(req, res){
 };
 
 exports.createGroup = function(req, res){
+	if(req.body.groupname == undefined || req.body.description == undefined)
+		return res.send(404, "one or more data fields are not filled out properly");
+		
 	Group.findOne({groupname : {$regex : new RegExp(req.body.groupname, "i")}}, function(error, data){
 		if(error) res.send(error);
 		else if(data == null){
@@ -64,6 +67,9 @@ exports.createGroup = function(req, res){
 
 
 exports.addUser2Group = function(req, res){
+	if(req.body.username == undefined || req.body.groupname == undefined)
+		return res.send(404, "one or more data fields are not filled out properly");
+		
 	User.findOne({username : {$regex : new RegExp(req.body.username, "i")}}, function(error, data1){
 		if(error) throw error;
 		else 

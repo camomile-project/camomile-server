@@ -42,6 +42,9 @@ exports.listWithIdOfResource = function(req, res){
 	if(idSought == undefined) idSought = req.params.id_layer;
 	if(idSought == undefined) idSought = req.params.id_media;
 	if(idSought == undefined) idSought = req.params.id;
+	
+	if(idSought == undefined) return res.send(404, "The id has not been filled up");
+	
 	ACL.findOne({id:idSought}, function(error, data){
 		if(error){
 			res.json(error);
@@ -59,6 +62,7 @@ exports.updateWithIdOfResource = function(req, res){
 	if(idSought == undefined) idSought = req.params.id_layer;
 	if(idSought == undefined) idSought = req.params.id_media;
 	if(idSought == undefined) idSought = req.params.id;
+	if(idSought == undefined) return res.send(404, "The id has not been filled up");
 	
 	ACL.findOne({id:idSought}, function(error, data){
 		if(error){
@@ -73,7 +77,8 @@ exports.updateWithIdOfResource = function(req, res){
 				userright = req.body.userright,
 				groupname = req.body.groupname,
 				groupright = req.body.groupright;
-			if(username != undefined) {
+				
+			if(username != undefined && userright != undefined) {
 				User.findOne({username : {$regex : new RegExp(username, "i")}}, function(error, datU){
 					if(error) send(error);
 					else 
@@ -101,7 +106,7 @@ exports.updateWithIdOfResource = function(req, res){
 				});	
 			}			
 			
-			else if(groupname != undefined) {
+			else if(groupname != undefined && groupright != undefined) {
 				Group.findOne({groupname : {$regex : new RegExp(groupname, "i")}}, function(error, datG){
 					if(error) send(error);
 					else 
@@ -129,6 +134,7 @@ exports.updateWithIdOfResource = function(req, res){
 					}
 				});	
 			}
+			else return res.send(404, "not found groupname or username or userright");
 		} //else
 	});
 };
@@ -138,47 +144,6 @@ exports.getRightOfId = function(id1, callback){
 	ACL.findOne({id:id1}, callback);
 };
 
-
-exports.getRightOfIdSynChro = function(id) {
-        var callback = function() {
-            return function(error, data) {
-                if(error) {
-                    console.log("Error: " + error);
-                }
-                console.log("success");
-            }
-        };
-        return ACL.findById(id, callback);
-};
-
-var ready = false;
-    var result = null;	
-    var check = function() {
-		if (ready === true) {
-			 return;
-		}
-		setTimeout(check, 1000);
-	}
-exports.getRightOfIdHachedSyncho = function(id1){
-	
-	
-	/*var callback = function() {
-            return function(error, data) {
-                if(error) {
-                    console.log("Error: " + error); throw error;
-                }
-                else {result = data; console.log("data ready: "); console.log(data); ready = true;}
-            }
-        };*/
-	ACL.find({id:id1}, function(error, data) {
-                if(error) {
-                    console.log("Error: " + error); throw error;
-                }
-                else {result = data; console.log("data ready: "); console.log(result); ready = true;}
-            });
-	check();
-	return result;
-}
 
 exports.getRightAllId = function(callback){
 	ACL.findById({}, callback);
@@ -246,6 +211,9 @@ function findUserInUsersRightArr(login, users){
 } 
 
 exports.addUserRight = function(req, res){
+	if(req.body.userLogin == undefined || req.body.userRight == undefined)
+		return res.send(404, "one or more data fields are not filled out properly");
+		
 	User.findOne({username : {$regex : new RegExp(req.body.userLogin, "i")}}, function(error, data){
 		if(error) throw error;
 		else 
@@ -301,6 +269,9 @@ exports.addUserRight = function(req, res){
 }
 
 exports.addGroupRight = function(req, res){
+	if(req.body.groupLogin == undefined || req.body.groupRight == undefined)
+		return res.send(404, "one or more data fields are not filled out properly");
+		
 	Group.findOne({groupname : {$regex : new RegExp(req.body.groupLogin, "i")}}, function(error, data){
 		if(error) throw error;
 		else 
@@ -415,7 +386,7 @@ exports.addGroupRightGeneric = function addGroupRightGeneric(id1, groupLogin, gr
 }
 
 exports.removeAnACLEntry = function removeAnACLEntry(id2remove){
-	ALC.remove({id : id2remove}, function(error, data){
+	ACL.remove({id : id2remove}, function(error, data){
 		if(error) {
 			console.log(error); return;
 		}

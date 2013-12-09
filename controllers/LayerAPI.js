@@ -59,7 +59,7 @@ exports.listAll = function(req, res){
 									}
 								} //for
 								if(resultReturn.length == 0) {
-									console.log("get id of his parent");
+								//	console.log("get id of his parent");
 									parentID = [];
 									parentID.push(req.params.id_media); parentID.push(req.params.id_corpus);
 									ACL.findOne({id:{$in:parentID}}, function(error, dataACL1){
@@ -128,6 +128,10 @@ exports.listWithId = function(req, res){
 //test for Posting corpus
 //app.post('/corpus/:id_corpus/media/:id_media/layer', 
 exports.post = function(req, res){
+	if(req.body.layer_type == undefined || req.body.fragment_type == undefined 
+		|| req.body.data_type == undefined || req.body.source == undefined || req.body.history == undefined)
+		return res.send(404, "one or more data fields are not filled out properly");
+	
 	Media.findById(req.params.id_media, function(error, data){
 		if(error){
 			res.json(error);
@@ -156,8 +160,10 @@ exports.post = function(req, res){
 				else{
 					console.log('Success on saving layer data');
 					// add the current id to the ACL list
-					var connectedUser = req.session.user.username;
-					if(connectedUser == undefined)
+					var connectedUser;
+					if(req.session.user)
+						connectedUser = req.session.user.username;
+					else
 						connectedUser = "root";
 					ACLAPI.addUserRightGeneric(dataLayer._id, connectedUser, 'A');
 					res.json(dataLayer);
@@ -192,15 +198,30 @@ exports.post = function(req, res){
 //test for updating layers
 //app.put('/corpus/:id_corpus/media/:id_media/layer/:id_layer', 
 exports.updateAll = function(req, res){
-	//Corpus.update(_id : req.params.id, function(error, data){
-	var update = {
+	if(req.body.layer_type == undefined && req.body.fragment_type == undefined 
+		&& req.body.data_type == undefined && req.body.source == undefined)
+		return res.send(404, "one or more data fields are not filled out properly");
+
+	var update = {};
+	if(req.body.id_media)
+		update.id_media = req.params.id_media;
+	if(req.body.layer_type)
+		update.layer_type = req.body.layer_type;
+	if(req.body.fragment_type)
+		update.fragment_type = req.body.fragment_type;
+	if(req.body.data_type)
+		update.data_type = req.body.data_type;
+	if(req.body.source)
+		update.source = req.body.source;
+			
+	/*var update = {
 			id_media : req.params.id_media,
 			layer_type : req.body.layer_type,
 			fragment_type : req.body.fragment_type,
 			data_type : req.body.data_type,
 			source : req.body.source
 	//		history : req.body.history
-	};
+	};*/
 	Layer.findByIdAndUpdate(req.params.id_layer, update, function (error, oneLayer) {
 		if(error){
 			res.json(error);

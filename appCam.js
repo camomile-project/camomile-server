@@ -5,13 +5,26 @@ if (process.argv.indexOf('--no-auth') > -1 ){
   GLOBAL.no_auth = true;
 }
 
+//parser the arguments
+process.argv.forEach(function(arg) {
+  	if(arg.indexOf("--video-path") == 0)
+    	GLOBAL.video_path = arg.split("=")[1];
+	if (arg.indexOf("--db-port") == 0)
+     	GLOBAL.db_port = arg.split("=")[1];
+	if (arg.indexOf("--db-host") == 0)
+     	GLOBAL.db_host = arg.split("=")[1];
+    if (arg.indexOf("--db-name") == 0)
+     	GLOBAL.db_name = arg.split("=")[1];
+    if (arg.indexOf("--server-port") == 0)
+    	GLOBAL.server_port = arg.split("=")[1];
+});
+
 var express = require('express'), 
     http = require('http'), 
     path = require('path'), 
 	routes = require('./routes/routes'),
     mongoose = require('mongoose'), 
     mongoStore = require('connect-mongo')(express);
-
 
 var app = express();
 
@@ -34,12 +47,23 @@ var allowCrossDomain = function(req, res, next) {
 }
 
 // connect to the db:
- mongoose.connect('mongodb://localhost/sampledb');
-//mongoose.connect('mongodb://localhost/sampledbTAM');
-//mongoose.connect('mongodb://localhost/TAM');
+//var db_name = 'TAM';
+var db_name = 'sampledb';//'tmpNov';
+var db_host = 'mongodb://localhost';
+
+if(GLOBAL.db_host)
+	db_host = GLOBAL.db_host;
+	
+if(GLOBAL.db_name)
+	db_name = GLOBAL.db_name;
+
+db_name = db_host + '/' + db_name;
+// mongoose.connect('mongodb://localhost/sampledb');
+
+mongoose.connect(db_name);//('mongodb://localhost/TAM');
 // mongoose.connect('mongodb://localhost/tmpCURL');
 mongoose.connection.on('open', function(){
-	console.log("Connected to Mongoose") ;
+	console.log("Connected to Mongoose:") ;
 });
 
 keepSession = function (req, res, next) {
@@ -57,9 +81,15 @@ keepSession = function (req, res, next) {
 var sessionStore = new mongoStore({mongoose_connection: mongoose.connection, db: mongoose.connections[0].db, clear_interval: 60}, function(){
                           console.log('connect mongodb session success...');
 });
+
+var server_port = process.env.PORT || 3000;
+if(GLOBAL.server_port)
+	server_port = GLOBAL.server_port;
+//console.log("server_port: " + server_port);
+
 // configure all environments
 app.configure(function(){
-	app.set('port', process.env.PORT || 3000);
+	app.set('port', server_port);
 	app.set('views', __dirname + '/views');
 	app.set('view engine', 'jade');
 	app.use(express.favicon());

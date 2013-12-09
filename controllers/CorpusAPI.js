@@ -86,6 +86,9 @@ exports.listWithId = function(req, res){
 //test for Posting corpus
 //app.post('/corpus', 
 exports.post = function(req, res){
+	if(req.body.name == undefined)
+		return res.send(404, "one or more data fields are not filled out properly");
+		
 	var corpus_data = {
           name: req.body.name
         };
@@ -100,8 +103,10 @@ exports.post = function(req, res){
 		else {
 			console.log('Success on saving corpus data'); 
 			// now we need to create the first ACL for the current user
-			var connectedUser = req.session.user.username;
-			if(connectedUser == undefined)
+			var connectedUser;
+			if(req.session.user)
+				connectedUser = req.session.user.username;
+			else
 				connectedUser = "root";
 			ACLAPI.addUserRightGeneric(data._id, connectedUser, 'A');
 			res.json(data);
@@ -111,6 +116,8 @@ exports.post = function(req, res){
 
 //app.put('/corpus/:id', 
 exports.update = function(req, res){
+	if(req.body.name == undefined)
+		return res.send(404, "one or more data fields are not filled out properly");
 	//Corpus.update(_id : req.params.id, function(error, data){
 	var update = {name: req.body.name};
 	Corpus.findByIdAndUpdate(req.params.id, update, function (error, data) {

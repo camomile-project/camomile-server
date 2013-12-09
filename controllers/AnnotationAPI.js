@@ -130,6 +130,9 @@ exports.listWithId = function(req, res){
 //test for Posting 
 //app.post('/corpus/:id_corpus/media/:id_media/layer/:id_layer/annotation', 
 exports.post = function(req, res){
+	if(req.body.fragment == undefined || req.body.data == undefined || req.body.history == undefined)
+		return res.send(404, "one or more data fields are not filled out properly");
+		
 	Layer.findById(req.params.id_layer, function(error, data){
 		if(error){
 			res.json(error);
@@ -160,8 +163,10 @@ exports.post = function(req, res){
 				else{
 					console.log('Success on saving annotation data');
 					//saved = true;
-					var connectedUser = req.session.user.username;
-					if(connectedUser == undefined)
+					var connectedUser;
+					if(req.session.user)
+						connectedUser = req.session.user.username;
+					else
 						connectedUser = "root";
 					ACLAPI.addUserRightGeneric(annoData._id, connectedUser, 'A');
 					res.json(annoData);
@@ -175,11 +180,18 @@ exports.post = function(req, res){
 //app.put('/corpus/:id_corpus/media/:id_media/layer/:id_layer/annotation/:id_anno', 
 exports.updateAll = function(req, res){
 	//Corpus.update(_id : req.params.id, function(error, data){
-	var update = {
+	if(req.body.fragment == undefined && req.body.data == undefined)
+		return res.send(404, "one or more data fields are not filled out properly");
+	var update = {};
+	if(req.body.fragment)
+		update.fragment = req.body.fragment;
+	if(req.body.data)
+		update.data = req.body.data;
+	/*var update = {
 		id_layer : req.params.id_layer, // req.body.id_layer,
 		fragment : req.body.fragment,
 		data : req.body.data
-	};
+	};*/
 	Annotation.findByIdAndUpdate(req.params.id_anno, update, function (error, anno) {
 		if(error){
 			res.json(error);
@@ -190,8 +202,10 @@ exports.updateAll = function(req, res){
 			//anno.history.push({name: req.body.history.name, date : req.body.history.date}); //phuong commented on 6th 11 2013
 			
 			var dateNow = new Date();
-			var uname = req.session.user.username;
-			if(uname == undefined) uname = "root";
+			var uname = "root"; 
+			if(req.session.user)
+				uname = req.session.user.username;
+			
 			anno.history.push({name:uname, date: dateNow});
 			
 			anno.save( function(error, data){
