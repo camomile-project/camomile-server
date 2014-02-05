@@ -39,7 +39,7 @@ Or if you would like to use a dialog form to enter create your user, simply type
 Change the role of an existing user
 ----------
 
-The role of the create user is assigned to "user" by default, but you can then change it later by making a post operation, for example:
+The role of the created user is assigned to "user" by default, but you can then change it later by making a post operation, for example:
 
 	curl -i -X POST http://localhost:3000/chmodUser --data '{"username":"ta", "role":"admin"}' -H "Content-Type: application/json"
 
@@ -72,15 +72,14 @@ Login as an admin user and make a post, for example:
 	curl -i -X POST http://localhost:3000/Group --data '{"groupname":"CRP", "description":"People at CRP"}' -H "Content-Type: application/json"
 	
 	
-As an alternative way, you can do so by filling up a form through a GET:
+As an alternative way, you can do so by filling up a form which can be obtained from a GET request:
 
 	http://localhost:3000/addGroup
-	
 	
 Remove a group
 --------------
 
-Login as an admin user, then perform a delete operation:	
+Login as an admin user, and then perform a delete operation:	
 	
 	$ curl -i -X DELETE http://localhost:3000/removeGroupByName --data '{"groupname":"CRP"}' -H "Content-Type: application/json"
 	
@@ -108,13 +107,13 @@ To list all groups, login as an admin account and type:
 Working with the ACL (only users which have an admin rights on the requested resource can view its content)
 ----------
 
-- View all acls (only users which have an admin rights on the requested resource can view or modify its content)
+- Retrieve all acls (only users which have an admin rights on the requested resource can view or modify its content)
 
 Login as an admin user, and type:
 	
 	http://localhost:3000/allACLs
 
-- View alcs of a specific resource (a corpus, a medium, a layer, an annotation):
+- Retrieve alcs of a specific resource (a corpus, a medium, a layer, an annotation):
 
 Type either the following command (only users which have an admin rights on the requested resource can view or modify its content): 
 
@@ -128,15 +127,16 @@ or (for layer):
 	
 	http://localhost:3000/corpus/id_corpus/media/id_media/layer/id_layer/acl
 
-or (for annnotation):
+or (for annotation):
 	
 	http://localhost:3000/corpus/id_corpus/media/id_media/layer/id_layer/annotation/id_anno/acl
 	
-- Update the right of an ACL resource
+- Update the right (ACL entries) of a resource
 
 http://localhost:3000/corpus/id/acl
 
-You can either add a username right or a groupname right to a specific resource. If the username or groupname being updated exists, it simply updates its corresponding new right.
+You can either add a username right or a groupname right to a specific resource. If the username or groupname being updated exists 
+in the resource, its corresponding new right will be updated.
 	
 To update a username and its right for a specific resource id, execute the following command:	
 

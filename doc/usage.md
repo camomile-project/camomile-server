@@ -185,7 +185,7 @@ Yes! Well done! Similarly, you can update a media/layer or an annotation.
 Delete a corpus/media/layer/annotation
 --------------------------------------
 
-Now it’s time the test the deletion of the resources. Note that, if you delete a corpus, every resource belonging this corpus should be deleted. Here is an example showing the deletion of a media:
+Now it’s time the test the deletion of the resources. Note that, if you delete a corpus, all resources belonging to this corpus should be deleted. Here is an example showing the deletion of a media:
 
 	$ curl -i -X DELETE http://localhost:3000/corpus/5223404ef22f9e1305000001/media/52234d74f22f9e1305000002
 	HTTP/1.1 200 OK
