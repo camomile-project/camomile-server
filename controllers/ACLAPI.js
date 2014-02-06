@@ -205,7 +205,7 @@ exports.addUserRightGeneric = function addUserRightGeneric(id1, userLogin, userR
 
 function findUserInUsersRightArr(login, users){
 	for(var i = 0; i < users.length; i++) {
-		if(users[i].login == login.toLowercase()) return i;
+		if(users[i].login == login.toLowerCase()) return i;
 	}
 	return -1;
 } 
@@ -400,7 +400,7 @@ function removeItemFromArray(a, item){
 	var index = -1;
 	console.log("index = " + index);
 	for(var j = 0; j < a.length; j++) {
-		if(a[j].login == item.toLowercase()) {
+		if(a[j].login == item.toLowerCase()) {
 			index = j; break;
 		}
 	}	

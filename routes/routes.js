@@ -109,7 +109,7 @@ exports.initialize = function(app){
 	//end of authenticating configurations
 	
 	// ===================================
-	//N R E C D A
+	//N R E C D A : different rights
 	app.get("/", authenticate.racine); // rout
 	
 	//app.get('/corpus', authenticate.requiredAuthentication("user", 0, 0), corpus.listAll);
