@@ -48,7 +48,7 @@ var allowCrossDomain = function(req, res, next) {
 
 // connect to the db:
 //var db_name = 'TAM';
-var db_name = 'sampledb';//'tmpNov';
+var db_name = 'tmpNov';
 var db_host = 'mongodb://localhost';
 
 if(GLOBAL.db_host)
