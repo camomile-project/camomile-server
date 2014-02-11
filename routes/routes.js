@@ -26,7 +26,6 @@ exports.initialize = function(app){
 
 	// ===================================
 	//authenticating configurations
-	app.get("/signup", authenticate.requiredAuthentication("admin"), authenticate.signupGET);
 	app.post("/signup", authenticate.requiredAuthentication("admin"), authenticate.userExist, authenticate.signup);
 	//----------------
 	app.get("/login", function (req, res) {
