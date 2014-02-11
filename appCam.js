@@ -19,32 +19,31 @@ process.argv.forEach(function(arg) {
     	GLOBAL.server_port = arg.split("=")[1];
 });
 
-var express = require('express'), 
-    http = require('http'), 
-    path = require('path'), 
+var express = require('express'),
+    http = require('http'),
+    path = require('path'),
 	routes = require('./routes/routes'),
-    mongoose = require('mongoose'), 
+    mongoose = require('mongoose'),
     mongoStore = require('connect-mongo')(express);
 
 var app = express();
 
-// Le 2/9/2013, Phuong tried to fix cross-domain connections.
-// The current solution is to allow CORS by overloading the middleware function:
-
+// Allow CORS by overloading the middleware function:
 var allowCrossDomain = function(req, res, next) {
-	res.header('Access-Control-Allow-Origin', '*');
-    res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE');
-    res.header('Access-Control-Allow-Headers', 'Content-Type');
-	res.header('Access-Control-Allow-Headers', 'Content-Type, X-Requested-With'); // Pierrick: needed by REST calls from angular
+  res.header('Access-Control-Allow-Credentials', true);
+  res.header('Access-Control-Allow-Origin', req.headers.origin);
+  res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE');
+  res.header('Access-Control-Allow-Headers', 'Content-Type');
+  res.header('Access-Control-Allow-Headers', 'Content-Type, X-Requested-With')
 
 	// intercept OPTIONS method
-    if('OPTIONS' == req.method) {
-    	res.send(200); // force the server to treat such a request as a normal GET or POST request.
-    }
-    else {
-    	next(); // otherwise, do anything else, on s'en fiche (dont care)
-    }
-}
+  if('OPTIONS' == req.method) {
+   	res.send(200); // force the server to treat such a request as a normal GET or POST request.
+  }
+  else {
+   	next();
+  }
+};
 
 // connect to the db:
 //var db_name = 'TAM';
@@ -53,7 +52,7 @@ var db_host = 'mongodb://localhost';
 
 if(GLOBAL.db_host)
 	db_host = GLOBAL.db_host;
-	
+
 if(GLOBAL.db_name)
 	db_name = GLOBAL.db_name;
 
@@ -74,7 +73,6 @@ keepSession = function (req, res, next) {
     res.locals.message = '';
     if (err) res.locals.message = '<p class="msg error">' + err + '</p>';
     if (msg) res.locals.message = '<p class="msg success">' + msg + '</p>';
-    //console.log("res.locals"); console.log(res.locals);
     next();
 }
 
@@ -96,31 +94,30 @@ app.configure(function(){
 	app.use(express.logger('dev'));
 	app.use(express.bodyParser());
 	app.use(express.methodOverride());
-	
-    app.use(allowCrossDomain); //phuong added on 2/9/2013 for CORS problem!
-    
+
+  app.use(allowCrossDomain);
+
 	app.use(express.cookieParser('your secret here'));
-	
-	//app.use(express.session());
+
 	app.use(express.session({
     	key : "camomile.sid",
     	secret: "123camomile",
-    	cookie: { 
-    		//expires: new Date(Date.now() + 60 * 10000) 
+    	cookie: {
+    		//expires: new Date(Date.now() + 60 * 10000)
     		maxAge: 3*3600000 // 3 h resolved the prob encountered when one user is timeout
   		},
-  		/*store: new mongoStore({ host: 'http://localhost/', 
-  			port: 27017, 
-  			db: 'session', 
+  		/*store: new mongoStore({ host: 'http://localhost/',
+  			port: 27017,
+  			db: 'session',
   			collection: 'sessions',
   			interval: 120000,
-  			clear_interval : (10)//search db to clear the expired every 10 seconds 
+  			clear_interval : (10)//search db to clear the expired every 10 seconds
   			})*/
   		//store: new mongoStore({db: mongoose.connections[0].db})
   		store: sessionStore
     }));
 	app.use(keepSession); //added
-	
+
 	app.use(app.router);
 	app.use(express.static(path.join(__dirname, 'public')));
 });
