@@ -337,8 +337,9 @@ exports.postAll = function(req, res){
 						(function (annoitem){
 								var anno = new Annotation(annoItem);
 								//just added 12/07/2013
-								anno.history.push({name : req.body.history.name, date : req.body.history.date});
-						
+								//anno.history.push({name : req.body.history.name, date : req.body.history.date});
+								anno.history.push({name : connectedUser, date : new Date()});
+								
 								anno.save( function(error, annoData){
 									if(error){
 										console.log('error in posting the annotation list');

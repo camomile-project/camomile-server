@@ -29,6 +29,22 @@ var fileSystem = require('fs'), //working with video streaming
 } */
 
 exports.listAll = function(req, res){
+	
+	function async(arg, callback) {
+  		//console.log('do something with \''+arg+'\', return 1 sec later');
+  		setTimeout(function() { callback(arg); }, 1000);
+	}
+	
+	function emptyAsync(callback) {
+		setTimeout(function() { callback(); },1000);
+	}
+	
+	function final(resultReturn, n) { 
+		if(resultReturn.length == 0 && n > 0)										
+			res.json(403, "You dont have enough permission to get this resource");
+		else res.json(resultReturn);
+	}
+	
 	Media.find({id_corpus : req.params.id}, function(error, data){
 		if(error){
 			res.json(error);
@@ -39,68 +55,83 @@ exports.listAll = function(req, res){
 				res.json(data);
 			}
 			else if(connectedUser != undefined && data != null){
-				//first find the group to which the connecteduser belongs
+				//first find the groups to which the connecteduser belongs
 				Group.find({'usersList' : {$regex : new RegExp(connectedUser.username, "i")}}, function(error, dataGroup) {
 					if(error) throw error;
 					else {
-					//	console.log("Finding a user in a group for: " + connectedUser.username); console.log(dataGroup);
 						result = [];//JSON.stringify(data);
 						resultReturn = [];
-					//	console.log("test listall Corpus: " + data.length);
+
 						for(var i = 0; i < data.length; i++){
-							console.log(data[i]._id);
+							//console.log(data[i]._id);
 							result.push(data[i]._id);
 						}
-					//	console.log("Id of corpus: "); console.log(req.params.id);
-						//result.push(req.params.id); //add the corpus id to the end of the list for back propagation
-						
+						// find all acl of these ids
 						ACL.find({id:{$in:result}}, function(error, dataACL){
 							if(error) console.log("error in ACL-corpusListall:");
-							else if(dataACL != null){
-					//			console.log("dataACL");
-					//			console.log(dataACL);
-								//console.log("connectedUser"); console.log(connectedUser);
-								for(var i = 0; i < dataACL.length; i++){ //the last one is the corpus id
+							else if(dataACL != null) {
+								var dataACLLen = dataACL.length;
+								var countTreatedACL = 0;
+								for(var i = 0; i < dataACL.length; i++){ 
 									var foundPos = commonFuncs.findUsernameInACL(connectedUser.username, dataACL[i].users);
-					//				console.log("foundPos: " + foundPos);
-									if(foundPos != -1 && dataACL[i].users[foundPos].right != 'N')
-										resultReturn.push(data[i]);
+									// if the user has at least a R right on this resource
+									// 
+									if(foundPos != -1) {
+										if(dataACL[i].users[foundPos].right != 'N') {
+											resultReturn.push(data[i]);
+											countTreatedACL += 1; 
+										}
+									} //not found this user's right on the current resource, look for its group's one
 									else {
 										foundPos = commonFuncs.findUsernameInGroupACL(dataGroup, dataACL[i].groups);
 					//					console.log("foundPos: " + foundPos + " for : ");
-										if(foundPos != -1 && dataACL[i].groups[foundPos].right != 'N')
-											resultReturn.push(data[i]);
+										if(foundPos != -1) {
+										 	if(dataACL[i].groups[foundPos].right != 'N') {
+												resultReturn.push(data[i]);
+												countTreatedACL += 1;
+											}
+										}
+										else { //not found user right, nor group one, do a back propagation
+											(function(d){								//		console.log("get id of his parent");
+												ACL.findOne({id:req.params.id}, function(error, dataACL1){
+													if(error) res.send(error);
+													else if(dataACL1 != null) {
+														countTreatedACL += 1;
+														var foundPos = commonFuncs.findUsernameInACL(connectedUser.username, dataACL1.users);
+
+														if(foundPos != -1) {
+															if(dataACL1.users[foundPos].right != 'N') {
+																resultReturn.push(d);
+															}
+														}
+														else {
+															foundPos = commonFuncs.findUsernameInGroupACL(dataGroup, dataACL1.groups);
+															if(foundPos != -1 && dataACL1.groups[foundPos].right != 'N')
+																resultReturn.push(d);
+														}
+													}
+												}); //acl 2
+											})(data[i]);
+										} // else { //not found user right	
 									}
 								} //for
-								if(resultReturn.length == 0) {
-									console.log("get id of his parent");
-									ACL.findOne({id:req.params.id}, function(error, dataACL1){
-										if(error) res.send(error);
-										else if(dataACL1 != null) {
-											var foundPos = commonFuncs.findUsernameInACL(connectedUser.username, dataACL1.users);
-					//						console.log("foundPos: " + foundPos);
-											if(foundPos != -1 && dataACL1.users[foundPos].right != 'N')
-												resultReturn.push(data);
-											else {
-												foundPos = commonFuncs.findUsernameInGroupACL(dataGroup, dataACL1.groups);
-					//							console.log("foundPos: " + foundPos + " for : ");
-												if(foundPos != -1 && dataACL1.groups[foundPos].right != 'N')
-													resultReturn.push(data);
-											}
-											if(resultReturn.length == 0)
-												res.json("You dont have enough permission to get this resource");
-											else res.json(resultReturn);
-										}
-									}); //acl 2
-								}
-								else res.json(resultReturn);
-							}
+							
+								emptyAsync(function(){
+									if(countTreatedACL == dataACLLen) 
+										final(resultReturn, data.length);
+								});
+								
+							} // else if(dataACL != null){
 						}); //ACL.find
 					} //else
 				}); // group
 				//res.json(resultReturn);
 			} // else if (connectedUser)
-			else res.json("You dont have permission to access this resource");
+			else { 
+				if(data != null)
+					res.json("You dont have permission to access this resource"); 
+				else return([]);
+			}
 		}
 	});
 } 

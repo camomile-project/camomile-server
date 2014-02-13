@@ -28,6 +28,16 @@ var ACL = require('../models/ACL').ACL,
 } */
 
 exports.listAll = function(req, res){
+	function emptyAsync(callback) {
+		setTimeout(function() {callback();}, 1000);
+	}
+	
+	function final(resultReturn, n) { 
+		if(resultReturn.length == 0 && n > 0)										
+			res.json(403, "You dont have enough permission to get this resource");
+		else res.json(resultReturn);
+	}
+	
 	Annotation.find({id_layer : req.params.id_layer}, function(error, data){
 		if(error){
 			res.json(error);
@@ -38,70 +48,83 @@ exports.listAll = function(req, res){
 				res.json(data);
 			}
 			else if(connectedUser != undefined && data != null){
-				//first find the group to which the connecteduser belongs
+				//first find the groups to which the connecteduser belongs
 				Group.find({'usersList' : {$regex : new RegExp(connectedUser.username, "i")}}, function(error, dataGroup) {
 					if(error) throw error;
 					else {
-					//	console.log("Finding a user in a group for: " + connectedUser.username); console.log(dataGroup);
+					
 						result = [];//JSON.stringify(data);
 						resultReturn = [];
-					//	console.log("test listall Corpus: " + data.length);
+					
 						for(var i = 0; i < data.length; i++){
-//							console.log(data[i]._id);
 							result.push(data[i]._id);
 						}
-					//	console.log("Id of media: "); console.log(req.params.id_media);
-						//result.push(req.params.id); //add the corpus id to the end of the list for back propagation
 						
 						ACL.find({id:{$in:result}}, function(error, dataACL){
 							if(error) console.log("error in ACL-corpusListall:");
 							else if(dataACL != null){
-					//			console.log("dataACL");
-					//			console.log(dataACL);
-								//console.log("connectedUser"); console.log(connectedUser);
-								for(var i = 0; i < dataACL.length; i++){ //the last one is the corpus id
+								var dataACLLen = dataACL.length;
+								var countTreatedACL = 0;
+								for(var i = 0; i < dataACL.length; i++){ 
 									var foundPos = commonFuncs.findUsernameInACL(connectedUser.username, dataACL[i].users);
-					//				console.log("foundPos: " + foundPos);
-									if(foundPos != -1 && dataACL[i].users[foundPos].right != 'N')
-										resultReturn.push(data[i]);
+
+									if(foundPos != -1) { 
+										if(dataACL[i].users[foundPos].right != 'N') {
+											resultReturn.push(data[i]);
+											countTreatedACL += 1;
+										}
+									} // not found user's right, find its group's one
 									else {
 										foundPos = commonFuncs.findUsernameInGroupACL(dataGroup, dataACL[i].groups);
-					//					console.log("foundPos: " + foundPos + " for : ");
-										if(foundPos != -1 && dataACL[i].groups[foundPos].right != 'N')
-											resultReturn.push(data[i]);
+
+										if(foundPos != -1) {
+											if(dataACL[i].groups[foundPos].right != 'N') {
+												resultReturn.push(data[i]);
+												countTreatedACL += 1;
+											}
+										}
+										else { //not found user right, nor group one, do a back propagation
+									//		console.log("get id of his parent");
+											(function(d){
+												parentID = [];
+												//be careful, the order of push is important
+												parentID.push(req.params.id_layer);
+												parentID.push(req.params.id_media); parentID.push(req.params.id_corpus);
+												
+												ACL.find({id:{$in:parentID}}, function(error, dataACL1){
+													if(error) res.send(error);
+													else if(dataACL1 != null) {
+														countTreatedACL += 1;
+														var contd = true;
+														for(var j = 0; j < dataACL1.length && contd; j++) {
+															var foundPos = commonFuncs.findUsernameInACL(connectedUser.username, dataACL1[j].users);
+														
+															if(foundPos != -1) {
+																if(dataACL1[j].users[foundPos].right != 'N') {
+																	resultReturn.push(d); contd = false;
+																}
+															}
+															else {
+																foundPos = commonFuncs.findUsernameInGroupACL(dataGroup, dataACL1[j].groups);
+							
+																if(foundPos != -1) {
+																	if(dataACL1[j].groups[foundPos].right != 'N') {
+																		resultReturn.push(d); contd = false;
+																	}
+																	else contd = false; // stop because we already found the right N
+																}
+															}
+														} //for
+													} //else if(dataACL1 != null)
+												}); //acl 2
+											})(data[i]); // treat the callback function
+										} // else { //not found user right	
 									}
 								} //for
-								if(resultReturn.length == 0) {
-									console.log("get id of his parent");
-									parentID = [];
-									parentID.push(req.params.id_layer); parentID.push(req.params.id_media);
-									parentID.push(req.params.id_corpus);
-									
-									ACL.findOne({id:{$in:parentID}}, function(error, dataACL1){
-										if(error) res.send(403, error);
-										else if(dataACL1 != null) {
-											var contd = true;
-											for(var i = 0; i < dataACL1.length && contd; i++) {
-												var foundPos = commonFuncs.findUsernameInACL(connectedUser.username, dataACL1[i].users);
-					//							console.log("foundPos: " + foundPos);
-												if(foundPos != -1 && dataACL1[i].users[foundPos].right != 'N') {
-													resultReturn.push(data); contd = false;
-												}
-												else {
-													foundPos = commonFuncs.findUsernameInGroupACL(dataGroup, dataACL1[i].groups);
-					//								console.log("foundPos: " + foundPos + " for : ");
-													if(foundPos != -1 && dataACL1[i].groups[foundPos].right != 'N') {
-														resultReturn.push(data); contd = false;
-													}
-												}
-											} //for
-											if(resultReturn.length == 0 && data.length > 0)
-												res.json(403, "You dont have enough permission to get this resource");
-											else res.json(resultReturn);
-										}
-									}); //acl 2
-								} //if(resultReturn.length == 0) {
-								else res.json(resultReturn);
+								emptyAsync(function(){
+									if(countTreatedACL == dataACLLen) 
+										final(resultReturn, data.length);
+								});
 							}
 						}); //ACL.find
 					} //else
@@ -151,7 +174,11 @@ exports.post = function(req, res){
 	
 			var anno = new Annotation(annoItem);
 			//just added 12/07/2013
-			anno.history.push({name : req.body.history.name, date : req.body.history.date});
+			var connectedUser = "root";
+			if(req.session.user)
+				connectedUser = req.session.user.username;
+			
+			anno.history.push({name : connectedUser, date : new Date()});
 	
 			anno.save( function(errorAnno, annoData){
 				if(errorAnno){
@@ -162,12 +189,7 @@ exports.post = function(req, res){
 				}
 				else{
 					console.log('Success on saving annotation data');
-					//saved = true;
-					var connectedUser;
-					if(req.session.user)
-						connectedUser = req.session.user.username;
-					else
-						connectedUser = "root";
+					
 					ACLAPI.addUserRightGeneric(annoData._id, connectedUser, 'A');
 					res.json(annoData);
 				}

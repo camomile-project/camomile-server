@@ -26,12 +26,11 @@ exports.listAll = function(req, res){
 				Group.find({'usersList' : {$regex : new RegExp(connectedUser.username, "i")}}, function(error, dataGroup) {
 					if(error) throw error;
 					else {
-						//console.log("Finding a user in a group for: " + connectedUser.username); console.log(dataGroup);
 						result = [];//JSON.stringify(data);
 						resultReturn = [];
-						//console.log("test listall Corpus: " + data.length);
+						
 						for(var i = 0; i < data.length; i++){
-							console.log(data[i]._id);
+						//	console.log(data[i]._id);
 							result.push(data[i]._id);
 						}
 						ACL.find({id:{$in:result}}, function(error, dataACL){

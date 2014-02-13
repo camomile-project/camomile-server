@@ -91,7 +91,7 @@ exports.addUser2Group = function(req, res){
 						else {
 							//console.log('data in dataUser2group = '); console.log(data);
 							//find if the user is already here
-							if(data.usersList.indexOf(req.body.username.toLowercase()) == -1) {
+							if(data.usersList.indexOf(req.body.username.toLowerCase()) == -1) {
 								data.usersList.push(req.body.username);
 							
 								data.save(function(err, dat){
