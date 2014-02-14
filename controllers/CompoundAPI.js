@@ -266,7 +266,7 @@ exports.removeAnno = function(req, res){
 //app.post('/corpus/:id_corpus/media/:id_media/layerAll', 
 exports.postAll = function(req, res){
 	if(req.body.layer_type == undefined || req.body.fragment_type == undefined 
-		|| req.body.data_type == undefined || req.body.source == undefined || req.body.history == undefined)
+		|| req.body.data_type == undefined || req.body.source == undefined)
 		return res.send(404, "one or more data fields are not filled out properly");
 	if(req.body.annotation == undefined)
 		return res.send(404, "one or more data fields are not filled out properly");	
@@ -292,8 +292,14 @@ exports.postAll = function(req, res){
 			var saved = false;
 	
 			var layer = new Layer(layer_data);
-			//just added 12/07/2013
-			layer.history.push({name : req.body.history.name, date : req.body.history.date});
+			//just added 12/07/2013, modified on 14th, 02/2014
+			
+			var connectedUser = "root";					
+			if(req.session.user)
+				connectedUser = req.session.user.username;
+				
+			//layer.history.push({name : req.body.history.name, date : req.body.history.date});
+			layer.history.push({name : connectedUser, date : new Date()});
 	
 			layer.save( function(errorLayer, dataLayer){
 				if(errorLayer){
@@ -307,18 +313,13 @@ exports.postAll = function(req, res){
 					//res.json(dataLayer);
 					//	}
 					//});//*/
-					
-					var connectedUser;
-					if(req.session.user)
-						connectedUser = req.session.user.username;
-					else
-						connectedUser = "root";
+				
 					ACLAPI.addUserRightGeneric(layer._id, connectedUser, 'A');
 					
 					//now we insert the annotation list into the annotation collection
 					var id_layer = layer._id; //get the new id_layer for this list of annotations
-					console.log('id_layer ' + id_layer);
-					console.log('req.body');
+					//console.log('id_layer ' + id_layer);
+					//console.log('req.body');
 					console.log(req.body.annotation.length);
 					var cpt = 0;
 					var annoObj = [];
