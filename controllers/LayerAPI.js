@@ -97,16 +97,20 @@ exports.listAll = function(req, res){
 																}
 															}
 														} //for
+														if(countTreatedACL == dataACLLen) {
+															countTreatedACL = -1
+															final(resultReturn, data.length);
+														}
 													} //else if(dataACL1 != null)
 												}); //acl 2
 											})(data[i]); // treat the callback function
 										} // else { //not found user right	
 									} //else
 								} //for
-								emptyAsync(function(){
-									if(countTreatedACL == dataACLLen) 
-										final(resultReturn, data.length);
-								});
+								//emptyAsync(function(){
+								if(countTreatedACL == dataACLLen) 
+									final(resultReturn, data.length);
+								//});
 							}
 						}); //ACL.find
 					} //else

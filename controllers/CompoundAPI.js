@@ -281,7 +281,7 @@ exports.postAll = function(req, res){
 		else {
 			
 			var layer_data = {
-					"id_media" : req.body.id_media,
+					"id_media" : req.params.id_media,
 					"layer_type" : req.body.layer_type,
 					"fragment_type" : req.body.fragment_type,
 					"data_type" : req.body.data_type,
@@ -308,7 +308,7 @@ exports.postAll = function(req, res){
 					return;
 				}
 				else{
-					console.log('Success on saving layer data');
+					//console.log('Success on saving layer data');
 					saved = true;
 					//res.json(dataLayer);
 					//	}
@@ -320,7 +320,7 @@ exports.postAll = function(req, res){
 					var id_layer = layer._id; //get the new id_layer for this list of annotations
 					//console.log('id_layer ' + id_layer);
 					//console.log('req.body');
-					console.log(req.body.annotation.length);
+					//console.log(req.body.annotation.length);
 					var cpt = 0;
 					var annoObj = [];
 	
@@ -349,7 +349,7 @@ exports.postAll = function(req, res){
 										return;
 									}
 									else{
-										console.log('Success on saving annotation data');
+					//					console.log('Success on saving annotation data');
 										saved = true;
 										//res.json(dataLayer);
 										ACLAPI.addUserRightGeneric(anno._id, connectedUser, 'A');
@@ -371,7 +371,7 @@ exports.postAll = function(req, res){
 					}
 					else 
 						res.json('error in saving');
-					console.log('already saved ' + cpt);
+					//console.log('already saved ' + cpt);
 				}
 			});
 		}
