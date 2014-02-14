@@ -14,7 +14,7 @@ var ACL = require('../models/ACL').ACL,
 
 var fileSystem = require('fs'), //working with video streaming
     path = require('path');
-// for the uri : app.get('/corpus/:id/media', 
+// for the uri : app.get('/corpus/:id/media',
 /*exports.listAll = function(req, res){
 	Media.find({id_corpus : req.params.id}, function(error, data){
 		if(error){
@@ -66,7 +66,9 @@ exports.listAll = function(req, res){
 							//console.log(data[i]._id);
 							result.push(data[i]._id);
 						}
+
 						// find all acl of these ids
+
 						ACL.find({id:{$in:result}}, function(error, dataACL){
 							if(error) console.log("error in ACL-corpusListall:");
 							else if(dataACL != null) {
@@ -134,9 +136,9 @@ exports.listAll = function(req, res){
 			}
 		}
 	});
-} 
+}
 
-//for the uri: app.get('/corpus/:id_corpus/media/:id_media', 
+//for the uri: app.get('/corpus/:id_corpus/media/:id_media',
 exports.listWithId = function(req, res){
 	//Media.findOne({id_corpus: req.params.id}, function(error, data){
 	//Media.find({id_ : req.params.id_media}, function(error, data){
@@ -153,11 +155,11 @@ exports.listWithId = function(req, res){
 }
 
 //test for Posting corpus
-//app.post('/corpus/:id_corpus/media', 
+//app.post('/corpus/:id_corpus/media',
 exports.post = function(req, res){
 	if(req.body.name == undefined)
 		return res.send(404, "one or more data fields are not filled out properly");
-		
+
 	Corpus.findById(req.params.id_corpus, function(error, data){
 		if(error){
 			res.json(error);
@@ -173,7 +175,7 @@ exports.post = function(req, res){
 			};
 			if(req.body.url)
 				media_data.url = req.body.url;
-				
+
 			var media = new Media(media_data);
 
 			media.save(function(error1, data1){
@@ -214,11 +216,11 @@ exports.post = function(req, res){
 	});*/
 }
 
-//app.put('/corpus/:id_corpus/media/:id_media', 
+//app.put('/corpus/:id_corpus/media/:id_media',
 exports.update = function(req, res){
 	if(req.params.id_corpus == undefined && req.body.name == undefined && req.body.url == undefined)
 		return res.send(404, "one or more data fields are not filled out properly");
-		
+
 	var update = {};
 	if(req.params.id_corpus)
 		update.id_corpus = req.params.id_corpus;
@@ -240,7 +242,7 @@ exports.update = function(req, res){
 	});
 }
 
-//app.get('/corpus/:id_corpus/media/:id_media/video', 
+//app.get('/corpus/:id_corpus/media/:id_media/video',
 exports.getVideo = function(req, res){
 	Media.findById(req.params.id_media, function(error, data){
 		if(error){
@@ -250,25 +252,25 @@ exports.getVideo = function(req, res){
 			res.json(404, 'no such id_media!')
 		}
 		else {
-			
+
 			var filePath = data.url;
 			if(data.url == undefined) return res.send(404, 'not found the video corresponding to this media');
 			if(GLOBAL.video_path)
-				filePath = GLOBAL.video_path + '/' + filePath;
-			
+				filePath = GLOBAL.video_path + '/' + filePath + '.webm';
+
 			//var filePath = 'data/05._Lau_Dai_Tinh_Ai.mp3';
 			//var filePath = 'data/BFMTV_BFMStory_2011-07-07_175900.webm';
 			var mineType = commonFuncs.getMineType(filePath);
 			if(mineType == "video/webm")
 				res.sendfile(filePath);
-			else {	
+			else {
 				fileSystem.stat(filePath, function (err, stat){
 					if(stat) {
 						res.writeHead(200, {
-							'Content-Type': mineType,//'audio/mpeg', 
+							'Content-Type': mineType,//'audio/mpeg',
 							'Content-Length': stat.size
 						});
-	
+
 						var readStream = fileSystem.createReadStream(filePath);
 						readStream.on('data', function(dataS) {
 							var flushed = res.write(dataS);
@@ -276,14 +278,14 @@ exports.getVideo = function(req, res){
 							if(!flushed)
 								readStream.pause();
 						});
-	
+
 						res.on('drain', function() {
-							// Resume the read stream when the write stream gets hungry 
-							readStream.resume();    
+							// Resume the read stream when the write stream gets hungry
+							readStream.resume();
 						});
-	
+
 						readStream.on('end', function() {
-							res.end();        
+							res.end();
 						});
 					} //if
 					else res.send(404);

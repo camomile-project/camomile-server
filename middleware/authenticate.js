@@ -32,7 +32,7 @@ authenticateElem = function(name, pass, fn) {
         	} else {
             	return fn(new Error('could not find this user'));
         	}
-    	}); 
+    	});
 }
 
 exports.authenticate = function(name, pass, fn) {
@@ -45,7 +45,7 @@ exports.requiredRightUGname = function(role) {
 		if (GLOBAL.no_auth){
     		next();
     	}
-    	else if(req.session.user) { 
+    	else if(req.session.user) {
     			if(req.session.user.role == "admin")
 					next();
 				else if(commonFuncs.isAllowedUser(req.session.user.role, role) < 0) {
@@ -57,7 +57,7 @@ exports.requiredRightUGname = function(role) {
 					if(userLogin == undefined) userLogin = "root";
 					User.findOne({username : {$regex : new RegExp(userLogin, "i")}}, function(error, data){
 						if(error) {console.log(error); commonFuncs.returnAccessDenied(req, res);}
-						else 
+						else
 						{
 							if(data == null){
 								console.log("This user does not exist");
@@ -69,7 +69,7 @@ exports.requiredRightUGname = function(role) {
 								else {
 									Group.findOne({groupname : {$regex : new RegExp(groupLogin, "i")}}, function(error, data){
 										if(error) {console.log(error); commonFuncs.returnAccessDenied(req, res);}
-										else 
+										else
 										{
 											if(data == null){
 												console.log("This group does not exist");
@@ -98,7 +98,7 @@ exports.requiredConsistentID = function(role, minimumRightRequired, level) {
 		if (GLOBAL.no_auth){
     		next();
     	}
-    	else if(req.session.user) { 
+    	else if(req.session.user) {
     			if(req.session.user.role == "admin" || minimumRightRequired == 'N')
 					next();
 				else if(commonFuncs.isAllowedUser(req.session.user.role, role) < 0) {
@@ -109,7 +109,7 @@ exports.requiredConsistentID = function(role, minimumRightRequired, level) {
 						case 1:
 							var id_corpus = req.params.id;
 							if(id_corpus == undefined) id_corpus = req.params.id_corpus;
-							
+
 							Corpus.findById(id_corpus, function(error, data){
 								if(error){
 									req.session.error = 'Access denied!';
@@ -140,7 +140,7 @@ exports.requiredConsistentID = function(role, minimumRightRequired, level) {
 										res.send(401, 'One of these ids is not correct');
 									}
 							});
-							
+
 							break;
 						case 5:
 							Layer.findById(req.params.id_layer, function(error, data){
@@ -176,7 +176,7 @@ exports.requiredConsistentID = function(role, minimumRightRequired, level) {
 									}
 							});
 							break;
-						
+
 						case 7:
 							Annotation.findById(req.params.id_anno, function(error, dat){
 								if(error){
@@ -223,13 +223,13 @@ exports.requiredConsistentID = function(role, minimumRightRequired, level) {
 															}
 													});
 												}
-										});		
+										});
 									}
 							});
 							break;
 						default:
 							break;
-					}	
+					}
 				}
 		}
 		else {
@@ -245,7 +245,7 @@ exports.requiredAuthentication = function(role, minimumRightRequired, level) {
 		if (GLOBAL.no_auth){
     		next();
     	}
-    	else if(req.session.user) { 
+    	else if(req.session.user) {
     			if(req.session.user.role == "admin" || minimumRightRequired == 'N')
 					next();
 				else if(commonFuncs.isAllowedUser(req.session.user.role, role) < 0) {
@@ -274,20 +274,20 @@ exports.requiredAuthentication = function(role, minimumRightRequired, level) {
 											var contd = true;
 											for(var i = 0; i < dataACL.length && contd; i++){
 												var foundPos = commonFuncs.findUsernameInACL(connectedUser.username, dataACL[i].users);
-												
+
 												//console.log("foundPos: " + foundPos);
 												if(foundPos != -1 && commonFuncs.isAllowedRight(minimumRightRequired, dataACL[i].users[foundPos].right) >= 0) {
-													//console.log("dd: " + i + " id = " + dataACL[i].id); 
-												
+													//console.log("dd: " + i + " id = " + dataACL[i].id);
+
 													found = true; contd = false;
 													next();
-												}	
+												}
 												else {
 													foundPos = commonFuncs.findUsernameInGroupACL(dataGroup, dataACL[i].groups);
 													//console.log("foundPos: " + foundPos + " for : ");
 													if(foundPos != -1 && commonFuncs.isAllowedRight(minimumRightRequired, dataACL[i].groups[foundPos].right) >= 0) {
-												
-														found = true; contd = false; next(); 
+
+														found = true; contd = false; next();
 													}
 												}
 												if(foundPos != -1 && contd) {contd = false; } // found the user right, but not satisfied
@@ -297,10 +297,10 @@ exports.requiredAuthentication = function(role, minimumRightRequired, level) {
 										else {commonFuncs.returnAccessDenied(req, res); }
 									});
 								}
-							});	
+							});
 							break;
 						case  5: ///corpus/:id_corpus/media/:id_media/layer/:id_layer
-							//var id_layer = req.params.id_layer;	
+							//var id_layer = req.params.id_layer;
 							Group.find({'usersList' : {$regex : new RegExp(connectedUser.username, "i")}}, function(error, dataGroup) {
 								if(error) throw error;
 								else {
@@ -318,15 +318,15 @@ exports.requiredAuthentication = function(role, minimumRightRequired, level) {
 												var foundPos = commonFuncs.findUsernameInACL(connectedUser.username, dataACL[i].users);
 											//	console.log("foundPos: " + foundPos);
 												if(foundPos != -1 && commonFuncs.isAllowedRight(minimumRightRequired, dataACL[i].users[foundPos].right) >= 0) {
-											//		console.log("dd: " + i + " id = " + dataACL[i].id); 
+											//		console.log("dd: " + i + " id = " + dataACL[i].id);
 													contd = false; found = true;
 													next();
-												}	
+												}
 												else {
 													foundPos = commonFuncs.findUsernameInGroupACL(dataGroup, dataACL[i].groups);
 											//		console.log("foundPos: " + foundPos + " for : ");
 													if(foundPos != -1 && commonFuncs.isAllowedRight(minimumRightRequired, dataACL[i].groups[foundPos].right) >= 0) {
-														found = true; contd = false; next(); 
+														found = true; contd = false; next();
 													}
 												}
 												if(foundPos != -1 && contd) {contd = false; } // found the user right, but not satisfied
@@ -336,7 +336,7 @@ exports.requiredAuthentication = function(role, minimumRightRequired, level) {
 										else commonFuncs.returnAccessDenied(req, res);
 									});
 								}
-							});	
+							});
 							break;
 						case 3: ///corpus/:id_corpus/media/:id_media
 							var id_media = req.params.id_media;
@@ -356,15 +356,15 @@ exports.requiredAuthentication = function(role, minimumRightRequired, level) {
 												var foundPos = commonFuncs.findUsernameInACL(connectedUser.username, dataACL[i].users);
 											//	console.log("foundPos: " + foundPos);
 												if(foundPos != -1 && commonFuncs.isAllowedRight(minimumRightRequired, dataACL[i].users[foundPos].right) >= 0) {
-										//			console.log("dd: " + i + " id = " + dataACL[i].id); 
+										//			console.log("dd: " + i + " id = " + dataACL[i].id);
 													contd = false; found = true;
 													next();
-												}	
+												}
 												else {
 													foundPos = commonFuncs.findUsernameInGroupACL(dataGroup, dataACL[i].groups);
 											//		console.log("foundPos: " + foundPos + " for : ");
 													if(foundPos != -1 && commonFuncs.isAllowedRight(minimumRightRequired, dataACL[i].groups[foundPos].right) >= 0) {
-														found = true; contd = false; next(); 
+														found = true; contd = false; next();
 													}
 												}
 												if(foundPos != -1 && contd) {contd = false; } // found the user right, but not satisfied
@@ -376,31 +376,31 @@ exports.requiredAuthentication = function(role, minimumRightRequired, level) {
 								}
 							});
 							break;
-							
+
 						case 2:
-							
+
 							break;
 						case 1: //corpus/:id
 							var id_corpus = req.params.id;
 							if(id_corpus == undefined) id_corpus = req.params.id_corpus;
-							
+
 							Group.find({'usersList' : {$regex : new RegExp(connectedUser.username, "i")}}, function(error, dataGroup) {
 								if(error) throw error;
 								else {
-									
+
 									ACLModel.findOne({id:id_corpus}, function(error, dataACL) {
 										if(error) {
 											console.log("Error: " + error); throw error;
 										}
 										else if(dataACL != null) {
-											
+
 											var foundPos = commonFuncs.findUsernameInACL(connectedUser.username, dataACL.users);
 										//	console.log("foundPos: " + foundPos);
 											if(foundPos != -1 && commonFuncs.isAllowedRight(minimumRightRequired, dataACL.users[foundPos].right) >= 0) {
-									//			console.log("dd"); 
+									//			console.log("dd");
 												found = true;
 												next();
-											}	
+											}
 											else {
 												foundPos = commonFuncs.findUsernameInGroupACL(dataGroup, dataACL.groups);
 										//		console.log("foundPos: " + foundPos + " for : ");
@@ -416,19 +416,19 @@ exports.requiredAuthentication = function(role, minimumRightRequired, level) {
 							});
 							break;
 						case 0:
-							
+
 							break;
 						default:
 							//keep only the permitted resources
 							console.log ("level = " + level);
 					}//next();
-				} //else 
-			} //else if(req.session.user) { 
+				} //else
+			} //else if(req.session.user) {
 			else {
 				//req.session.error = 'Access denied!';
 				//res.redirect('login');
 				commonFuncs.returnAccessDenied(req, res);
-			}		
+			}
 	}
 }
 
@@ -437,7 +437,7 @@ exports.requiredAuthentication = function(role, minimumRightRequired, level) {
 		if (GLOBAL.no_auth){
     		next();
     	}
-    	else if(req.session.user) { 
+    	else if(req.session.user) {
     			if(req.session.user.role == "admin")
 					next();
 				else {
@@ -446,7 +446,7 @@ exports.requiredAuthentication = function(role, minimumRightRequired, level) {
 						if(err) throw err;
 						else {
 							if(data == null) {
-								
+
 							}
 							else { //
 								var i = level;
@@ -456,11 +456,11 @@ exports.requiredAuthentication = function(role, minimumRightRequired, level) {
 									switch(i) {
 										case  3: //get the right of annotation
 											var id_anno = req.params.id_anno;
-																	
+
 											break;
 										case 2:
 											var id_layer = req.params.id_layer;
-											
+
 											break;
 										case 1:
 											var id_media = req.params.id_media;
@@ -471,14 +471,14 @@ exports.requiredAuthentication = function(role, minimumRightRequired, level) {
 										default:
 											console.log ("level = " + level);
 									}
-									
+
 									if(found) i = 0;
 									i--;
 								} //while
 							} //second else inside ACL function
 						} //first else inside ACL function
 					});
-					
+
 				} //else if (req.session.user)
 			}
 		/*else if(req.session.user && req.session.user.role === role) {
@@ -514,7 +514,7 @@ exports.createRootUser = function(){
 					if (err) throw err;
 					console.log("already added the root user");
 				}); //save
-			});	
+			});
    		} //data
 	});
 }
@@ -572,7 +572,7 @@ exports.userExist = function(req, res, next) {
 					if (err) throw err;
 					console.log("already added the root user");
 				}); //save
-			});	
+			});
    		} //data
 	});
 }*/
@@ -620,7 +620,7 @@ exports.signup = function (req, res) {
 	else {
 		var roleuser = req.body.role;
 		if(roleuser == undefined) roleuser = "user";
-		
+
 		hash(req.body.password, function (err, salt, hash) {
 			if (err) throw err;
 			var user = new User({
@@ -634,7 +634,7 @@ exports.signup = function (req, res) {
 				if (err) throw err;
 				//authenticate(newUser.username, newUser.password, function(err, user){
 	//               if(user){
-					 if(newUser){ 
+					 if(newUser){
 						/*req.session.regenerate(function(){
 							req.session.user = newUser;//user;
 							req.session.success = 'Authenticated as ' + newUser.username + ' click to <a href="logout">logout</a>.';
@@ -654,7 +654,7 @@ exports.chmodUser = function (req, res) {
     }
 	var usrname = req.body.username,
 		newrole = req.body.role;
-	
+
 	if(usrname == undefined) { //login via a POST
 		usrname = req.params.username;
 		newrole = req.params.role;
@@ -662,12 +662,12 @@ exports.chmodUser = function (req, res) {
 	//le 17/11/2013
 	if(usrname == undefined)
 		return res.send(404,'The field username has not been filled');
-		
+
 	if(usrname == "root") {
 		res.redirect('/');
 		return false;
 	}
-	
+
 	var strRights = ["admin", "user", "supervisor"];
 	if(strRights.indexOf(newrole) < 0) {
 		console.log("role should be either user, admin, or supervisor");
@@ -713,36 +713,17 @@ exports.racine = function (req, res) {
     if (req.session.user) {
         res.send("Welcome " + req.session.user.username + "<br>" + "<a href='logout'>logout</a>");
     } else {
-    	
+
         res.send("<h1 ALIGN="+ "CENTER>" + "Welcome to Camomile project!</h1>" + "<br>" + "<h2>You have to log in to use the APIs</h2>" + "<br>" + "<a href='login'> Login</a>" + "<br>" + "<a href='signup'> Sign Up</a>");
     }
 }
 
-/*
-exports.signupGET = function (req, res) {
-    if (req.session.user) {
-        res.redirect("/");
-    } else {
-        res.render("signup");
-    }
-}
-*/
-
-exports.signupGET = function (req, res) {
-    if (req.session.user) { //only admin can do it
-        res.render("signup");
-    } else {
-        res.redirect("/"); 
-    }
-}
-
-
 exports.logoutGET = function (req, res) {
 	if (GLOBAL.no_auth){
-    	return res.send('This is an anonymous user');
+    	return res.send(200);
     }
     req.session.destroy(function () {
-        res.redirect('/');
+        res.send(200);
     });
 }
 
@@ -807,7 +788,7 @@ exports.addGroup = function (req, res) {
     else {
     	if(req.body.groupname == undefined)
     		return res.send(404, 'The groupname field has not been filled in');
-    		
+
     	Group.findOne({groupname : {$regex : new RegExp(req.body.groupname, "i")}}, function(error, group) {
     		if(error) res.send(error);
     		else if(group == null) {
@@ -817,15 +798,15 @@ exports.addGroup = function (req, res) {
 					usersList : []
 				};
 				var g = new Group(groupItem);
-	
+
 				g.save(function(err, data){
 					if(err) { throw err; }
-					else { 
+					else {
 						//res.redirect('/');
 						res.send(200, data);
 					}
 				});
-			} 
+			}
 			else {
 				res.send("This group already exists");
 			}
@@ -913,9 +894,9 @@ exports.removeUserByName  = function (req, res) {
     	var uname = req.body.username;
     	if(uname == undefined)
     		return res.send(404, 'The username field has not been filled in');
-    		
+
 		User.remove({username : {$regex : new RegExp(req.body.username, "i")}}, function(error, data){
-			if(error){					
+			if(error){
 				console.log('Error in deleting one annotation');
 				res.json(error);
 			}
@@ -934,9 +915,9 @@ exports.removeGroupByID  = function (req, res) {
     else {
     	if(req.params.id == undefined)
     		return res.send(404, 'The id parameter has not been sent');
-    		
+
 		Group.remove({_id : req.params.id}, function(error, data){
-			if(error){					
+			if(error){
 				console.log('Error in deleting one annotation');
 				res.json(error);
 			}
@@ -956,7 +937,7 @@ exports.removeGroupByName  = function (req, res) {
     	var gname = req.body.groupname;
     	if(gname != undefined) {
 			Group.remove({groupname : {$regex : new RegExp(req.body.groupname, "i")}}, function(error, data){
-				if(error){					
+				if(error){
 					console.log('Error in deleting one annotation');
 					res.json(error);
 				}
