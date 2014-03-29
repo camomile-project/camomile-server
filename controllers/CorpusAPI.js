@@ -12,6 +12,11 @@ var ACL = require('../models/ACL').ACL,
 	commonFuncs = require('../lib/commonFuncs');
 
 // for the uri : app.get('/corpus', 
+/*
+	- First: retrieves all corpus regardless of user/group's rights
+	- Second: finds all groups belonging to the connected user
+	- For each found corpus, check ACLs (the permission of the connected user and its groups) 
+*/
 exports.listAll = function(req, res){  	
 	Corpus.find({}, function(error, data){
 		if(error) res.json(error);
@@ -22,31 +27,29 @@ exports.listAll = function(req, res){
 			}
 			else if(connectedUser != undefined && data != null)
 			{
-				//first find the group to which the connecteduser belongs
-				Group.find({'usersList' : {$regex : new RegExp(connectedUser.username, "i")}}, function(error, dataGroup) {
+				//first find groups to which the connected user belongs
+				Group.find({'usersList' : {$regex : new RegExp('^'+ connectedUser.username + '$', "i")}}, function(error, dataGroup) {
 					if(error) throw error;
 					else {
-						result = [];//JSON.stringify(data);
+						result = [];
 						resultReturn = [];
 						
 						for(var i = 0; i < data.length; i++){
-						//	console.log(data[i]._id);
+						
 							result.push(data[i]._id);
 						}
+						// then find all acls of the data
 						ACL.find({id:{$in:result}}, function(error, dataACL){
 							if(error) console.log("error in ACL-corpusListall:");
 							else if(dataACL != null) {
-							//	console.log("dataACL");
-							//	console.log(dataACL);
-								//console.log("connectedUser"); console.log(connectedUser);
 								for(var i = 0; i < dataACL.length; i++){
 									var foundPos = commonFuncs.findUsernameInACL(connectedUser.username, dataACL[i].users);
-							//		console.log("foundPos: " + foundPos);
+
 									if(foundPos != -1 && dataACL[i].users[foundPos].right != 'N')
 										resultReturn.push(data[i]);
 									else {
 										foundPos = commonFuncs.findUsernameInGroupACL(dataGroup, dataACL[i].groups);
-							//			console.log("foundPos: " + foundPos + " for : ");
+
 										if(foundPos != -1 && dataACL[i].groups[foundPos].right != 'N')
 											resultReturn.push(data[i]);
 									}
@@ -54,6 +57,9 @@ exports.listAll = function(req, res){
 								if(resultReturn.length == 0)
 									res.json(403, "You dont have enough permission to get this resource");
 								else res.json(resultReturn);
+							} //if(dataACL != null)
+							else {
+								res.json(404, "error in finding acl");
 							}
 						}); //ACL.find
 					} //else
@@ -67,7 +73,6 @@ exports.listAll = function(req, res){
 
 //for the uri app.get('/corpus/:id', 
 exports.listWithId = function(req, res){
-	//Media.findOne({id_corpus: req.params.id}, function(error, data){
 	Corpus.findById(req.params.id, function(error, data){
 		if(error){
 			res.json(error);
@@ -75,8 +80,7 @@ exports.listWithId = function(req, res){
 		else if(data == null){
 			res.json('no such id_corpus!')
 		}
-		else {
-			//console.log("data"); console.log(data);	
+		else {	
 			res.json(data);
 		}
 	});
@@ -102,11 +106,10 @@ exports.post = function(req, res){
 		else {
 			console.log('Success on saving corpus data'); 
 			// now we need to create the first ACL for the current user
-			var connectedUser;
+			var connectedUser = "root";
 			if(req.session.user)
 				connectedUser = req.session.user.username;
-			else
-				connectedUser = "root";
+				
 			ACLAPI.addUserRightGeneric(data._id, connectedUser, 'A');
 			res.json(data);
 		}
@@ -117,24 +120,14 @@ exports.post = function(req, res){
 exports.update = function(req, res){
 	if(req.body.name == undefined)
 		return res.send(404, "one or more data fields are not filled out properly");
-	//Corpus.update(_id : req.params.id, function(error, data){
+	
 	var update = {name: req.body.name};
 	Corpus.findByIdAndUpdate(req.params.id, update, function (error, data) {
-	//Corpus.findOne({_id:req.params.id}, function (err, cor) {
 		if(error){
 			res.json(error);
 		}
 		else {
-		//	cor.name = req.body.name;
 			res.json(data);
-			/*cor.save( function(error, data){
-                if(error){
-                    res.json(error);
-                }
-                else{
-                    res.json(data);
-                }
-            });*/
 		}
 	});
 }

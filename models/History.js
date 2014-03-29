@@ -1,15 +1,14 @@
 var mongoose = require('mongoose')
-   ,Schema = mongoose.Schema
-   ,ObjectId = Schema.ObjectId;
+   , Schema = mongoose.Schema
+   , ObjectId = Schema.ObjectId;
    
 /**
- * 
+ * Modification is a generic type, which can be used to store any kind of data
  */
  
 exports.History = HistorySchema = new Schema({
-	//_id: {type:mongoose.Schema.ObjectId, default: new mongoose.Types.ObjectId()},
-	date : {type: Date, 'default': Date.now}, 
-	name: {type: String, required: true, trim: true} 	
-}, { versionKey: false });
+	date : {type: Date, 'default': Date.now},
+	name: {type: String, required: true, trim: true, index : true},
+	modification: {type: Schema.Types.Mixed, 'default' : '', index : true} 	
+}, { versionKey: false }); 
 
-//exports.History = History = mongoose.model('Corpus', CorpusSchema);

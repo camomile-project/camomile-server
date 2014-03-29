@@ -10,22 +10,23 @@ var Layer = require('../models/Layer').Layer; //get the layer model
 var ACL = require('../models/ACL').ACL,
 	ACLAPI = require('../controllers/ACLAPI'),
 	Group = require('../models/Group').Group,
+	compound = require('../controllers/CompoundAPI'),
 	commonFuncs = require('../lib/commonFuncs');
 
 // for the uri : app.get('/corpus/:id_corpus/media/:id_media/layer', 
-
+/*
+	- First: retrieves all layers regardless of user/group's rights
+	- Second: finds all groups belonging to the connected user
+	- For each found layer, check ACLs (the permission of the connected user and its groups)
+	- If not found, do a back propagation
+*/
 exports.listAll = function(req, res){
-
-	function emptyAsync(callback) {
-		setTimeout(function() {callback();}, 1000);
-	}
-	
 	function final(resultReturn, n) { 
 		if(resultReturn.length == 0 && n > 0)										
 			res.json(403, "You dont have enough permission to get this resource");
 		else res.json(resultReturn);
 	}
-	
+	//find all layers under this media
 	Layer.find({id_media : req.params.id_media}, function(error, data){
 		if(error){
 			res.json(error);
@@ -36,8 +37,8 @@ exports.listAll = function(req, res){
 				res.json(data);
 			}
 			else if(connectedUser != undefined && data != null){
-				//first find the group to which the connecteduser belongs
-				Group.find({'usersList' : {$regex : new RegExp(connectedUser.username, "i")}}, function(error, dataGroup) {
+				//first find all groups to which the connecteduser belongs
+				Group.find({'usersList' : {$regex : new RegExp('^'+ connectedUser.username + '$', "i")}}, function(error, dataGroup) {
 					if(error) throw error;
 					else {
 						result = [];
@@ -46,10 +47,10 @@ exports.listAll = function(req, res){
 						for(var i = 0; i < data.length; i++){
 							result.push(data[i]._id);
 						}
-
+						// find all acls of these id
 						ACL.find({id:{$in:result}}, function(error, dataACL){
 							if(error) console.log("error in ACL-corpusListall:");
-							else if(dataACL != null){
+							else if(dataACL != null) {
 								var dataACLLen = dataACL.length;
 								var countTreatedACL = 0;
 								for(var i = 0; i < dataACL.length; i++){
@@ -69,7 +70,7 @@ exports.listAll = function(req, res){
 											}
 										}
 										else { //not found user right, nor group one, do a back propagation
-									//		console.log("get id of his parent");
+
 											(function(d){
 												parentID = [];
 												parentID.push(req.params.id_media); parentID.push(req.params.id_corpus);
@@ -107,10 +108,11 @@ exports.listAll = function(req, res){
 										} // else { //not found user right	
 									} //else
 								} //for
-								//emptyAsync(function(){
 								if(countTreatedACL == dataACLLen) 
 									final(resultReturn, data.length);
-								//});
+							} //else if(dataACL != null)
+							else {
+								res.json(404, "error in finding acl");
 							}
 						}); //ACL.find
 					} //else
@@ -125,19 +127,6 @@ exports.listAll = function(req, res){
 		}
 	});
 }
-
-/*exports.listAll = function(req, res){
-	Layer.find({id_media : req.params.id_media}, function(error, data){
-		if(error){
-			res.json(error);
-		}
-		else if(data == null){
-			res.json('no such id_media!')
-		}
-		else
-			res.json(data);
-	});
-}*/
 
 //for the uri: app.get('/corpus/:id_corpus/media/:id_media/layer/:id_layer 
 exports.listWithId = function(req, res){
@@ -154,74 +143,68 @@ exports.listWithId = function(req, res){
 }
 
 //test for Posting corpus
-//app.post('/corpus/:id_corpus/media/:id_media/layer', 
+//app.post('/corpus/:id_corpus/media/:id_media/layer'
+/*
+	if body.annotation is given, a list of annotations will be created
+*/
 exports.post = function(req, res){
 	if(req.body.layer_type == undefined || req.body.fragment_type == undefined 
 		|| req.body.data_type == undefined || req.body.source == undefined)
 		return res.send(404, "one or more data fields are not filled out properly");
-	
-	Media.findById(req.params.id_media, function(error, data){
-		if(error){
-			res.json(error);
-		}
-		else if(data == null){
-			res.json('Could not post this layer because the given id_media is incorrect'); return;
-		}
-		else {
-			var layer_data = {
-				"id_media" : req.params.id_media,
-				"layer_type" : req.body.layer_type,
-				"fragment_type" : req.body.fragment_type,
-				"data_type" : req.body.data_type,
-				"source" : req.body.source,
-				"history" : []
-			};
+	if(req.body.annotation != undefined)
+		return compound.postAll(req, res);
+	else {
+		Media.findById(req.params.id_media, function(error, data){
+			if(error){
+				res.json(error);
+			}
+			else if(data == null){
+				res.json('Could not post this layer because the given id_media is incorrect'); 
+				return;
+			}
+			else {
+				var layer_data = {
+					"id_media" : req.params.id_media,
+					"layer_type" : req.body.layer_type,
+					"fragment_type" : req.body.fragment_type,
+					"data_type" : req.body.data_type,
+					"source" : req.body.source,
+					"history" : []
+				};
 			
-			var connectedUser = "root";
-			if(req.session.user)
-				connectedUser = req.session.user.username;
-			
-			var layer = new Layer(layer_data);
-			layer.history.push({name : connectedUser, date : new Date()});
-	
-			layer.save( function(errorLayer, dataLayer){
-				if(errorLayer){
-					console.log('error in posting layer data, the id_media does not exist');
-					res.json(errorLayer);
-					return;
-				}
-				else{
-					console.log('Success on saving layer data');
-					// add the current id to the ACL list
-					
-					ACLAPI.addUserRightGeneric(dataLayer._id, connectedUser, 'A');
-					res.json(dataLayer);
-				}
-			});
-		}
-	});
-	/*var layer_data = {
-			"id_media" : req.params.id_media,
-			"layer_type" : req.body.layer_type,
-			"fragment_type" : req.body.fragment_type,
-			"data_type" : req.body.data_type,
-			"source" : req.body.source,
-			"history" : req.body.history
-	};
-	
-	var layer = new Layer(layer_data);
-	
-	layer.save( function(error, dataLayer){
-		if(error){
-			console.log('error in posting layer data, the id_media does not exist');
-			res.json(error);
-			return;
-		}
-		else{
-			console.log('Success on saving layer data');
-			res.json(dataLayer);
-		}
-	});*/
+				var connectedUser = "root";
+				if(req.session.user)
+					connectedUser = req.session.user.username;
+
+				// add new layer
+				var layer = new Layer(layer_data);
+
+				var modified = {
+					"id_media" : req.params.id_media,
+					"layer_type" : req.body.layer_type,
+					"fragment_type" : req.body.fragment_type,
+					"data_type" : req.body.data_type,
+					"source" : req.body.source
+				};
+				// update history
+				layer.history.push({name : connectedUser, date : new Date(), modification: modified});
+				// save new layer	
+				layer.save( function(errorLayer, dataLayer){
+					if(errorLayer){
+						console.log('error in posting layer data, the id_media does not exist');
+						res.json(errorLayer);
+						return;
+					}
+					else{
+						console.log('Success on saving layer data');
+						// add the current id to the ACL list
+						ACLAPI.addUserRightGeneric(dataLayer._id, connectedUser, 'A');
+						res.json(dataLayer);
+					}
+				});
+			}
+		});
+	}
 }
 
 //test for updating layers
@@ -243,27 +226,17 @@ exports.updateAll = function(req, res){
 	if(req.body.source)
 		update.source = req.body.source;
 			
-	/*var update = {
-			id_media : req.params.id_media,
-			layer_type : req.body.layer_type,
-			fragment_type : req.body.fragment_type,
-			data_type : req.body.data_type,
-			source : req.body.source
-	//		history : req.body.history
-	};*/
 	Layer.findByIdAndUpdate(req.params.id_layer, update, function (error, oneLayer) {
 		if(error){
 			res.json(error);
 		}
 		else
 		{
-			//oneLayer.history.push({name: req.body.history.name});
-			//oneLayer.history.push({name:req.body.history.name, date: req.body.history.date}); //phuong commented on 6th 11 2013
 			var dateNow = new Date();
 			var uname = "root";
 			if(req.session.user) uname = req.session.user.username;
 			
-			oneLayer.history.push({name:uname, date: dateNow});
+			oneLayer.history.push({name:uname, date: dateNow, modification: update});
 			
 			oneLayer.save( function(error, data){
 				if(error){
@@ -277,3 +250,4 @@ exports.updateAll = function(req, res){
 		}
 	});
 }
+

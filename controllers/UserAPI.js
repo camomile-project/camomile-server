@@ -1,0 +1,163 @@
+/* The API controller for user's methods
+   
+*/
+
+var Corpus = require('../models/Corpus').Corpus;
+
+var Media = require('../models/Media').Media; //get the media model
+
+var Layer = require('../models/Layer').Layer; //get the layer model
+
+var Annotation = require('../models/Annotation').Annotation; //get the annotation model
+
+var ACL = require('../models/ACL').ACL;
+
+var User = require('../models/user').User;
+
+var Group = require('../models/Group').Group;
+
+
+var ACLAPI = require('../controllers/ACLAPI');
+
+// retrieve all users
+exports.listUsers = function (req, res) {
+	var connectedUser = req.session.user;	
+	if(connectedUser.role == "admin") {				
+		User.find({}, 'username role affiliation', function (err, users) {
+        	if(err) throw err;
+        	if (users) {
+ 				res.send(users);
+        	} else {
+            	return res.send([]);
+        	}
+    	});
+	}
+    else {
+    	User.findOne({username: connectedUser.username}, 'username role affiliation', function (err, users) {
+        	if(err) throw err;
+        	if (users) {
+ 				res.send(users);
+        	} else {
+            	return res.send([]);
+        	}
+    	});
+    }
+}
+
+//retrieve a particular user (with id)
+exports.listWithId = function(req, res){
+	if(req.params.id == undefined)
+		return res.send(404, "the given ID is not correct");
+		
+	var connectedUser = req.session.user;	
+
+	User.findById(req.params.id, 'username affiliation role', function(error, data){
+		if(error){
+			res.json(error);
+		}
+		else if(data == null){
+			res.json('no such user!')
+		}
+		else
+			if(connectedUser.role == "admin") {	
+				res.json(data);
+			}
+			else {
+				
+				if(data.username == connectedUser.username)
+					res.json(data);
+				else res.send(401, "You dont have enough right to access this resource");
+			}
+	});
+}
+
+//retrieve a particular user (with id)
+exports.listGroupsOfUserId = function(req, res){
+	if(req.params.id == undefined)
+		return res.send(404, "the given ID is not correct");
+		
+	var connectedUser = req.session.user;	
+
+	User.findById(req.params.id, 'username affiliation role', function(error, data){
+		if(error){
+			res.json(error);
+		}
+		else if(data == null){
+			res.json('no such user!')
+		}
+		else {
+			
+			Group.find({'usersList' : {$regex : new RegExp('^'+ data.username + '$', "i")}}, function(error, dataGroup) {
+				if(error) res.send(error);
+				else {
+					if(connectedUser.role == "admin") {	
+						
+						res.json(dataGroup);
+					}
+					else {
+				
+						if(data.username == connectedUser.username)
+							res.json(dataGroup);
+						else res.send(401, "You dont have enough right to access this resource");
+					}
+				}
+			});
+		}
+	});
+}
+
+// update information of a group: put /user/:id
+exports.update = function(req, res){
+	if(req.params.id == undefined)
+		return res.send(404, "one or more data fields are not filled out properly");
+	var connectedUser = req.session.user;
+	
+	var update = {};
+	if(connectedUser.role == "admin" && req.body.username != undefined)
+		update.username = req.body.username;
+	if(req.body.affiliation)
+		update.affiliation = req.body.affiliation;
+	
+	if(req.body.password == undefined) {
+		User.findByIdAndUpdate(req.params.id, update, function (error, data) {
+			if(error){
+				res.json(error);
+			}
+			else {
+				res.json(data);
+			}
+		});
+	} 
+	else { //update pass
+		hash(req.body.password, function (err, salt, hash) {
+			if (err) throw err;
+			else {
+				update.salt = salt;
+				update.hash = hash;
+				User.findByIdAndUpdate(req.params.id, update, function (error, data) {
+					if(error){
+						res.json(error);
+					}
+					else {
+						res.json(data);
+					}
+				});
+			} // else
+		});
+	}
+}
+
+// remove a user
+exports.remove  = function(req, res){
+	if(req.params.id == undefined)
+		return res.send(404, "one or more data fields are not filled out properly");
+	User.remove({_id : req.params.id}, function (error, data) {
+		if(error) {
+			res.json(error);
+		}
+		else {
+			ACLAPI.removeAUserFromALC(data.username);
+			res.json(data);
+		}
+	});
+}

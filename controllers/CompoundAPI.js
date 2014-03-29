@@ -12,6 +12,8 @@ var Annotation = require('../models/Annotation').Annotation; //get the annotatio
 
 var ACLAPI = require('../controllers/ACLAPI');
 
+var User = require('../models/user').User;
+
 //test for deleting corpus
 //app.delete('/corpus/:id', 
 exports.removeCorpus = function(req, res){
@@ -47,11 +49,8 @@ exports.removeCorpus = function(req, res){
 						res.json(data);
 						return;
 					}
-					//var listId = [];
-					//console.log("I am here, inside the removeAllMediaWithCorpusId, before docs.forEach");
+				
 					docs.forEach( function (doc) {
-					//	console.log("xoa"); console.log(doc);
-						
 						//already deleted this id, now remove it from the ACL
 						ACLAPI.removeAnACLEntry(doc._id);
 						// end of removing from the ACL
@@ -73,7 +72,7 @@ exports.removeCorpus = function(req, res){
 								}
 								
 								doc1s.forEach( function (doc1) {
-									//console.log("xoa1"); console.log(doc1);
+									
 									//already deleted this id, now remove it from the ACL
 									ACLAPI.removeAnACLEntry(doc1._id);
 									// end of removing from the ACL
@@ -95,7 +94,6 @@ exports.removeCorpus = function(req, res){
 											}
 											
 											doc2s.forEach( function (doc2) {
-												//console.log("xoa2"); console.log(doc2);
 												
 												//already deleted this id, now remove it from the ACL
 												ACLAPI.removeAnACLEntry(doc2._id);
@@ -150,7 +148,7 @@ exports.removeMedia = function(req, res){
 					}
 					
 					doc1s.forEach( function (doc1) {
-						//console.log("xoa1"); console.log(doc1);
+						
 						//already deleted this id, now remove it from the ACL
 						ACLAPI.removeAnACLEntry(doc1._id);
 						// end of removing from the ACL
@@ -172,7 +170,7 @@ exports.removeMedia = function(req, res){
 								}
 								
 								doc2s.forEach( function (doc2) {
-									//console.log("xoa2"); console.log(doc2);
+									
 									//already deleted this id, now remove it from the ACL
 									ACLAPI.removeAnACLEntry(doc2._id);
 									// end of removing from the ACL
@@ -188,7 +186,6 @@ exports.removeMedia = function(req, res){
 		} //else
 	}); //media function
 }
-
 
 removeOneAnno = function(id){
 	Annotation.findByIdAndRemove(id, function(error, anno){
@@ -298,8 +295,15 @@ exports.postAll = function(req, res){
 			if(req.session.user)
 				connectedUser = req.session.user.username;
 				
-			//layer.history.push({name : req.body.history.name, date : req.body.history.date});
-			layer.history.push({name : connectedUser, date : new Date()});
+			var modifiedL = {
+				"id_media" : req.params.id_media,
+				"layer_type" : req.body.layer_type,
+				"fragment_type" : req.body.fragment_type,
+				"data_type" : req.body.data_type,
+				"source" : req.body.source
+			};
+			
+			layer.history.push({name : connectedUser, date : new Date(), modification: modifiedL});
 	
 			layer.save( function(errorLayer, dataLayer){
 				if(errorLayer){
@@ -307,23 +311,24 @@ exports.postAll = function(req, res){
 					res.json(errorLayer);
 					return;
 				}
-				else{
-					//console.log('Success on saving layer data');
+				else {
+					
 					saved = true;
-					//res.json(dataLayer);
-					//	}
-					//});//*/
-				
+					
 					ACLAPI.addUserRightGeneric(layer._id, connectedUser, 'A');
 					
 					//now we insert the annotation list into the annotation collection
 					var id_layer = layer._id; //get the new id_layer for this list of annotations
-					//console.log('id_layer ' + id_layer);
-					//console.log('req.body');
-					//console.log(req.body.annotation.length);
+					
+					//keep all saved data to return to clients
+					var ret = {};
+					ret.layer = dataLayer;
+					ret.annotation = [];
+					
 					var cpt = 0;
 					var annoObj = [];
-	
+					var nbAnno = req.body.annotation.length;
+					
 					for(var i in req.body.annotation) {
 						var annoItem = {
 							"id_layer" : id_layer,
@@ -339,7 +344,7 @@ exports.postAll = function(req, res){
 								var anno = new Annotation(annoItem);
 								//just added 12/07/2013
 								//anno.history.push({name : req.body.history.name, date : req.body.history.date});
-								anno.history.push({name : connectedUser, date : new Date()});
+								anno.history.push({name : connectedUser, date : new Date(), modification: annoItem});
 								
 								anno.save( function(error, annoData){
 									if(error){
@@ -349,10 +354,13 @@ exports.postAll = function(req, res){
 										return;
 									}
 									else{
-					//					console.log('Success on saving annotation data');
-										saved = true;
-										//res.json(dataLayer);
+										saved = true;	
+										ret.annotation.push(annoData);
+										
 										ACLAPI.addUserRightGeneric(anno._id, connectedUser, 'A');
+										cpt =  cpt+1;
+										if(cpt >= nbAnno)
+											res.json(ret);
 									}
 								});
 							}
@@ -360,20 +368,56 @@ exports.postAll = function(req, res){
 
 						if(saved == false) {
 							console.log('break because getting error in saving an annotation');
-							break;//*/
+							res.send("error in saving the annotation");
+							break;
 						}
-						cpt =  cpt+1;
 					}
 	
-					if(saved) {
+					/*if(saved) {
 						var str_id = {"id_layer" : id_layer};
 						res.json(str_id);
 					}
 					else 
-						res.json('error in saving');
-					//console.log('already saved ' + cpt);
+						res.json('error in saving annotation data');
+					*/
+					if(cpt >= nbAnno)
+						res.json(ret);
 				}
 			});
 		}
 	});
+}
+
+// retrieve histories of a user
+exports.retrieveUserHistory = function(req, res){
+	var name = req.params.name;
+	var connectedUser = req.session.user;
+	if(connectedUser.username != name && connectedUser.role != "admin")
+	 	return res.send(403, "You dont have enough right to access this resource");
+
+	User.findOne({username: name}, function (err, user) {
+        if (err) {
+        	res.send(err);
+        }
+        else if(user == null)
+        	return res.send(401, "Invalid user");
+        else
+        {
+        	Layer.find({'history.name' : {$regex : new RegExp('^'+ name + '$', "i")}}, 'history.modification',function(error, data) {
+				if(error) return res.send("error in retrieving histories");
+				else {
+					var ret = {};
+					ret.layer = data; //res.send(data);
+					//now retrieve all histories of this user in the annotation table
+					Annotation.find({'history.name' : {$regex : new RegExp('^'+ name + '$', "i")}}, 'history.modification',function(error, data) {
+						if(error) return res.send(404, "error in retrieving histories");
+						else {
+							ret.annotation = data;
+							res.json(ret);
+						} //else
+					}); //annotation.find
+				} //else 
+			}); //Layer.find    		 
+        } //else
+    }); //user.findOne
 }

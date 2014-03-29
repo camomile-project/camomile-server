@@ -1,70 +1,74 @@
-if (process.argv.indexOf('--no-auth') > -1 ){
-  /**
-   * Indicates when to run without requiring auth for API
-   */
-  GLOBAL.no_auth = true;
-}
 
-//parser the arguments
-process.argv.forEach(function(arg) {
-  	if(arg.indexOf("--video-path") == 0)
-    	GLOBAL.video_path = arg.split("=")[1];
-	if (arg.indexOf("--db-port") == 0)
-     	GLOBAL.db_port = arg.split("=")[1];
-	if (arg.indexOf("--db-host") == 0)
-     	GLOBAL.db_host = arg.split("=")[1];
-    if (arg.indexOf("--db-name") == 0)
-     	GLOBAL.db_name = arg.split("=")[1];
-    if (arg.indexOf("--server-port") == 0)
-    	GLOBAL.server_port = arg.split("=")[1];
-});
-
-var express = require('express'),
-    http = require('http'),
-    path = require('path'),
+var express = require('express'), 
+    http = require('http'), 
+    path = require('path'), 
 	routes = require('./routes/routes'),
-    mongoose = require('mongoose'),
+    mongoose = require('mongoose'), 
+    program = require('commander'),
+    //config = require('./config'),
     mongoStore = require('connect-mongo')(express);
 
 var app = express();
-
-// Allow CORS by overloading the middleware function:
+	
+	//parsing the arguments
+	program
+  	.option('-p, --server_port <port>', 'Local port to listen to (default: 3000)', parseInt)
+  	.option('-d, --db_host <dbhost>', 'Database host (default: mongodb://localhost)')
+  	.option('-P, --db_port <dbport>', 'Database port (default: 27017)', parseInt)
+  	.option('-n, --db_name <dbname>', 'Database name (default: camomile)')
+  	.option('-r, --root_pass <dbname>', 'Password of the root user (default: camomile)')
+  	.option('-v, --video_path <vpath>', 'Path to the video directory (default: /corpora/video)')
+  	.option('-c, --config_dir <cdir>', 'Path to the directory containing config. files (default: .)')
+  	.option('-t, --cookie_timeout <timeout>', 'Set the cookie timeout (unit is hour, default: 3h)', parseInt)
+  	.option('-a, --noauth', 'Disables authenticated mode (default: authenticated)')
+  	.parse(process.argv);
+	
+// Cross-domain connections.
+// The current solution is to allow CORS by overloading the middleware function:
 var allowCrossDomain = function(req, res, next) {
-  res.header('Access-Control-Allow-Credentials', true);
-  res.header('Access-Control-Allow-Origin', req.headers.origin);
-  res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE');
-  res.header('Access-Control-Allow-Headers', 'Content-Type');
-  res.header('Access-Control-Allow-Headers', 'Content-Type, X-Requested-With')
-
+	res.header('Access-Control-Allow-Credentials', true);
+    res.header('Access-Control-Allow-Origin', req.headers.origin)
+	//res.header('Access-Control-Allow-Origin', '*');
+    res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE');
+	res.header('Access-Control-Allow-Headers', 'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version');
 	// intercept OPTIONS method
-  if('OPTIONS' == req.method) {
-   	res.send(200); // force the server to treat such a request as a normal GET or POST request.
-  }
-  else {
-   	next();
-  }
-};
+    if('OPTIONS' == req.method) {
+    	res.send(200); // force the server to treat such a request as a normal GET or POST request.
+    }
+    else {
+    	next(); // otherwise, do anything else, on s'en fiche (dont care)
+    }
+}
+
+//here is the configuration, where sever's parameters will be set
+var config;
+if(program.config_dir == undefined)
+	config = require('./config');
+else config = require(program.config_dir + '/config');
+
+GLOBAL.config_dir = program.config_dir || false;
+
+GLOBAL.no_auth 		= program.no_auth || false;
+GLOBAL.video_path 	= program.video_path || config.video_path;
+GLOBAL.root_passdef = config.root_pass;
+GLOBAL.root_pass 	= program.root_pass || config.root_pass;
+
+var server_port = program.server_port || config.server_port;
+var db_name 	= program.db_name || config.mongo.db_name;
+var db_host 	= program.db_host || config.mongo.db_host;
+var video_path 	= program.video_path || config.video_path;
+var cookie_timeout = program.cookie_timeout || config.cookie_timeout;
+//end of the configuration
 
 // connect to the db:
-//var db_name = 'TAM';
-var db_name = 'tmpNov';
-var db_host = 'mongodb://localhost';
-
-if(GLOBAL.db_host)
-	db_host = GLOBAL.db_host;
-
-if(GLOBAL.db_name)
-	db_name = GLOBAL.db_name;
-
 db_name = db_host + '/' + db_name;
 // mongoose.connect('mongodb://localhost/sampledb');
-
-mongoose.connect(db_name);//('mongodb://localhost/TAM');
-// mongoose.connect('mongodb://localhost/tmpCURL');
+mongoose.connect(db_name);
 mongoose.connection.on('open', function(){
 	console.log("Connected to Mongoose:") ;
 });
 
+// used to pass values to a template (mostly used in view)
 keepSession = function (req, res, next) {
     var err = req.session.error,
         msg = req.session.success;
@@ -76,14 +80,11 @@ keepSession = function (req, res, next) {
     next();
 }
 
-var sessionStore = new mongoStore({mongoose_connection: mongoose.connection, db: mongoose.connections[0].db, clear_interval: 60}, function(){
+//store all information related to sessions
+var sessionStore = new mongoStore({mongoose_connection: mongoose.connection, 
+			db: mongoose.connections[0].db, clear_interval: 60}, function(){
                           console.log('connect mongodb session success...');
 });
-
-var server_port = process.env.PORT || 3000;
-if(GLOBAL.server_port)
-	server_port = GLOBAL.server_port;
-//console.log("server_port: " + server_port);
 
 // configure all environments
 app.configure(function(){
@@ -94,30 +95,22 @@ app.configure(function(){
 	app.use(express.logger('dev'));
 	app.use(express.bodyParser());
 	app.use(express.methodOverride());
-
-  app.use(allowCrossDomain);
-
+	
+    app.use(allowCrossDomain); // for CORS problem!
+    
 	app.use(express.cookieParser('your secret here'));
-
+	
 	app.use(express.session({
     	key : "camomile.sid",
     	secret: "123camomile",
-    	cookie: {
-    		//expires: new Date(Date.now() + 60 * 10000)
-    		maxAge: 3*3600000 // 3 h resolved the prob encountered when one user is timeout
+    	cookie: { 
+    		//expires: new Date(Date.now() + 60 * 10000) 
+    		maxAge: cookie_timeout*3600000 //equivalent to the above option
   		},
-  		/*store: new mongoStore({ host: 'http://localhost/',
-  			port: 27017,
-  			db: 'session',
-  			collection: 'sessions',
-  			interval: 120000,
-  			clear_interval : (10)//search db to clear the expired every 10 seconds
-  			})*/
-  		//store: new mongoStore({db: mongoose.connections[0].db})
   		store: sessionStore
     }));
-	app.use(keepSession); //added
-
+	app.use(keepSession);
+	
 	app.use(app.router);
 	app.use(express.static(path.join(__dirname, 'public')));
 });

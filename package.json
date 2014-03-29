@@ -1,5 +1,5 @@
 {
-  "name": "camomile-api",
+  "name": "camomille-node",
   "version": "0.0.1",
   "private": true,
   "scripts": {
@@ -9,6 +9,7 @@
     "express": "3.2.6",
     "jade": "*",
     "mongoose": "*",
-    "connect-mongo": "*"
+    "connect-mongo": "*",
+    "commander": "2.1.0"	
   }
 }

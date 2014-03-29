@@ -1,4 +1,4 @@
-/* The API controller for compound methods
+/* The API controller for ACL methods
    
 */
 
@@ -16,6 +16,7 @@ var User = require('../models/user').User;
 
 var Group = require('../models/Group').Group;
 
+// retrieve all acl
 exports.listAll = function(req, res){
 	ACL.find({}, function(error, data){
 		if(error) throw error;
@@ -24,6 +25,7 @@ exports.listAll = function(req, res){
 	});
 }
 
+// retrieve an acl id
 exports.listWithId = function(req, res){
 	ACL.findById(req.params.id, function(error, data){
 		if(error){
@@ -36,7 +38,7 @@ exports.listWithId = function(req, res){
 			res.json(data);
 	});
 };
-
+//retrieve an ACL id
 exports.listWithIdOfResource = function(req, res){
 	var idSought = req.params.id_anno;///corpus/:id_corpus/media/:id_media/layer/:id_layer/annotation/:id_anno/acl
 	if(idSought == undefined) idSought = req.params.id_layer;
@@ -56,7 +58,8 @@ exports.listWithIdOfResource = function(req, res){
 			res.json(data);
 	});
 };
-//update
+
+//update an acl entry
 exports.updateWithIdOfResource = function(req, res){
 	var idSought = req.params.id_anno;///corpus/:id_corpus/media/:id_media/layer/:id_layer/annotation/:id_anno/acl
 	if(idSought == undefined) idSought = req.params.id_layer;
@@ -72,14 +75,14 @@ exports.updateWithIdOfResource = function(req, res){
 			res.json('no such id!');
 		}
 		else {
-			//console.log("here: "); console.log(data);
+			
 			var username = req.body.username,
 				userright = req.body.userright,
 				groupname = req.body.groupname,
 				groupright = req.body.groupright;
 				
 			if(username != undefined && userright != undefined) {
-				User.findOne({username : {$regex : new RegExp(username, "i")}}, function(error, datU){
+				User.findOne({username : {$regex : new RegExp('^'+ username + '$', "i")}}, function(error, datU){
 					if(error) send(error);
 					else 
 					{
@@ -97,7 +100,6 @@ exports.updateWithIdOfResource = function(req, res){
 									res.send(404, error);
 								}
 								else {
-									console.log("saved: " + dat);
 									res.json(dat);
 								}
 							});
@@ -107,7 +109,7 @@ exports.updateWithIdOfResource = function(req, res){
 			}			
 			
 			else if(groupname != undefined && groupright != undefined) {
-				Group.findOne({groupname : {$regex : new RegExp(groupname, "i")}}, function(error, datG){
+				Group.findOne({groupname : {$regex : new RegExp('^'+ groupname + '$', "i")}}, function(error, datG){
 					if(error) send(error);
 					else 
 					{
@@ -126,7 +128,6 @@ exports.updateWithIdOfResource = function(req, res){
 									res.send(404, error);
 								}
 								else {
-									console.log("saved: " + dat);
 									res.json(dat);
 								}
 							});
@@ -150,7 +151,7 @@ exports.getRightAllId = function(callback){
 };
 
 exports.addUserRightGeneric = function addUserRightGeneric(id1, userLogin, userRight){
-	User.findOne({username : {$regex : new RegExp(userLogin, "i")}}, function(error, data){
+	User.findOne({username : {$regex : new RegExp('^'+ userLogin + '$', "i")}}, function(error, data){
 		if(error) throw error;
 		else 
 		{
@@ -176,12 +177,10 @@ exports.addUserRightGeneric = function addUserRightGeneric(id1, userLogin, userR
 
 						aclItem.save(function(err){
 							if(err) { throw err; }
-							console.log('saved');
 						});
 					}
 					else {
 						// just update the user account
-						console.log("data generic: "); console.log(dataACL);
 						var i = findUserInUsersRightArr(userLogin, dataACL.users);
 						if(i == -1)
 							dataACL.users.push({login : userLogin, right : userRight});
@@ -193,7 +192,6 @@ exports.addUserRightGeneric = function addUserRightGeneric(id1, userLogin, userR
 								throw error;
 							}
 							else {
-								console.log("saved: " + dat);
 							}
 						});
 					}
@@ -210,17 +208,18 @@ function findUserInUsersRightArr(login, users){
 	return -1;
 } 
 
+// this function is to add a user right
 exports.addUserRight = function(req, res){
 	if(req.body.userLogin == undefined || req.body.userRight == undefined)
 		return res.send(404, "one or more data fields are not filled out properly");
 		
-	User.findOne({username : {$regex : new RegExp(req.body.userLogin, "i")}}, function(error, data){
+	User.findOne({username : {$regex : new RegExp('^'+ req.body.userLogin + '$', "i")}}, function(error, data){
 		if(error) throw error;
 		else 
 		{
 			if(data == null){
 				console.log("This user does not exist");
-				res.send("This user does not exist");
+				res.send(404, "This user does not exist");
 			}
 			else {
 		
@@ -241,7 +240,7 @@ exports.addUserRight = function(req, res){
 
 						aclItem.save(function(err, acl){
 							if(err) { throw err; }
-							console.log('saved');
+							
 							res.send(acl);
 						});
 					}
@@ -257,7 +256,6 @@ exports.addUserRight = function(req, res){
 								throw error;
 							}
 							else {
-								console.log("saved");
 								res.send(dat);
 							}
 						});
@@ -268,11 +266,12 @@ exports.addUserRight = function(req, res){
 	});
 }
 
+// grant group right to the resource
 exports.addGroupRight = function(req, res){
 	if(req.body.groupLogin == undefined || req.body.groupRight == undefined)
 		return res.send(404, "one or more data fields are not filled out properly");
 		
-	Group.findOne({groupname : {$regex : new RegExp(req.body.groupLogin, "i")}}, function(error, data){
+	Group.findOne({groupname : {$regex : new RegExp('^'+ req.body.groupLogin + '$', "i")}}, function(error, data){
 		if(error) throw error;
 		else 
 		{
@@ -299,14 +298,13 @@ exports.addGroupRight = function(req, res){
 
 						aclItem.save(function(err, dat){
 							if(err) { throw err; }
-							console.log('saved');
 							res.send(dat);
 						});
 					}
 					else {
 						// just update the group account
 						var i = findUserInUsersRightArr(req.body.groupLogin, data.groups);
-						console.log('i = ' + i);
+
 						if(i == -1)
 							data.groups.push({login : req.body.groupLogin, right : req.body.groupRight});
 						else data.groups[i].right = req.body.groupRight;
@@ -317,7 +315,6 @@ exports.addGroupRight = function(req, res){
 								throw error;
 							}
 							else{
-								console.log("saved");
 								res.send(dat);
 							}
 						});
@@ -331,7 +328,7 @@ exports.addGroupRight = function(req, res){
 
 
 exports.addGroupRightGeneric = function addGroupRightGeneric(id1, groupLogin, groupRight){
-	Group.findOne({groupname : {$regex : new RegExp(groupLogin, "i")}}, function(error, data){
+	Group.findOne({groupname : {$regex : new RegExp('^'+ groupLogin + '$', "i")}}, function(error, data){
 		if(error) throw error;
 		else 
 		{
@@ -357,13 +354,12 @@ exports.addGroupRightGeneric = function addGroupRightGeneric(id1, groupLogin, gr
 
 						aclItem.save(function(err){
 							if(err) { throw err; }
-							console.log('saved');
 						});
 					}
 					else {
 						// just update the group account
 						var i = findUserInUsersRightArr(groupLogin, data.groups);
-						console.log('i = ' + i);
+
 						if(i == -1)
 							data.groups.push({login : groupLogin, right : groupRight});
 						else data.groups[i].right = groupRight;
@@ -374,7 +370,7 @@ exports.addGroupRightGeneric = function addGroupRightGeneric(id1, groupLogin, gr
 								throw error;
 							}
 							else{
-								console.log("saved");
+
 							}
 						});
 					}
@@ -384,7 +380,7 @@ exports.addGroupRightGeneric = function addGroupRightGeneric(id1, groupLogin, gr
 		} //first else
 	}); // group.find
 }
-
+// remove an ACL entry
 exports.removeAnACLEntry = function removeAnACLEntry(id2remove){
 	ACL.remove({id : id2remove}, function(error, data){
 		if(error) {
@@ -398,7 +394,7 @@ exports.removeAnACLEntry = function removeAnACLEntry(id2remove){
 
 function removeItemFromArray(a, item){
 	var index = -1;
-	console.log("index = " + index);
+
 	for(var j = 0; j < a.length; j++) {
 		if(a[j].login == item.toLowerCase()) {
 			index = j; break;
@@ -408,8 +404,9 @@ function removeItemFromArray(a, item){
 		a.splice(index, 1);
 }
 
+// remove a user from acl
 exports.removeAUserFromALC = function removeAnUserFromALC(user2remove){
-	ACL.find({'users.login' : {$regex : new RegExp(user2remove, "i")}}, function(error, data){
+	ACL.find({'users.login' : {$regex : new RegExp('^'+ user2remove + '$', "i")}}, function(error, data){
 		if(error){
 			console.log(error); return;
 		}
@@ -420,7 +417,6 @@ exports.removeAUserFromALC = function removeAnUserFromALC(user2remove){
 				data[i].save(function(error, dat) {
 					if(error) throw error;
 					else {
-					//	console.log("dat: "); console.log(dat);
 						console.log("just removed the " + user2remove + " from the ACL");
 					}
 				});
@@ -430,7 +426,7 @@ exports.removeAUserFromALC = function removeAnUserFromALC(user2remove){
 }
 
 exports.removeAGroupFromALC = function removeAnGroupFromALC(group2remove){
-	ACL.find({'groups.login' : {$regex : new RegExp(group2remove, "i")}}, function(error, data){
+	ACL.find({'groups.login' : {$regex : new RegExp('^'+ group2remove + '$', "i")}}, function(error, data){
 		if(error){
 			console.log(error); return;
 		}
@@ -441,7 +437,6 @@ exports.removeAGroupFromALC = function removeAnGroupFromALC(group2remove){
 				data[i].save(function(error, dat) {
 					if(error) throw error;
 					else {
-					//	console.log("dat: "); console.log(dat);
 						console.log("just removed the " + group2remove + " from the ACL");
 					}
 				});
