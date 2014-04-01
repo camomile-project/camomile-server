@@ -40,7 +40,7 @@ Using the APIs
 Now it’s time to test our APIs. Open two different terminal sessions, and type on each one the following commands:
 
 	$> mongod
-	$> node appCam.js
+	$> node app.js
 
 If everything is ok, you will see the following message:
 

@@ -5,4 +5,4 @@ mongod --config /app/docker/mongodb.conf
 npm install /app
 
 # start NodeJS app
-node /app/appCam.js --video-path=/media --db-port=27017 --db-host=localhost --db-name=camomile --server-port=3000
+node /app/app.js --video-path=/media --db-port=27017 --db-host=localhost --db-name=camomile --server-port=3000

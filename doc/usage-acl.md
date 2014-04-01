@@ -8,7 +8,7 @@ First, make sure that all the necessary packages are installed. We can then star
 --------------
 
 	$> mongod
-	$> node appCam.js
+	$> node app.js
 
 To use the APIs, you must login with a valid username and password. To login, make a post operation with username and password, for exemple:
 

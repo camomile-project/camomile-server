@@ -17,4 +17,4 @@ Run
 ---
 
   $ mongod
-  $ node appCam.js
+  $ node app.js

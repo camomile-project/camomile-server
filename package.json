@@ -1,9 +1,9 @@
 {
-  "name": "camomille-node",
+  "name": "camomile",
   "version": "0.0.1",
   "private": true,
   "scripts": {
-    "start": "node appCam.js"
+    "start": "node app.js"
   },
   "dependencies": {
     "express": "3.2.6",
