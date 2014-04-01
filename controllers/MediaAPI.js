@@ -214,7 +214,7 @@ exports.getVideo = function(req, res){
 		}
 		else {
 			
-			var filePath = data.url;
+			var filePath = data.url + '.webm';
 			if(data.url == undefined) return res.send(404, 'not found the video corresponding to this media');
 			if(GLOBAL.video_path)
 				filePath = GLOBAL.video_path + '/' + filePath;
