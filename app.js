@@ -79,7 +79,7 @@ GLOBAL.root_pass 	= program.root_pass || config.root_pass;
 
 var server_port = program.server_port || config.server_port;
 var db_name 	= program.db_name || config.mongo.db_name;
-var db_host 	= program.db_host || config.mongo.db_host;
+var db_host 	= process.env.MONGOLAB_URI || program.db_host || config.mongo.db_host;
 var video_path 	= program.video_path || config.video_path;
 var cookie_timeout = program.cookie_timeout || config.cookie_timeout;
 //end of the configuration
