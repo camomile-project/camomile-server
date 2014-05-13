@@ -13,6 +13,8 @@ $ heroku addons:add mongolab
 $ git push heroku master
 ``` 
 
+Default **root** password is **camomile**.
+
 ## Local setup
 
 1. Install requirements
@@ -33,3 +35,5 @@ $ npm install
 $ mongod 
 $ node app.js  
 ```
+
+Default **root** password is **camomile**.
