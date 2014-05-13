@@ -41,7 +41,6 @@ var corpus = require('../controllers/CorpusAPI'),
 
 // check for authentication
 authenticateElem = function(name, pass, fn) {
-    if (module.parent) console.log('authenticating %s:%s', name, pass);  //use somewhere else, not in the main
 
     User.findOne({
         username: name
@@ -651,18 +650,8 @@ exports.racine = function (req, res) {
     }
 }
 
-// test purpose only, and it will be removed from the production version 
-exports.signupGET = function (req, res) {
-    if (req.session.user) { //only admin can do it
-        res.render("signup");
-    } else {
-        //res.redirect("/"); 
-        res.send(401, "You do not have enough right");
-    }
-}
-
 // used for test, and it will be removed from the production version
-exports.logoutGET = function (req, res) {
+exports.logout = function (req, res) {
 	if (GLOBAL.no_auth){
     	return res.send('This is an anonymous user');
     }
@@ -703,140 +692,16 @@ exports.profile = function (req, res) {
 	}
 }
 
-//list all sessions
-exports.listAllSessions = function (req, res) {
-    ses.find({},function (err, sessions) {
-        if (err) console.log(err);
-        else res.send(sessions);
-    });
-}
+// //list all sessions
+// exports.listAllSessions = function (req, res) {
+//     ses.find({},function (err, sessions) {
+//         if (err) console.log(err);
+//         else res.send(sessions);
+//     });
+// }
 
 // working with groups of users
 
-// just for test, will be removed from the final version
-exports.addGroupGET = function (req, res) {
-    if (req.session.user) {
-        res.render("addGroup");
-    } else {
-        //res.redirect("/");
-        res.send(401, "You do not have enough right");
-    }
-}
-
-// just for test, will be removed from the final version
-exports.addUser2GroupGET = function (req, res) {
-    if (req.session.user) {
-        res.render("addUser2Group");
-    } else {
-        //res.redirect("/");
-        res.send(401, "You do not have enough right");
-    }
-}
-
-//add a user to a group
-exports.addUser2Group = function (req, res) {
-	if (GLOBAL.no_auth){
-    	return res.send('Anonymous user is not allowed here');
-    }
-    else {
-        GroupAPI.addUser2Group(req, res);
-    }
-}
-
-// just for test, to be removed in the final version
-exports.addUserRight2ResourceGET = function (req, res) {
-    if (req.session.user) {
-        res.render("addUserRight2Resource");
-    } else {
-        res.send(401, "You do not have enough right");
-    }
-}
-
-// add user right to a given resource
-exports.addUserRight2Resource = function (req, res) {
-	if (GLOBAL.no_auth){
-    	return res.send('Anonymous user is not allowed here');
-    }
-    else {
-		ACL.addUserRight(req, res);
-    }
-}
-
-// to be remove in the final version
-exports.addGroupRight2ResourceGET = function (req, res) {
-    if (req.session.user) {
-        res.render("addGroupRight2Resource");
-    } else {
-        //res.redirect("/");
-        res.send(401, "You do not have enough right");
-    }
-}
-
-// add a group right to a given resource
-exports.addGroupRight2Resource = function (req, res) {
-	if (GLOBAL.no_auth){
-    	return res.send('Anonymous user is not allowed here');
-    }
-    else {
-		ACL.addGroupRight(req, res);
-    }
-}
-
-// retrieve all ACLs, only admin user can do it
-exports.listACLs = function (req, res) {
-	if (GLOBAL.no_auth){
-    	return res.send('Anonymous user is not allowed here');
-    }
-    else {
-		ACL.listAll(req, res);
-    }
-}
-
-// remove the user by it name, also remove it from the ACL
-exports.removeUserByName  = function (req, res) {
-	if (GLOBAL.no_auth){
-    	return res.send('Anonymous user is not allowed here');
-    }
-    else {
-    	var uname = req.body.username;
-    	if(uname == undefined)
-    		return res.send(404, 'The username field has not been filled in');
-    		
-		User.remove({username : {$regex : new RegExp('^'+ req.body.username + '$', "i")}}, function(error, data){
-			if(error){					
-				console.log('Error in deleting one annotation');
-				res.json(error);
-			}
-			else {
-				ACLAPI.removeAUserFromALC(req.body.username);
-				res.send(data);
-			}
-		});
-    }
-}
-
-// remove a group by its name, also remove it from the ACL table
-exports.removeGroupByName  = function (req, res) {
-	if (GLOBAL.no_auth){
-    	return res.send('Anonymous user is not allowed here');
-    }
-    else {
-    	var gname = req.params.name;
-    	if(gname != undefined) {
-			Group.remove({groupname : {$regex : new RegExp('^'+ req.body.groupname + '$', "i")}}, function(error, data){
-				if(error){					
-					console.log('Error in deleting one annotation');
-					res.json(error);
-				}
-				else {
-					ACLAPI.removeAGroupFromALC(gname);
-					res.send(data);
-				}
-			});
-		}
-		else res.send(404, "The groupname has not been sent");
-    }
-}
 
 // remove a given group ID, also remove this group in the ACL table
 exports.removeGroupByID  = function (req, res) {

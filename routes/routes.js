@@ -48,58 +48,33 @@ exports.initialize = function(app){
 	//create a root user if it does not exist
 	authenticate.createRootUser();
 
-	//===================================
-	//authenticating configurations
-	app.get("/signup", authenticate.requiredAuthentication("admin"), authenticate.signupGET);
-	app.post("/signup", authenticate.requiredAuthentication("admin"), authenticate.userExist, authenticate.signup);
-	//----------------
-	app.get("/login", function (req, res) {
-    	res.render("login");
-	});
-	app.get("/login/:username/:password", authenticate.login);
 	app.post("/login", authenticate.login);
-	//----------------
-	app.get('/logout', authenticate.logoutGET);
-	app.post('/logout', authenticate.requiredAuthentication("user", "R", 0), authenticate.logoutGET);
-	
-	//----------------
-	app.get('/chmodUser', authenticate.requiredAuthentication("admin"), function (req, res) {
-		res.render("chmodUser");
-	});
-	app.post("/chmodUser/:username/:role", authenticate.requiredAuthentication("admin"), authenticate.chmodUser);
-	app.post("/chmodUser", authenticate.requiredAuthentication("admin"), authenticate.chmodUser);
-	
-	//----------------
-	
+	app.post('/logout', authenticate.requiredAuthentication("user", "R", 0), authenticate.logout);
+
 	app.get('/user', authenticate.requiredAuthentication("user", "R", 0), user.listUsers);
 	app.get('/user/:id', authenticate.requiredAuthentication("user", "R", 0), user.listWithId);
 	app.get('/user/:id/group', authenticate.requiredAuthentication("user", "R", 0), user.listGroupsOfUserId); //testing
 	app.put('/user/:id', authenticate.requiredAuthentication("admin"), user.update);
 	app.delete('/user/:id', authenticate.requiredAuthentication("admin"), user.remove);
 	app.post("/user", authenticate.requiredAuthentication("admin"), authenticate.userExist, authenticate.signup);
-	//----------------
+	// app.post("/chmodUser/:username/:role", authenticate.requiredAuthentication("admin"), authenticate.chmodUser);
+	// app.post("/chmodUser", authenticate.requiredAuthentication("admin"), authenticate.chmodUser);
 	
-	app.get('/session', authenticate.requiredAuthentication("admin"), authenticate.listAllSessions);
+	// app.get('/session', authenticate.requiredAuthentication("admin"), authenticate.listAllSessions);
 	
 	//--------------------
-	
-	app.post("/group", authenticate.requiredAuthentication("admin"), group.addGroup); //done
-	app.post("/group/:id/user", authenticate.requiredAuthentication("admin"), authenticate.addUser2Group); //done
-	
 	app.get('/group', authenticate.requiredAuthentication("user", "R", 0), group.listAll); // testing : done
-	app.get('/group/:id', authenticate.requiredAuthentication("user", "R", 0), group.listWithId); // testing done
-	app.get('/group/:id/user', authenticate.requiredAuthentication("admin", "R", 0), group.listUserOfGroupId); // testing 
-	
-	app.put('/group/:id', authenticate.requiredAuthentication("admin"), group.update); // testing : done
+	app.post("/group", authenticate.requiredAuthentication("admin"), group.addGroup); //done
 
-	app.delete('/group/:name', authenticate.requiredAuthentication("admin"), authenticate.removeGroupByName);
+	app.get('/group/:id', authenticate.requiredAuthentication("user", "R", 0), group.listWithId); // testing done
+	app.put('/group/:id', authenticate.requiredAuthentication("admin"), group.update); // testing : done
 	app.delete('/group/:id', authenticate.requiredAuthentication("admin"), authenticate.removeGroupByID); //done
+
+	app.get('/group/:id/user', authenticate.requiredAuthentication("admin", "R", 0), group.listUserOfGroupId); // testing 
+	app.post("/group/:id/user", authenticate.requiredAuthentication("admin"), group.addUser2Group); //done
+
 	app.delete('/group/:id/user/:username', authenticate.requiredAuthentication("admin"), group.removeUserFromGroup); //done
 	
-	//--------------------
-	
-	app.get('/acl', authenticate.requiredAuthentication("admin"), authenticate.listACLs);
-	 
 	//--------------------------------
 	app.get("/corpus/:id/acl", authenticate.requiredConsistentID("user", 'A', 1), 
 		authenticate.requiredAuthentication("user", 'A', 1), ACLAPI.listWithIdOfResource);
