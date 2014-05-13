@@ -1,20 +1,35 @@
-Camomile Annotation REST API
-============================
+# Camomile Annotation REST API
 
-Requirements
-------------
+## Heroku setup
 
-  * node.js
-  * npm
-  * mongodb
+1. Follow [Heroku quickstart guide](https://devcenter.heroku.com/articles/quickstart)
+2. Deploy camomile-server:
 
-Install
--------
+```bash
+$ git clone https://github.com/camomile-project/camomile-server.git  
+$ cd camomile-server  
+$ heroku create  
+$ heroku addons:add mongolab  
+$ git push heroku master
+``` 
 
-  $ npm install
+## Local setup
 
-Run
----
+1. Install requirements
+    - node.js and npm
+    - mongodb  
 
-  $ mongod
-  $ node app.js
+2. Get source code and install node modules:
+
+```bash
+$ git clone https://github.com/camomile-project/camomile-server.git  
+$ cd camomile-server  
+$ npm install  
+```
+
+3. Run:
+
+```bash
+$ mongod 
+$ node app.js  
+```
