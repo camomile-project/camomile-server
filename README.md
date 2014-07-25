@@ -10,6 +10,13 @@ $ docker pull dockerfile/mongodb
 $ docker run -d -v $CMML_DB:/data/db --name mongodb dockerfile/mongodb
 ```
 
+Dumping the database (e.g. for backup) is as easy as
+
+```
+$ export CMML_DUMP=/where/to/dump
+$ docker run -i -t --rm --link mongodb:mongodb -v $CMML_DUMP:/dump dockerfile/mongodb bash -c 'mongodump --host $MONGODB_PORT_27017_TCP_ADDR -o /dump'
+```
+
 ### Step 2 | Run Camomile Server 
 
 ```
