@@ -227,8 +227,58 @@ exports.update = function(req, res){
 	});
 }
 
-//app.get('/corpus/:id_corpus/media/:id_media/video', 
-exports.getVideo = function(req, res){
+// exports.getVideo = function(req, res){
+// 	Media.findById(req.params.id_media, function(error, data){
+// 		if(error){
+// 			res.json(error);
+// 		}
+// 		else if(data == null){
+// 			res.json(404, 'no such id_media!')
+// 		}
+// 		else {
+			
+// 			var filePath = data.url + '.webm';
+// 			if(data.url == undefined) return res.send(404, 'not found the video corresponding to this media');
+// 			if(GLOBAL.video_path)
+// 				filePath = GLOBAL.video_path + '/' + filePath;
+			
+// 			var mineType = commonFuncs.getMineType(filePath);
+// 			if(mineType == "video/webm")
+// 				res.sendfile(filePath);
+// 			else {	
+// 				fileSystem.stat(filePath, function (err, stat){
+// 					if(stat) {
+// 						res.writeHead(200, {
+// 							'Content-Type': mineType,//'audio/mpeg', 
+// 							'Content-Length': stat.size
+// 						});
+	
+// 						var readStream = fileSystem.createReadStream(filePath);
+// 						readStream.on('data', function(dataS) {
+// 							var flushed = res.write(dataS);
+// 							// Pause the read stream when the write stream gets saturated
+// 							if(!flushed)
+// 								readStream.pause();
+// 						});
+	
+// 						res.on('drain', function() {
+// 							// Resume the read stream when the write stream gets hungry 
+// 							readStream.resume();    
+// 						});
+	
+// 						readStream.on('end', function() {
+// 							res.end();        
+// 						});
+// 					} //if
+// 					else res.send(404);
+// 				});
+// 			} //if(mineType
+// 		}
+// 	});
+// }
+
+function getVideoWithExtension(req, res, extension) {
+
 	Media.findById(req.params.id_media, function(error, data){
 		if(error){
 			res.json(error);
@@ -238,42 +288,27 @@ exports.getVideo = function(req, res){
 		}
 		else {
 			
-			var filePath = data.url + '.webm';
+			var filePath = data.url + '.' + extension;
 			if(data.url == undefined) return res.send(404, 'not found the video corresponding to this media');
 			if(GLOBAL.video_path)
 				filePath = GLOBAL.video_path + '/' + filePath;
-			
-			var mineType = commonFuncs.getMineType(filePath);
-			if(mineType == "video/webm")
-				res.sendfile(filePath);
-			else {	
-				fileSystem.stat(filePath, function (err, stat){
-					if(stat) {
-						res.writeHead(200, {
-							'Content-Type': mineType,//'audio/mpeg', 
-							'Content-Length': stat.size
-						});
-	
-						var readStream = fileSystem.createReadStream(filePath);
-						readStream.on('data', function(dataS) {
-							var flushed = res.write(dataS);
-							// Pause the read stream when the write stream gets saturated
-							if(!flushed)
-								readStream.pause();
-						});
-	
-						res.on('drain', function() {
-							// Resume the read stream when the write stream gets hungry 
-							readStream.resume();    
-						});
-	
-						readStream.on('end', function() {
-							res.end();        
-						});
-					} //if
-					else res.send(404);
-				});
-			} //if(mineType
+			res.sendfile(filePath);
 		}
 	});
+}
+
+exports.getVideo = function(req, res) {
+	getVideoWithExtension(req, res, 'webm');
+}
+
+exports.getVideoWEBM = function(req, res) {
+	getVideoWithExtension(req, res, 'webm');
+}
+
+exports.getVideoMP4 = function(req, res) {
+	getVideoWithExtension(req, res, 'mp4');
+}
+
+exports.getVideoOGV = function(req, res) {
+	getVideoWithExtension(req, res, 'ogv');
 }
