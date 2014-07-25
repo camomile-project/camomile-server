@@ -1,25 +1,27 @@
 # CAMOMILE Annotation Framework
 #
-# VERSION 0.0.1
+# VERSION 0.1
 
 FROM stackbrew/ubuntu:12.04
 MAINTAINER Hervé Bredin <bredin@limsi.fr>
 
 # create volumes
 # /app:   path to app directory
-# /db:    path to database
 # /media: path to media
-VOLUME ["/app", "/db", "/media"]
+VOLUME ["/media"]
 
-# install mongodb and NodeJS
+# install NodeJS
 RUN apt-get update
 RUN apt-get install -y python-software-properties python g++ make software-properties-common
 RUN add-apt-repository ppa:chris-lea/node.js
 RUN apt-get update
-RUN apt-get install -y mongodb nodejs
+RUN apt-get install -y nodejs
 
 # expose NodeJS app port
 EXPOSE 3000
 
-CMD ["/bin/bash", "/app/docker/run.sh"]
+ADD . /app
+RUN cd /app; npm install
+
+ENTRYPOINT ["/bin/bash", "/app/run.sh"]
 
