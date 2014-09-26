@@ -587,9 +587,9 @@ exports.signup = function (req, res) {
 	}
 	else {
 		var roleuser = req.body.role;
-		if(roleuser == undefined) {
+		if(GLOBAL.list_user_role.indexOf(roleuser)==-1)  {
 			roleuser = "user";
-		}
+		}	
 		hash(req.body.password, function (err, salt, hash) {
 			if (err) {
 				throw err;
@@ -608,10 +608,11 @@ exports.signup = function (req, res) {
 					res.send(200, newUser);
 				}
 			});
-		});
+		});		
 	}
 }
 
+/*
 // change the role of the user
 exports.chmodUser = function (req, res) {
 	var usrname = req.body.username,
@@ -658,6 +659,7 @@ exports.chmodUser = function (req, res) {
 		}
    	});
 }
+*/
 
 exports.racine = function (req, res) {
     if (req.session.user) {
