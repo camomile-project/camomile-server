@@ -27,20 +27,12 @@ SOFTWARE.
 */
 
 var Corpus = require('../models/Corpus').Corpus;
-
 var Media = require('../models/Media').Media; //get the media model
-
 var Layer = require('../models/Layer').Layer; //get the layer model
-
 var Annotation = require('../models/Annotation').Annotation; //get the annotation model
-
 var ACL = require('../models/ACL').ACL;
-
 var User = require('../models/user').User;
-
 var Group = require('../models/Group').Group;
-
-
 var ACLAPI = require('../controllers/ACLAPI');
 
 // retrieve all users

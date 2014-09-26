@@ -66,7 +66,6 @@ exports.initialize = function(app){
 							user.remove);                       														// delete a specific user
 	// app.post("/chmodUser/:username/:role", authenticate.requiredAuthentication("admin"), authenticate.chmodUser);
 	// app.post("/chmodUser", authenticate.requiredAuthentication("admin"), authenticate.chmodUser);
-	// app.get('/session', authenticate.requiredAuthentication("admin"), authenticate.listAllSessions);
 	
 	// --- group routes --- \\
 	app.post("/group", authenticate.requiredAuthentication("admin"), 
