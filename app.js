@@ -56,18 +56,13 @@ var allowCrossDomain = function(req, res, next) {
     res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE');
 	res.header('Access-Control-Allow-Headers', 'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version');
 	// intercept OPTIONS method
-    if('OPTIONS' == req.method) {
-    	res.send(200); // force the server to treat such a request as a normal GET or POST request.
-    }
-    else {
-    	next(); // otherwise, do anything else, on s'en fiche (dont care)
-    }
+    if('OPTIONS' == req.method) res.send(200); // force the server to treat such a request as a normal GET or POST request.
+    else  next(); // otherwise, do anything else, on s'en fiche (dont care)
 }
 
 //here is the configuration, where sever's parameters will be set
 var config;
-if(program.config_dir == undefined)
-	config = require('./config');
+if(program.config_dir == undefined) config = require('./config');
 else config = require(program.config_dir + '/config');
 
 GLOBAL.config_dir = program.config_dir || false;
@@ -97,8 +92,8 @@ mongoose.connection.on('open', function(){
 
 // used to pass values to a template (mostly used in view)
 keepSession = function (req, res, next) {
-    var err = req.session.error,
-        msg = req.session.success;
+    var err = req.session.error;
+	var	msg = req.session.success;
     delete req.session.error;
     delete req.session.success;
     res.locals.message = '';
@@ -136,16 +131,14 @@ app.configure(function(){
   		},
   		store: sessionStore
     }));
-	app.use(keepSession);
+	//app.use(keepSession);     // pourquoi cette fonction est la ???
 	
 	app.use(app.router);
 	app.use(express.static(path.join(__dirname, 'public')));
 });
 
 // development only
-if ('development' == app.get('env')) {
-	app.use(express.errorHandler());
-}
+if ('development' == app.get('env')) app.use(express.errorHandler());
 
 //start routes:
 routes.initialize(app);
@@ -153,8 +146,6 @@ routes.initialize(app);
 //finally boot up the server:
 http.createServer(app).listen(app.get('port'), process.env.IP, function(){
 	console.log('Express server listening on port ' + app.get('port'));
-	if(GLOBAL.no_auth == true){
-		console.log('be careful: any user can access the data without authentication');
-	}
+	if(GLOBAL.no_auth == true) console.log('be careful: any user can access the data without authentication');
 });
 
