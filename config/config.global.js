@@ -30,10 +30,10 @@ config.env = 'development'; //default
 config.hostname = process.env.HOSTNAME || 'camomile.limsi.fr';
 config.server_port = process.env.PORT || 3000;
 
-// authentification or not
-config.no_auth = false;
-
 config.video_path = '/corpora/video';
+
+config.list_user_role = new Array("admin", "supervisor", "user");
+
 
 // mongo database: database name, database port
 config.mongo = {};

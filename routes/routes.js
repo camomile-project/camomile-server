@@ -44,162 +44,172 @@ exports.index = function(req, res){
 };
 
 exports.initialize = function(app){
-    //get
-	//create a root user if it does not exist
-	authenticate.createRootUser();
+	authenticate.createRootUser();																						//create a root user if it does not exist
 
+	//N R E C D A : different rights
+
+	app.get("/", authenticate.racine); // rout
+
+	// --- user routes --- \\
 	app.post("/login", authenticate.login);
-	app.post('/logout', authenticate.requiredAuthentication("user", "R", 0), authenticate.logout);
-
-	app.get('/user', authenticate.requiredAuthentication("user", "R", 0), user.listUsers);
-	app.get('/user/:id', authenticate.requiredAuthentication("user", "R", 0), user.listWithId);
-	app.get('/user/:id/group', authenticate.requiredAuthentication("user", "R", 0), user.listGroupsOfUserId); //testing
-	app.put('/user/:id', authenticate.requiredAuthentication("admin"), user.update);
-	app.delete('/user/:id', authenticate.requiredAuthentication("admin"), user.remove);
-	app.post("/user", authenticate.requiredAuthentication("admin"), authenticate.userExist, authenticate.signup);
+	app.post('/logout', authenticate.requiredAuthentication("user", "R", "global"), authenticate.logout);
+	app.post("/user", authenticate.requiredAuthentication("admin"), 
+				      authenticate.userExist, 
+				      authenticate.signup);																				// create user
+	app.get('/user', authenticate.requiredAuthentication("user", "R", "global"), 
+				     user.listUsers);																					// get list of all users
+	app.get('/user/:id', authenticate.requiredAuthentication("user", "R", "global"), 
+						 user.listWithId);               																// info on a specific user
+	app.put('/user/:id', authenticate.requiredAuthentication("admin"), 
+						 user.update);						  															// update information on a specific user
+	app.delete('/user/:id', authenticate.requiredAuthentication("admin"), 
+							user.remove);                       														// delete a specific user
 	// app.post("/chmodUser/:username/:role", authenticate.requiredAuthentication("admin"), authenticate.chmodUser);
 	// app.post("/chmodUser", authenticate.requiredAuthentication("admin"), authenticate.chmodUser);
 	
-	// app.get('/session', authenticate.requiredAuthentication("admin"), authenticate.listAllSessions);
+	// --- group routes --- \\
+	app.post("/group", authenticate.requiredAuthentication("admin"), 
+					   group.addGroup); 																				// create a group
+	app.get('/group', authenticate.requiredAuthentication("user", "R", "global"), 
+					  group.listAll); 																					// get list of all groups
+	app.get('/group/:id', authenticate.requiredAuthentication("user", "R", "global"), 
+						  group.listWithId); 																			// info on a specific group
+	app.put('/group/:id', authenticate.requiredAuthentication("admin"), 
+						  group.update); 																				// update information of a group
+	app.delete('/group/:id', authenticate.requiredAuthentication("admin"), 
+							 authenticate.removeGroupByID); 															// delete a group
+	app.get('/group/:id/user', authenticate.requiredAuthentication("admin", "R", "global"), 
+							   group.listUserOfGroupId); 																// list user of a group
+	app.post("/group/:id/user", authenticate.requiredAuthentication("admin"), 
+								group.addUser2Group); 																	// add user to a group
+	app.get('/user/:id/group', authenticate.requiredAuthentication("user", "R", "global"), 
+							   user.listGroupsOfUserId); 																// return list of group of a specific user
+	app.delete('/group/:id/user/:username', authenticate.requiredAuthentication("admin"), 
+											group.removeUserFromGroup); 												// remove a user from a group
 	
-	//--------------------
-	app.get('/group', authenticate.requiredAuthentication("user", "R", 0), group.listAll); // testing : done
-	app.post("/group", authenticate.requiredAuthentication("admin"), group.addGroup); //done
-
-	app.get('/group/:id', authenticate.requiredAuthentication("user", "R", 0), group.listWithId); // testing done
-	app.put('/group/:id', authenticate.requiredAuthentication("admin"), group.update); // testing : done
-	app.delete('/group/:id', authenticate.requiredAuthentication("admin"), authenticate.removeGroupByID); //done
-
-	app.get('/group/:id/user', authenticate.requiredAuthentication("admin", "R", 0), group.listUserOfGroupId); // testing 
-	app.post("/group/:id/user", authenticate.requiredAuthentication("admin"), group.addUser2Group); //done
-
-	app.delete('/group/:id/user/:username', authenticate.requiredAuthentication("admin"), group.removeUserFromGroup); //done
-	
-	//--------------------------------
-	app.get("/corpus/:id/acl", authenticate.requiredConsistentID("user", 'A', 1), 
-		authenticate.requiredAuthentication("user", 'A', 1), ACLAPI.listWithIdOfResource);
-	
-	app.get("/corpus/:id_corpus/media/:id_media/acl", authenticate.requiredConsistentID("user", 'A', 3),
-		authenticate.requiredAuthentication("user", 'A', 3), ACLAPI.listWithIdOfResource);
-		
-	app.get("/corpus/:id_corpus/media/:id_media/layer/:id_layer/acl", 
-		authenticate.requiredConsistentID("user", 'A', 5), 
-		authenticate.requiredAuthentication("user", 'A', 5), ACLAPI.listWithIdOfResource);
-		
-	app.get("/corpus/:id_corpus/media/:id_media/layer/:id_layer/annotation/:id_anno/acl", 
-		authenticate.requiredConsistentID("user", 'A', 7), authenticate.requiredAuthentication("user", 'A', 7), 
-		ACLAPI.listWithIdOfResource);
-	
-	app.put("/corpus/:id/acl", authenticate.requiredConsistentID("user", 'A', 1), 
-		authenticate.requiredRightUGname("user"), authenticate.requiredAuthentication("user", 'A', 1), 
-		ACLAPI.updateWithIdOfResource);
-		
-	//app.put("/corpus/:id/acl", authenticate.requiredRightUGname("user"), ACLAPI.updateWithIdOfResource);
-	app.put("/corpus/:id_corpus/media/:id_media/acl", authenticate.requiredConsistentID("user", 'A', 3), 
-		authenticate.requiredRightUGname("user"), 
-		authenticate.requiredAuthentication("user", 'A', 3), ACLAPI.updateWithIdOfResource);
-
-	app.put("/corpus/:id_corpus/media/:id_media/layer/:id_layer/acl", authenticate.requiredConsistentID("user", 'A', 5), 
-		authenticate.requiredRightUGname("user"), 
-		authenticate.requiredAuthentication("user", 'A', 5), ACLAPI.updateWithIdOfResource);
-	
-	app.put("/corpus/:id_corpus/media/:id_media/layer/:id_layer/annotation/:id_anno/acl", 
-		authenticate.requiredConsistentID("user", 'A', 7), authenticate.requiredRightUGname("user"), 
-		authenticate.requiredAuthentication("user", 'A', 7), ACLAPI.updateWithIdOfResource);
-	//end of authenticating configurations
-	
-	// ===================================
-	//N R E C D A : different rights
-	app.get("/", authenticate.racine); // rout
-	
-	//app.get('/corpus', authenticate.requiredAuthentication("user", 0, 0), corpus.listAll);
+	// --- resources routes --- \\
+	// corpus
+	app.post('/corpus', authenticate.requiredAuthentication("admin"), 
+					    corpus.post);
 	app.get('/corpus', corpus.listAll);
-	
-	app.get('/corpus/:id', authenticate.requiredConsistentID("user", 'R', 1),  
-		authenticate.requiredAuthentication("user", 'R', 1), corpus.listWithId);
-	//-------------
-	//app.get('/corpus/:id/media', authenticate.requiredAuthentication("user", 'N', 2), media.listAll);
+	app.get('/corpus/:id', authenticate.requiredConsistentID("user", 'R', "corpus"),  
+						   authenticate.requiredAuthentication("user", 'R', "corpus"), 
+						   corpus.listWithId);							   
+	app.put('/corpus/:id', authenticate.requiredConsistentID("user", 'E', "corpus"), 
+						   authenticate.requiredAuthentication("user", 'E', "corpus"), 
+						   corpus.update);
+	app.delete('/corpus/:id', authenticate.requiredConsistentID("user", 'D', "corpus"), 
+						 	  authenticate.requiredAuthentication("user", 'D', "corpus"), 
+						 	  compound.removeCorpus);
+	// media
+	app.post('/corpus/:id_corpus/media', authenticate.requiredConsistentID("user", 'C', "corpus"), 
+										 authenticate.requiredAuthentication("user", 'C', "corpus"), 
+										 media.post);
 	app.get('/corpus/:id/media', media.listAll);
-	app.get('/corpus/:id_corpus/media/:id_media', authenticate.requiredConsistentID("user", 'R', 3), 
-		authenticate.requiredAuthentication("user", 'R', 3), media.listWithId);
-	//-------------
-	app.get('/corpus/:id_corpus/media/:id_media/video', authenticate.requiredConsistentID("user", 'R', 3), 
-		authenticate.requiredAuthentication("user", 'R', 3), media.getVideo);
-	//-------------
-	//app.get('/corpus/:id_corpus/media/:id_media/layer', authenticate.requiredAuthentication("user"), layer.listAll);
-	app.get('/corpus/:id_corpus/media/:id_media/layer', 
-		authenticate.requiredConsistentID("user", 'R', 4-1), layer.listAll);
+	app.get('/corpus/:id_corpus/media/:id_media', authenticate.requiredConsistentID("user", 'R', "media"), 
+												  authenticate.requiredAuthentication("user", 'R', "media"), 
+												  media.listWithId);
+	app.put('/corpus/:id_corpus/media/:id_media', authenticate.requiredConsistentID("user", 'E', "media"),
+												  authenticate.requiredAuthentication("user", 'E', "media"), 
+												  media.update);											  
+	app.delete('/corpus/:id_corpus/media/:id_media', authenticate.requiredConsistentID("user", 'D', "media"), 
+													 authenticate.requiredAuthentication("user", 'D', "media"), 
+													 compound.removeMedia);											  
+	// layer
+	app.post('/corpus/:id_corpus/media/:id_media/layer', authenticate.requiredConsistentID("user", 'C', "media"), 
+														 authenticate.requiredAuthentication("user", 'C', "media"), 
+														 layer.post);
+	app.get('/corpus/:id_corpus/media/:id_media/layer', authenticate.requiredConsistentID("user", 'R', "media"), 
+														layer.listAll);	
+	app.get('/corpus/:id_corpus/media/:id_media/layer/:id_layer', authenticate.requiredConsistentID("user", 'R', "layer"), 
+													   			  authenticate.requiredAuthentication("user", 'R', "layer"), 
+													   			  layer.listWithId);
+	app.put('/corpus/:id_corpus/media/:id_media/layer/:id_layer', authenticate.requiredConsistentID("user", 'E', "layer"), 
+																  authenticate.requiredAuthentication("user", 'E', "layer"), 
+																  layer.updateAll);
+	app.delete('/corpus/:id_corpus/media/:id_media/layer/:id_layer', authenticate.requiredConsistentID("user", 'D', "layer"), 
+																 	 authenticate.requiredAuthentication("user", 'D', "layer"), 
+																 	 compound.removeLayer);
+ 	// annotation
+ 	app.post('/corpus/:id_corpus/media/:id_media/layer/:id_layer/annotation', authenticate.requiredConsistentID("user", 'C', "layer"), 
+																			  authenticate.requiredAuthentication("user", 'C', "layer"), 
+																			  anno.post);
+	app.get('/corpus/:id_corpus/media/:id_media/layer/:id_layer/annotation', authenticate.requiredConsistentID("user", 'R', "layer"), 
+																		 	 anno.listAll);		
+	app.get('/corpus/:id_corpus/media/:id_media/layer/:id_layer/annotation/:id_anno', authenticate.requiredConsistentID("user", 'R', "annotation"), 
+													   								  authenticate.requiredAuthentication("user", 'R', "annotation"), 
+													   								  anno.listWithId);
+	app.put('/corpus/:id_corpus/media/:id_media/layer/:id_layer/annotation/:id_anno', authenticate.requiredConsistentID("user", 'E', "annotation"), 
+																					  authenticate.requiredAuthentication("user", 'E', "annotation"), 
+																					  anno.updateAll);
+	app.delete('/corpus/:id_corpus/media/:id_media/layer/:id_layer/annotation/:id_anno', authenticate.requiredConsistentID("user", 'D', "annotation"), 
+																						  authenticate.requiredAuthentication("user", 'D', "annotation"), 
+																						  compound.removeAnno); 
+	// read video
+	app.get('/corpus/:id_corpus/media/:id_media/video', authenticate.requiredConsistentID("user", 'R', "media"), 
+														authenticate.requiredAuthentication("user", 'R', "media"), 
+														media.getVideo);
+	app.get('/corpus/:id_corpus/media/:id_media/webm', authenticate.requiredConsistentID("user", 'R', "media"), 
+													   authenticate.requiredAuthentication("user", 'R', "media"), 
+													   media.getVideoWEBM);
+	app.get('/corpus/:id_corpus/media/:id_media/mp4', authenticate.requiredConsistentID("user", 'R', "media"), 
+													  authenticate.requiredAuthentication("user", 'R', "media"), 
+													  media.getVideoMP4);
+	app.get('/corpus/:id_corpus/media/:id_media/ogv', authenticate.requiredConsistentID("user", 'R', "media"), 
+													  authenticate.requiredAuthentication("user", 'R', "media"), 
+													  media.getVideoOGV);
+													  
+													  	
+	// --- queue routes --- \\
+	app.post('/queue', authenticate.requiredValidUser, 
+					   queue.post);
+	app.put('/queue/:id', authenticate.requiredValidUser, 
+						  queue.update); //create or replace a list of ids
+	app.get('/queue', authenticate.requiredAuthentication("admin"), 
+					  queue.listAll); 
+	app.get('/queue/:id', authenticate.requiredValidUser, 
+					      queue.listWithId);
+	app.get('/queue/:id/next', authenticate.requiredValidUser, 
+							   queue.getNext);
+	app.put('/queue/:id/next', authenticate.requiredValidUser, 
+							   queue.putnext);
+	app.delete('/queue/:id', authenticate.requiredValidUser, 
+							 queue.remove);
 	
-	app.get('/corpus/:id_corpus/media/:id_media/layer/:id_layer', authenticate.requiredConsistentID("user", 'R', 5), 
-		authenticate.requiredAuthentication("user", 'R', 5), layer.listWithId);
-	//-------------
-	//app.get('/corpus/:id_corpus/media/:id_media/layer/:id_layer/annotation', authenticate.requiredAuthentication("user"), anno.listAll);
-	app.get('/corpus/:id_corpus/media/:id_media/layer/:id_layer/annotation', 
-		authenticate.requiredConsistentID("user", 'R', 6-1), anno.listAll);		
-	
-	app.get('/corpus/:id_corpus/media/:id_media/layer/:id_layer/annotation/:id_anno', 
-		authenticate.requiredConsistentID("user", 'R', 7), 
-		authenticate.requiredAuthentication("user", 'R', 7), anno.listWithId);
-		
-	//post
-	app.post('/corpus', authenticate.requiredAuthentication("admin"), corpus.post);
-	//-------------
-	app.post('/corpus/:id_corpus/media', authenticate.requiredConsistentID("user", 'C', 2-1), 
-		authenticate.requiredAuthentication("user", 'C', 2-1), media.post);
-	//-------------
-	app.post('/corpus/:id_corpus/media/:id_media/layer', authenticate.requiredConsistentID("user", 'C', 4-1), 
-		authenticate.requiredAuthentication("user", 'C', 4-1), layer.post);
-	//-------------
-	app.post('/corpus/:id_corpus/media/:id_media/layer/:id_layer/annotation', 
-		authenticate.requiredConsistentID("user", 'C', 6-1), 
-		authenticate.requiredAuthentication("user", 'C', 6-1), anno.post);
-	//-------------
-	//app.post('/corpus/:id_corpus/media/:id_media/layerAll', authenticate.requiredConsistentID("user", 'C', 4-1), 
-	//	authenticate.requiredAuthentication("user", 'C', 4-1), compound.postAll); //layer + its annotations
-	
-	//put
-	app.put('/corpus/:id', authenticate.requiredConsistentID("user", 'E', 1), 
-		authenticate.requiredAuthentication("user", 'E', 1), corpus.update);
-	//-------------
-	app.put('/corpus/:id_corpus/media/:id_media', authenticate.requiredConsistentID("user", 'E', 3),
-		authenticate.requiredAuthentication("user", 'E', 3), media.update);
-	//-------------
-	app.put('/corpus/:id_corpus/media/:id_media/layer/:id_layer', authenticate.requiredConsistentID("user", 'E', 5), 
-		authenticate.requiredAuthentication("user", 'E', 5), layer.updateAll);
-	//-------------
-	app.put('/corpus/:id_corpus/media/:id_media/layer/:id_layer/annotation/:id_anno', 
-		authenticate.requiredConsistentID("user", 'E', 7), 
-		authenticate.requiredAuthentication("user", 'E', 7), anno.updateAll);
-		
-	//delete
-	app.delete('/corpus/:id', authenticate.requiredConsistentID("user", 'D', 1), 
-		authenticate.requiredAuthentication("user", 'D', 1), compound.removeCorpus);
-	//-------------
-	app.delete('/corpus/:id_corpus/media/:id_media', authenticate.requiredConsistentID("user", 'D', 3), 
-		authenticate.requiredAuthentication("user", 'D', 3), compound.removeMedia);
-	//-------------
-	app.delete('/corpus/:id_corpus/media/:id_media/layer/:id_layer', authenticate.requiredConsistentID("user", 'D', 5), 
-		authenticate.requiredAuthentication("user", 'D', 5), compound.removeLayer);
-	//-------------
-	app.delete('/corpus/:id_corpus/media/:id_media/layer/:id_layer/annotation/:id_anno', authenticate.requiredConsistentID("user", 'D', 7), 
-		authenticate.requiredAuthentication("user", 'D', 7), compound.removeAnno); //*/
-		
-	// queue configuration: trecvid tasks
-	app.post('/queue', authenticate.requiredValidUser, queue.post);
-	
-	app.put('/queue/:id', authenticate.requiredValidUser, queue.update); //create or replace a list of ids
-	
-	app.get('/queue', authenticate.requiredAuthentication("admin"), queue.listAll); 
-	
-	app.get('/queue/:id', authenticate.requiredValidUser, queue.listWithId);
-	
-	app.get('/queue/:id/next', authenticate.requiredValidUser, queue.getNext);
-	
-	app.put('/queue/:id/next', authenticate.requiredValidUser, queue.putnext);
-	
-	app.delete('/queue/:id', authenticate.requiredValidUser, queue.remove);
-	
-	// retrieve histories of a user, 
 	// You can view your own histories, or as a root user you can check all other users' histories
-	app.get('/history/:name', authenticate.requiredValidUser, compound.retrieveUserHistory);
+	app.get('/history/:name', authenticate.requiredValidUser, 
+							  compound.retrieveUserHistory);															// retrieve histories of a user, 
+
+	// --- ASL routes --- \\
+	// corpus
+	app.get("/corpus/:id/acl", authenticate.requiredConsistentID("user", 'A', "corpus"), 
+							   authenticate.requiredAuthentication("user", 'A', "corpus"), 
+							   ACLAPI.listWithIdOfResource);
+	app.put("/corpus/:id/acl", authenticate.requiredConsistentID("user", 'A', "corpus"), 
+							   authenticate.requiredRightUGname("user"), authenticate.requiredAuthentication("user", 'A', "corpus"), 
+							   ACLAPI.updateWithIdOfResource);
+	// media
+	app.get("/corpus/:id_corpus/media/:id_media/acl", authenticate.requiredConsistentID("user", 'A', "media"),
+													  authenticate.requiredAuthentication("user", 'A', "media"), 
+													  ACLAPI.listWithIdOfResource);
+	app.put("/corpus/:id_corpus/media/:id_media/acl", authenticate.requiredConsistentID("user", 'A', "media"), 
+													  authenticate.requiredRightUGname("user"), 
+													  authenticate.requiredAuthentication("user", 'A', "media"), 
+													  ACLAPI.updateWithIdOfResource);
+	// layer
+	app.get("/corpus/:id_corpus/media/:id_media/layer/:id_layer/acl", authenticate.requiredConsistentID("user", 'A', "layer"), 
+																	  authenticate.requiredAuthentication("user", 'A', "layer"), 
+																	  ACLAPI.listWithIdOfResource);
+	app.put("/corpus/:id_corpus/media/:id_media/layer/:id_layer/acl", authenticate.requiredConsistentID("user", 'A', "layer"), 
+																	  authenticate.requiredRightUGname("user"), 
+																	  authenticate.requiredAuthentication("user", 'A', "layer"), 
+																	  ACLAPI.updateWithIdOfResource);
+	// annotation
+	app.get("/corpus/:id_corpus/media/:id_media/layer/:id_layer/annotation/:id_anno/acl", authenticate.requiredConsistentID("user", 'A', "annotation"), 
+																						  authenticate.requiredAuthentication("user", 'A', "annotation"), 
+																						  ACLAPI.listWithIdOfResource);
+	app.put("/corpus/:id_corpus/media/:id_media/layer/:id_layer/annotation/:id_anno/acl", authenticate.requiredConsistentID("user", 'A', "annotation"), 
+																						  authenticate.requiredRightUGname("user"),	
+																						  authenticate.requiredAuthentication("user", 'A', "annotation"), 
+																						  ACLAPI.updateWithIdOfResource);
 }
