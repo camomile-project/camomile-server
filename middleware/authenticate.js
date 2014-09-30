@@ -60,7 +60,7 @@ exports.authenticate = function(name, pass, fn) {
 
 exports.requiredValidUser = function(req, res, next) {
 	if(req.session.user) next();
-	else res.send(403, '{"error":"access denied"}');
+	else res.status(403).json({error:"access denied"});
 }
 
 // check if the given user name or group name exists
@@ -68,22 +68,22 @@ exports.requiredRightUGname = function(role) {
 	return function(req, res, next) {
     	if(req.session.user) { 
     		if(req.session.user.role == "admin") next();
-			else if(commonFuncs.isAllowedUser(req.session.user.role, role) < 0) res.send(403, '{"error":"access denied"}');
+			else if(commonFuncs.isAllowedUser(req.session.user.role, role) < 0) res.status(403).json({error:"access denied"});
 			else {
 				var userLogin = req.body.username;
 				var groupLogin = req.body.groupname;
 				if(userLogin == undefined) userLogin = "root";
 				User.findOne({username : {$regex : new RegExp('^'+ userLogin + '$', "i")}}, function(error, data){
-					if(error) res.send(403, '{"error":"access denied"}');
+					if(error) res.status(403).json( {error:"access denied"});
 					else {
-						if(data == null) res.send(400, '{"error":"this user does not exist"}');
+						if(data == null) res.status(400).json( {error:"this user does not exist"});
 						else {
 							if(groupLogin == undefined) next();
 							else {
 								Group.findOne({groupname : {$regex : new RegExp('^'+ groupLogin + '$', "i")}}, function(error, data){
-									if(error) res.send(403, '{"error":"access denied"}');
+									if(error) res.status(403).json( {error:"access denied"});
 									else {
-										if(data == null)res.send(400, '{"error":"this group does not exist"}');
+										if(data == null)res.status(400).json( {error:"this group does not exist"});
 										else next();
 									}
 								});
@@ -93,7 +93,7 @@ exports.requiredRightUGname = function(role) {
 				});
 			}
 		}
-		else res.send(403, '{"error":"access denied"}');
+		else res.status(403).json( {error:"access denied"});
 	}
 }
 
@@ -103,39 +103,39 @@ exports.requiredConsistentID = function(role, minimumRightRequired, level) {
 	return function(req, res, next) {
 		if(req.session.user) { 
     		if(req.session.user.role == "admin" || minimumRightRequired == 'N') next();
-		else if(commonFuncs.isAllowedUser(req.session.user.role, role) < 0) res.send(403, '{"error":"access denied"}');
+		else if(commonFuncs.isAllowedUser(req.session.user.role, role) < 0) res.status(403).json( {error:"access denied"});
 		else {
 			switch(level){
 				case "corpus":
 					var id_corpus = req.params.id;
 					if(id_corpus == undefined) id_corpus = req.params.id_corpus;
 					Corpus.findById(id_corpus, function(error, data){
-						if(error) res.send(403, '{"error":"access denied"}');
-						else if(data == null) res.send(403, '{"error":"access denied"}');
+						if(error) res.status(403).json( {error:"access denied"});
+						else if(data == null) res.status(403).json( {error:"access denied"});
 						else next();
 					});
 					break;
 					
 				case "media":
 					Media.findById(req.params.id_media, function(error, data){
-						if(error) res.send(403, '{"error":"access denied!"}');
-						else if(data == null) res.send(400, '{"error":"Not found this id"}');
+						if(error) res.status(403).json( {error:"access denied!"});
+						else if(data == null) res.status(400).json( {error:"Not found this id"});
 						else if(req.params.id_corpus == data.id_corpus)  next();
-						else res.send(400, '{"error":"One of these ids is not correct"}');
+						else res.status(400).json( {error:"One of these ids is not correct"});
 					});						
 					break;
 					
 				case "layer":
 					Layer.findById(req.params.id_layer, function(error, data){
-						if(error) res.send(403, '{"error":"access denied!"}');
-						else if(data == null) res.send(400, '{"error":"Not found this id"}');
-						else if(data.id_media != req.params.id_media)  res.send(400, '{"error":"One of these ids is not correct"}');
+						if(error) res.status(403).json( {error:"access denied!"});
+						else if(data == null) res.status(400).json( {error:"Not found this id"});
+						else if(data.id_media != req.params.id_media)  res.status(400).json( {error:"One of these ids is not correct"});
 						else {
 							Media.findById(req.params.id_media, function(error, data1){
-								if(error) res.send(403, '{"error":"access denied!"}');
-								else if(data1 == null) res.send(400, '{"error":"Not found this id"}');
+								if(error) res.status(403).json( {error:"access denied!"});
+								else if(data1 == null) res.status(400).json( {error:"Not found this id"});
 								else if(req.params.id_corpus == data1.id_corpus) next();
-								else res.send(400, '{"error":"One of these ids is not correct"}');
+								else res.status(400).json( {error:"One of these ids is not correct"});
 							});
 						}
 					});
@@ -143,20 +143,20 @@ exports.requiredConsistentID = function(role, minimumRightRequired, level) {
 				
 				case "annotation":
 					Annotation.findById(req.params.id_anno, function(error, dat){
-						if(error)res.send(403, '{"error":"access denied!"}');
-						else if(dat == null) res.send(400, '{"error":"Not found this id"}');
-						else if(dat.id_layer != req.params.id_layer) res.send(400, '{"error":"One of these ids is not correct"}');
+						if(error)res.status(403).json( {error:"access denied!"});
+						else if(dat == null) res.status(400).json( {error:"Not found this id"});
+						else if(dat.id_layer != req.params.id_layer) res.status(400).json( {error:"One of these ids is not correct"});
 						else {
 							Layer.findById(req.params.id_layer, function(error, data){
-								if(error) res.send(403, '{"error":"access denied!"}');
-								else if(data == null) res.send(400, '{"error":"Not found this id"}');
-								else if(data.id_media != req.params.id_media)  res.send(400, '{"error":"One of these ids is not correct"}');
+								if(error) res.status(403).json( {error:"access denied!"});
+								else if(data == null) res.status(400).json( {error:"Not found this id"});
+								else if(data.id_media != req.params.id_media)  res.status(400).json( {error:"One of these ids is not correct"});
 								else {
 									Media.findById(req.params.id_media, function(error, data1){
-										if(error) res.send(403, '{"error":"access denied!"}');
-										else if(data1 == null) res.send(400, '{"error":"Not found this id"}');
+										if(error) res.status(403).json( {error:"access denied!"});
+										else if(data1 == null) res.status(400).json( {error:"Not found this id"});
 										else if(req.params.id_corpus == data1.id_corpus) next();
-										else res.send(400, '{"error":"One of these ids is not correct"}');
+										else res.status(400).json( {error:"One of these ids is not correct"});
 									});
 								}
 							});		
@@ -177,7 +177,7 @@ exports.requiredAuthentication = function(role, minimumRightRequired, level) {
 	return function(req, res, next) {
 		if(req.session.user) { 
     		if(req.session.user.role == "admin" || minimumRightRequired == 'N')  next();
-			else if(commonFuncs.isAllowedUser(req.session.user.role, role) < 0)	 res.send(403, '{"error":"access denied"}');
+			else if(commonFuncs.isAllowedUser(req.session.user.role, role) < 0)	 res.status(403).json( {error:"access denied"});
 			else {
 				var connectedUser = req.session.user;
 				var i = level;
@@ -193,7 +193,7 @@ exports.requiredAuthentication = function(role, minimumRightRequired, level) {
 								result.push(req.params.id_media);
 								result.push(req.params.id_corpus);
 								ACLModel.find({id:{$in:result}}, function(error, dataACL) {
-									if(error) res.send(400, '{"error":"'+error+'"}');
+									if(error) res.status(400).json( {error:"'+error+'"});
 									else if(dataACL != null) {
 										var contd = true;
 										for(var i = 0; i < dataACL.length && contd; i++){
@@ -213,9 +213,9 @@ exports.requiredAuthentication = function(role, minimumRightRequired, level) {
 											}
 											if(foundPos != -1 && contd)  contd = false;  // found the user right, but not satisfied
 										} 
-										if(found == false)  res.send(403, '{"error":"access denied"}');
+										if(found == false)  res.status(403).json( {error:"access denied"});
 									}
-									else  res.send(403, '{"error":"access denied"}'); 
+									else  res.status(403).json( {error:"access denied"}); 
 								});
 							}
 						});	
@@ -230,7 +230,7 @@ exports.requiredAuthentication = function(role, minimumRightRequired, level) {
 								result.push(req.params.id_media);
 								result.push(req.params.id_corpus);
 								ACLModel.find({id:{$in:result}}, function(error, dataACL) {
-									if(error) res.send(400, '{"error":"'+error+'"}');
+									if(error) res.status(400).json( {error:"'+error+'"});
 									else if(dataACL != null) {
 										var contd = true;
 										for(var i = 0; i < dataACL.length && contd; i++){
@@ -250,9 +250,9 @@ exports.requiredAuthentication = function(role, minimumRightRequired, level) {
 											}
 											if(foundPos != -1 && contd) contd = false;  // found the user right, but not satisfied
 										} 
-										if(found == false) res.send(403, '{"error":"access denied"}');
+										if(found == false) res.status(403).json( {error:"access denied"});
 									}
-									else res.send(403, '{"error":"access denied"}');
+									else res.status(403).json( {error:"access denied"});
 								});
 							}
 						});	
@@ -287,9 +287,9 @@ exports.requiredAuthentication = function(role, minimumRightRequired, level) {
 											}
 											if(foundPos != -1 && contd) contd = false;  // found the user right, but not satisfied
 										} 
-										if(found == false) res.send(403, '{"error":"access denied"}');
+										if(found == false) res.status(403).json( {error:"access denied"});
 									}
-									else res.send(403, '{"error":"access denied"}');
+									else res.status(403).json( {error:"access denied"});
 								});
 							}
 						});
@@ -317,9 +317,9 @@ exports.requiredAuthentication = function(role, minimumRightRequired, level) {
 												next();
 											}
 										}
-										if(found == false) res.send(403, '{"error":"access denied"}');
+										if(found == false) res.status(403).json( {error:"access denied"});
 									}
-									else res.send(403, '{"error":"access denied"}');
+									else res.status(403).json( {error:"access denied"});
 								});
 							}
 						});
@@ -327,16 +327,16 @@ exports.requiredAuthentication = function(role, minimumRightRequired, level) {
 					
 					case "global":						
 						if(commonFuncs.isAllowedUser(req.session.user.role, role) >= 0)	next();
-						else res.send(403, '{"error":"access denied"}');
+						else res.status(403).json( {error:"access denied"});
 						break;
 						
 					default:
-						res.send(403, '{"error":"access denied"}');					//keep only the permitted resources
+						res.status(403).json( {error:"access denied"});					//keep only the permitted resources
 				}
 			}  
 		} 
 		else {
-			res.send(403, '{"error":"access denied"}');	
+			res.status(403).json( {error:"access denied"});	
 		}	
 	}
 }
@@ -377,7 +377,7 @@ exports.createRootUser = function(){
 exports.userExist = function(req, res, next) {
     User.count({username: req.body.username}, function (err, count) {
         if (count === 0)  next();
-        else res.send(400, '{"error":"this user name already exists"}');
+        else res.status(400).json( {error:"this user name already exists"});
     });
 }
 
@@ -388,23 +388,23 @@ exports.login = function (req, res) {
 		username = req.params.username;
 		pass = req.params.password;
 	}
-	if(username == undefined || pass == undefined) res.send(400, '{"error":"authentication failed, username or password are not define"}');
+	if(username == undefined || pass == undefined) res.status(400).json({error:"authentication failed, username or password are not define"});
 	else {
 		authenticateElem(username, pass, function (err, user) {
 			if (user) {
 				req.session.regenerate(function () {
 					req.session.user = user;
-					res.send(200, '{"message":"You have been successfully logged in as '+username+'"}'); 
+					res.status(200).json({message:"You have been successfully logged in as "+username}); 
 				});
-			} 
-			else res.send(400, '{"error":"authentication failed, please check your username or password"}');
+			} 			
+			else res.status(400).json({error:"authentication failed, please check your username or password"});
 		});
 	}
 }
 
 // create a user
 exports.signup = function (req, res) {
-	if(req.body.password == undefined || req.body.username == undefined) res.send(400, '{"error":"the username and/or password fields have not been filled up with data"}');
+	if(req.body.password == undefined || req.body.username == undefined) res.status(400).json( {error:"the username and/or password fields have not been filled up with data"});
 	else {
 		var roleuser = req.body.role;
 		if(GLOBAL.list_user_role.indexOf(roleuser)==-1)  roleuser = "user";
@@ -418,14 +418,14 @@ exports.signup = function (req, res) {
 				hash: hash,
 			}).save(function (err, newUser) {
 				if (err) throw err;
-				if(newUser)res.send(200, newUser);
+				if(newUser)res.status(200).json( newUser);
 			});
 		});		
 	}
 }
 
 exports.racine = function (req, res) {
-    if (req.session.user) res.send(200, '{"message":"user is logged as ' + req.session.user.username+'"}' );
+    if (req.session.user) res.status(200).json({message:"user is logged as ' + req.session.user.username+'"});
 }
 
 // used for test, and it will be removed from the production version
@@ -433,19 +433,19 @@ exports.logout = function (req, res) {
     if(req.session.user) {
     	var uname = req.session.user.username;
     	req.session.destroy(function () {
-        	res.send(200, '{"message":"' +uname + ' is logged out"}');
+        	res.status(200).json({message:uname +" is logged out"});
     	});
     }
 }
 
 // remove a given group ID, also remove this group in the ACL table
 exports.removeGroupByID  = function (req, res) {
-    if(req.params.id == undefined) return res.send(400, '{"error":"The id parameter has not been sent"}');
+    if(req.params.id == undefined) return res.status(400).json( {error:"The id parameter has not been sent"});
 	Group.remove({_id : req.params.id}, function(error, data){
 		if(error) res.json(error);			//Error in deleting one annotation		
 		else {
 			ACLAPI.removeAGroupFromALC(data.groupname);
-			res.send(data);
+			res.status(200).json(data);
 		}
 	});    
 }

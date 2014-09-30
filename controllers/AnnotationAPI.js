@@ -47,35 +47,23 @@ var ACL = require('../models/ACL').ACL,
 exports.listAll = function(req, res){
 	
 	function final(resultReturn, n) { 
-		if(resultReturn.length == 0 && n > 0)										
-			res.json(403, "You dont have enough permission to get this resource");
-		else res.json(resultReturn);
+		if(resultReturn.length == 0 && n > 0) res.status(403).json({error: "You dont have enough permission to get this resource"});
+		else res.status(200).json(resultReturn);
 	}
-	// get all annotations under this id
-	Annotation.find({id_layer : req.params.id_layer}, function(error, data){
-		if(error){
-			res.json(error);
-		}
+	Annotation.find({id_layer : req.params.id_layer}, function(error, data){	// get all annotations under this id
+		if(error) res.status(400).json(error);
 		else {
 			var connectedUser = req.session.user;
-			if(GLOBAL.no_auth == true || (connectedUser != undefined && connectedUser.role == "admin")){
-				res.json(data);
-			}
+			if(GLOBAL.no_auth == true || (connectedUser != undefined && connectedUser.role == "admin")) res.status(200).json(data);
 			else if(connectedUser != undefined && data != null){
-				//first find the groups to which the connecteduser belongs
-				Group.find({'usersList' : {$regex : new RegExp('^'+ connectedUser.username + '$', "i")}}, function(error, dataGroup) {
+				Group.find({'usersList' : {$regex : new RegExp('^'+ connectedUser.username + '$', "i")}}, function(error, dataGroup) {				//first find the groups to which the connecteduser belongs
 					if(error) throw error;
-					else {
-					
-						result = [];//JSON.stringify(data);
+					else {					
+						result = [];
 						resultReturn = [];
-					
-						for(var i = 0; i < data.length; i++){
-							result.push(data[i]._id);
-						}
-						// then find all acls of these id
-						ACL.find({id:{$in:result}}, function(error, dataACL){
-							if(error) console.log("error in ACL-corpusListall:");
+						for(var i = 0; i < data.length; i++) result.push(data[i]._id);
+						ACL.find({id:{$in:result}}, function(error, dataACL){												// then find all acls of these id
+							if(error) res.status(500).json({error:"error in ACL-corpusListall"});
 							else if(dataACL != null){
 								var dataACLLen = dataACL.length;
 								var countTreatedACL = 0;
@@ -87,35 +75,33 @@ exports.listAll = function(req, res){
 											resultReturn.push(data[i]);
 											countTreatedACL += 1;
 										}
-									} // not found user's right, find its group's one
-									else {
+									} 
+									else {																					// not found user's right, find its group's one
 										foundPos = commonFuncs.findUsernameInGroupACL(dataGroup, dataACL[i].groups);
-
 										if(foundPos != -1) {
 											if(dataACL[i].groups[foundPos].right != 'N') {
 												resultReturn.push(data[i]);
 												countTreatedACL += 1;
 											}
 										}
-										else { //not found user right, nor group one, do a back propagation
-									
+										else { 																				//not found user right, nor group one, do a back propagation
 											(function(d){
-												parentID = [];
-												//be careful, the order of push is important
+												parentID = [];																//be careful, the order of push is important
 												parentID.push(req.params.id_layer);
-												parentID.push(req.params.id_media); parentID.push(req.params.id_corpus);
-												// get all parent's acl 
-												ACL.find({id:{$in:parentID}}, function(error, dataACL1){
-													if(error) res.send(error);
+												parentID.push(req.params.id_media); 
+												parentID.push(req.params.id_corpus);
+												ACL.find({id:{$in:parentID}}, function(error, dataACL1){					// get all parent's acl 
+													if(error) res.status(400).json(error);
 													else if(dataACL1 != null) {
 														countTreatedACL += 1;
-														var contd = true; // stop when found any right
+														var contd = true; 													// stop when found any right
 														for(var j = 0; j < dataACL1.length && contd; j++) {
 															var foundPos = commonFuncs.findUsernameInACL(connectedUser.username, dataACL1[j].users);
 														
 															if(foundPos != -1) {
 																if(dataACL1[j].users[foundPos].right != 'N') {
-																	resultReturn.push(d); contd = false;
+																	resultReturn.push(d); 
+																	contd = false;
 																}
 															}
 															else {
@@ -123,139 +109,87 @@ exports.listAll = function(req, res){
 							
 																if(foundPos != -1) {
 																	if(dataACL1[j].groups[foundPos].right != 'N') {
-																		resultReturn.push(d); contd = false;
+																		resultReturn.push(d); 
+																		contd = false;
 																	}
-																	else contd = false; // stop because we already found the right N
+																	else contd = false; 									// stop because we already found the right N
 																}
 															}
-														} //for
+														} 
 														if(countTreatedACL == dataACLLen) {
 															countTreatedACL = -1
 															final(resultReturn, data.length);
 														}
-													} //else if(dataACL1 != null)
-												}); //acl 2
-											})(data[i]); // treat the callback function
-										} // else { //not found user right	
+													} 
+												}); 
+											})(data[i]); 
+										} 
 									}
-								} //for
-								if(countTreatedACL == dataACLLen) 
-									final(resultReturn, data.length);
-							} //if(dataACL != null)
-							else {
-								res.json(404, "error in finding acl");
+								} 
+								if(countTreatedACL == dataACLLen) final(resultReturn, data.length);
 							}
-						}); //ACL.find
-					} //else
-				}); // group
-				//res.json(resultReturn);
-			} // else if (connectedUser)
-			else res.json(403, "You dont have permission to access this resource");
+							else res.status(400).json({error: "error in finding acl"});
+						}); 
+					} 
+				}); 
+			} 
+			else res.status(403).json({error: "You dont have permission to access this resource"});
 		}
 	});
 }
 
-//for the uri: app.get('/corpus/:id_corpus/media/:id_media/layer/:id_layer/:id_layer/annotation/:id_anno 
 exports.listWithId = function(req, res){
 	Annotation.findById(req.params.id_anno, function(error, data){
-		if(error){
-			res.json(error);
-		}
-		else if(data == null){
-			res.json('no such id_layer!')
-		}
-		else
-			res.json(data);
+		if(error) res.status(400).json(error);
+		else if(data == null) res.status(400).json({error:'no such id_layer!'})
+		else res.status(200).json(data);
 	});
 }
 
-//test for Posting 
-//app.post('/corpus/:id_corpus/media/:id_media/layer/:id_layer/annotation', 
 exports.post = function(req, res){
 	if(req.body.fragment == undefined || req.body.data == undefined)
-		return res.send(404, "one or more data fields are not filled out properly");
+		return res.status(400).json({error: "one or more data fields are not filled out properly"});
 		
 	Layer.findById(req.params.id_layer, function(error, data){
-		if(error){
-			res.json(error);
-		}
-		else if(data == null){
-			res.json('Could not post this annotation because the given id_layer is incorrect');
-		}
-		else {
-		
-			var annoItem = {
-				"id_layer" : req.params.id_layer,
-				"fragment" : req.body.fragment,
-				"data" : req.body.data,
-				"history" : []//req.body.history
-			};
-	
+		if(error) res.status(400).json(error);
+		else if(data == null) res.status(400).json({error:'Could not post this annotation because the given id_layer is incorrect'});
+		else {		
+			var annoItem = {"id_layer" : req.params.id_layer, "fragment" : req.body.fragment, "data" : req.body.data, "history" : []};
 			var anno = new Annotation(annoItem);
-			
 			var connectedUser = "root";
-			if(req.session.user)
-				connectedUser = req.session.user.username;
-			
-			// changed after the meeting with the CRP and grenoble
-			var modified = {
-				"id_layer" : req.params.id_layer,
-				"fragment" : req.body.fragment,
-				"data" : req.body.data
-			};
+			if(req.session.user) connectedUser = req.session.user.username;
+			var modified = {"id_layer" : req.params.id_layer, "fragment" : req.body.fragment, "data" : req.body.data};			// changed after the meeting with the CRP and grenoble
 			anno.history.push({name : connectedUser, date : new Date(), modification:modified});
-	
 			anno.save( function(errorAnno, annoData){
 				if(errorAnno){
-					console.log('error in posting the annotation list');
-					console.log(errorAnno);
-					//saved = false;
-					res.send(errorAnno);
+					res.status(400).json(errorAnno);
 					return;
 				}
 				else{
-					console.log('Success on saving annotation data');
-					
 					ACLAPI.addUserRightGeneric(annoData._id, connectedUser, 'A');
-					res.json(annoData);
+					res.status(200).json(annoData);
 				}
 			});
 		}
 	});
 }
 
-//test for updating annotation
-//app.put('/corpus/:id_corpus/media/:id_media/layer/:id_layer/annotation/:id_anno', 
 exports.updateAll = function(req, res){
-	if(req.body.fragment == undefined && req.body.data == undefined)
-		return res.send(404, "one or more data fields are not filled out properly");
+	if(req.body.fragment == undefined && req.body.data == undefined) return res.status(400).json({error: "one or more data fields are not filled out properly"});
 	var update = {};
-	if(req.body.fragment)
-		update.fragment = req.body.fragment;
-	if(req.body.data)
-		update.data = req.body.data;
+	if(req.body.fragment) update.fragment = req.body.fragment;
+	if(req.body.data) update.data = req.body.data;
 	
 	Annotation.findByIdAndUpdate(req.params.id_anno, update, function (error, anno) {
-		if(error){
-			res.json(error);
-		}
-		else
-		{
+		if(error) res.status(400).json(error);
+		else {
 			var dateNow = new Date();
 			var uname = "root"; 
-			if(req.session.user)
-				uname = req.session.user.username;
-		
-			//changed after the meeting with RCP and grenoble
-			anno.history.push({name:uname, date: dateNow, modification: update});
-			
+			if(req.session.user) uname = req.session.user.username;
+			anno.history.push({name:uname, date: dateNow, modification: update});			//changed after the meeting with RCP and grenoble
 			anno.save( function(error, data){
-				if(error){
-					res.json(error);
-				}
-				else{
-					res.json(data);
-				}
+				if(error) res.status(400).json(error);
+				else res.status(200).json(data);
 			});
 		}
 	});

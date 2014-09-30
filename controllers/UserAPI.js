@@ -42,50 +42,50 @@ exports.listUsers = function (req, res) {
 	if(connectedUser.role == "admin") {				
 		User.find({}, 'username role affiliation', function (err, users) {
         	if (err) throw err;
-        	if (users) res.send(users);
-			else return res.send([]);
+        	if (users) res.status(200).json(users);
+			else return res.status(200).json([]);
     	});
 	}
     else {
     	User.findOne({username: connectedUser.username}, 'username role affiliation', function (err, users) {
         	if(err) throw err;
-        	if (users) res.send(users);
-        	else return res.send([]);
+        	if (users) res.status(200).json(users);
+        	else return res.status(200).json([]);
     	});
     }
 }
 
 //retrieve a particular user (with id)
 exports.listWithId = function(req, res){
-	if(req.params.id == undefined) return res.send(400, '{"error":"the given ID is not correct"}');
+	if(req.params.id == undefined) return res.status(400).json({error:"the given ID is not correct"});
 	var connectedUser = req.session.user;	
 	User.findById(req.params.id, 'username affiliation role', function(error, data){
-		if(error) res.json(error);
-		else if(data == null) res.json(400, '{"error":"no such user"}')
+		if(error) res.status(400).json(error);
+		else if(data == null) res.status(400).json({error:"no such user"});
 		else
-			if(connectedUser.role == "admin")  res.json(data);
+			if(connectedUser.role == "admin")  res.status(200).json(data);
 			else {				
-				if(data.username == connectedUser.username)	res.json(data);
-				else res.send(401, '{"error":"You dont have enough right to access this resource"}');
+				if(data.username == connectedUser.username)	res.status(200).json(data);
+				else res.status(401).json({error:"You dont have enough right to access this resource"});
 			}
 	});
 }
 
 //retrieve a particular user (with id)
 exports.listGroupsOfUserId = function(req, res){
-	if(req.params.id == undefined) return res.send(400, '{"error":"the given ID is not correct"}');
+	if(req.params.id == undefined) return res.status(400).json({error:"the given ID is not correct"});
 	var connectedUser = req.session.user;	
 	User.findById(req.params.id, 'username affiliation role', function(error, data){
-		if(error) res.json(error);
-		else if(data == null) res.json(400, '{"error":"no such user"}')
+		if(error) res.status(400).json(error);
+		else if(data == null) res.status(200).json(400, '{"error":"no such user"}')
 		else {			
 			Group.find({'usersList' : {$regex : new RegExp('^'+ data.username + '$', "i")}}, function(error, dataGroup) {
-				if(error) res.send(400, '{"error":"'+error+'"}');
+				if(error) res.status(400).json(error);
 				else {
-					if(connectedUser.role == "admin")  res.json(dataGroup);
+					if(connectedUser.role == "admin")  res.status(200).json(dataGroup);
 					else {				
-						if(data.username == connectedUser.username)	res.json(dataGroup);
-						else res.send(401, '{"error":"You dont have enough right to access this resource"}');
+						if(data.username == connectedUser.username)	res.status(200).json(dataGroup);
+						else res.status(401).json({error:"You dont have enough right to access this resource"});
 					}
 				}
 			});
@@ -94,7 +94,7 @@ exports.listGroupsOfUserId = function(req, res){
 }
 
 exports.update = function(req, res){
-	if(req.params.id == undefined) return res.send(400, '{"error":"one or more data fields are not filled out properly"}');
+	if(req.params.id == undefined) return res.status(400).json({error:"one or more data fields are not filled out properly"});
 	var connectedUser = req.session.user;
 	var update = {};
 	if(connectedUser.role == "admin" && GLOBAL.list_user_role.indexOf(req.body.role)!=-1 && connectedUser.username != "root") update.role = req.body.role;		
@@ -102,8 +102,8 @@ exports.update = function(req, res){
 	
 	if(req.body.password == undefined) {
 		User.findByIdAndUpdate(req.params.id, update, function (error, data) {
-			if(error) res.json(error);
-			else res.json(data);
+			if(error) res.status(400).json(error);
+			else res.status(200).json(data);
 		});
 	} 
 	else { 
@@ -113,8 +113,8 @@ exports.update = function(req, res){
 				update.salt = salt;
 				update.hash = hash;
 				User.findByIdAndUpdate(req.params.id, update, function (error, data) {
-					if(error) res.json(error);
-					else res.json(data);
+					if(error) res.status(400).json(error);
+					else res.status(200).json(data);
 				});
 			} 
 		});
@@ -124,12 +124,12 @@ exports.update = function(req, res){
 // remove a user
 exports.remove  = function(req, res){
 	if(req.params.id == undefined)
-		return res.send(400, '{"error":"one or more data fields are not filled out properly"}');
+		return res.status(400).json({error:"one or more data fields are not filled out properly"});
 	User.remove({_id : req.params.id}, function (error, data) {
-		if(error) res.json(error);
+		if(error) res.status(400).json(error);
 		else {
 			ACLAPI.removeAUserFromALC(data.username);
-			res.json(data);
+			res.status(200).json(data);
 		}
 	});
 }

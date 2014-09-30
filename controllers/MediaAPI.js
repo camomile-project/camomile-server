@@ -48,20 +48,15 @@ var fileSystem = require('fs'); //working with video streaming
 exports.listAll = function(req, res){
 	
 	function final(resultReturn, n) { 
-		if(resultReturn.length == 0 && n > 0)										
-			res.json(403, "You dont have enough permission to get this resource");
-		else res.json(resultReturn);
+		if(resultReturn.length == 0 && n > 0) res.status(403).json({error: "You dont have enough permission to get this resource"});
+		else res.status(200).json(resultReturn);
 	}
 	//find all media under this corpus
 	Media.find({id_corpus : req.params.id}, function(error, data){
-		if(error){
-			res.json(error);
-		}
+		if(error) res.status(400).json(error);
 		else {
 			var connectedUser = req.session.user;
-			if(GLOBAL.no_auth == true || (connectedUser != undefined && connectedUser.role == "admin")){
-				res.json(data);
-			}
+			if(GLOBAL.no_auth == true || (connectedUser != undefined && connectedUser.role == "admin")) res.status(200).json(data);
 			else if(connectedUser != undefined && data != null){
 				//first find groups to which the connected user belongs
 				Group.find({'usersList' : {$regex : new RegExp('^'+ connectedUser.username + '$', "i")}}, function(error, dataGroup) {
@@ -69,13 +64,9 @@ exports.listAll = function(req, res){
 					else {
 						result = [];
 						resultReturn = [];
-
-						for(var i = 0; i < data.length; i++){
-							result.push(data[i]._id);
-						}
-						// find all acl of these ids
-						ACL.find({id:{$in:result}}, function(error, dataACL){
-							if(error) console.log("error in ACL-corpusListall:");
+						for(var i = 0; i < data.length; i++) result.push(data[i]._id);
+						ACL.find({id:{$in:result}}, function(error, dataACL){										// find all acl of these ids
+							if(error)  res.statut(500).json({error:"error in ACL-corpusListall:"});
 							else if(dataACL != null) {
 								var dataACLLen = dataACL.length;
 								var countTreatedACL = 0;
@@ -101,44 +92,38 @@ exports.listAll = function(req, res){
 										else { //not found user right, nor group one, do a back propagation
 											(function(d){								
 												ACL.findOne({id:req.params.id}, function(error, dataACL1){
-													if(error) res.send(error);
+													if(error) res.status(400).send(error);
 													else if(dataACL1 != null) {
 														countTreatedACL += 1;
 														var foundPos = commonFuncs.findUsernameInACL(connectedUser.username, dataACL1.users);
 
 														if(foundPos != -1) {
-															if(dataACL1.users[foundPos].right != 'N') {
-																resultReturn.push(d);
-															}
+															if(dataACL1.users[foundPos].right != 'N') resultReturn.push(d);
 														}
 														else {
 															foundPos = commonFuncs.findUsernameInGroupACL(dataGroup, dataACL1.groups);
-															if(foundPos != -1 && dataACL1.groups[foundPos].right != 'N')
-																resultReturn.push(d);
+															if(foundPos != -1 && dataACL1.groups[foundPos].right != 'N') resultReturn.push(d);
 														}
 														if(countTreatedACL == dataACLLen) {
 															countTreatedACL = -1
 															final(resultReturn, data.length);
 														}
 													}
-												}); //acl 2
+												}); 
 											})(data[i]);
-										} // else { //not found user right	
+										} 
 									}
-								} //for
+								} 
 								if(countTreatedACL == dataACLLen) 
 									final(resultReturn, data.length);			
-							} // else if(dataACL != null){
-							else {
-								res.json(404, "error in finding acl");
-							}
-						}); //ACL.find
-					} //else
-				}); // group
-			} // else if (connectedUser)
+							} 
+							else res.status(400).json({error: "error in finding acl"});
+						}); 
+					} 
+				}); 
+			} 
 			else { 
-				if(data != null)
-					res.json("You dont have permission to access this resource"); 
+				if(data != null) res.status(403).json({error:"You dont have permission to access this resource"}); 
 				else return([]);
 			}
 		}
@@ -148,55 +133,33 @@ exports.listAll = function(req, res){
 //for the uri: app.get('/corpus/:id_corpus/media/:id_media', 
 exports.listWithId = function(req, res) {
 	Media.findById(req.params.id_media, function(error, data){
-		if(error) {
-			res.json(error);
-		}
-		else if(data == null) {
-			res.json('no such id_media!')
-		}
-		else
-			res.json(data);
+		if(error) res.status(400).json(error);
+		else if(data == null) res.status(400).json({error:'no such id_media!'})
+		else res.status(200).json(data);
 	});
 }
 
 //test for Posting corpus
 //app.post('/corpus/:id_corpus/media', 
 exports.post = function(req, res){
-	if(req.body.name == undefined)
-		return res.send(404, "one or more data fields are not filled out properly");
+	if(req.body.name == undefined) return res.status(400).json({error:"one or more data fields are not filled out properly"});
 		
 	Corpus.findById(req.params.id_corpus, function(error, data){
-		if(error){
-			res.json(error);
-		}
-		else if(data == null){
-			res.json('Could not post this media because the given id_corpus is incorrect');
-		}
+		if(error) res.status(400).json(error);
+		else if(data == null) res.status(400).json({error:'Could not post this media because the given id_corpus is incorrect'});
 		else {
-			var media_data = {
-					id_corpus: req.params.id_corpus
-				  , name: req.body.name
-				  , url : ""
-			};
-			if(req.body.url)
-				media_data.url = req.body.url;
-				
+			var media_data = {id_corpus: req.params.id_corpus, name: req.body.name, url : ""};
+			if(req.body.url) media_data.url = req.body.url;
 			var media = new Media(media_data);
 			// create a new media
 			media.save(function(error1, data1){
-				if(error1){
-					console.log('error in posting media data');
-					res.json(error1);
-				}
+				if(error1) res.status(400).json(error1);
 				else {
-					console.log('Success on saving media data');
 					//add the current user to the ACL list
 					var connectedUser = "root";
-					if(req.session.user)
-						connectedUser = req.session.user.username;
-					
+					if(req.session.user) connectedUser = req.session.user.username;
 					ACLAPI.addUserRightGeneric(data1._id, connectedUser, 'A');
-					res.json(data1);
+					res.status(200).json(data1);
 				}
 			});
 		}
@@ -205,94 +168,26 @@ exports.post = function(req, res){
 
 //app.put('/corpus/:id_corpus/media/:id_media', 
 exports.update = function(req, res){
-	if(req.params.id_corpus == undefined && req.body.name == undefined && req.body.url == undefined)
-		return res.send(404, "one or more data fields are not filled out properly");
-		
+	if(req.params.id_corpus == undefined && req.body.name == undefined && req.body.url == undefined) return res.status(400).json({error:"one or more data fields are not filled out properly"});
 	var update = {};
-	if(req.params.id_corpus)
-		update.id_corpus = req.params.id_corpus;
-	if(req.body.name)
-		update.name = req.body.name;
-	if(req.body.url)
-		update.url = req.body.url;
-	
+	if(req.params.id_corpus) update.id_corpus = req.params.id_corpus;
+	if(req.body.name) update.name = req.body.name;
+	if(req.body.url) update.url = req.body.url;
 	Media.findByIdAndUpdate(req.params.id_media, update, function (error, data) {
-		if(error){
-			console.log('error'); console.log(error);
-			res.json(error);
-		}
-		else{
-			res.json(data);
-		}
+		if(error) res.status(400).json(error);
+		else res.status(200).json(data);
 	});
 }
 
-// exports.getVideo = function(req, res){
-// 	Media.findById(req.params.id_media, function(error, data){
-// 		if(error){
-// 			res.json(error);
-// 		}
-// 		else if(data == null){
-// 			res.json(404, 'no such id_media!')
-// 		}
-// 		else {
-			
-// 			var filePath = data.url + '.webm';
-// 			if(data.url == undefined) return res.send(404, 'not found the video corresponding to this media');
-// 			if(GLOBAL.video_path)
-// 				filePath = GLOBAL.video_path + '/' + filePath;
-			
-// 			var mineType = commonFuncs.getMineType(filePath);
-// 			if(mineType == "video/webm")
-// 				res.sendfile(filePath);
-// 			else {	
-// 				fileSystem.stat(filePath, function (err, stat){
-// 					if(stat) {
-// 						res.writeHead(200, {
-// 							'Content-Type': mineType,//'audio/mpeg', 
-// 							'Content-Length': stat.size
-// 						});
-	
-// 						var readStream = fileSystem.createReadStream(filePath);
-// 						readStream.on('data', function(dataS) {
-// 							var flushed = res.write(dataS);
-// 							// Pause the read stream when the write stream gets saturated
-// 							if(!flushed)
-// 								readStream.pause();
-// 						});
-	
-// 						res.on('drain', function() {
-// 							// Resume the read stream when the write stream gets hungry 
-// 							readStream.resume();    
-// 						});
-	
-// 						readStream.on('end', function() {
-// 							res.end();        
-// 						});
-// 					} //if
-// 					else res.send(404);
-// 				});
-// 			} //if(mineType
-// 		}
-// 	});
-// }
-
 function getVideoWithExtension(req, res, extension) {
-
 	Media.findById(req.params.id_media, function(error, data){
-		if(error){
-			res.json(error);
-		}
-		else if(data == null){
-			res.json(404, 'no such id_media!')
-		}
-		else {
-			
+		if(error) res.status(400).json(error);
+		else if(data == null) res.status(400).json({error: 'no such id_media!'})
+		else {			
 			var filePath = data.url + '.' + extension;
-			if(data.url == undefined) return res.send(404, 'not found the video corresponding to this media');
-			if(GLOBAL.video_path)
-				filePath = GLOBAL.video_path + '/' + filePath;
-			res.sendfile(filePath);
+			if(data.url == undefined) return res.status(404).send({error:'not found the video corresponding to this media'});
+			if(GLOBAL.video_path) filePath = GLOBAL.video_path + '/' + filePath;
+			res.status(200).sendfile(filePath);
 		}
 	});
 }
