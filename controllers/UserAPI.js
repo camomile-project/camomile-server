@@ -80,7 +80,7 @@ exports.listGroupsOfUserId = function(req, res){
 		else if(data == null) res.json(404, '{"error":"no such user"}')
 		else {			
 			Group.find({'usersList' : {$regex : new RegExp('^'+ data.username + '$', "i")}}, function(error, dataGroup) {
-				if(error) res.send(error);
+				if(error) res.send(400, '{"error":"'+error+'"}');
 				else {
 					if(connectedUser.role == "admin")  res.json(dataGroup);
 					else {				
