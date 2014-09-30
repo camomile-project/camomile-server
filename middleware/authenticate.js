@@ -43,7 +43,7 @@ var corpus = require('../controllers/CorpusAPI'),
 authenticateElem = function(name, pass, fn) {
     User.findOne({username: name}, function (err, user) {
        	if (user) {
-           	if (err) return fn(new Error('could not find user'));
+           	if (err)  return fn(new Error('could not find user'));
            	hash(pass, user.salt, function (err, hash) {
             	if (err) return fn(err);
             	if (hash == user.hash) return fn(null, user);
@@ -382,19 +382,19 @@ exports.userExist = function(req, res, next) {
 }
 
 exports.login = function (req, res) {
-	var username = req.body.username,
-		pass = req.body.password;
+	var username = req.body.username;
+	var	pass = req.body.password;
 	if(username == undefined) { //login via a GET
 		username = req.params.username;
 		pass = req.params.password;
 	}
-	if(username == undefined || pass == undefined) res.send(400, '{"error":"authentication failed, please check your username or password"}');
+	if(username == undefined || pass == undefined) res.send(400, '{"error":"authentication failed, username or password are not define"}');
 	else {
 		authenticateElem(username, pass, function (err, user) {
 			if (user) {
 				req.session.regenerate(function () {
 					req.session.user = user;
-					res.send(200, '{"message":"You have been successfully logged in as'+req.session.user+'"}'); 
+					res.send(200, '{"message":"You have been successfully logged in as '+username+'"}'); 
 				});
 			} 
 			else res.send(400, '{"error":"authentication failed, please check your username or password"}');
