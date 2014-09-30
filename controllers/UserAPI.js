@@ -57,11 +57,11 @@ exports.listUsers = function (req, res) {
 
 //retrieve a particular user (with id)
 exports.listWithId = function(req, res){
-	if(req.params.id == undefined) return res.send(404, '{"error":"the given ID is not correct"}');
+	if(req.params.id == undefined) return res.send(400, '{"error":"the given ID is not correct"}');
 	var connectedUser = req.session.user;	
 	User.findById(req.params.id, 'username affiliation role', function(error, data){
 		if(error) res.json(error);
-		else if(data == null) res.json(404, '{"error":"no such user"}')
+		else if(data == null) res.json(400, '{"error":"no such user"}')
 		else
 			if(connectedUser.role == "admin")  res.json(data);
 			else {				
@@ -73,11 +73,11 @@ exports.listWithId = function(req, res){
 
 //retrieve a particular user (with id)
 exports.listGroupsOfUserId = function(req, res){
-	if(req.params.id == undefined) return res.send(404, '{"error":"the given ID is not correct"}');
+	if(req.params.id == undefined) return res.send(400, '{"error":"the given ID is not correct"}');
 	var connectedUser = req.session.user;	
 	User.findById(req.params.id, 'username affiliation role', function(error, data){
 		if(error) res.json(error);
-		else if(data == null) res.json(404, '{"error":"no such user"}')
+		else if(data == null) res.json(400, '{"error":"no such user"}')
 		else {			
 			Group.find({'usersList' : {$regex : new RegExp('^'+ data.username + '$', "i")}}, function(error, dataGroup) {
 				if(error) res.send(400, '{"error":"'+error+'"}');

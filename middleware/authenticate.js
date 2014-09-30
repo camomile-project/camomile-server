@@ -193,7 +193,7 @@ exports.requiredAuthentication = function(role, minimumRightRequired, level) {
 								result.push(req.params.id_media);
 								result.push(req.params.id_corpus);
 								ACLModel.find({id:{$in:result}}, function(error, dataACL) {
-									if(error) res.send(404, '{"error":"'+error+'"}');
+									if(error) res.send(400, '{"error":"'+error+'"}');
 									else if(dataACL != null) {
 										var contd = true;
 										for(var i = 0; i < dataACL.length && contd; i++){
@@ -230,7 +230,7 @@ exports.requiredAuthentication = function(role, minimumRightRequired, level) {
 								result.push(req.params.id_media);
 								result.push(req.params.id_corpus);
 								ACLModel.find({id:{$in:result}}, function(error, dataACL) {
-									if(error) res.send(404, '{"error":"'+error+'"}');
+									if(error) res.send(400, '{"error":"'+error+'"}');
 									else if(dataACL != null) {
 										var contd = true;
 										for(var i = 0; i < dataACL.length && contd; i++){
