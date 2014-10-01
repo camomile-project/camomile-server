@@ -96,28 +96,35 @@ exports.listGroupsOfUserId = function(req, res){
 exports.update = function(req, res){
 	if (req.params.id == undefined) return res.status(400).json({error:"one or more data fields are not filled out properly"});
 	var connectedUser = req.session.user;
-	var update = {};
-	if (connectedUser.role == "admin" && GLOBAL.list_user_role.indexOf(req.body.role)!=-1 && connectedUser.username != "root") update.role = req.body.role;		
-	if (req.body.affiliation) update.affiliation = req.body.affiliation;
-	if (req.body.password == undefined) {
-		User.findByIdAndUpdate(req.params.id, update, function (error, data) {
-			if (error) res.status(400).json({error:"error", message:error});
-			else res.status(200).json(data);
-		});
-	} 
-	else { 
-		pass.hash(req.body.password, function (error, salt, hash) {
-			if (error) res.status(400).json({error:"error", message:error});
-			else {
-				update.salt = salt;
-				update.hash = hash;
-				User.findByIdAndUpdate(req.params.id, update, function (error2, data) {
-					if (error2) res.status(400).json({error:"error", message:error2});
+
+	User.findById(req.params.id, 'username affiliation role', function(error0, data0){
+		if (error0) res.status(400).json({error:"error", message:error0});
+		else if (data0 == null) res.status(400).json({error:"no such user"});
+		else {
+			var update = {};
+			if (connectedUser.role == "admin" && GLOBAL.list_user_role.indexOf(req.body.role)!=-1 && connectedUser.username != "root") update.role = req.body.role;		
+			if (req.body.affiliation) update.affiliation = req.body.affiliation;
+			if (req.body.password == undefined) {
+				User.findByIdAndUpdate(req.params.id, update, function (error, data) {
+					if (error) res.status(400).json({error:"error", message:error});
 					else res.status(200).json(data);
 				});
 			} 
-		});
-	}
+			else { 
+				pass.hash(req.body.password, function (error, salt, hash) {
+					if (error) res.status(400).json({error:"error", message:error});
+					else {
+						update.salt = salt;
+						update.hash = hash;
+						User.findByIdAndUpdate(req.params.id, update, function (error2, data) {
+							if (error2) res.status(400).json({error:"error", message:error2});
+							else res.status(200).json(data);
+						});
+					} 
+				});
+			}
+		}
+	});
 }
 
 // remove a user
