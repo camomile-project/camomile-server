@@ -66,7 +66,7 @@ exports.listWithId = function(req, res){
 			if (connectedUser.role == "admin")  res.status(200).json(data);
 			else {				
 				if (data.username == connectedUser.username)	res.status(200).json(data);
-				else res.status(401).json({error:"You dont have enough right to access this resource"});
+				else res.status(403).json({error:"You dont have enough right to access this resource"});
 			}
 	});
 }
@@ -85,7 +85,7 @@ exports.listGroupsOfUserId = function(req, res){
 					if (connectedUser.role == "admin")  res.status(200).json(dataGroup);
 					else {				
 						if (data.username == connectedUser.username)	res.status(200).json(dataGroup);
-						else res.status(401).json({error:"You dont have enough right to access this resource"});
+						else res.status(403).json({error:"You dont have enough right to access this resource"});
 					}
 				}
 			});

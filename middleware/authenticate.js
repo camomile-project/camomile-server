@@ -161,6 +161,7 @@ exports.requiredConsistentID = function(role, minimumRightRequired, level) {
 				}	
 			}
 		}
+		else res.status(401).json({error:"You are not connected"});
 	}
 }
 

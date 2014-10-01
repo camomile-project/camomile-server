@@ -69,7 +69,7 @@ exports.createGroup = function(req, res){
 				else res.status(200).json(dat);
 			});	
 		}
-		else res.status(403).json({error:"This group already exists"});
+		else res.status(400).json({error:"This group already exists"});
 	});
 };
 
@@ -141,7 +141,7 @@ exports.listWithId = function(req, res){
 			if (connectedUser.role == "admin") res.json(data);
 			else {				
 				if (data.usersList.indexOf(connectedUser.username) > -1) res.json(data); //not working on IE8 and below
-				else res.status(401).json({error:"You dont have enough right to access this resource"});
+				else res.status(403).json({error:"You dont have enough right to access this resource"});
 			}
 		}
 	});
@@ -163,27 +163,24 @@ exports.listUserOfGroupId = function(req, res){
 
 // add a group
 exports.addGroup = function (req, res) {
-	if (GLOBAL.no_auth) return res.status(401).json({error:"Anonymous user is not allowed here"});
-    else {
-    	if (req.body.groupname == undefined) return res.status(400).json({error:"The groupname field has not been filled in"});
-    	Group.findOne({groupname : {$regex : new RegExp('^'+ req.body.groupname + '$', "i")}}, function(error, group) {
-    		if (error) res.status(400).json({error:"error", message:error});
-    		else if (group == null) {
-				var groupItem = {
-					groupname : req.body.groupname,
-					description : req.body.description || "unknown",
-					usersList : []
-				};
-				var g = new Group(groupItem);
-	
-				g.save(function(error2, data){
-					if (error2) res.status(400).json({error:"error", message:error2});
-					else res.send(200, data);
-				});
-			} 
-			else res.status(400).json({error:"This group already exists"});
-		});
-    }
+	if (req.body.groupname == undefined) return res.status(400).json({error:"The groupname field has not been filled in"});
+	Group.findOne({groupname : {$regex : new RegExp('^'+ req.body.groupname + '$', "i")}}, function(error, group) {
+		if (error) res.status(400).json({error:"error", message:error});
+		else if (group == null) {
+			var groupItem = {
+				groupname : req.body.groupname,
+				description : req.body.description || "unknown",
+				usersList : []
+			};
+			var g = new Group(groupItem);
+
+			g.save(function(error2, data){
+				if (error2) res.status(400).json({error:"error", message:error2});
+				else res.send(200, data);
+			});
+		} 
+		else res.status(400).json({error:"This group already exists"});
+	});    
 }
 
 // update information of a group: put /group/:id

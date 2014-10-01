@@ -274,7 +274,7 @@ exports.retrieveUserHistory = function(req, res){
 
 	User.findOne({username: name}, function (error, user) {
         if (error) res.status(400).json({error:"error", message:error});
-        else if (user == null) return res.status(401).json({error:"Invalid user"});
+        else if (user == null) return res.status(400).json({error:"Invalid user"});
         else {
         	Layer.find({'history.name' : {$regex : new RegExp('^'+ name + '$', "i")}}, 'history.modification',function(error2, data) {
 				if (error2) return res.status(400).json({error:"error in retrieving histories", message:error2});

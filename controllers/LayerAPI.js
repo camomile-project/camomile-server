@@ -195,7 +195,10 @@ exports.post = function(req, res){
 }
 
 exports.updateAll = function(req, res){
+
 	if (req.body.layer_type == undefined && req.body.fragment_type == undefined && req.body.data_type == undefined && req.body.source == undefined) return res.status(400).json({error:"one or more data fields are not filled out properly"});
+
+
 
 	var update = {};
 	if (req.body.id_media) update.id_media = req.params.id_media;
