@@ -74,14 +74,14 @@ exports.requiredRightUGname = function(role) {
 				var groupLogin = req.body.groupname;
 				if(userLogin == undefined) userLogin = "root";
 				User.findOne({username : {$regex : new RegExp('^'+ userLogin + '$', "i")}}, function(error, data){
-					if(error) res.status(403).json( {error:"access denied"});
+					if(error) res.status(403).json( {error:"access denied", message:error});
 					else {
 						if(data == null) res.status(400).json( {error:"this user does not exist"});
 						else {
 							if(groupLogin == undefined) next();
 							else {
 								Group.findOne({groupname : {$regex : new RegExp('^'+ groupLogin + '$', "i")}}, function(error, data){
-									if(error) res.status(403).json( {error:"access denied"});
+									if(error) res.status(403).json( {error:"access denied", message:error});
 									else {
 										if(data == null)res.status(400).json( {error:"this group does not exist"});
 										else next();
@@ -97,81 +97,123 @@ exports.requiredRightUGname = function(role) {
 	}
 }
 
+
+checkRequiredConsistentID_corpus = function(req, res, next) {
+	var id_corpus = req.params.id;
+	if(id_corpus == undefined) id_corpus = req.params.id_corpus;
+	Corpus.findById(id_corpus, function(error, data){
+		if(error) res.status(403).json({error:"access denied!", message:error});
+		else if(data == null) res.status(403).json( {error:"access denied"});
+		else next();
+	});
+}
+
+checkRequiredConsistentID_media = function(req, res, next) {
+	Media.findById(req.params.id_media, function(error, data){
+		if(error) res.status(403).json({error:"access denied!", message:error});
+		else if(data == null) res.status(400).json( {error:"Not found this id"});
+		else if(req.params.id_corpus == data.id_corpus)  next();
+		else res.status(400).json( {error:"One of these ids is not correct"});
+	});
+}
+
+checkRequiredConsistentID_layer = function(req, res, next) {
+	Layer.findById(req.params.id_layer, function(error, data){
+		if(error) res.status(403).json({error:"access denied!", message:error});
+		else if(data == null) res.status(400).json( {error:"Not found this id"});
+		else if(data.id_media != req.params.id_media)  res.status(400).json( {error:"One of these ids is not correct"});
+		else checkRequiredConsistentID_media(req, res, next);
+	});
+}
+
+checkRequiredConsistentID_annotation = function(req, res, next) {
+	Annotation.findById(req.params.id_anno, function(error, data){
+		if(error) res.status(403).json({error:"access denied!", message:error});
+		else if(data == null) res.status(400).json( {error:"Not found this id"});
+		else if(data.id_layer != req.params.id_layer) res.status(400).json( {error:"One of these ids is not correct"});
+		else checkRequiredConsistentID_layer(req, res, next);
+	});
+}
+
 // check if the IDs given for an operation are consistent, 
 // ie., id_layer is under its id_media, ...
 exports.requiredConsistentID = function(role, minimumRightRequired, level) {
 	return function(req, res, next) {
-		if(req.session.user) { 
+		if(req.session.user) {
     		if(req.session.user.role == "admin" || minimumRightRequired == 'N') next();
-		else if(commonFuncs.isAllowedUser(req.session.user.role, role) < 0) res.status(403).json( {error:"access denied"});
-		else {
-			switch(level){
-				case "corpus":
-					var id_corpus = req.params.id;
-					if(id_corpus == undefined) id_corpus = req.params.id_corpus;
-					Corpus.findById(id_corpus, function(error, data){
-						if(error) res.status(403).json( {error:"access denied"});
-						else if(data == null) res.status(403).json( {error:"access denied"});
-						else next();
-					});
-					break;
-					
-				case "media":
-					Media.findById(req.params.id_media, function(error, data){
-						if(error) res.status(403).json( {error:"access denied!"});
-						else if(data == null) res.status(400).json( {error:"Not found this id"});
-						else if(req.params.id_corpus == data.id_corpus)  next();
-						else res.status(400).json( {error:"One of these ids is not correct"});
-					});						
-					break;
-					
-				case "layer":
-					Layer.findById(req.params.id_layer, function(error, data){
-						if(error) res.status(403).json( {error:"access denied!"});
-						else if(data == null) res.status(400).json( {error:"Not found this id"});
-						else if(data.id_media != req.params.id_media)  res.status(400).json( {error:"One of these ids is not correct"});
-						else {
-							Media.findById(req.params.id_media, function(error, data1){
-								if(error) res.status(403).json( {error:"access denied!"});
-								else if(data1 == null) res.status(400).json( {error:"Not found this id"});
-								else if(req.params.id_corpus == data1.id_corpus) next();
-								else res.status(400).json( {error:"One of these ids is not correct"});
-							});
-						}
-					});
-					break;
-				
-				case "annotation":
-					Annotation.findById(req.params.id_anno, function(error, dat){
-						if(error)res.status(403).json( {error:"access denied!"});
-						else if(dat == null) res.status(400).json( {error:"Not found this id"});
-						else if(dat.id_layer != req.params.id_layer) res.status(400).json( {error:"One of these ids is not correct"});
-						else {
-							Layer.findById(req.params.id_layer, function(error, data){
-								if(error) res.status(403).json( {error:"access denied!"});
-								else if(data == null) res.status(400).json( {error:"Not found this id"});
-								else if(data.id_media != req.params.id_media)  res.status(400).json( {error:"One of these ids is not correct"});
-								else {
-									Media.findById(req.params.id_media, function(error, data1){
-										if(error) res.status(403).json( {error:"access denied!"});
-										else if(data1 == null) res.status(400).json( {error:"Not found this id"});
-										else if(req.params.id_corpus == data1.id_corpus) next();
-										else res.status(400).json( {error:"One of these ids is not correct"});
-									});
-								}
-							});		
-						}
-					});
-					break;
-					
-				default:
-					break;
+			else if(commonFuncs.isAllowedUser(req.session.user.role, role) < 0) res.status(403).json( {error:"access denied"});
+			else {
+				switch(level){
+					case "corpus":
+						checkRequiredConsistentID_corpus(req, res, next);
+						break;						
+					case "media":
+						checkRequiredConsistentID_media(req, res, next);
+						break;						
+					case "layer":
+						checkRequiredConsistentID_layer(req, res, next);					
+						break;					
+					case "annotation":
+						checkRequiredConsistentID_annotation(req, res, next);					
+						break;						
+					default:
+						break;
 				}	
 			}
 		}
 	}
 }
 
+
+checkRequiredAuthentication = function(req, res, result, connectedUser, dataGroup, minimumRightRequired, next){
+	ACLModel.find({id:{$in:result}}, function(error, dataACL) {
+		if(error) res.status(400).json({error:"access denied!", message:error});
+		else if(dataACL != null) {
+			var contd = true;
+			for(var i = 0; i < dataACL.length && contd; i++){
+				var foundPos = commonFuncs.findUsernameInACL(connectedUser.username, dataACL[i].users);
+				if(foundPos != -1 && commonFuncs.isAllowedRight(minimumRightRequired, dataACL[i].users[foundPos].right) >= 0) {
+					found = true; 
+					contd = false;
+					next();
+				}	
+				else {
+					foundPos = commonFuncs.findUsernameInGroupACL(dataGroup, dataACL[i].groups);
+					if(foundPos != -1 && commonFuncs.isAllowedRight(minimumRightRequired, dataACL[i].groups[foundPos].right) >= 0) {
+						found = true; 
+						contd = false; 
+						next(); 
+					}
+				}
+				if(foundPos != -1 && contd)  contd = false;  // found the user right, but not satisfied
+			} 
+			if(found == false)  res.status(403).json( {error:"access denied"});
+		}
+		else  res.status(403).json( {error:"access denied"}); 
+	});
+}
+
+checkRequiredAuthenticationCorpus = function(req, res, id_corpus, connectedUser, dataGroup, minimumRightRequired, next){
+	ACLModel.findOne({id:id_corpus}, function(error, dataACL) {
+		if(error) res.status(400).json({error:"access denied!", message:error});
+		else if(dataACL != null) {										
+			var foundPos = commonFuncs.findUsernameInACL(connectedUser.username, dataACL.users);
+			if(foundPos != -1 && commonFuncs.isAllowedRight(minimumRightRequired, dataACL.users[foundPos].right) >= 0) {
+				found = true;
+				next();
+			}	
+			else {
+				foundPos = commonFuncs.findUsernameInGroupACL(dataGroup, dataACL.groups);
+				if(foundPos != -1 && commonFuncs.isAllowedRight(minimumRightRequired, dataACL.groups[foundPos].right) >= 0) {
+					found = true; 
+					next();
+				}
+			}
+			if(found == false) res.status(403).json( {error:"access denied"});
+		}
+		else res.status(403).json( {error:"access denied"});
+	});
+}
 
 exports.requiredAuthentication = function(role, minimumRightRequired, level) {
 	return function(req, res, next) {
@@ -185,75 +227,27 @@ exports.requiredAuthentication = function(role, minimumRightRequired, level) {
 				switch(i) {
 					case "annotation": 
 						Group.find({'usersList' : {$regex : new RegExp('^'+ connectedUser.username + '$', "i")}}, function(error, dataGroup) {
-							if(error)  throw error;
+							if(error) res.status(400).json({error:"access denied!", message:error});
 							else {
 								result = [];
 								result.push(req.params.id_anno);
 								result.push(req.params.id_layer);
 								result.push(req.params.id_media);
 								result.push(req.params.id_corpus);
-								ACLModel.find({id:{$in:result}}, function(error, dataACL) {
-									if(error) res.status(400).json( {error:"'+error+'"});
-									else if(dataACL != null) {
-										var contd = true;
-										for(var i = 0; i < dataACL.length && contd; i++){
-											var foundPos = commonFuncs.findUsernameInACL(connectedUser.username, dataACL[i].users);
-											if(foundPos != -1 && commonFuncs.isAllowedRight(minimumRightRequired, dataACL[i].users[foundPos].right) >= 0) {
-												found = true; 
-												contd = false;
-												next();
-											}	
-											else {
-												foundPos = commonFuncs.findUsernameInGroupACL(dataGroup, dataACL[i].groups);
-												if(foundPos != -1 && commonFuncs.isAllowedRight(minimumRightRequired, dataACL[i].groups[foundPos].right) >= 0) {
-													found = true; 
-													contd = false; 
-													next(); 
-												}
-											}
-											if(foundPos != -1 && contd)  contd = false;  // found the user right, but not satisfied
-										} 
-										if(found == false)  res.status(403).json( {error:"access denied"});
-									}
-									else  res.status(403).json( {error:"access denied"}); 
-								});
+								checkRequiredAuthentication(req, res, result, connectedUser, dataGroup, minimumRightRequired, next);
 							}
 						});	
 						break;
 						
 					case  "layer": 
 						Group.find({'usersList' : {$regex : new RegExp('^'+ connectedUser.username + '$', "i")}}, function(error, dataGroup) {
-							if(error) throw error;
+							if(error) res.status(400).json({error:"access denied!", message:error});
 							else {
 								result = [];
 								result.push(req.params.id_layer);
 								result.push(req.params.id_media);
 								result.push(req.params.id_corpus);
-								ACLModel.find({id:{$in:result}}, function(error, dataACL) {
-									if(error) res.status(400).json( {error:"'+error+'"});
-									else if(dataACL != null) {
-										var contd = true;
-										for(var i = 0; i < dataACL.length && contd; i++){
-											var foundPos = commonFuncs.findUsernameInACL(connectedUser.username, dataACL[i].users);
-											if(foundPos != -1 && commonFuncs.isAllowedRight(minimumRightRequired, dataACL[i].users[foundPos].right) >= 0) {
-												contd = false; 
-												found = true;
-												next();
-											}	
-											else {
-												foundPos = commonFuncs.findUsernameInGroupACL(dataGroup, dataACL[i].groups);
-												if(foundPos != -1 && commonFuncs.isAllowedRight(minimumRightRequired, dataACL[i].groups[foundPos].right) >= 0) { 
-													found = true; 
-													contd = false; 
-													next(); 
-												}
-											}
-											if(foundPos != -1 && contd) contd = false;  // found the user right, but not satisfied
-										} 
-										if(found == false) res.status(403).json( {error:"access denied"});
-									}
-									else res.status(403).json( {error:"access denied"});
-								});
+								checkRequiredAuthentication(req, res, result, connectedUser, dataGroup, minimumRightRequired, next);
 							}
 						});	
 						break;
@@ -261,69 +255,24 @@ exports.requiredAuthentication = function(role, minimumRightRequired, level) {
 					case "media": 
 						var id_media = req.params.id_media;
 						Group.find({'usersList' : {$regex : new RegExp('^'+ connectedUser.username + '$', "i")}}, function(error, dataGroup) {
-							if(error) throw error;
+							if(error) res.status(400).json({error:"access denied!", message:error});
 							else {
 								result = [];
 								result.push(req.params.id_media);
 								result.push(req.params.id_corpus);
-								ACLModel.find({id:{$in:result}}, function(error, dataACL) {
-									if(error)  throw error;
-									else if(dataACL != null) {
-										var contd = true;
-											for(var i = 0; i < dataACL.length && contd; i++){
-											var foundPos = commonFuncs.findUsernameInACL(connectedUser.username, dataACL[i].users);
-											if(foundPos != -1 && commonFuncs.isAllowedRight(minimumRightRequired, dataACL[i].users[foundPos].right) >= 0) {
-												contd = false; 
-												found = true;
-												next();
-											}	
-											else {
-												foundPos = commonFuncs.findUsernameInGroupACL(dataGroup, dataACL[i].groups);
-												if(foundPos != -1 && commonFuncs.isAllowedRight(minimumRightRequired, dataACL[i].groups[foundPos].right) >= 0) {
-													found = true; 
-													contd = false; 
-													next(); 
-												}
-											}
-											if(foundPos != -1 && contd) contd = false;  // found the user right, but not satisfied
-										} 
-										if(found == false) res.status(403).json( {error:"access denied"});
-									}
-									else res.status(403).json( {error:"access denied"});
-								});
+								checkRequiredAuthentication(req, res, result, connectedUser, dataGroup, minimumRightRequired, next);
 							}
 						});
 						break;
 						
 					case "corpus": 
 						var id_corpus = req.params.id;
-						if(id_corpus == undefined) id_corpus = req.params.id_corpus;
-						
+						if(id_corpus == undefined) id_corpus = req.params.id_corpus;						
 						Group.find({'usersList' : {$regex : new RegExp('^'+ connectedUser.username + '$', "i")}}, function(error, dataGroup) {
-							if(error) throw error;
-							else {									
-								ACLModel.findOne({id:id_corpus}, function(error, dataACL) {
-									if(error) throw error;
-									else if(dataACL != null) {										
-										var foundPos = commonFuncs.findUsernameInACL(connectedUser.username, dataACL.users);
-										if(foundPos != -1 && commonFuncs.isAllowedRight(minimumRightRequired, dataACL.users[foundPos].right) >= 0) {
-											found = true;
-											next();
-										}	
-										else {
-											foundPos = commonFuncs.findUsernameInGroupACL(dataGroup, dataACL.groups);
-											if(foundPos != -1 && commonFuncs.isAllowedRight(minimumRightRequired, dataACL.groups[foundPos].right) >= 0) {
-												found = true; 
-												next();
-											}
-										}
-										if(found == false) res.status(403).json( {error:"access denied"});
-									}
-									else res.status(403).json( {error:"access denied"});
-								});
-							}
+							if(error) res.status(400).json({error:"access denied!", message:error});
+							else checkRequiredAuthenticationCorpus(req, res, id_corpus, connectedUser, dataGroup, minimumRightRequired, next);
 						});
-					break;
+						break;
 					
 					case "global":						
 						if(commonFuncs.isAllowedUser(req.session.user.role, role) >= 0)	next();
