@@ -33,34 +33,34 @@ var Queue = require('../models/Queue').Queue;
 
 // retrieve all queues, only admin users can do so
 exports.listAll = function (req, res) {
-	Queue.find({}, function (err, que) {
-        if(err) throw err;
-        if(que) res.status(200).json(que);
+	Queue.find({}, function (error, que) {
+        if (error) res.status(400).json({error:"error", message:error});
+        if (que) res.status(200).json(que);
         else return res.status(200).json([]);
     });
 }
 
 //retrieve a particular queue, any connected user can do it
 exports.listWithId = function(req, res){
-	if(req.params.id == undefined) return res.status(400).json({error:"the given ID is not correct"});
-	Queue.findById(req.params.id, function (err, que) {
-        if(err) throw err;
-        if(que) res.status(200).json(que);
+	if (req.params.id == undefined) return res.status(400).json({error:"the given ID is not correct"});
+	Queue.findById(req.params.id, function (error, que) {
+        if (error) res.status(400).json({error:"error", message:error});
+        if (que) res.status(200).json(que);
         else return res.status(200).json([]);
     });
 }
 
 //get(pop) the next annotation to be annotated
 exports.getNext = function(req, res){
-	if(req.params.id == undefined) return res.status(200).json({error:"the given ID is not correct"});
-	Queue.findById(req.params.id, function (err, que) {
-        if(err) throw err;
-        if(que) {
-        	if(que.queue.length > 0){
+	if (req.params.id == undefined) return res.status(200).json({error:"the given ID is not correct"});
+	Queue.findById(req.params.id, function (error, que) {
+        if (error) res.status(400).json({error:"error", message:error});
+        if (que) {
+        	if (que.queue.length > 0){
         		ret = que.queue.slice(0,1);
         		que.queue.splice(0,1);
-        		que.save(function(err, queNew) {
-        			if(err) res.status(200).json(err);
+        		que.save(function(error2, queNew) {
+        			if (error2) res.status(400).json({error:"error", message:error2});
         			else res.status(200).json(ret[0]);
         		});
         	}
@@ -72,27 +72,27 @@ exports.getNext = function(req, res){
 
 //create a queue with a given name (and a queue containing a list of ids, optional)
 exports.post = function(req, res){
-	if(req.body.name == undefined) return res.status(400).json({error:"You must fill in the name of the queue"});
+	if (req.body.name == undefined) return res.status(400).json({error:"You must fill in the name of the queue"});
 	var queue_data = {name: req.body.name, queue : []};
-	if(req.body.queue) queue_data = req.body.queue;
+	if (req.body.queue) queue_data = req.body.queue;
 	var queue = new Queue(queue_data);
 	queue.save(function(error, data){
-		if(error)res.status(400).json(error);
+		if (error) res.status(400).json({error:"error", message:error});
 		else res.status(200).json(data);
 	});
 }
 
 // update information of a queue: 
 exports.update = function(req, res){
-	if(req.params.id == undefined || req.body.id_list == undefined)	return res.status(400).json({error:"one or more data fields are not filled out properly"});
+	if (req.params.id == undefined || req.body.id_list == undefined)	return res.status(400).json({error:"one or more data fields are not filled out properly"});
 	Queue.findById(req.params.id, function(error, data){
-		if(error) res.status(400).json(error);
-		else if(data == null) res.status(400).json({error:'no such id_queue!'})
+		if (error) res.status(400).json({error:"error", message:error});
+		else if (data == null) res.status(400).json({error:'no such id_queue!'})
 		else {
-			if(req.body.name) data.name = req.body.name;
-			if(req.body.id_list) data.queue = req.body.id_list;
-			data.save(function(err, dat){
-				if(err) res.status(400).json(err);
+			if (req.body.name) data.name = req.body.name;
+			if (req.body.id_list) data.queue = req.body.id_list;
+			data.save(function(error2, dat){
+				if (error2) res.status(400).json(error2);
 				else res.status(200).json(dat);
 			});
 		}
@@ -101,21 +101,21 @@ exports.update = function(req, res){
 
 // add a list of ids to the queue
 exports.putnext = function(req, res){
-	if(req.params.id == undefined || req.body.id_list == undefined) return res.status(400).json({error:"one or more data fields are not filled out properly"});
+	if (req.params.id == undefined || req.body.id_list == undefined) return res.status(400).json({error:"one or more data fields are not filled out properly"});
 	Queue.findById(req.params.id, function(error, data){
-		if(error) res.status(400).json(error);
-		else if(data == null) res.status(400).json({error:'no such id_queue!'})
+		if (error) res.status(400).json({error:"error", message:error});
+		else if (data == null) res.status(400).json({error:'no such id_queue!'})
 		else {
-			if(req.body.name) data.name = req.body.name;
-			if(req.body.id_list){
+			if (req.body.name) data.name = req.body.name;
+			if (req.body.id_list){
 				var id_list = req.body.id_list;	
 				for(var i = 0; i < id_list.length; i++) {
 					var index = data.queue.indexOf(id_list[i]);
-					if(index < 0) data.queue.push(id_list[i]);										// not found, so insert it into the queue
+					if (index < 0) data.queue.push(id_list[i]);										// not found, so insert it into the queue
 				}
 			}
-			data.save(function(err, dat){
-				if(err) res.status(400).json(err);
+			data.save(function(error2, dat){
+				if (error2) res.status(400).json({error:"error", message:error2});
 				else res.status(200).json(dat);
 			});
 		}
@@ -124,9 +124,9 @@ exports.putnext = function(req, res){
 
 // remove a queue
 exports.remove  = function(req, res){
-	if(req.params.id == undefined) return res.status(400).json({error:"one or more data fields are not filled out properly"});
+	if (req.params.id == undefined) return res.status(400).json({error:"one or more data fields are not filled out properly"});
 	Queue.remove({_id : req.params.id}, function (error, data) {
-		if(error) res.status(400).json(error);
+		if (error) res.status(400).json({error:"error", message:error});
 		else res.status(200).json(data);
 	});
 }

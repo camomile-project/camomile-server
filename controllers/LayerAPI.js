@@ -45,39 +45,39 @@ var ACL = require('../models/ACL').ACL,
 */
 exports.listAll = function(req, res){
 	function final(resultReturn, n) { 
-		if(resultReturn.length == 0 && n > 0) res.status(403).json({error:"You dont have enough permission to get this resource"});
+		if (resultReturn.length == 0 && n > 0) res.status(403).json({error:"You dont have enough permission to get this resource"});
 		else res.status(200).json(resultReturn);
 	}
 	Layer.find({id_media : req.params.id_media}, function(error, data){																		//find all layers under this media
-		if(error) res.status(400).json(error);
+		if (error) res.status(400).json({error:"error", message:error});
 		else {
 			var connectedUser = req.session.user;
-			if(GLOBAL.no_auth == true || (connectedUser != undefined && connectedUser.role == "admin")) res.status(400).json(data);
-			else if(connectedUser != undefined && data != null){
+			if (GLOBAL.no_auth == true || (connectedUser != undefined && connectedUser.role == "admin")) res.status(400).json(data);
+			else if (connectedUser != undefined && data != null){
 				//first find all groups to which the connecteduser belongs
-				Group.find({'usersList' : {$regex : new RegExp('^'+ connectedUser.username + '$', "i")}}, function(error, dataGroup) {
-					if(error) throw error;
+				Group.find({'usersList' : {$regex : new RegExp('^'+ connectedUser.username + '$', "i")}}, function(error2, dataGroup) {
+					if (error2) res.status(400).json({error:"error", message:error2});
 					else {
 						result = [];
 						resultReturn = [];
 						for(var i = 0; i < data.length; i++) result.push(data[i]._id);
-						ACL.find({id:{$in:result}}, function(error, dataACL){																// find all acls of these id
-							if(error) res.status(500).json({error:"error in ACL-corpusListall:"});
-							else if(dataACL != null) {
+						ACL.find({id:{$in:result}}, function(error3, dataACL){																// find all acls of these id
+							if (error3) res.status(500).json({error:"error in ACL-corpusListall:", message:error3});
+							else if (dataACL != null) {
 								var dataACLLen = dataACL.length;
 								var countTreatedACL = 0;
 								for(var i = 0; i < dataACL.length; i++){
 									var foundPos = commonFuncs.findUsernameInACL(connectedUser.username, dataACL[i].users);
-									if(foundPos != -1) {
-										if(dataACL[i].users[foundPos].right != 'N'){
+									if (foundPos != -1) {
+										if (dataACL[i].users[foundPos].right != 'N'){
 											resultReturn.push(data[i]);
 											countTreatedACL += 1; 
 										}
 									} 
 									else {																									//not found this user's right on the current resource, look for its group's one
 										foundPos = commonFuncs.findUsernameInGroupACL(dataGroup, dataACL[i].groups);
-										if(foundPos != -1) {
-											if(dataACL[i].groups[foundPos].right != 'N') {
+										if (foundPos != -1) {
+											if (dataACL[i].groups[foundPos].right != 'N') {
 												resultReturn.push(data[i]);
 												countTreatedACL += 1; 
 											}
@@ -87,23 +87,23 @@ exports.listAll = function(req, res){
 												parentID = [];
 												parentID.push(req.params.id_media); 
 												parentID.push(req.params.id_corpus);
-												ACL.find({id:{$in:parentID}}, function(error, dataACL1){
-													if(error) res.status(400).json(error);
-													else if(dataACL1 != null) {
+												ACL.find({id:{$in:parentID}}, function(error4, dataACL1){
+													if (error4) res.status(400).json({error:"error", message:error4});
+													else if (dataACL1 != null) {
 														countTreatedACL += 1;
 														var contd = true;
 														for(var j = 0; j < dataACL1.length && contd; j++) {
 															var foundPos = commonFuncs.findUsernameInACL(connectedUser.username, dataACL1[j].users);														
-															if(foundPos != -1) {
-																if(dataACL1[j].users[foundPos].right != 'N') {
+															if (foundPos != -1) {
+																if (dataACL1[j].users[foundPos].right != 'N') {
 																	resultReturn.push(d); 
 																	contd = false;
 																}
 															}
 															else {
 																foundPos = commonFuncs.findUsernameInGroupACL(dataGroup, dataACL1[j].groups);							
-																if(foundPos != -1) {
-																	if(dataACL1[j].groups[foundPos].right != 'N') {
+																if (foundPos != -1) {
+																	if (dataACL1[j].groups[foundPos].right != 'N') {
 																		resultReturn.push(d); 
 																		contd = false;
 																	}
@@ -111,7 +111,7 @@ exports.listAll = function(req, res){
 																}
 															}
 														} 
-														if(countTreatedACL == dataACLLen) {
+														if (countTreatedACL == dataACLLen) {
 															countTreatedACL = -1
 															final(resultReturn, data.length);
 														}
@@ -121,7 +121,7 @@ exports.listAll = function(req, res){
 										}
 									} 
 								} 
-								if(countTreatedACL == dataACLLen) final(resultReturn, data.length);
+								if (countTreatedACL == dataACLLen) final(resultReturn, data.length);
 							} 
 							else res.status(400).json({error: "error in finding acl"});
 						}); 
@@ -130,7 +130,7 @@ exports.listAll = function(req, res){
 				
 			} 
 			else {
-				if(data != null) res.status(400).json({error: "You dont have permission to access this resource"}); 
+				if (data != null) res.status(400).json({error: "You dont have permission to access this resource"}); 
 				else return([]);
 			}
 		}
@@ -139,19 +139,19 @@ exports.listAll = function(req, res){
 
 exports.listWithId = function(req, res){
 	Layer.findById(req.params.id_layer, function(error, data){
-		if(error) res.status(400).json(error);
-		else if(data == null) res.status(400).json({error:'no such id_layer!'})
+		if (error) res.status(400).json({error:"error", message:error});
+		else if (data == null) res.status(400).json({error:'no such id_layer!'})
 		else res.status(200).json(data);
 	});
 }
 
 exports.post = function(req, res){
-	if(req.body.layer_type == undefined || req.body.fragment_type == undefined || req.body.data_type == undefined || req.body.source == undefined) return res.status(400).json({error: "one or more data fields are not filled out properly"});
-	if(req.body.annotation != undefined) return compound.postAll(req, res);
+	if (req.body.layer_type == undefined || req.body.fragment_type == undefined || req.body.data_type == undefined || req.body.source == undefined) return res.status(400).json({error: "one or more data fields are not filled out properly"});
+	if (req.body.annotation != undefined) return compound.postAll(req, res);
 	else {
-		Media.findById(req.params.id_media, function(error, data){
-			if(error) res.status(400).json(error);
-			else if(data == null){
+		Media.findById(req.params.id_media, function(error2, data){
+			if (error2) res.status(400).json({error:"error", message:error2});
+			else if (data == null){
 				res.status(400).json({error:'Could not post this layer because the given id_media is incorrect'}); 
 				return;
 			}
@@ -166,7 +166,7 @@ exports.post = function(req, res){
 				};
 			
 				var connectedUser = "root";
-				if(req.session.user) connectedUser = req.session.user.username;
+				if (req.session.user) connectedUser = req.session.user.username;
 
 				var layer = new Layer(layer_data);																	// add new layer
 
@@ -179,9 +179,9 @@ exports.post = function(req, res){
 				};
 
 				layer.history.push({name : connectedUser, date : new Date(), modification: modified});				// update history
-				layer.save( function(errorLayer, dataLayer){														// save new layer	
-					if(errorLayer){
-						res.status(400).json(errorLayer);
+				layer.save( function(error3, dataLayer){														// save new layer	
+					if (error3){
+						res.status(400).json({error:"error", message:error3});
 						return;
 					}
 					else{
@@ -195,24 +195,24 @@ exports.post = function(req, res){
 }
 
 exports.updateAll = function(req, res){
-	if(req.body.layer_type == undefined && req.body.fragment_type == undefined && req.body.data_type == undefined && req.body.source == undefined) return res.status(400).json({error:"one or more data fields are not filled out properly"});
+	if (req.body.layer_type == undefined && req.body.fragment_type == undefined && req.body.data_type == undefined && req.body.source == undefined) return res.status(400).json({error:"one or more data fields are not filled out properly"});
 
 	var update = {};
-	if(req.body.id_media) update.id_media = req.params.id_media;
-	if(req.body.layer_type) update.layer_type = req.body.layer_type;
-	if(req.body.fragment_type) update.fragment_type = req.body.fragment_type;
-	if(req.body.data_type) update.data_type = req.body.data_type;
-	if(req.body.source) update.source = req.body.source;
+	if (req.body.id_media) update.id_media = req.params.id_media;
+	if (req.body.layer_type) update.layer_type = req.body.layer_type;
+	if (req.body.fragment_type) update.fragment_type = req.body.fragment_type;
+	if (req.body.data_type) update.data_type = req.body.data_type;
+	if (req.body.source) update.source = req.body.source;
 			
 	Layer.findByIdAndUpdate(req.params.id_layer, update, function (error, oneLayer) {
-		if(error) res.status(400).json(error);
+		if (error) res.status(400).json({error:"error", message:error});
 		else {
 			var dateNow = new Date();
 			var uname = "root";
-			if(req.session.user) uname = req.session.user.username;
+			if (req.session.user) uname = req.session.user.username;
 			oneLayer.history.push({name:uname, date: dateNow, modification: update});
-			oneLayer.save( function(error, data){
-				if(error) res.status(400).json(error);
+			oneLayer.save( function(error2, data){
+				if (error2) res.status(400).json({error:"error", message:error2});
 				else res.status(200).json(data);
 			});
 		}

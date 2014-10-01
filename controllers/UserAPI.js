@@ -39,16 +39,16 @@ var pass = require('../middleware/pass');
 // retrieve all users
 exports.listUsers = function (req, res) {
 	var connectedUser = req.session.user;	
-	if(connectedUser.role == "admin") {				
-		User.find({}, 'username role affiliation', function (err, users) {
-        	if (err) throw err;
+	if (connectedUser.role == "admin") {				
+		User.find({}, 'username role affiliation', function (error, users) {
+        	if (error) res.status(400).json({error:"error", message:error});
         	if (users) res.status(200).json(users);
 			else return res.status(200).json([]);
     	});
 	}
     else {
-    	User.findOne({username: connectedUser.username}, 'username role affiliation', function (err, users) {
-        	if(err) throw err;
+    	User.findOne({username: connectedUser.username}, 'username role affiliation', function (error, users) {
+        	if (error) res.status(400).json({error:"error", message:error});
         	if (users) res.status(200).json(users);
         	else return res.status(200).json([]);
     	});
@@ -57,15 +57,15 @@ exports.listUsers = function (req, res) {
 
 //retrieve a particular user (with id)
 exports.listWithId = function(req, res){
-	if(req.params.id == undefined) return res.status(400).json({error:"the given ID is not correct"});
+	if (req.params.id == undefined) return res.status(400).json({error:"the given ID is not correct"});
 	var connectedUser = req.session.user;	
 	User.findById(req.params.id, 'username affiliation role', function(error, data){
-		if(error) res.status(400).json(error);
-		else if(data == null) res.status(400).json({error:"no such user"});
+		if (error) res.status(400).json({error:"error", message:error});
+		else if (data == null) res.status(400).json({error:"no such user"});
 		else
-			if(connectedUser.role == "admin")  res.status(200).json(data);
+			if (connectedUser.role == "admin")  res.status(200).json(data);
 			else {				
-				if(data.username == connectedUser.username)	res.status(200).json(data);
+				if (data.username == connectedUser.username)	res.status(200).json(data);
 				else res.status(401).json({error:"You dont have enough right to access this resource"});
 			}
 	});
@@ -73,18 +73,18 @@ exports.listWithId = function(req, res){
 
 //retrieve a particular user (with id)
 exports.listGroupsOfUserId = function(req, res){
-	if(req.params.id == undefined) return res.status(400).json({error:"the given ID is not correct"});
+	if (req.params.id == undefined) return res.status(400).json({error:"the given ID is not correct"});
 	var connectedUser = req.session.user;	
 	User.findById(req.params.id, 'username affiliation role', function(error, data){
-		if(error) res.status(400).json(error);
-		else if(data == null) res.status(200).json(400, '{"error":"no such user"}')
+		if (error) res.status(400).json({error:"error", message:error});
+		else if (data == null) res.status(200).json(400, '{"error":"no such user"}')
 		else {			
-			Group.find({'usersList' : {$regex : new RegExp('^'+ data.username + '$', "i")}}, function(error, dataGroup) {
-				if(error) res.status(400).json(error);
+			Group.find({'usersList' : {$regex : new RegExp('^'+ data.username + '$', "i")}}, function(error2, dataGroup) {
+				if (error2) res.status(400).json({error:"error", message:error2});
 				else {
-					if(connectedUser.role == "admin")  res.status(200).json(dataGroup);
+					if (connectedUser.role == "admin")  res.status(200).json(dataGroup);
 					else {				
-						if(data.username == connectedUser.username)	res.status(200).json(dataGroup);
+						if (data.username == connectedUser.username)	res.status(200).json(dataGroup);
 						else res.status(401).json({error:"You dont have enough right to access this resource"});
 					}
 				}
@@ -94,26 +94,26 @@ exports.listGroupsOfUserId = function(req, res){
 }
 
 exports.update = function(req, res){
-	if(req.params.id == undefined) return res.status(400).json({error:"one or more data fields are not filled out properly"});
+	if (req.params.id == undefined) return res.status(400).json({error:"one or more data fields are not filled out properly"});
 	var connectedUser = req.session.user;
 	var update = {};
-	if(connectedUser.role == "admin" && GLOBAL.list_user_role.indexOf(req.body.role)!=-1 && connectedUser.username != "root") update.role = req.body.role;		
-	if(req.body.affiliation) update.affiliation = req.body.affiliation;
+	if (connectedUser.role == "admin" && GLOBAL.list_user_role.indexOf(req.body.role)!=-1 && connectedUser.username != "root") update.role = req.body.role;		
+	if (req.body.affiliation) update.affiliation = req.body.affiliation;
 	
-	if(req.body.password == undefined) {
+	if (req.body.password == undefined) {
 		User.findByIdAndUpdate(req.params.id, update, function (error, data) {
-			if(error) res.status(400).json(error);
+			if (error) res.status(400).json({error:"error", message:error});
 			else res.status(200).json(data);
 		});
 	} 
 	else { 
-		pass.hash(req.body.password, function (err, salt, hash) {
-			if (err) throw err;
+		pass.hash(req.body.password, function (error, salt, hash) {
+			if (error) res.status(400).json({error:"error", message:error});
 			else {
 				update.salt = salt;
 				update.hash = hash;
-				User.findByIdAndUpdate(req.params.id, update, function (error, data) {
-					if(error) res.status(400).json(error);
+				User.findByIdAndUpdate(req.params.id, update, function (error2, data) {
+					if (error2) res.status(400).json({error:"error", message:error2});
 					else res.status(200).json(data);
 				});
 			} 
@@ -123,10 +123,9 @@ exports.update = function(req, res){
 
 // remove a user
 exports.remove  = function(req, res){
-	if(req.params.id == undefined)
-		return res.status(400).json({error:"one or more data fields are not filled out properly"});
+	if (req.params.id == undefined) return res.status(400).json({error:"one or more data fields are not filled out properly"});
 	User.remove({_id : req.params.id}, function (error, data) {
-		if(error) res.status(400).json(error);
+		if (error) res.status(400).json({error:"error", message:error});
 		else {
 			ACLAPI.removeAUserFromALC(data.username);
 			res.status(200).json(data);

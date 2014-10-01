@@ -43,35 +43,35 @@ var ACL = require('../models/ACL').ACL,
 */
 exports.listAll = function(req, res){  	
 	Corpus.find({}, function(error, data){
-		if(error) res.status(400).json(error);
+		if (error) res.status(400).json({error:"error", message:error});
 		else {
 			var connectedUser = req.session.user;
-			if(GLOBAL.no_auth == true || (connectedUser != undefined && connectedUser.role == "admin")) {
+			if (GLOBAL.no_auth == true || (connectedUser != undefined && connectedUser.role == "admin")) {
 				res.status(200).json(data); 
 				return;
 			}
-			else if(connectedUser != undefined && data != null)	{
+			else if (connectedUser != undefined && data != null)	{
 				
-				Group.find({'usersList' : {$regex : new RegExp('^'+ connectedUser.username + '$', "i")}}, function(error, dataGroup) {		//first find groups to which the connected user belongs
-					if(error) throw error;
+				Group.find({'usersList' : {$regex : new RegExp('^'+ connectedUser.username + '$', "i")}}, function(error2, dataGroup) {		//first find groups to which the connected user belongs
+					if (error2) res.status(400).json({error:"error", message:error2});
 					else {
 						result = [];
 						resultReturn = [];						
 						for(var i = 0; i < data.length; i++) result.push(data[i]._id);
 						
-						ACL.find({id:{$in:result}}, function(error, dataACL){																// then find all acls of the data
-							if(error) res.status(500).json({error:"error in ACL-corpusListall:"});
-							else if(dataACL != null) {
+						ACL.find({id:{$in:result}}, function(error3, dataACL){																// then find all acls of the data
+							if (error3) res.status(500).json({error:"error in ACL-corpusListall:", message:error3});
+							else if (dataACL != null) {
 								for(var i = 0; i < dataACL.length; i++){
 									var foundPos = commonFuncs.findUsernameInACL(connectedUser.username, dataACL[i].users);
 
-									if(foundPos != -1 && dataACL[i].users[foundPos].right != 'N') resultReturn.push(data[i]);
+									if (foundPos != -1 && dataACL[i].users[foundPos].right != 'N') resultReturn.push(data[i]);
 									else {
 										foundPos = commonFuncs.findUsernameInGroupACL(dataGroup, dataACL[i].groups);
-										if(foundPos != -1 && dataACL[i].groups[foundPos].right != 'N') resultReturn.push(data[i]);
+										if (foundPos != -1 && dataACL[i].groups[foundPos].right != 'N') resultReturn.push(data[i]);
 									}
 								} 
-								if(resultReturn.length == 0) res.status(403).json({error:"You dont have enough permission to get this resource"});
+								if (resultReturn.length == 0) res.status(403).json({error:"You dont have enough permission to get this resource"});
 								else res.status(200).json(resultReturn);
 							} 
 							else res.status(400).json({error:"error in finding acl"});
@@ -87,8 +87,8 @@ exports.listAll = function(req, res){
 //for the uri app.get('/corpus/:id', 
 exports.listWithId = function(req, res){
 	Corpus.findById(req.params.id, function(error, data){
-		if(error) res.status(400).json(error);
-		else if(data == null) res.status(400).json({error:'no such id_corpus!'})
+		if (error) res.status(400).json({error:"error", message:error});
+		else if (data == null) res.status(400).json({error:'no such id_corpus!'})
 		else  res.status(200).json(data);
 	});
 };
@@ -96,14 +96,14 @@ exports.listWithId = function(req, res){
 //test for Posting corpus
 //app.post('/corpus', 
 exports.post = function(req, res){
-	if(req.body.name == undefined) return res.status(400).json({error:"one or more data fields are not filled out properly"});
+	if (req.body.name == undefined) return res.status(400).json({error:"one or more data fields are not filled out properly"});
 	var corpus_data = {name: req.body.name};
 	var corpus = new Corpus(corpus_data);
 	corpus.save(function(error, data){
-		if(error) res.status(400).json(error);
+		if (error) res.status(400).json({error:"error", message:error});
 		else {
 			var connectedUser = "root";
-			if(req.session.user) connectedUser = req.session.user.username;
+			if (req.session.user) connectedUser = req.session.user.username;
 			ACLAPI.addUserRightGeneric(data._id, connectedUser, 'A');
 			res.status(200).json(data);
 		}
@@ -112,10 +112,10 @@ exports.post = function(req, res){
 
 //app.put('/corpus/:id', 
 exports.update = function(req, res){
-	if(req.body.name == undefined) return res.status(400).send({error:"one or more data fields are not filled out properly"});
+	if (req.body.name == undefined) return res.status(400).send({error:"one or more data fields are not filled out properly"});
 	var update = {name: req.body.name};
 	Corpus.findByIdAndUpdate(req.params.id, update, function (error, data) {
-		if(error) res.status(400).json(error);
+		if (error) res.status(400).json({error:"error", message:error});
 		else res.status(200).json(data);
 	});
 }

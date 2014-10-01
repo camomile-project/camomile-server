@@ -35,28 +35,28 @@ var Group = require('../models/Group').Group;
 //list all groups to which the connected user belong
 exports.listAll = function (req, res) {
 	var connectedUser = req.session.user;	
-	if(connectedUser.role == "admin") {				
-		Group.find({}, function (err, groups) {
-			if(err) throw err;
+	if (connectedUser.role == "admin") {				
+		Group.find({}, function (error, groups) {
+			if (error) res.status(400).json({error:"error", message:error});
 			if (groups) res.status(200).json(groups);
 			else return res.status(200).json([]);
 		});
 	}
     else {
     	Group.find({'usersList' : {$regex : new RegExp('^'+ connectedUser.username + '$', "i")}}, function(error, dataGroup) {
-			if(error) throw error;
+			if (error) res.status(400).json({error:"error", message:error});
 			else res.status(200).json(dataGroup);
 		});
     }
 }
 
 exports.createGroup = function(req, res){
-	if(req.body.groupname == undefined || req.body.description == undefined)
+	if (req.body.groupname == undefined || req.body.description == undefined)
 		return res.status(400).json({error:"one or more data fields are not filled out properly"});
 		
 	Group.findOne({groupname : {$regex : new RegExp('^'+ req.body.groupname + '$', "i")}}, function(error, data){
-		if(error) res.status(400).json(error);
-		else if(data == null){
+		if (error) res.status(400).json({error:"error", message:error});
+		else if (data == null){
 			var groupItem = {
 				groupname : req.body.groupname,
 				description : req.body.description,
@@ -64,8 +64,8 @@ exports.createGroup = function(req, res){
 			};
 			var g = new Group(groupItem);
 	
-			g.save(function(err, dat){
-				if(err) res.send(err);
+			g.save(function(error2, dat){
+				if (error2) res.send({error:"error", message:error2});
 				else res.status(200).json(dat);
 			});	
 		}
@@ -75,21 +75,21 @@ exports.createGroup = function(req, res){
 
 //add a user to a group
 exports.addUser2Group = function(req, res){
-	if(req.body.username)	{
+	if (req.body.username)	{
 		User.findOne({username : {$regex : new RegExp('^'+ req.body.username + '$', "i")}}, function(error, data1){
-			if(error) throw error;
+			if (error) res.status(400).json({error:"error", message:error});
 			else {
-				if(data1 == null) res.status(400).json({error:"The user does not exist"});
+				if (data1 == null) res.status(400).json({error:"The user does not exist"});
 				else {
-					Group.findById(req.params.id, function(error, data){
-						if(error) throw error;
+					Group.findById(req.params.id, function(error2, data){
+						if (error2) res.status(400).json({error:"error", message:error2});
 						else {
-							if(data == null || data === undefined)  res.status(400).json({error:"The group does not exist"});
+							if (data == null || data === undefined)  res.status(400).json({error:"The group does not exist"});
 							else {
-								if(data.usersList.indexOf(req.body.username.toLowerCase()) == -1) { 								//find if the user is already here
+								if (data.usersList.indexOf(req.body.username.toLowerCase()) == -1) { 								//find if the user is already here
 									data.usersList.push(req.body.username);							
-									data.save(function(err, dat){
-										if(err) throw err;
+									data.save(function(error3, dat){
+										if (error3) res.status(400).json({error:"error", message:error3});
 										else res.json(dat);
 									}); 
 								}
@@ -101,21 +101,21 @@ exports.addUser2Group = function(req, res){
 			}
 		});
 	} 
-	else if(req.body.id_user){
+	else if (req.body.id_user){
 		User.findById(req.body.id_user, function(error, data1){
-			if(error) throw error;
+			if (error) res.status(400).json({error:"error", message:error});
 			else {
-				if(data1 == null) res.status(400).json(400, {error:"The user does not exist"});
+				if (data1 == null) res.status(400).json(400, {error:"The user does not exist"});
 				else {				
-					Group.findById(req.params.id, function(error, data){
-						if(error) throw error;
+					Group.findById(req.params.id, function(error2, data){
+						if (error2) res.status(400).json({error:"error", message:error2});
 						else {
-							if(data == null || data === undefined) res.status(400).json({error:"The group does not exist"});
+							if (data == null || data === undefined) res.status(400).json({error:"The group does not exist"});
 							else {
-								if(data.usersList.indexOf(data1.username) == -1) { 								//find if the user is already here
+								if (data.usersList.indexOf(data1.username) == -1) { 								//find if the user is already here
 									data.usersList.push(data1.username);
-									data.save(function(err, dat){
-										if(err) throw err;
+									data.save(function(error3, dat){
+										if (error3) res.status(400).json({error:"error", message:error3});
 										else res.json(dat);
 									}); 
 								}
@@ -132,32 +132,30 @@ exports.addUser2Group = function(req, res){
 
 //retrieve a particular group (with id)
 exports.listWithId = function(req, res){
-	if(req.params.id == undefined)
-		return res.status(400).json({error:"the given ID is not correct"});
-		
-	var connectedUser = req.session.user;	
-
+	if (req.params.id == undefined) return res.status(400).json({error:"the given ID is not correct"});
+	var connectedUser = req.session.user;
 	Group.findById(req.params.id, function(error, data){
-		if(error) res.json(error);
-		else if(data == null) res.status(400).json({error:"no such id!"})
-		else
-			if(connectedUser.role == "admin") res.json(data);
+		if (error) res.status(400).json({error:"error", message:error});
+		else if (data == null) res.status(400).json({error:"no such id!"})
+		else {
+			if (connectedUser.role == "admin") res.json(data);
 			else {				
-				if(data.usersList.indexOf(connectedUser.username) > -1) res.json(data); //not working on IE8 and below
+				if (data.usersList.indexOf(connectedUser.username) > -1) res.json(data); //not working on IE8 and below
 				else res.status(401).json({error:"You dont have enough right to access this resource"});
 			}
+		}
 	});
 }
 
 //retrieve a particular group (with id)
 exports.listUserOfGroupId = function(req, res){
-	if(req.params.id == undefined) return res.status(400).send({error:"the given ID is not correct"});//id of the group
+	if (req.params.id == undefined) return res.status(400).send({error:"the given ID is not correct"});//id of the group
 	var connectedUser = req.session.user;	
 	Group.findById(req.params.id, function(error, data){
-		if(error) res.json(error);
-		else if(data == null) res.json('{"error":"no such id!"}')
+		if (error) res.status(400).json({error:"error", message:error});
+		else if (data == null) res.json({error:"no such id!"})
 		else {
-			if(connectedUser.role == "admin")  res.json(data.usersList);
+			if (connectedUser.role == "admin")  res.json(data.usersList);
 			else res.status(403).json({error:"You dont have enough right to access this resource"});
 		}
 	});
@@ -167,10 +165,10 @@ exports.listUserOfGroupId = function(req, res){
 exports.addGroup = function (req, res) {
 	if (GLOBAL.no_auth) return res.status(401).json({error:"Anonymous user is not allowed here"});
     else {
-    	if(req.body.groupname == undefined) return res.status(400).json({error:"The groupname field has not been filled in"});
+    	if (req.body.groupname == undefined) return res.status(400).json({error:"The groupname field has not been filled in"});
     	Group.findOne({groupname : {$regex : new RegExp('^'+ req.body.groupname + '$', "i")}}, function(error, group) {
-    		if(error) res.status(400).json(error);
-    		else if(group == null) {
+    		if (error) res.status(400).json({error:"error", message:error});
+    		else if (group == null) {
 				var groupItem = {
 					groupname : req.body.groupname,
 					description : req.body.description || "unknown",
@@ -178,8 +176,8 @@ exports.addGroup = function (req, res) {
 				};
 				var g = new Group(groupItem);
 	
-				g.save(function(err, data){
-					if(err) throw err;
+				g.save(function(error2, data){
+					if (error2) res.status(400).json({error:"error", message:error2});
 					else res.send(200, data);
 				});
 			} 
@@ -190,27 +188,27 @@ exports.addGroup = function (req, res) {
 
 // update information of a group: put /group/:id
 exports.update = function(req, res){
-	if(req.params.id == undefined) return res.status(400).json({error:"one or more data fields are not filled out properly"});
+	if (req.params.id == undefined) return res.status(400).json({error:"one or more data fields are not filled out properly"});
 	var update = {};
-	if(req.body.groupname) update.groupname = req.body.groupname;
-	if(req.body.description) update.description = req.body.description;
+	if (req.body.groupname) update.groupname = req.body.groupname;
+	if (req.body.description) update.description = req.body.description;
 	Group.findByIdAndUpdate(req.params.id, update, function (error, data) {
-		if(error)res.json(error);
+		if (error) res.status(400).json({error:"error", message:error});
 		else res.json(data);
 	});
 }
 //remove a user from a group
 exports.removeUserFromGroup  = function(req, res){
-	if(req.params.id == undefined || req.params.username == undefined)
+	if (req.params.id == undefined || req.params.username == undefined)
 		return res.status(400).json({error:"one or more data fields are not filled out properly"});
 	Group.findById(req.params.id, function (error, data) {
-		if(error) res.json(error);
+		if (error) res.status(400).json({error:"error", message:error});
 		else {
 			var index = data.usersList.indexOf(req.params.username);
-			if(index > -1) {//not working on IE8 and below
+			if (index > -1) {//not working on IE8 and below
 				data.usersList.splice(index, 1);
-				data.save(function(err, dat){
-					if(err) res.send(err);
+				data.save(function(error2, dat){
+					if (error) res.status(400).json({error:"error", message:error});
 					else res.json(dat);
 				}); 
 			}

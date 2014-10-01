@@ -40,7 +40,7 @@ var corpus = require('../controllers/CorpusAPI'),
 	queue = require('../controllers/QueueAPI');
 	
 exports.index = function(req, res){
-  res.render('index', { title: 'Camomille' });
+  	res.render('index', { title: 'Camomille' });
 };
 
 exports.initialize = function(app){
@@ -64,8 +64,6 @@ exports.initialize = function(app){
 						 user.update);						  															// update information on a specific user
 	app.delete('/user/:id', authenticate.requiredAuthentication("admin"), 
 							user.remove);                       														// delete a specific user
-	// app.post("/chmodUser/:username/:role", authenticate.requiredAuthentication("admin"), authenticate.chmodUser);
-	// app.post("/chmodUser", authenticate.requiredAuthentication("admin"), authenticate.chmodUser);
 	
 	// --- group routes --- \\
 	app.post("/group", authenticate.requiredAuthentication("admin"), 
@@ -157,8 +155,7 @@ exports.initialize = function(app){
 													  media.getVideoMP4);
 	app.get('/corpus/:id_corpus/media/:id_media/ogv', authenticate.requiredConsistentID("user", 'R', "media"), 
 													  authenticate.requiredAuthentication("user", 'R', "media"), 
-													  media.getVideoOGV);
-													  
+													  media.getVideoOGV);					  
 													  	
 	// --- queue routes --- \\
 	app.post('/queue', authenticate.requiredValidUser, 

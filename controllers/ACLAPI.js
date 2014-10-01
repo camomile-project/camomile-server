@@ -37,7 +37,7 @@ var Group = require('../models/Group').Group;
 // retrieve all acl
 exports.listAll = function(req, res){
 	ACL.find({}, function(error, data){
-		if(error) throw error;
+		if (error) res.status(400).json({error:"error", message:error});
 		else res.status(200).json(data);
 	});
 }
@@ -45,8 +45,8 @@ exports.listAll = function(req, res){
 // retrieve an acl id
 exports.listWithId = function(req, res){
 	ACL.findById(req.params.id, function(error, data){
-		if(error) res.status(400).json(error);
-		else if(data == null) res.status(400).json({error:'no such id!'})
+		if (error) res.status(400).json({error:"error", message:error});
+		else if (data == null) res.status(400).json({error:'no such id!'})
 		else res.status(200).json(data);
 	});
 };
@@ -54,14 +54,14 @@ exports.listWithId = function(req, res){
 //retrieve an ACL id
 exports.listWithIdOfResource = function(req, res){
 	var idSought = req.params.id_anno;///corpus/:id_corpus/media/:id_media/layer/:id_layer/annotation/:id_anno/acl
-	if(idSought == undefined) idSought = req.params.id_layer;
-	if(idSought == undefined) idSought = req.params.id_media;
-	if(idSought == undefined) idSought = req.params.id;
-	if(idSought == undefined) return res.status(400).json({error: "The id has not been filled up"});
+	if (idSought == undefined) idSought = req.params.id_layer;
+	if (idSought == undefined) idSought = req.params.id_media;
+	if (idSought == undefined) idSought = req.params.id;
+	if (idSought == undefined) return res.status(400).json({error: "The id has not been filled up"});
 	
 	ACL.findOne({id:idSought}, function(error, data){
-		if(error) res.status(400).json(error);
-		else if(data == null) res.status(400).json('no such id!')
+		if (error) res.status(400).json({error:"error", message:error});
+		else if (data == null) res.status(400).json('no such id!')
 		else res.status(200).json(data);
 	});
 };
@@ -69,31 +69,31 @@ exports.listWithIdOfResource = function(req, res){
 //update an acl entry
 exports.updateWithIdOfResource = function(req, res){
 	var idSought = req.params.id_anno;///corpus/:id_corpus/media/:id_media/layer/:id_layer/annotation/:id_anno/acl
-	if(idSought == undefined) idSought = req.params.id_layer;
-	if(idSought == undefined) idSought = req.params.id_media;
-	if(idSought == undefined) idSought = req.params.id;
-	if(idSought == undefined) return res.status(400).json({error: "The id has not been filled up"});
+	if (idSought == undefined) idSought = req.params.id_layer;
+	if (idSought == undefined) idSought = req.params.id_media;
+	if (idSought == undefined) idSought = req.params.id;
+	if (idSought == undefined) return res.status(400).json({error: "The id has not been filled up"});
 	
 	ACL.findOne({id:idSought}, function(error, data){
-		if(error) res.status(400).json(error);
-		else if(data == null) res.status(400).json({error:'no such id!'});
+		if (error) res.status(400).json({error:"error", message:error});
+		else if (data == null) res.status(400).json({error:'no such id!'});
 		else {			
 			var username = req.body.username;
 			var userright = req.body.userright;
 			var groupname = req.body.groupname;
 			var groupright = req.body.groupright;
 				
-			if(username != undefined && userright != undefined) {
-				User.findOne({username : {$regex : new RegExp('^'+ username + '$', "i")}}, function(error, datU){
-					if(error) send(error);
+			if (username != undefined && userright != undefined) {
+				User.findOne({username : {$regex : new RegExp('^'+ username + '$', "i")}}, function(error2, datU){
+					if (error2) res.status(400).json({error:"error", message:error2});
 					else {
-						if(datU == null) res.status(400).json({error:"This group does not exist"});
+						if (datU == null) res.status(400).json({error:"This group does not exist"});
 						else {
 							var i = findUserInUsersRightArr(username, data.users);
-							if(i == -1) data.users.push({login : username, right : userright});
+							if (i == -1) data.users.push({login : username, right : userright});
 							else data.users[i].right = userright;
-							data.save(function(error, dat){
-								if(error) res.status(400).json(error);
+							data.save(function(error3, dat){
+								if (error3) res.status(400).json({error:"error", message:error3});
 								else res.status(200).json(dat);
 							});
 						} 
@@ -101,18 +101,18 @@ exports.updateWithIdOfResource = function(req, res){
 				});	
 			}			
 			
-			else if(groupname != undefined && groupright != undefined) {
-				Group.findOne({groupname : {$regex : new RegExp('^'+ groupname + '$', "i")}}, function(error, datG){
-					if(error) send(error);
+			else if (groupname != undefined && groupright != undefined) {
+				Group.findOne({groupname : {$regex : new RegExp('^'+ groupname + '$', "i")}}, function(error2, datG){
+					if (error2) res.status(400).json({error:"error", message:error2});
 					else {
-						if(datG == null) res.status(400).json({error:"This group does not exist"});
+						if (datG == null) res.status(400).json({error:"This group does not exist"});
 						else {
 							var i = findUserInUsersRightArr(groupname, data.groups);
-							if(i == -1)	data.groups.push({login : groupname, right : groupright});
+							if (i == -1)	data.groups.push({login : groupname, right : groupright});
 							else data.groups[i].right = groupright;
 							
-							data.save(function(error, dat){
-								if(error)res.status(400).json(error);
+							data.save(function(error3, dat){
+								if (error3) res.status(400).json({error:"error", message:error3});
 								else res.status(200).json(dat);
 							});
 						} 
@@ -136,28 +136,28 @@ exports.getRightAllId = function(callback){
 
 exports.addUserRightGeneric = function addUserRightGeneric(id1, userLogin, userRight){
 	User.findOne({username : {$regex : new RegExp('^'+ userLogin + '$', "i")}}, function(error, data){
-		if(error) throw error;
+		if (error) res.status(400).json({error:"error", message:error});
 		else {
-			if(data == null) res.status(400).json({error:"This user does not exist"});
+			if (data == null) res.status(400).json({error:"This user does not exist"});
 			else {		
-				ACL.findOne({id:id1}, function(error, dataACL){
-					if(error) throw error;
-					else if(dataACL == null || dataACL.length == 0){
+				ACL.findOne({id:id1}, function(error2, dataACL){
+					if (error2) res.status(400).json({error:"error", message:error2});
+					else if ( dataACL == null || dataACL.length == 0){
 						//not exist, create a new entry
 						var item = {"id" : id1, "users" : [], "groups" : []};
 						item.users.push({login : userLogin, right : userRight});
 						var aclItem = new ACL(item);
-						aclItem.save(function(err){	
-							if(err) throw err; 
+						aclItem.save(function(error3){	
+							if (error3) res.status(400).json({error:"error", message:error3}); 
 						});
 					}
 					else {																							// just update the user account						
 						var i = findUserInUsersRightArr(userLogin, dataACL.users);
-						if(i == -1)	dataACL.users.push({login : userLogin, right : userRight});
+						if (i == -1)	dataACL.users.push({login : userLogin, right : userRight});
 						else dataACL.users[i].right = userRight;
 						
-						dataACL.save(function(error, dat){
-							if(error) throw error;
+						dataACL.save(function(error3, dat){
+							if (errro3) res.status(400).json({error:"error", message:error3});
 						});
 					}
 				});
@@ -168,39 +168,39 @@ exports.addUserRightGeneric = function addUserRightGeneric(id1, userLogin, userR
 
 function findUserInUsersRightArr(login, users){
 	for(var i = 0; i < users.length; i++) {
-		if(users[i].login == login.toLowerCase()) return i;
+		if (users[i].login == login.toLowerCase()) return i;
 	}
 	return -1;
 } 
 
 // this function is to add a user right
 exports.addUserRight = function(req, res){
-	if(req.body.userLogin == undefined || req.body.userRight == undefined) return res.status(400).json({error: "one or more data fields are not filled out properly"});
+	if (req.body.userLogin == undefined || req.body.userRight == undefined) return res.status(400).json({error: "one or more data fields are not filled out properly"});
 		
 	User.findOne({username : {$regex : new RegExp('^'+ req.body.userLogin + '$', "i")}}, function(error, data){
-		if(error) throw error;
+		if (error) res.status(400).json({error:"error", message:error});
 		else {
-			if(data == null) res.status(400).json({error: "This user does not exist"});
+			if (data == null) res.status(400).json({error: "This user does not exist"});
 			else {		
-				ACL.findOne({id:req.body.id}, function(error, data){
-					if(error) throw error;
-					else if(data == null){
+				ACL.findOne({id:req.body.id}, function(error2, data){
+					if (error2) res.status(400).json({error:"error", message:error2});
+					else if (data == null){
 						//not exist, create a new entry
 						var item = { "id" : req.body.id, "users" : [], "groups" : []};
 						item.users.push({login : req.body.userLogin, right : req.body.userRight});
 						var aclItem = new ACL(item);
-						aclItem.save(function(err, acl){
-							if(err) throw err;
+						aclItem.save(function(error3, acl){
+							if (error3) res.status(400).json({error:"error", message:error3});
 							res.status(200).json(acl);
 						});
 					}
 					else {																				// just update the user account
 						var i = findUserInUsersRightArr(req.body.userLogin, data.users);
-						if(i == -1) data.users.push({login : req.body.userLogin, right : req.body.userRight});
+						if (i == -1) data.users.push({login : req.body.userLogin, right : req.body.userRight});
 						else data.users[i].right = req.body.userRight;
 						
-						data.save(function(error, dat){
-							if(error) throw error;
+						data.save(function(error3, dat){
+							if (error3) res.status(400).json({error:"error", message:error3});
 							else res.status(200).json(dat);
 						});
 					}
@@ -212,30 +212,30 @@ exports.addUserRight = function(req, res){
 
 // grant group right to the resource
 exports.addGroupRight = function(req, res){
-	if(req.body.groupLogin == undefined || req.body.groupRight == undefined) return res.status(400).json({error: "one or more data fields are not filled out properly"});
+	if (req.body.groupLogin == undefined || req.body.groupRight == undefined) return res.status(400).json({error: "one or more data fields are not filled out properly"});
 		
 	Group.findOne({groupname : {$regex : new RegExp('^'+ req.body.groupLogin + '$', "i")}}, function(error, data){
-		if(error) throw error;
+		if (error) res.status(400).json({error:"error", message:error});
 		else {
-			if(data == null) res.status(400).json({error:"This group does not exist"});
+			if (data == null) res.status(400).json({error:"This group does not exist"});
 			else {
-				ACL.findOne({id:req.body.id}, function(error, data){
-					if(error) throw error;
-					else if(data == null){						//not exist, create a new entry
+				ACL.findOne({id:req.body.id}, function(error2, data){
+					if (error2) res.status(400).json({error:"error", message:error2});
+					else if (data == null){						//not exist, create a new entry
 						var item = {"id" : req.body.id,	"users" : [], "groups" : []};
 						item.groups.push({login : req.body.groupLogin, right : req.body.groupRight});
 						var aclItem = new ACL(item);
-						aclItem.save(function(err, dat){
-							if(err) throw err;
+						aclItem.save(function(error3, dat){
+							if (error3) res.status(400).json({error:"error", message:error3});
 							res.status(200).json(dat);
 						});
 					}
 					else {																							// just update the group account
 						var i = findUserInUsersRightArr(req.body.groupLogin, data.groups);
-						if(i == -1) data.groups.push({login : req.body.groupLogin, right : req.body.groupRight});
+						if (i == -1) data.groups.push({login : req.body.groupLogin, right : req.body.groupRight});
 						else data.groups[i].right = req.body.groupRight;
-						data.save(function(error, dat){
-							if(error) throw error;
+						data.save(function(error3, dat){
+							if (error3) res.status(400).json({error:"error", message:error3});
 							else res.status(200).json(dat);
 						});
 					} 
@@ -249,26 +249,26 @@ exports.addGroupRight = function(req, res){
 
 exports.addGroupRightGeneric = function addGroupRightGeneric(id1, groupLogin, groupRight){
 	Group.findOne({groupname : {$regex : new RegExp('^'+ groupLogin + '$', "i")}}, function(error, data){
-		if(error) throw error;
+		if (error) res.status(400).json({error:"error", message:error});
 		else {
-			if(data == null) res.status(400).json({error:"This group does not exist"});
+			if (data == null) res.status(400).json({error:"This group does not exist"});
 			else {				
-				ACL.findOne({id:id1}, function(error, data){
-					if(error) throw error;
-					else if(data == null || data.length == 0){								//not exist, create a new entry
+				ACL.findOne({id:id1}, function(error2, data){
+					if (error2) res.status(400).json({error:"error", message:error2});
+					else if (data == null || data.length == 0){								//not exist, create a new entry
 						var item = {"id" : id1, "users" : [], "groups" : []};
 						item.groups.push({login : groupLogin, right : groupRight});
 						var aclItem = new ACL(item);
-						aclItem.save(function(err){
-							if(err) throw err;
+						aclItem.save(function(error3){
+							if (error3) res.status(400).json({error:"error", message:error3});
 						});
 					}
 					else {																	// just update the group account
 						var i = findUserInUsersRightArr(groupLogin, data.groups);
-						if(i == -1)	data.groups.push({login : groupLogin, right : groupRight});
+						if (i == -1)	data.groups.push({login : groupLogin, right : groupRight});
 						else data.groups[i].right = groupRight;
-						data.save(function(error, data){
-							if(error) throw error;
+						data.save(function(error3, data){
+							if (error3) res.status(400).json({error:"error", message:error3});
 						});
 					}
 				});			
@@ -281,8 +281,8 @@ exports.addGroupRightGeneric = function addGroupRightGeneric(id1, groupLogin, gr
 // remove an ACL entry
 exports.removeAnACLEntry = function removeAnACLEntry(id2remove){
 	ACL.remove({id : id2remove}, function(error, data){
-		if(error) {
-			res.status(400).json(error); 
+		if (error) {
+			res.status(400).json({error:"error", message:error}); 
 			return;
 		}
 		else res.status(200).json({message :"removed the " + group2remove + " from the ACL"});
@@ -292,26 +292,26 @@ exports.removeAnACLEntry = function removeAnACLEntry(id2remove){
 function removeItemFromArray(a, item){
 	var index = -1;
 	for(var j = 0; j < a.length; j++) {
-		if(a[j].login == item.toLowerCase()) {
+		if (a[j].login == item.toLowerCase()) {
 			index = j; 
 			break;
 		}
 	}	
-	if(index != -1)	a.splice(index, 1);
+	if (index != -1)	a.splice(index, 1);
 }
 
 // remove a user from acl
 exports.removeAUserFromALC = function removeAnUserFromALC(user2remove){
 	ACL.find({'users.login' : {$regex : new RegExp('^'+ user2remove + '$', "i")}}, function(error, data){
-		if(error){
+		if (error){
 			res.status(400).json(error); 
 			return;
 		}
-		else if(data != null) {
+		else if (data != null) {
 			for(var i = 0; i < data.length; i++) {
 				removeItemFromArray(data[i].users, user2remove);
-				data[i].save(function(error, dat) {
-					if(error) throw error;
+				data[i].save(function(error2, dat) {
+					if (error2) res.status(400).json({error:"error", message:error2});
 					else res.status(200).json({message :"removed the " + group2remove + " from the ACL"});
 				});
 			}
@@ -321,15 +321,15 @@ exports.removeAUserFromALC = function removeAnUserFromALC(user2remove){
 
 exports.removeAGroupFromALC = function removeAnGroupFromALC(group2remove){
 	ACL.find({'groups.login' : {$regex : new RegExp('^'+ group2remove + '$', "i")}}, function(error, data){
-		if(error){
+		if (error){
 			res.status(400).json(error); 
 			return;
 		}
-		else if(data != null) {
+		else if (data != null) {
 			for(var i = 0; i < data.length; i++) {
 				removeItemFromArray(data[i].groups, group2remove);
-				data[i].save(function(error, dat) {
-					if(error) throw error;
+				data[i].save(function(error2, dat) {
+					if (error2) res.status(400).json({error:"error", message:error2});
 					else res.status(200).json({message :"removed the " + group2remove + " from the ACL"});
 				});
 			}

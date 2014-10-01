@@ -54,13 +54,13 @@ var allowCrossDomain = function(req, res, next) {
     res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE');
 	  res.header('Access-Control-Allow-Headers', 'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version');
 	  // intercept OPTIONS method
-    if('OPTIONS' == req.method) res.send(200); // force the server to treat such a request as a normal GET or POST request.
+    if ('OPTIONS' == req.method) res.send(200); // force the server to treat such a request as a normal GET or POST request.
     else  next(); // otherwise, do anything else, on s'en fiche (dont care)
 }
 
 //here is the configuration, where sever's parameters will be set
 var config;
-if(program.config_dir == undefined) config = require('./config');
+if (program.config_dir == undefined) config = require('./config');
 else config = require(program.config_dir + '/config');
 
 GLOBAL.config_dir = program.config_dir || false;
@@ -87,12 +87,12 @@ mongoose.connection.on('open', function(){
 
 // used to pass values to a template (mostly used in view)
 keepSession = function (req, res, next) {
-    var err = req.session.error;
+    var error = req.session.error;
 	  var	msg = req.session.success;
     delete req.session.error;
     delete req.session.success;
     res.locals.message = '';
-    if (err) res.locals.message = '<p class="msg error">' + err + '</p>';
+    if (error) res.locals.message = '<p class="msg error">' + error + '</p>';
     if (msg) res.locals.message = '<p class="msg success">' + msg + '</p>';
     next();
 }

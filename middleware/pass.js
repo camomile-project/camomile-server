@@ -45,7 +45,7 @@ var iterations = 12000;
 
 /**
  * Hashes a password with optional `salt`, otherwise
- * generate a salt for `pass` and invoke `fn(err, salt, hash)`.
+ * generate a salt for `pass` and invoke `fn(error, salt, hash)`.
  *
  * @param {String} password to hash
  * @param {String} optional salt
@@ -58,11 +58,11 @@ exports.hash = function (pwd, salt, fn) {
     crypto.pbkdf2(pwd, salt, iterations, len, fn);
   } else {
     fn = salt;
-    crypto.randomBytes(len, function(err, salt){
-      if (err) return fn(err);
+    crypto.randomBytes(len, function(error, salt){
+      if (error) return fn(error);
       salt = salt.toString('base64');
-      crypto.pbkdf2(pwd, salt, iterations, len, function(err, hash){
-        if (err) return fn(err);
+      crypto.pbkdf2(pwd, salt, iterations, len, function(error2, hash){
+        if (error2) return fn(error);
         fn(null, salt, hash);
       });
     });
