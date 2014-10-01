@@ -99,7 +99,6 @@ exports.update = function(req, res){
 	var update = {};
 	if (connectedUser.role == "admin" && GLOBAL.list_user_role.indexOf(req.body.role)!=-1 && connectedUser.username != "root") update.role = req.body.role;		
 	if (req.body.affiliation) update.affiliation = req.body.affiliation;
-	
 	if (req.body.password == undefined) {
 		User.findByIdAndUpdate(req.params.id, update, function (error, data) {
 			if (error) res.status(400).json({error:"error", message:error});
@@ -126,9 +125,10 @@ exports.remove  = function(req, res){
 	if (req.params.id == undefined) return res.status(400).json({error:"one or more data fields are not filled out properly"});
 	User.remove({_id : req.params.id}, function (error, data) {
 		if (error) res.status(400).json({error:"error", message:error});
-		else {
+		else if (data == 1){
 			ACLAPI.removeAUserFromALC(data.username);
-			res.status(200).json(data);
+			res.status(200).json({message:"The user as been delete"});
 		}
+		else  res.status(200).json({message:"The user do not exist"});
 	});
 }
