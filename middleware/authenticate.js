@@ -284,9 +284,7 @@ exports.requiredAuthentication = function(role, minimumRightRequired, level) {
 				}
 			}  
 		} 
-		else {
-			res.status(403).json( {error:"access denied"});	
-		}	
+		else res.status(403).json( {error:"access denied"});	
 	}
 }
 
