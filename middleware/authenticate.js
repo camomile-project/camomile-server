@@ -612,6 +612,55 @@ exports.signup = function (req, res) {
 	}
 }
 
+/*
+// change the role of the user
+exports.chmodUser = function (req, res) {
+	var usrname = req.body.username,
+		newrole = req.body.role;
+	
+	if(usrname == undefined) { //login via a POST
+		usrname = req.params.username;
+		newrole = req.params.role;
+	}
+	if(usrname == undefined) {
+		return res.send(404,'The field username has not been filled');
+	}
+	if(usrname == "root") {
+		return res.send(501, "cannot change the root user");
+	}
+	
+	var strRights = ["admin", "user", "supervisor"];
+	if(strRights.indexOf(newrole) < 0) {
+		console.log("role should be either user, admin, or supervisor");
+		return res.send(404, "role is not correct");//redirect('/');
+	}
+
+	User.findOne({username:{$regex : new RegExp('^'+ usrname + '$', "i")}}, function(err, data){
+   		if(err) {
+   			throw err;
+   		}
+   		if(data){
+			data.role = newrole;
+			data.save(function(err) {
+				if(err) {
+					throw err;
+				}
+				console.log('successfully changed the role (as ' +  newrole  + ') for the username ' + usrname);
+				var olduser = req.session.user;
+				if(usrname == req.session.user.username){
+					req.session.destroy(function () {
+						res.send(200, 'successfully changed the role of ' + usrname);
+					});
+				}
+				else {
+					res.send(200, 'successfully changed the role of ' + usrname);
+				}
+			});
+		}
+   	});
+}
+*/
+
 exports.racine = function (req, res) {
     if (req.session.user) {
         res.send("Welcome " + req.session.user.username + "<br>" + "<a href='logout'>logout</a>");
