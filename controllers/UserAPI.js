@@ -122,14 +122,15 @@ exports.listGroupsOfUserId = function(req, res){
 	});
 }
 
+// update information of a group: put /user/:id
 exports.update = function(req, res){
 	if(req.params.id == undefined)
 		return res.send(404, "one or more data fields are not filled out properly");
 	var connectedUser = req.session.user;
 	
 	var update = {};
-	if(connectedUser.role == "admin" && GLOBAL.list_user_role.indexOf(req.body.role)!=-1 && connectedUser.username != "root")
-		update.role = req.body.role;		
+	if(connectedUser.role == "admin" && req.body.username != undefined)
+		update.username = req.body.username;
 	if(req.body.affiliation)
 		update.affiliation = req.body.affiliation;
 	
@@ -143,7 +144,7 @@ exports.update = function(req, res){
 			}
 		});
 	} 
-	else { 
+	else { //update pass
 		hash(req.body.password, function (err, salt, hash) {
 			if (err) throw err;
 			else {
@@ -157,7 +158,7 @@ exports.update = function(req, res){
 						res.json(data);
 					}
 				});
-			} 
+			} // else
 		});
 	}
 }

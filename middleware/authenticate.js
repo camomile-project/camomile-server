@@ -547,8 +547,8 @@ exports.userExist = function(req, res, next) {
             next();
         } 
         else {
-            req.session.error = "This user name already exists"
-            res.send(400, "{\n \"error\"=\"This user name already exists\"\n}\n");
+            req.session.error = "This user already exists"
+            res.send(200, "This user already exists");
         }
     });
 }
