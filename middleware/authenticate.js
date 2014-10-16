@@ -23,6 +23,23 @@ SOFTWARE.
 */
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/***************************************************** old part ********************************************************/
+
 var hash = require('./pass').hash,
     User = require('../models/user').User,
     ACLModel = require('../models/ACL').ACL,
@@ -38,6 +55,14 @@ var corpus = require('../controllers/CorpusAPI'),
   	layer = require('../controllers/LayerAPI'),
   	anno = require('../controllers/AnnotationAPI'),
   	compound = require('../controllers/CompoundAPI');
+
+var CorpusModel = require('../models/Corpus').Corpus
+var MediaModel = require('../models/Media').Media
+var LayerModel = require('../models/Layer').Layer
+var AnnotationModel = require('../models/Annotation').Annotation
+var async = require('async');
+
+
 
 // check for authentication
 authenticateElem = function(name, pass, fn) {
@@ -98,6 +123,7 @@ exports.requiredRightUGname = function(role) {
 }
 
 
+/*
 checkRequiredConsistentID_corpus = function(req, res, next) {
 	var id_corpus = req.params.id;
 	if (id_corpus == undefined) id_corpus = req.params.id_corpus;
@@ -164,9 +190,13 @@ exports.requiredConsistentID = function(role, minimumRightRequired, level) {
 		else res.status(401).json({error:"You are not connected"});
 	}
 }
+*/
 
 
-checkRequiredAuthentication = function(req, res, result, connectedUser, dataGroup, minimumRightRequired, next){
+
+
+/*
+checkRequiredAuthentication_old = function(req, res, result, connectedUser, dataGroup, minimumRightRequired, next){
 	ACLModel.find({id:{$in:result}}, function(error, dataACL) {
 		if (error) res.status(400).json({error:"access denied!", message:error});
 		else if (dataACL != null) {
@@ -194,29 +224,7 @@ checkRequiredAuthentication = function(req, res, result, connectedUser, dataGrou
 	});
 }
 
-checkRequiredAuthenticationCorpus = function(req, res, id_corpus, connectedUser, dataGroup, minimumRightRequired, next){
-	ACLModel.findOne({id:id_corpus}, function(error, dataACL) {
-		if (error) res.status(400).json({error:"access denied!", message:error});
-		else if (dataACL != null) {										
-			var foundPos = commonFuncs.findUsernameInACL(connectedUser.username, dataACL.users);
-			if (foundPos != -1 && commonFuncs.isAllowedRight(minimumRightRequired, dataACL.users[foundPos].right) >= 0) {
-				found = true;
-				next();
-			}	
-			else {
-				foundPos = commonFuncs.findUsernameInGroupACL(dataGroup, dataACL.groups);
-				if (foundPos != -1 && commonFuncs.isAllowedRight(minimumRightRequired, dataACL.groups[foundPos].right) >= 0) {
-					found = true; 
-					next();
-				}
-			}
-			if (found == false) res.status(403).json({error:"access denied"});
-		}
-		else res.status(403).json({error:"access denied"});
-	});
-}
-
-exports.requiredAuthentication = function(role, minimumRightRequired, level) {
+exports.requiredAuthentication_old = function(role, minimumRightRequired, level) {
 	return function(req, res, next) {
 		if (req.session.user) { 
     		if (req.session.user.role == "admin" || minimumRightRequired == 'N')  next();
@@ -235,7 +243,7 @@ exports.requiredAuthentication = function(role, minimumRightRequired, level) {
 								result.push(req.params.id_layer);
 								result.push(req.params.id_media);
 								result.push(req.params.id_corpus);
-								checkRequiredAuthentication(req, res, result, connectedUser, dataGroup, minimumRightRequired, next);
+								checkRequiredAuthentication_old(req, res, result, connectedUser, dataGroup, minimumRightRequired, next);
 							}
 						});	
 						break;
@@ -248,7 +256,7 @@ exports.requiredAuthentication = function(role, minimumRightRequired, level) {
 								result.push(req.params.id_layer);
 								result.push(req.params.id_media);
 								result.push(req.params.id_corpus);
-								checkRequiredAuthentication(req, res, result, connectedUser, dataGroup, minimumRightRequired, next);
+								checkRequiredAuthentication_old(req, res, result, connectedUser, dataGroup, minimumRightRequired, next);
 							}
 						});	
 						break;
@@ -261,17 +269,20 @@ exports.requiredAuthentication = function(role, minimumRightRequired, level) {
 								result = [];
 								result.push(req.params.id_media);
 								result.push(req.params.id_corpus);
-								checkRequiredAuthentication(req, res, result, connectedUser, dataGroup, minimumRightRequired, next);
+								checkRequiredAuthentication_old(req, res, result, connectedUser, dataGroup, minimumRightRequired, next);
 							}
 						});
 						break;
 						
 					case "corpus": 
-						var id_corpus = req.params.id;
-						if (id_corpus == undefined) id_corpus = req.params.id_corpus;						
+						var id_corpus = req.params.id_corpus;
 						Group.find({'usersList' : {$regex : new RegExp('^'+ connectedUser.username + '$', "i")}}, function(error, dataGroup) {
 							if (error) res.status(400).json({error:"access denied!", message:error});
-							else checkRequiredAuthenticationCorpus(req, res, id_corpus, connectedUser, dataGroup, minimumRightRequired, next);
+							else {
+								result = [];
+								result.push(req.params.id_corpus);
+								checkRequiredAuthentication_old(req, res, result, connectedUser, dataGroup, minimumRightRequired, next);
+							}
 						});
 						break;
 					
@@ -288,6 +299,153 @@ exports.requiredAuthentication = function(role, minimumRightRequired, level) {
 		else res.status(403).json({error:"access denied"});	
 	}
 }
+*/
+
+
+	/*
+	var id_media=null; 
+	var id_corpus=null;
+	async.waterfall([
+		function(callback) {
+			LayerModel.findById(id_layer, function (error, data) {
+				callback( error, data.id_media);
+			});
+		},
+		function(id_media, callback) {
+			MediaModel.findById(id_media, function (error, data) {
+				callback( error, data.id_corpus, id_media);
+			});
+		},
+		function(id_corpus, id_media, callback) {
+			console.log(id_corpus+' '+id_media+' '+id_layer);
+		}
+	], res.status(403).json({error:"access denied"}));
+	
+
+	var id_media=null; 
+	var id_corpus=null;
+	async.waterfall([
+		LayerModel.findById,
+		data -> data.id_media,
+		MediaModel.findById,
+		data -> data.id_corpus,
+		CorpusModel.findById,
+	]
+	)
+		function(data) { return data.id_media },
+
+		function(callback) {
+			LayerModel.findById(id_layer, function (error, data) {
+				callback( error, data.id_media);
+			});
+		},
+		function(id_media, callback) {
+			MediaModel.findById(id_media, function (error, data) {
+				callback( error, data.id_corpus, id_media);
+			});
+		},
+		function(id_corpus, id_media, callback) {
+			console.log(id_corpus+' '+id_media+' '+id_layer);
+		}
+	], res.status(403).json({error:"access denied"}));
+	*/
+
+
+
+/*
+checkRequiredAuthentication = function(req, res, error, dataACL, minimumRightRequired){
+	if (!error && dataACL != null) {	
+		var foundPosUser = commonFuncs.findUsernameInACL(req.session.user.username, dataACL.users);			
+		if (foundPosUser != -1 && commonFuncs.isAllowedRight(minimumRightRequired, dataACL.users[foundPosUser].right) >= 0) return true;
+		else {
+			var foundPosGroup = commonFuncs.findUsernameInGroupACL(dataGroup, dataACL.groups);
+			if (foundPosGroup != -1 && commonFuncs.isAllowedRight(minimumRightRequired, dataACL.groups[foundPosGroup].right) >= 0) return true; 
+		}			
+	}
+}
+
+checkRequiredAuthenticationCorpus = function(req, res, id_corpus, dataGroup, minimumRightRequired, next){
+	CorpusModel.findById(id_corpus, function(error, data){
+		if (error || data == null) res.status(403).json({error:"access denied"});	
+		else {
+			ACLModel.findOne({id:id_corpus}, function(error, dataACL) {
+				if (checkRequiredAuthentication(req, res, error, dataACL, minimumRightRequired)) next();
+				else res.status(403).json({error:"access denied"});	
+			});	
+		}
+	});	
+}
+
+checkRequiredAuthenticationMedia = function(req, res, id_media, dataGroup, minimumRightRequired, next){
+	MediaModel.findById(id_media, function(error, data){
+		if (error || data == null) res.status(403).json({error:"access denied"});	
+		else {
+			ACLModel.findOne({id:id_media}, function(error, dataACL) {
+				if (checkRequiredAuthentication(req, res, error, dataACL, minimumRightRequired)) next();
+				else checkRequiredAuthenticationCorpus(req, res, data.id_corpus, dataGroup, minimumRightRequired, next);
+			});	
+		}
+	});	
+}
+
+checkRequiredAuthenticationLayer = function(req, res, id_layer, dataGroup, minimumRightRequired, next){
+	LayerModel.findById(id_layer, function(error, data){
+		if (error || data == null) res.status(403).json({error:"access denied"});	
+		else {
+			ACLModel.findOne({id:id_layer}, function(error, dataACL) {
+				if (checkRequiredAuthentication(req, res, error, dataACL, minimumRightRequired)) next();
+				else checkRequiredAuthenticationMedia(req, res, data.id_media, dataGroup, minimumRightRequired, next);
+			});	
+		}
+	});	
+}
+
+checkRequiredAuthenticationAnnotation = function(req, res, id_annotation, dataGroup, minimumRightRequired, next){
+	AnnotationModel.findById(id_annotation, function(error, data){
+		if (error || data == null) res.status(403).json({error:"access denied"});	
+		else {
+			ACLModel.findOne({id:id_annotation}, function(error, dataACL) {
+				if (checkRequiredAuthentication(req, res, error, dataACL, minimumRightRequired)) next();
+				else checkRequiredAuthenticationLayer(req, res, data.id_layer, dataGroup, minimumRightRequired, next);
+			});	
+		}				
+	});	
+}
+
+exports.requiredAuthentication = function(role, minimumRightRequired, level) {
+	return function(req, res, next) {
+		if (req.session.user) {	
+    		//if (req.session.user.role == "admin" || minimumRightRequired == 'N')  next();
+			if (commonFuncs.isAllowedUser(req.session.user.role, role) < 0) res.status(403).json({error:"access denied"});		 
+			else {
+				Group.find({'usersList' : {$regex : new RegExp('^'+ req.session.user.username + '$', "i")}}, function(error, dataGroup) {
+					if (error) res.status(403).json({error:"access denied"});	
+					else {
+						switch(level) {
+							case "corpus": 
+								checkRequiredAuthenticationCorpus(req, res, req.params.id, dataGroup, minimumRightRequired, next);
+								break;							
+							case  "media":
+								checkRequiredAuthenticationMedia(req, res, req.params.id, dataGroup, minimumRightRequired, next);
+			 					break;							
+							case  "layer": 
+								checkRequiredAuthenticationLayer(req, res, req.params.id, dataGroup, minimumRightRequired, next);
+								break;							
+							case  "annotation": 
+								checkRequiredAuthenticationAnnotation(req, res, req.params.id, dataGroup, minimumRightRequired, next);
+								break;
+							default:
+								res.status(403).json({error:"access denied"});					//keep only the permitted resources
+								break;
+						}
+					}
+				});	
+			}
+		}
+	}
+}
+*/
+
 
 // create a root user if it does not exist
 exports.createRootUser = function(){

@@ -52,123 +52,113 @@ exports.initialize = function(app){
 
 	// --- user routes --- \\
 	app.post("/login", authenticate.login);
-	app.post('/logout', authenticate.requiredAuthentication("user", "R", "global"), 
+	app.post('/logout', ACLAPI.requiredAuthentication("user", "R", "global"), 
 					    authenticate.logout);
-	app.post("/user", authenticate.requiredAuthentication("admin"), 
+	app.post("/user", ACLAPI.requiredAuthentication("admin"), 
 				      authenticate.userExist, 
 				      authenticate.signup);																				// create user
-	app.get('/user', authenticate.requiredAuthentication("user", "R", "global"), 
+	app.get('/user', ACLAPI.requiredAuthentication("user", "R", "global"), 
 				     user.listUsers);																					// get list of all users
-	app.get('/user/:id', authenticate.requiredAuthentication("user", "R", "global"), 
+	app.get('/user/:id', ACLAPI.requiredAuthentication("user", "R", "global"), 
 						 user.listWithId);               																// info on a specific user
-	app.put('/user/:id', authenticate.requiredAuthentication("admin"), 
+	app.put('/user/:id', ACLAPI.requiredAuthentication("admin"), 
 						 user.update);						  															// update information on a specific user
-	app.delete('/user/:id', authenticate.requiredAuthentication("admin"), 
+	app.delete('/user/:id', ACLAPI.requiredAuthentication("admin"), 
 							user.remove);                       														// delete a specific user
 	
 	// --- group routes --- \\
-	app.post("/group", authenticate.requiredAuthentication("admin"), 
+	app.post("/group", ACLAPI.requiredAuthentication("admin"), 
 					   group.addGroup); 																				// create a group
-	app.get('/group', authenticate.requiredAuthentication("user", "R", "global"), 
+	app.get('/group', ACLAPI.requiredAuthentication("user", "R", "global"), 
 					  group.listAll); 																					// get list of all groups
-	app.get('/group/:id', authenticate.requiredAuthentication("user", "R", "global"), 
+	app.get('/group/:id', ACLAPI.requiredAuthentication("user", "R", "global"), 
 						  group.listWithId); 																			// info on a specific group
-	app.put('/group/:id', authenticate.requiredAuthentication("admin"), 
+	app.put('/group/:id', ACLAPI.requiredAuthentication("admin"), 
 						  group.update); 																				// update information of a group
-	app.delete('/group/:id', authenticate.requiredAuthentication("admin"), 
+	app.delete('/group/:id', ACLAPI.requiredAuthentication("admin"), 
 							 authenticate.removeGroupByID); 															// delete a group
-	app.get('/group/:id/user', authenticate.requiredAuthentication("admin", "R", "global"), 
+	app.get('/group/:id/user', ACLAPI.requiredAuthentication("admin", "R", "global"), 
 							   group.listUserOfGroupId); 																// list user of a group
-	app.post("/group/:id/user", authenticate.requiredAuthentication("admin"), 
+	app.post("/group/:id/user", ACLAPI.requiredAuthentication("admin"), 
 								group.addUser2Group); 																	// add user to a group
-	app.get('/user/:id/group', authenticate.requiredAuthentication("user", "R", "global"), 
+	app.get('/user/:id/group', ACLAPI.requiredAuthentication("user", "R", "global"), 
 							   user.listGroupsOfUserId); 																// return list of group of a specific user
-	app.delete('/group/:id/user/:username', authenticate.requiredAuthentication("admin"), 
+	app.delete('/group/:id/user/:username', ACLAPI.requiredAuthentication("admin"), 
 											group.removeUserFromGroup); 												// remove a user from a group
 	
 	// --- resources routes --- \\
 	// corpus
-	app.post('/corpus', authenticate.requiredAuthentication("admin"), 
+	app.post('/corpus', ACLAPI.requiredAuthentication("admin"), 
 					    corpus.post);																					// create new corpus
-	app.get('/corpus', authenticate.requiredAuthentication("user", 'R', "corpus"), 
+	app.get('/corpus', ACLAPI.requiredAuthentication("user", 'R', "corpus"), 
 					   corpus.listAll);																					// list all corpus
-	app.get('/corpus/:id', authenticate.requiredAuthentication("user", 'R', "corpus"), 
-						   authenticate.requiredConsistentID("user", 'R', "corpus"),  
-						   corpus.listWithId);							   												// info on a particular corpus
-	app.put('/corpus/:id', authenticate.requiredAuthentication("user", 'E', "corpus"), 
-						   authenticate.requiredConsistentID("user", 'E', "corpus"), 
+
+
+
+	app.get('/corpus/:id', corpus.listWithId);																			// info on a particular corpus
+
+
+
+	app.put('/corpus/:id', ACLAPI.requiredAuthentication("user", 'E', "corpus"), 
 						   corpus.update);																				// update info of a corpus
-	app.delete('/corpus/:id', authenticate.requiredAuthentication("user", 'D', "corpus"), 
-							  authenticate.requiredConsistentID("user", 'D', "corpus"), 
+	app.delete('/corpus/:id', ACLAPI.requiredAuthentication("user", 'D', "corpus"), 
 						 	  compound.removeCorpus);																	// delete a corpus
-	// media
-	app.post('/corpus/:id_corpus/media', authenticate.requiredAuthentication("user", 'C', "corpus"), 
-										 authenticate.requiredConsistentID("user", 'C', "corpus"), 
-										 media.post);																	// create a media for a corpus
-	app.get('/corpus/:id/media', authenticate.requiredAuthentication("user", 'R', "corpus"), 
-								 authenticate.requiredConsistentID("user", 'R', "corpus"),
-							     media.listAll);																		// list all media of a corpus												
-	app.get('/corpus/:id_corpus/media/:id_media', authenticate.requiredAuthentication("user", 'R', "media"), 
-												  authenticate.requiredConsistentID("user", 'R', "media"), 
-												  media.listWithId);													// info on a particular media
-	app.put('/corpus/:id_corpus/media/:id_media', authenticate.requiredAuthentication("user", 'E', "media"), 
-												  authenticate.requiredConsistentID("user", 'E', "media"),
-												  media.update);											  			// update info of a media
-	app.delete('/corpus/:id_corpus/media/:id_media', authenticate.requiredAuthentication("user", 'D', "media"), 
-													 authenticate.requiredConsistentID("user", 'D', "media"), 
-													 compound.removeMedia);											  	// delete a media
+	app.post('/corpus/:id/media', ACLAPI.requiredAuthentication("user", 'C', "corpus"), 
+								  media.post);																			// create a media for a corpus
+	app.get('/corpus/:id/media', ACLAPI.requiredAuthentication("user", 'R', "corpus"), 
+							     media.listAll);																		// list all media of a corpus	
+
+
+	// media									
+	app.get('/media/:id', media.listWithId);																			// info on a particular media
+	app.put('/media/:id', ACLAPI.requiredAuthentication("user", 'E', "media"), 
+						  media.update);											  									// update info of a media
+	app.delete('/media/:id', ACLAPI.requiredAuthentication("user", 'D', "media"), 
+							 compound.removeMedia);											  							// delete a media
+	app.post('/media/:id/layer', ACLAPI.requiredAuthentication("user", 'C', "media"), 
+								 layer.post);																			// create a layer
+	app.get('/media/:id/layer', ACLAPI.requiredAuthentication("user", 'R', "media"),
+								layer.listAll);																			// list of all layer for a media
+
+
 	// layer
-	app.post('/corpus/:id_corpus/media/:id_media/layer', authenticate.requiredAuthentication("user", 'C', "media"), 
-														 authenticate.requiredConsistentID("user", 'C', "media"), 
-														 layer.post);													// create a layer
-	app.get('/corpus/:id_corpus/media/:id_media/layer', authenticate.requiredAuthentication("user", 'R', "media"),
-														authenticate.requiredConsistentID("user", 'R', "media"), 
-														layer.listAll);													// list of all layer for a media
-	app.get('/corpus/:id_corpus/media/:id_media/layer/:id_layer', authenticate.requiredAuthentication("user", 'R', "layer"), 
-													   			  authenticate.requiredConsistentID("user", 'R', "layer"), 
-													   			  layer.listWithId);									// info on a particalar layer
-	app.put('/corpus/:id_corpus/media/:id_media/layer/:id_layer', authenticate.requiredAuthentication("user", 'E', "layer"), 
-																  authenticate.requiredConsistentID("user", 'E', "layer"), 
-																  layer.updateAll);										// update info of a layer
-	app.delete('/corpus/:id_corpus/media/:id_media/layer/:id_layer', authenticate.requiredAuthentication("user", 'D', "layer"), 
-																 	 authenticate.requiredConsistentID("user", 'D', "layer"), 
-																 	 compound.removeLayer);								// delete a layer
+	app.get('/layer/:id', ACLAPI.requiredAuthentication("user", 'R', "layer"), 
+						  layer.listWithId);									// info on a particalar layer
+	app.put('/layer/:id', ACLAPI.requiredAuthentication("user", 'E', "layer"), 
+						  layer.updateAll);										// update info of a layer
+	app.delete('/layer/:id', ACLAPI.requiredAuthentication("user", 'D', "layer"), 
+							 compound.removeLayer);								// delete a layer
+ 	app.post('/layer/:id/annotation', ACLAPI.requiredAuthentication("user", 'C', "layer"), 
+									  anno.post);								// create an annotation
+	app.get('/layer/:id/annotation', ACLAPI.requiredAuthentication("user", 'R', "layer"), 
+									 anno.listAll);								// list all annotation of a layer
+
  	// annotation
- 	app.post('/corpus/:id_corpus/media/:id_media/layer/:id_layer/annotation', authenticate.requiredAuthentication("user", 'C', "layer"), 
-																			  authenticate.requiredConsistentID("user", 'C', "layer"), 
-																			  anno.post);								// create an annotation
-	app.get('/corpus/:id_corpus/media/:id_media/layer/:id_layer/annotation', authenticate.requiredAuthentication("user", 'R', "layer"), 
-										 									 authenticate.requiredConsistentID("user", 'R', "layer"),
-																		 	 anno.listAll);								// list all annotation of a layer
-	app.get('/corpus/:id_corpus/media/:id_media/layer/:id_layer/annotation/:id_anno', authenticate.requiredAuthentication("user", 'R', "annotation"), 
-													   								  authenticate.requiredConsistentID("user", 'R', "annotation"), 
-													   								  anno.listWithId);            		// info on a particular annotation
-	app.put('/corpus/:id_corpus/media/:id_media/layer/:id_layer/annotation/:id_anno', authenticate.requiredAuthentication("user", 'E', "annotation"), 
-																					  authenticate.requiredConsistentID("user", 'E', "annotation"), 
-																					  anno.updateAll);					// update info of an annotation
-	app.delete('/corpus/:id_corpus/media/:id_media/layer/:id_layer/annotation/:id_anno', authenticate.requiredAuthentication("user", 'D', "annotation"), 
-																						 authenticate.requiredConsistentID("user", 'D', "annotation"), 
-																						 compound.removeAnno); 			// delete annotation
+	app.get('/annotation/:id', ACLAPI.requiredAuthentication("user", 'R', "annotation"), 
+							   anno.listWithId);            		// info on a particular annotation
+	app.put('/annotation/:id', ACLAPI.requiredAuthentication("user", 'E', "annotation"), 
+					           anno.updateAll);					// update info of an annotation
+	app.delete('/annotation/:id', ACLAPI.requiredAuthentication("user", 'D', "annotation"), 
+								  compound.removeAnno); 			// delete annotation
+
+
+
 	// read video
-	app.get('/corpus/:id_corpus/media/:id_media/video', authenticate.requiredAuthentication("user", 'R', "media"), 
-														authenticate.requiredConsistentID("user", 'R', "media"), 
-														media.getVideo);
-	app.get('/corpus/:id_corpus/media/:id_media/webm', authenticate.requiredAuthentication("user", 'R', "media"), 
-													   authenticate.requiredConsistentID("user", 'R', "media"), 
-													   media.getVideoWEBM);
-	app.get('/corpus/:id_corpus/media/:id_media/mp4', authenticate.requiredAuthentication("user", 'R', "media"), 
-													  authenticate.requiredConsistentID("user", 'R', "media"), 
-													  media.getVideoMP4);
-	app.get('/corpus/:id_corpus/media/:id_media/ogv', authenticate.requiredAuthentication("user", 'R', "media"), 
-													  authenticate.requiredConsistentID("user", 'R', "media"), 
-													  media.getVideoOGV);					  
+	app.get('/media/:id/video', ACLAPI.requiredAuthentication("user", 'R', "media"), 
+								media.getVideo);
+	app.get('/media/:id/webm', ACLAPI.requiredAuthentication("user", 'R', "media"), 
+							   media.getVideoWEBM);
+	app.get('/media/:id/mp4', ACLAPI.requiredAuthentication("user", 'R', "media"), 
+							  media.getVideoMP4);
+	app.get('/media/:id/ogv', ACLAPI.requiredAuthentication("user", 'R', "media"), 
+							  media.getVideoOGV);					  
 													  	
 	// --- queue routes --- \\
 	app.post('/queue', authenticate.requiredValidUser, 
 					   queue.post);																						// create a queue
 	app.put('/queue/:id', authenticate.requiredValidUser, 
 						  queue.update); 																				// create or replace a list of ids
-	app.get('/queue', authenticate.requiredAuthentication("admin"), 
+	app.get('/queue', ACLAPI.requiredAuthentication("admin"), 
 					  queue.listAll); 																					// list all ids in a queue
 	app.get('/queue/:id', authenticate.requiredValidUser, 
 					      queue.listWithId);																			// info on a queue
@@ -185,35 +175,27 @@ exports.initialize = function(app){
 
 	// --- ASL routes --- \\
 	// corpus
-	app.get("/corpus/:id/acl", authenticate.requiredAuthentication("user", 'A', "corpus"), 
-							   authenticate.requiredConsistentID("user", 'A', "corpus"), 
+	app.get("/corpus/:id/acl", ACLAPI.requiredAuthentication("user", 'A', "corpus"), 
 							   ACLAPI.listWithIdOfResource);															// Get acl of a corpus
-	app.put("/corpus/:id/acl", authenticate.requiredAuthentication("user", 'A', "corpus"), 
-							   authenticate.requiredConsistentID("user", 'A', "corpus"), 
+	app.put("/corpus/:id/acl", ACLAPI.requiredAuthentication("user", 'A', "corpus"), 
 							   authenticate.requiredRightUGname("user"), 
 							   ACLAPI.updateWithIdOfResource);															// Set acl of a corpus for user or a group
 	// media
-	app.get("/corpus/:id_corpus/media/:id_media/acl", authenticate.requiredAuthentication("user", 'A', "media"), 
-													  authenticate.requiredConsistentID("user", 'A', "media"),
-													  ACLAPI.listWithIdOfResource);										// Get acl of a media
-	app.put("/corpus/:id_corpus/media/:id_media/acl", authenticate.requiredAuthentication("user", 'A', "media"), 
-													  authenticate.requiredConsistentID("user", 'A', "media"), 
-													  authenticate.requiredRightUGname("user"), 
-													  ACLAPI.updateWithIdOfResource);									// Set acl of a media for user or a group
+	app.get("/media/:id/acl", ACLAPI.requiredAuthentication("user", 'A', "media"), 
+							  ACLAPI.listWithIdOfResource);										// Get acl of a media
+	app.put("/media/:id/acl", ACLAPI.requiredAuthentication("user", 'A', "media"), 
+							  authenticate.requiredRightUGname("user"), 
+							  ACLAPI.updateWithIdOfResource);									// Set acl of a media for user or a group
 	// layer
-	app.get("/corpus/:id_corpus/media/:id_media/layer/:id_layer/acl", authenticate.requiredAuthentication("user", 'A', "layer"), 
-																	  authenticate.requiredConsistentID("user", 'A', "layer"), 
-																	  ACLAPI.listWithIdOfResource);						// Get acl of a media
-	app.put("/corpus/:id_corpus/media/:id_media/layer/:id_layer/acl", authenticate.requiredAuthentication("user", 'A', "layer"), 
-																	  authenticate.requiredConsistentID("user", 'A', "layer"), 
-																	  authenticate.requiredRightUGname("user"), 
-																	  ACLAPI.updateWithIdOfResource);					// Set acl of a layer for user or a group
+	app.get("/layer/:id/acl", ACLAPI.requiredAuthentication("user", 'A', "layer"), 
+							  ACLAPI.listWithIdOfResource);						// Get acl of a media
+	app.put("/layer/:id/acl", ACLAPI.requiredAuthentication("user", 'A', "layer"), 
+							  authenticate.requiredRightUGname("user"), 
+							  ACLAPI.updateWithIdOfResource);					// Set acl of a layer for user or a group
 	// annotation
-	app.get("/corpus/:id_corpus/media/:id_media/layer/:id_layer/annotation/:id_anno/acl", authenticate.requiredAuthentication("user", 'A', "annotation"),
-																						  authenticate.requiredConsistentID("user", 'A', "annotation"), 																						  
-																						  ACLAPI.listWithIdOfResource);	// Get acl of an annotation
-	app.put("/corpus/:id_corpus/media/:id_media/layer/:id_layer/annotation/:id_anno/acl", authenticate.requiredAuthentication("user", 'A', "annotation"), 
-																						  authenticate.requiredConsistentID("user", 'A', "annotation"), 
-																						  authenticate.requiredRightUGname("user"),	
-																						  ACLAPI.updateWithIdOfResource);// Set acl of an annotation for user or a group
+	app.get("/annotation/:id/acl", ACLAPI.requiredAuthentication("user", 'A', "annotation"),
+								   ACLAPI.listWithIdOfResource);	// Get acl of an annotation
+	app.put("/annotation/:id/acl", ACLAPI.requiredAuthentication("user", 'A', "annotation"), 
+								   authenticate.requiredRightUGname("user"),	
+								   ACLAPI.updateWithIdOfResource);// Set acl of an annotation for user or a group
 }

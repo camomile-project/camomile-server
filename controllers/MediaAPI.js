@@ -131,6 +131,12 @@ exports.listAll = function(req, res){
 
 //for the uri: app.get('/corpus/:id_corpus/media/:id_media', 
 exports.listWithId = function(req, res) {
+
+
+						  
+
+	console.log('ici');
+
 	Media.findById(req.params.id_media, function(error, data){
 		if (error) res.status(400).json({error:"error", message:error});
 		else if (data == null) res.status(400).json({error:'no such id_media!'})
@@ -141,8 +147,7 @@ exports.listWithId = function(req, res) {
 //test for Posting corpus
 //app.post('/corpus/:id_corpus/media', 
 exports.post = function(req, res){
-	if (req.body.name == undefined) return res.status(400).json({error:"one or more data fields are not filled out properly"});
-		
+	if (req.body.name == undefined) return res.status(400).json({error:"one or more data fields are not filled out properly"});	
 	Corpus.findById(req.params.id_corpus, function(error, data){
 		if (error) res.status(400).json({error:"error", message:error});
 		else if (data == null) res.status(400).json({error:'Could not post this media because the given id_corpus is incorrect'});

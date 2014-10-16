@@ -24,7 +24,15 @@ SOFTWARE.
 
 /* The API controller for ACL methods
    
+   ACL is only for corpus and corpuslayer
 */
+
+
+
+
+
+
+/***************************************************** old part ********************************************************/
 
 var Corpus = require('../models/Corpus').Corpus;
 var Media = require('../models/Media').Media; //get the media model
@@ -33,6 +41,26 @@ var Annotation = require('../models/Annotation').Annotation; //get the annotatio
 var ACL = require('../models/ACL').ACL;
 var User = require('../models/user').User;
 var Group = require('../models/Group').Group;
+var commonFuncs = require('../lib/commonFuncs');
+
+var CorpusModel = require('../models/Corpus').Corpus
+var MediaModel = require('../models/Media').Media
+var LayerModel = require('../models/Layer').Layer
+var AnnotationModel = require('../models/Annotation').Annotation
+var ACLModel = require('../models/ACL').ACL;
+
+var userRoleConstant = new Array();
+	userRoleConstant["user"] = 1; // normal user
+	userRoleConstant["supervisor"] = 2;
+	userRoleConstant["admin"] = 3;	
+
+var rightConstant = new Array(); 
+	rightConstant["N"] = 1; //none		
+	rightConstant["R"] = 2; //read
+	rightConstant["E"] = 3; //edit
+	rightConstant["C"] = 4; //create
+	rightConstant["D"] = 5; //delete
+	rightConstant["A"] = 6; //admin
 
 // retrieve all acl
 exports.listAll = function(req, res){
@@ -130,9 +158,248 @@ exports.getRightOfId = function(id1, callback){
 };
 
 
-exports.getRightAllId = function(callback){
-	ACL.findById({}, callback);
-};
+
+
+checkUserRight = function(username, dataACL, minimumRightRequired) {
+	for(var i = 0; i < dataACL.users.length; i++) {
+		if (dataACL.users[i].login === username && rightConstant[dataACL.users[i].right] - rightConstant[minimumRightRequired] >= 0 ) return true;
+	}
+	return false;
+}
+
+checkGroupRight = function(groupname, groups, dataACL, minimumRightRequired) {
+	for(var j = 0; j < groupname.length; j++) { //group to which the person belongs
+		for(var i = 0; i < groups.length; i++) { //group for which the resource has been granted
+			if (groups[i].login === groupname[j].groupname && rightConstant[minimumRightRequired] - rightConstant[dataACL.users[foundPosUser].right] >= 0) return true;
+		} 
+	}
+	return false;
+}
+
+exports.checkRightCorpus = function(req, minimumRightRequired, callback){
+	Group.find({'usersList' : {$regex : new RegExp('^'+ req.session.user.username + '$', "i")}}, function(error, dataGroup) {
+		ACLModel.findOne({id:req.params.id}, function(error, dataACL) {
+			if (checkUserRight(req.session.user.username, dataACL, minimumRightRequired)) callback(null, true);
+			else if (checkGroupRight(dataGroup, dataACL.groups, dataACL, minimumRightRequired)) callback(null, true);	
+			else callback("Acces denied", false);
+			
+		});	
+	});
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+exports.checkRightMedia = function(minimumRightRequired){
+	return function(req, res, next) {
+		Group.find({'usersList' : {$regex : new RegExp('^'+ req.session.user.username + '$', "i")}}, function(error, dataGroup) {
+			ACLModel.findOne({id:req.params.id}, function(error, dataACL) {
+				if (checkUserRight(req.session.user.username, dataACL, minimumRightRequired)) next();
+				else if (checkGroupRight(dataGroup, dataACL.groups, dataACL, minimumRightRequired)) next();
+				else {
+					async.waterfall([
+						function(callback) {
+							MediaModel.findById(req.params.id, function (error, data) {
+								callback(error, data.id_corpus);
+							});
+						},
+						function(id_corpus, callback) {
+							ACLModel.findOne({id:id_corpus}, function(error, dataACL) {
+								if (checkUserRight(req.session.user.username, dataACL, minimumRightRequired)) next();
+								else if (checkGroupRight(dataGroup, dataACL.groups, dataACL, minimumRightRequired)) next();	
+								else res.status(403).json({error:"access denied"});									
+							});	
+						}
+					], res.status(403).json({error:"access denied"}));
+				}
+			});	
+		});
+	}	
+}
+
+
+
+
+exports.requiredAuthentication = function(role, minimumRightRequired, level) {
+	return function(req, res, next) {
+
+		if (req.session.user) {	
+    		//if (req.session.user.role == "admin" || minimumRightRequired == 'N')  next();
+			if (commonFuncs.isAllowedUser(req.session.user.role, role) < 0) res.status(403).json({error:"access denied"});		 
+			else {
+				Group.find({'usersList' : {$regex : new RegExp('^'+ req.session.user.username + '$', "i")}}, function(error, dataGroup) {
+					if (error) res.status(403).json({error:"access denied"});	
+					else {
+						var allowedRight=false;
+						if(level == "corpus") {
+							ACLModel.findOne({id:id_ressource}, function(error, dataACL) {
+								if (checkUserRight(username, dataACL, minimumRightRequired)) next();
+								else if (checkGroupRight(dataGroup, dataACL.groups, dataACL, minimumRightRequired)) next();
+							});	
+						}
+						else if(level == "media") {
+
+						}
+						else if(level == "layer") {
+
+							var id_media=null; 
+							var id_corpus=null;
+							async.waterfall([
+								function(callback) {
+									LayerModel.findById(id_layer, function (error, data) {
+										callback( error, data.id_media);
+									});
+								},
+								function(id_media, callback) {
+									MediaModel.findById(id_media, function (error, data) {
+										callback( error, data.id_corpus, id_media);
+									});
+								},
+								function(id_corpus, id_media, callback) {
+									console.log(id_corpus+' '+id_media+' '+id_layer);
+
+
+
+								}
+							], res.status(403).json({error:"access denied"}));
+
+
+						}
+						else if(level == "annotation") {
+
+						}
+						else res.status(403).json({error:"access denied 5"});					//keep only the permitted resources
+					}
+				});	
+			}
+		}
+	}
+}
+
+
+
+
+/*
+checkRequiredAuthenticationCorpus = function(req, res, id_corpus, dataGroup, minimumRightRequired, allowedRight){
+	CorpusModel.findById(id_corpus, function(error, data){
+		if (error || data == null) return false;
+		else {
+			ACLModel.findOne({id:id_corpus}, function(error, dataACL) {
+				if (checkUserRight(req.session.user.username, dataACL, minimumRightRequired)) return true;
+				else if (checkGroupRight(dataGroup, dataACL.groups, dataACL, minimumRightRequired)) return true;
+				else return false;
+			});	
+		}
+	});	
+}
+
+checkRequiredAuthenticationMedia = function(req, res, id_media, dataGroup, minimumRightRequired, allowedRight){
+	MediaModel.findById(id_media, function(error, data){
+		if (error || data == null) return false;
+		else {
+			ACLModel.findOne({id:id_media}, function(error, dataACL) {
+				if (checkUserRight(req.session.user.username, dataACL, minimumRightRequired)) return true;
+				else if (checkGroupRight(dataGroup, dataACL.groups, dataACL, minimumRightRequired)) return true;
+				else checkRequiredAuthenticationCorpus(req, res, data.id_corpus, dataGroup, minimumRightRequired, allowedRight);
+			});	
+		}
+	});	
+}
+
+checkRequiredAuthenticationLayer = function(req, res, id_layer, dataGroup, minimumRightRequired, allowedRight){
+	LayerModel.findById(id_layer, function(error, data){
+		if (error || data == null) return false;	
+		else {
+			ACLModel.findOne({id:id_layer}, function(error, dataACL) {
+				if (checkUserRight(req.session.user.username, dataACL, minimumRightRequired)) return true;
+				else if (checkGroupRight(dataGroup, dataACL.groups, dataACL, minimumRightRequired)) return true;
+				else checkRequiredAuthenticationMedia(req, res, data.id_media, dataGroup, minimumRightRequired, next);
+			});	
+		}
+	});	
+}
+
+checkRequiredAuthenticationAnnotation = function(req, res, id_annotation, dataGroup, minimumRightRequired, allowedRight){
+	AnnotationModel.findById(id_annotation, function(error, data){
+		if (error || data == null) return false;	
+		else {
+			ACLModel.findOne({id:id_layer}, function(error, dataACL) {
+				if (checkUserRight(req.session.user.username, dataACL, minimumRightRequired)) return true;
+				else if (checkGroupRight(dataGroup, dataACL.groups, dataACL, minimumRightRequired)) return true;
+				else checkRequiredAuthenticationMedia(req, res, data.id_layer, dataGroup, minimumRightRequired, next);
+			});	
+		}
+	});	
+}
+*/
+
+
+/*
+	var id_media=null; 
+	var id_corpus=null;
+	async.waterfall([
+		function(callback) {
+			LayerModel.findById(id_layer, function (error, data) {
+				callback( error, data.id_media);
+			});
+		},
+		function(id_media, callback) {
+			MediaModel.findById(id_media, function (error, data) {
+				callback( error, data.id_corpus, id_media);
+			});
+		},
+		function(id_corpus, id_media, callback) {
+			console.log(id_corpus+' '+id_media+' '+id_layer);
+		}
+	], res.status(403).json({error:"access denied"}));
+*/
+
+/*
+exports.requiredAuthentication = function(role, minimumRightRequired, level) {
+	return function(req, res, next) {
+		if (req.session.user) {	
+    		//if (req.session.user.role == "admin" || minimumRightRequired == 'N')  next();
+			if (commonFuncs.isAllowedUser(req.session.user.role, role) < 0) res.status(403).json({error:"access denied"});		 
+			else {
+				Group.find({'usersList' : {$regex : new RegExp('^'+ req.session.user.username + '$', "i")}}, function(error, dataGroup) {
+					if (error) res.status(403).json({error:"access denied"});	
+					else {
+						var allowedRight=false;
+						if(level == "corpus") {
+							if (checkRequiredAuthenticationCorpus(req, res, req.params.id, dataGroup, minimumRightRequired, allowedRight))	next();
+							else res.status(403).json({error:"access denied 1"});
+						}
+						else if(level == "media") {
+							if (checkRequiredAuthenticationMedia(req, res, req.params.id, dataGroup, minimumRightRequired, allowedRight)) next();
+							else res.status(403).json({error:"access denied 2"});
+						}
+						else if(level == "layer") {
+							if (checkRequiredAuthenticationLayer(req, res, req.params.id, dataGroup, minimumRightRequired, allowedRight)) next();
+							else res.status(403).json({error:"access denied 3"});
+						}
+						else if(level == "annotation") {
+							if (checkRequiredAuthenticationAnnotation(req, res, req.params.id, dataGroup, minimumRightRequired, allowedRight)) next();
+							else res.status(403).json({error:"access denied 4"});
+						}
+						else res.status(403).json({error:"access denied 5"});					//keep only the permitted resources
+					}
+				});	
+			}
+		}
+	}
+}
+*/
+
+
 
 exports.addUserRightGeneric = function addUserRightGeneric(id1, userLogin, userRight){
 	User.findOne({username : {$regex : new RegExp('^'+ userLogin + '$', "i")}}, function(error, data){
@@ -142,8 +409,7 @@ exports.addUserRightGeneric = function addUserRightGeneric(id1, userLogin, userR
 			else {		
 				ACL.findOne({id:id1}, function(error2, dataACL){
 					if (error2) res.status(400).json({error:"error", message:error2});
-					else if ( dataACL == null || dataACL.length == 0){
-						//not exist, create a new entry
+					else if ( dataACL == null || dataACL.length == 0){												//not exist, create a new entry
 						var item = {"id" : id1, "users" : [], "groups" : []};
 						item.users.push({login : userLogin, right : userRight});
 						var aclItem = new ACL(item);

@@ -31,6 +31,7 @@ var mongoose = require('mongoose');
 var program = require('commander');
 var mongoStore = require('connect-mongo')(express);
 var app = express();
+
 	
 //parsing the arguments
 program

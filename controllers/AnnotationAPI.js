@@ -22,6 +22,17 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
+
+
+
+
+
+
+
+
+
+/***************************************************** old part ********************************************************/
+
 /* The API controller
    Exports 3 methods:
    * post - Creates a new annotation
@@ -146,26 +157,26 @@ exports.listWithId = function(req, res){
 	});
 }
 
+
+
+
+
 exports.post = function(req, res){
-	if (req.body.fragment == undefined || req.body.data == undefined)
-		return res.status(400).json({error: "one or more data fields are not filled out properly"});
-		
-	Layer.findById(req.params.id_layer, function(error, data){
+
+
+	if (req.body.fragment == undefined || req.body.data == undefined) return res.status(400).json({error: "one or more data fields are not filled out properly"});
+	Layer.findById(req.params.id, function(error, data){
 		if (error) res.status(400).json({error:"error", message:error});
-		else if (data == null) res.status(400).json({error:'Could not post this annotation because the given id_layer is incorrect'});
+		else if (data == null) res.status(400).json({error:'Could not post this annotation because the given id is incorrect'});
 		else {		
-			var annoItem = {"id_layer" : req.params.id_layer, "fragment" : req.body.fragment, "data" : req.body.data, "history" : []};
+			var annoItem = {"id" : req.params.id, "fragment" : req.body.fragment, "data" : req.body.data, "history" : []};
 			var anno = new Annotation(annoItem);
-			var connectedUser = "root";
-			if (req.session.user) connectedUser = req.session.user.username;
-			var modified = {"id_layer" : req.params.id_layer, "fragment" : req.body.fragment, "data" : req.body.data};			// changed after the meeting with the CRP and grenoble
+			var connectedUser = req.session.user.username;
+			var modified = {"id" : req.params.id, "fragment" : req.body.fragment, "data" : req.body.data};			// changed after the meeting with the CRP and grenoble
 			anno.history.push({name : connectedUser, date : new Date(), modification:modified});
 			anno.save( function(error2, annoData){
-				if (error2){
-					res.status(400).json({error:"error", message:error2});
-					return;
-				}
-				else{
+				if (error2) res.status(400).json({error:"error", message:error2});
+				else {
 					ACLAPI.addUserRightGeneric(annoData._id, connectedUser, 'A');
 					res.status(200).json(annoData);
 				}

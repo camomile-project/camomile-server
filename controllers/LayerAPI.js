@@ -22,6 +22,8 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
+
+
 /* The API controller
    Exports 3 methods:
    * post - Creates a new layer
@@ -138,9 +140,9 @@ exports.listAll = function(req, res){
 }
 
 exports.listWithId = function(req, res){
-	Layer.findById(req.params.id_layer, function(error, data){
+	Layer.findById(req.params.id, function(error, data){
 		if (error) res.status(400).json({error:"error", message:error});
-		else if (data == null) res.status(400).json({error:'no such id_layer!'})
+		else if (data == null) res.status(400).json({error:'no such id!'})
 		else res.status(200).json(data);
 	});
 }

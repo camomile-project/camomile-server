@@ -34,6 +34,7 @@ var ACL = require('../models/ACL').ACL,
 	ACLAPI = require('../controllers/ACLAPI'),
 	Group = require('../models/Group').Group,
 	commonFuncs = require('../lib/commonFuncs');
+var async = require('async');
 
 // for the uri : app.get('/corpus', 
 /*
@@ -42,6 +43,8 @@ var ACL = require('../models/ACL').ACL,
 	- For each found corpus, check ACLs (the permission of the connected user and its groups) 
 */
 exports.listAll = function(req, res){  	
+	console.log('ici');
+
 	Corpus.find({}, function(error, data){
 		if (error) res.status(400).json({error:"error", message:error});
 		else {
@@ -84,14 +87,42 @@ exports.listAll = function(req, res){
 	}); 
 };
 
+
+
+
+
+
+
+
+
+
+
+
 //for the uri app.get('/corpus/:id', 
 exports.listWithId = function(req, res){
-	Corpus.findById(req.params.id, function(error, data){
-		if (error) res.status(400).json({error:"error", message:error});
-		else if (data == null) res.status(400).json({error:'no such id_corpus!'})
-		else  res.status(200).json(data);
-	});
+	var error=null;
+	async.waterfall([
+		function(callback) {
+			ACLAPI.checkRightCorpus(req, 'R', callback);
+		},		
+		function(userAllow, callback){
+			Corpus.findById(req.params.id, function(error, data){
+				if (error) res.status(400).json({error:"error", message:error});
+				else if (data==null) res.status(400).json({error:'no such id_corpus!'});
+  				else res.status(200).json(data);
+				callback(null);
+			});
+		}
+	],  function(err) { }); 
 };
+
+
+
+
+
+
+
+
 
 //test for Posting corpus
 //app.post('/corpus', 
