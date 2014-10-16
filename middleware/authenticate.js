@@ -122,6 +122,7 @@ exports.requiredRightUGname = function(role) {
 
 // check if the IDs given for an operation are consistent, 
 // ie., id_layer is under its id_media, ...
+// 1, 3, 5, 7 indicates the level of request : corpus is level 1, media is 2, layer is 3
 exports.requiredConsistentID = function(role, minimumRightRequired, level) {
 	return function(req, res, next) {
 		if (GLOBAL.no_auth){
@@ -135,7 +136,7 @@ exports.requiredConsistentID = function(role, minimumRightRequired, level) {
 				}
 				else {
 					switch(level){
-						case "corpus":
+						case 1:
 							var id_corpus = req.params.id;
 							if(id_corpus == undefined) id_corpus = req.params.id_corpus;
 							
@@ -152,7 +153,7 @@ exports.requiredConsistentID = function(role, minimumRightRequired, level) {
 									next();
 							});
 							break;
-						case "media":
+						case 3:
 							Media.findById(req.params.id_media, function(error, data){
 								if(error){
 									req.session.error = 'Access denied!';
@@ -171,7 +172,7 @@ exports.requiredConsistentID = function(role, minimumRightRequired, level) {
 							});
 							
 							break;
-						case "layer":
+						case 5:
 							Layer.findById(req.params.id_layer, function(error, data){
 								if(error){
 									req.session.error = 'Access denied!';
@@ -206,7 +207,7 @@ exports.requiredConsistentID = function(role, minimumRightRequired, level) {
 							});
 							break;
 						
-						case "annotation":
+						case 7:
 							Annotation.findById(req.params.id_anno, function(error, dat){
 								if(error){
 									req.session.error = 'Access denied!';
@@ -266,7 +267,8 @@ exports.requiredConsistentID = function(role, minimumRightRequired, level) {
 		}
 	}
 }
-
+//level = 0 => corpus, level = 1 > media, level = 2 => layer, level = 3 => annotation
+///corpus = 0 /:id_corpus = 1 /media =  2/:id_media = 3/layer =  4/:id_layer = 5
 
 exports.requiredAuthentication = function(role, minimumRightRequired, level) {
 	return function(req, res, next) {
@@ -285,7 +287,7 @@ exports.requiredAuthentication = function(role, minimumRightRequired, level) {
 					var i = level;
 					var found = false;
 					switch(i) {
-						case "annotation": ///corpus/:id_corpus/media/:id_media/layer/:id_layer/annotation/:id_anno
+						case 7: ///corpus/:id_corpus/media/:id_media/layer/:id_layer/annotation/:id_anno
 							Group.find({'usersList' : {$regex : new RegExp('^'+ connectedUser.username + '$', "i")}}, function(error, dataGroup) {
 								if(error) throw error;
 								else {
@@ -327,7 +329,7 @@ exports.requiredAuthentication = function(role, minimumRightRequired, level) {
 								}
 							});	
 							break;
-						case  "layer": ///corpus/:id_corpus/media/:id_media/layer/:id_layer
+						case  5: ///corpus/:id_corpus/media/:id_media/layer/:id_layer
 							//var id_layer = req.params.id_layer;	
 							Group.find({'usersList' : {$regex : new RegExp('^'+ connectedUser.username + '$', "i")}}, function(error, dataGroup) {
 								if(error) throw error;
@@ -366,7 +368,7 @@ exports.requiredAuthentication = function(role, minimumRightRequired, level) {
 								}
 							});	
 							break;
-						case "media": ///corpus/:id_corpus/media/:id_media
+						case 3: ///corpus/:id_corpus/media/:id_media
 							var id_media = req.params.id_media;
 							Group.find({'usersList' : {$regex : new RegExp('^'+ connectedUser.username + '$', "i")}}, function(error, dataGroup) {
 								if(error) throw error;
@@ -405,7 +407,10 @@ exports.requiredAuthentication = function(role, minimumRightRequired, level) {
 							});
 							break;
 							
-						case "corpus": //corpus/:id
+						case 2:
+							
+							break;
+						case 1: //corpus/:id
 							var id_corpus = req.params.id;
 							if(id_corpus == undefined) id_corpus = req.params.id_corpus;
 							
@@ -440,7 +445,7 @@ exports.requiredAuthentication = function(role, minimumRightRequired, level) {
 								}
 							});
 							break;
-						case "global":
+						case 0:
 							
 							if(commonFuncs.isAllowedUser(req.session.user.role, role) >= 0)
 								next();
