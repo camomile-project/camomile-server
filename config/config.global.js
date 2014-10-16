@@ -32,9 +32,6 @@ config.server_port = process.env.PORT || 3000;
 
 config.video_path = '/corpora/video';
 
-config.list_user_role = new Array("admin", "supervisor", "user");
-
-
 // mongo database: database name, database port
 config.mongo = {};
 config.mongo.db_host = process.env.MONGO_URI || 'mongodb://localhost';
