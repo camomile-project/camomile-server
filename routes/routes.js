@@ -22,180 +22,220 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
+var	authenticate = require('../middleware/authenticate');
+var	user = require('../controllers/UserAPI');
+var	group = require('../controllers/GroupAPI');
+var corpus = require('../controllers/CorpusAPI');
+var	media = require('../controllers/MediaAPI');
+var	layer = require('../controllers/LayerAPI');
+var	annotation = require('../controllers/AnnotationAPI');
+var	acl = require('../controllers/acl');
+var	queue = require('../controllers/QueueAPI');
 
-/*
- * GET home page.
- */
-
-var corpus = require('../controllers/CorpusAPI'),
-  	media = require('../controllers/MediaAPI'),
-  	layer = require('../controllers/LayerAPI'),
-  	anno = require('../controllers/AnnotationAPI'),
-  	compound = require('../controllers/CompoundAPI'),
-  	authenticate = require('../middleware/authenticate'),
-  	ACLAPI = require('../controllers/ACLAPI'),
-  	ACL = require('../models/ACL').ACL,
-	group = require('../controllers/GroupAPI'),
-	user = require('../controllers/UserAPI'),
-	queue = require('../controllers/QueueAPI');
-	
 exports.index = function(req, res){
-  	res.render('index', { title: 'Camomille' });
+	res.render('index', { title: 'Camomille' });
 };
 
 exports.initialize = function(app){
-	authenticate.createRootUser();																						//create a root user if it does not exist
-
-	//N R E C D A : different rights
-
-	app.get("/", authenticate.racine); // rout
+	app.post("/login", authenticate.login);
+	app.post('/logout', authenticate.logout);
+	app.post('/whoiam', authenticate.whoIAm);
 
 	// --- user routes --- \\
-	app.post("/login", authenticate.login);
-	app.post('/logout', ACLAPI.requiredAuthentication("user", "R", "global"), 
-					    authenticate.logout);
-	app.post("/user", ACLAPI.requiredAuthentication("admin"), 
-				      authenticate.userExist, 
-				      authenticate.signup);																				// create user
-	app.get('/user', ACLAPI.requiredAuthentication("user", "R", "global"), 
-				     user.listUsers);																					// get list of all users
-	app.get('/user/:id', ACLAPI.requiredAuthentication("user", "R", "global"), 
-						 user.listWithId);               																// info on a specific user
-	app.put('/user/:id', ACLAPI.requiredAuthentication("admin"), 
-						 user.update);						  															// update information on a specific user
-	app.delete('/user/:id', ACLAPI.requiredAuthentication("admin"), 
-							user.remove);                       														// delete a specific user
+	app.post("/user", user.userRoleAllowed("admin"), 
+					  user.userNameFree, 
+					  user.createUser);													// create user
+	app.get('/user', user.userRoleAllowed("admin"), 
+					 user.getAllUsers);													// get list of all users
+	app.get('/user/:id_user', user.userRoleAllowed("admin"), 
+							  user.id_userExist, 
+							  user.getInfoOnUser);               						// info on a specific user
+	app.put('/user/:id_user', user.userRoleAllowed("admin"), 
+							  user.id_userExist,
+							  user.updateUser);						  					// update information on a specific user
+	app.delete('/user/:id_user', user.userIsRoot, 
+							 	 user.id_userExist, 
+								 user.deleteUser);										// delete a specific user
+	app.get('/user/:id_user', user.userRoleAllowed("admin"), 
+							  user.id_userExist, 
+							  user.getAllGroupOfAUser); 								// get all group of a user
 	
 	// --- group routes --- \\
-	app.post("/group", ACLAPI.requiredAuthentication("admin"), 
-					   group.addGroup); 																				// create a group
-	app.get('/group', ACLAPI.requiredAuthentication("user", "R", "global"), 
-					  group.listAll); 																					// get list of all groups
-	app.get('/group/:id', ACLAPI.requiredAuthentication("user", "R", "global"), 
-						  group.listWithId); 																			// info on a specific group
-	app.put('/group/:id', ACLAPI.requiredAuthentication("admin"), 
-						  group.update); 																				// update information of a group
-	app.delete('/group/:id', ACLAPI.requiredAuthentication("admin"), 
-							 authenticate.removeGroupByID); 															// delete a group
-	app.get('/group/:id/user', ACLAPI.requiredAuthentication("admin", "R", "global"), 
-							   group.listUserOfGroupId); 																// list user of a group
-	app.post("/group/:id/user", ACLAPI.requiredAuthentication("admin"), 
-								group.addUser2Group); 																	// add user to a group
-	app.get('/user/:id/group', ACLAPI.requiredAuthentication("user", "R", "global"), 
-							   user.listGroupsOfUserId); 																// return list of group of a specific user
-	app.delete('/group/:id/user/:username', ACLAPI.requiredAuthentication("admin"), 
-											group.removeUserFromGroup); 												// remove a user from a group
-	
+	app.post("/group", user.userRoleAllowed("admin"), 
+					   group.groupNameFree, 
+					   group.createGroup); 												// create a group
+	app.get('/group', user.userRoleAllowed("admin"), 
+					  group.getAllGroup); 												// get list of all groups
+	app.get('/group/:id_group', user.userRoleAllowed("admin"),  
+								group.id_groupExist, 
+								group.getInfoOnGroup); 									// info on a specific group
+	app.put('/group/:id_group', user.userRoleAllowed("admin"),  
+								group.id_groupExist, 
+								group.updateGroup); 									// update information of a group
+	app.delete('/group/:id_group', user.userIsRoot,  
+								   group.id_groupExist, 
+								   group.deleteGroup); 									// delete a group
+	app.post("/group/:id_group/user/:id_user", user.userRoleAllowed("admin"),  
+											   group.id_groupExist, 
+											   user.id_userExist,
+											   group.addUserToGroup); 					// add user to a group
+	app.get('/group/:id_group/user', user.userRoleAllowed("admin"), 
+									 group.id_groupExist,  
+									 group.getAllUserOfAGroup);							// list user of a group
+	app.delete('/group/:id_group/user/:id_user', user.userRoleAllowed("admin"),  
+												 group.id_groupExist, 
+												 user.id_userExist, 
+												 group.removeUserFromGroup); 			// remove a user from a group
+
 	// --- resources routes --- \\
 	// corpus
-	app.post('/corpus', ACLAPI.requiredAuthentication("admin"), 
-					    corpus.post);																					// create new corpus
-	app.get('/corpus', ACLAPI.requiredAuthentication("user", 'R', "corpus"), 
-					   corpus.listAll);																					// list all corpus
-
-
-
-	app.get('/corpus/:id', corpus.listWithId);																			// info on a particular corpus
-
-
-
-	app.put('/corpus/:id', ACLAPI.requiredAuthentication("user", 'E', "corpus"), 
-						   corpus.update);																				// update info of a corpus
-	app.delete('/corpus/:id', ACLAPI.requiredAuthentication("user", 'D', "corpus"), 
-						 	  compound.removeCorpus);																	// delete a corpus
-	app.post('/corpus/:id/media', ACLAPI.requiredAuthentication("user", 'C', "corpus"), 
-								  media.post);																			// create a media for a corpus
-	app.get('/corpus/:id/media', ACLAPI.requiredAuthentication("user", 'R', "corpus"), 
-							     media.listAll);																		// list all media of a corpus	
-
+	app.post('/corpus', user.userRoleAllowed("admin"), 
+					    corpus.createCorpus);											// create new corpus
+	app.get('/corpus', acl.AllowUser("corpus", ["O"]),, 
+					   corpus.getAllcorpus);											// list all corpus
+	app.get('/corpus/:id_corpus', acl.AllowUser("corpus", ["O"]),
+								  corpus.id_corpusExist,
+								  corpus.getInfoOnCorpus);								// info on a particular corpus
+	app.put('/corpus/:id_corpus', acl.AllowUser("corpus", ["O"]),
+								  corpus.id_corpusExist, 
+								  corpus.updateCorpus);									// update info of a corpus
+	app.delete('/corpus/:id_corpus', acl.AllowUser("corpus", ["O"]),
+									 corpus.id_corpusExist, 
+									 corpus.deleteCorpus);								// delete a corpus
+	app.post('/corpus/:id_corpus/media', acl.AllowUser("corpus", ["O"]),
+										 corpus.id_corpusExist, 
+										 corpus.addMedia);								// create a media for a corpus
+	app.post('/corpus/:id_corpus/layer', acl.AllowUser("corpus", ["O"]),
+										 corpus.id_corpusExist, 
+										 corpus.addLayer);								// create a layer
+	app.get('/corpus/:id_corpus/media', acl.AllowUser("corpus", ["O", "W", "V"]), 
+										corpus.id_corpusExist,
+										corpus.getAllMedia);							// list all media of a corpus	
+	app.get('/corpus/:id_corpus/layer', acl.AllowUser("corpus", ["O", "W", "V"]),
+										corpus.id_corpusExist,
+										corpus.getAllLayer);							// list all layer of a corpus	
+	app.get('/corpus/:id_corpus/ACL', acl.AllowUser("corpus", ["O"]),
+									  corpus.id_corpusExist,
+									  acl.getInfoOnACL("corpus"));						// ACL of a particular corpus
+    app.get('/acl/id_corpus', acl.AllowUser("corpus", ["O"]),
+							  corpus.id_corpusExist,
+							  getInfoOnACL("corpus")
+    app.put('/acl/id_corpus/user/id_user', acl.AllowUser("corpus", ["O"]),
+										   corpus.id_corpusExist, 
+										   user.id_userExist, 
+										   updateACLUser("corpus")
+    app.put('/acl/id_corpus/group/id_group', acl.AllowUser("corpus", ["O"]),
+											 corpus.id_corpusExist,
+											 group.id_groupExist, 
+											 updateACLGroup("corpus")
+    app.delete('/acl/id_corpus/user/id_user', acl.AllowUser("corpus", ["O"]),
+											  corpus.id_corpusExist, 
+											  user.id_userExist, 
+											  removeUserFromACL("corpus")
+    app.delete('/acl/id_corpus/group/id_group', acl.AllowUser("corpus", ["O"]),
+												corpus.id_corpusExist,
+												group.id_groupExist, 
+												removeGroupFromACL("corpus")
+    app.get('/acl/id_corpus/user/is_user', acl.AllowUser("corpus", ["O"]),
+										   corpus.id_corpusExist,
+										   user.id_userExist, 
+										   getUserRight("corpus")
 
 	// media									
-	app.get('/media/:id', media.listWithId);																			// info on a particular media
-	app.put('/media/:id', ACLAPI.requiredAuthentication("user", 'E', "media"), 
-						  media.update);											  									// update info of a media
-	app.delete('/media/:id', ACLAPI.requiredAuthentication("user", 'D', "media"), 
-							 compound.removeMedia);											  							// delete a media
-	app.post('/media/:id/layer', ACLAPI.requiredAuthentication("user", 'C', "media"), 
-								 layer.post);																			// create a layer
-	app.get('/media/:id/layer', ACLAPI.requiredAuthentication("user", 'R', "media"),
-								layer.listAll);																			// list of all layer for a media
-
+	app.get('/media/:id_media', acl.AllowUser("corpus", ["O", "W", "V"])
+								media.id_mediaExist,
+								media.getInfoOnMedia);									// info on a particular media
+	app.put('/media/:id_media', acl.AllowUser("corpus", ["O"]),
+								media.id_mediaExist, 
+								media.updateMedia);										// update info of a media
+	app.delete('/media/:id_media', acl.AllowUser("corpus", ["O"]), 
+								   media.id_mediaExist,
+								   corpus.removeMedia);									// delete a media
+	app.get('/media/:id_media/video', acl.AllowUser("corpus", ["O", "W", "V"]),
+									  media.id_mediaExist, 
+									  media.getVideo);
+	app.get('/media/:id_media/webm', acl.AllowUser("corpus", ["O", "W", "V"]), 
+									 media.id_mediaExist,
+									 media.getVideoWEBM);
+	app.get('/media/:id_media/mp4', acl.AllowUser("corpus", ["O", "W", "V"]),
+									media.id_mediaExist, 
+									media.getVideoMP4);
+	app.get('/media/:id_media/ogv', acl.AllowUser("corpus", ["O", "W", "V"]),
+									media.id_mediaExist, 
+									media.getVideoOGV);
 
 	// layer
-	app.get('/layer/:id', ACLAPI.requiredAuthentication("user", 'R', "layer"), 
-						  layer.listWithId);									// info on a particalar layer
-	app.put('/layer/:id', ACLAPI.requiredAuthentication("user", 'E', "layer"), 
-						  layer.updateAll);										// update info of a layer
-	app.delete('/layer/:id', ACLAPI.requiredAuthentication("user", 'D', "layer"), 
-							 compound.removeLayer);								// delete a layer
- 	app.post('/layer/:id/annotation', ACLAPI.requiredAuthentication("user", 'C', "layer"), 
-									  anno.post);								// create an annotation
-	app.get('/layer/:id/annotation', ACLAPI.requiredAuthentication("user", 'R', "layer"), 
-									 anno.listAll);								// list all annotation of a layer
+	app.get('/layer/:id_layer', acl.AllowUser("layer", ["O", "W", "V"]]),
+								layer.id_layerExist,
+								layer.getInfoOnLayer);									// info on a particalar layer
+	app.put('/layer/:id_layer', acl.AllowUser("layer", ["O"]),
+								layer.id_layerExist,
+								layer.updateLayer);										// update info of a layer
+	app.delete('/layer/:id_layer', acl.AllowUser("layer", ["O"]),
+								   layer.id_layerExist,
+								   layer.deleteLayer);									// delete a layer
+	app.post('/layer/:id_layer/annotation', acl.AllowUser("layer", ["O", "W"]),
+											layer.id_layerExist,
+											layer.addAnnotation);						// create an annotation
+	app.get('/layer/:id_layer/annotation', acl.AllowUser("layer", ["O", "W", "V"]]),
+										   layer.id_layerExist,
+										   layer.getAllAnnotation);						// list all annotation of a layer
+	app.get('/layer/:id_layer/ACL', acl.AllowUser("layer", ["O"]),
+									layer.id_layerExist,
+									acl.getInfoOnACL("layer")));						// ACL of a particular layer
+    app.put('/acl/id_layer/user/id_user', acl.AllowUser("layer", ["O"]),
+										   layer.id_layerExist, 
+										   user.id_userExist, 
+										   updateACLUser("layer")
+    app.put('/acl/id_layer/group/id_group', acl.AllowUser("layer", ["O"]),
+											 layer.id_layerExist,
+											 group.id_groupExist, 
+											 updateACLGroup("layer")
+    app.delete('/acl/id_layer/user/id_user', acl.AllowUser("layer", ["O"]),
+											  layer.id_layerExist, 
+											  user.id_userExist, 
+											  removeUserFromACL("layer")
+    app.delete('/acl/id_layer/group/id_group', acl.AllowUser("layer", ["O"]),
+												layer.id_layerExist,
+												group.id_groupExist, 
+												removeGroupFromACL("layer")
+    app.get('/acl/id_layer/user/is_user', acl.AllowUser("layer", ["O"]),
+										   layer.id_layerExist,
+										   user.id_userExist, 
+										   getUserRight("layer")
 
- 	// annotation
-	app.get('/annotation/:id', ACLAPI.requiredAuthentication("user", 'R', "annotation"), 
-							   anno.listWithId);            		// info on a particular annotation
-	app.put('/annotation/:id', ACLAPI.requiredAuthentication("user", 'E', "annotation"), 
-					           anno.updateAll);					// update info of an annotation
-	app.delete('/annotation/:id', ACLAPI.requiredAuthentication("user", 'D', "annotation"), 
-								  compound.removeAnno); 			// delete annotation
-
-
-
-	// read video
-	app.get('/media/:id/video', ACLAPI.requiredAuthentication("user", 'R', "media"), 
-								media.getVideo);
-	app.get('/media/:id/webm', ACLAPI.requiredAuthentication("user", 'R', "media"), 
-							   media.getVideoWEBM);
-	app.get('/media/:id/mp4', ACLAPI.requiredAuthentication("user", 'R', "media"), 
-							  media.getVideoMP4);
-	app.get('/media/:id/ogv', ACLAPI.requiredAuthentication("user", 'R', "media"), 
-							  media.getVideoOGV);					  
-													  	
-	// --- queue routes --- \\
-	app.post('/queue', authenticate.requiredValidUser, 
-					   queue.post);																						// create a queue
-	app.put('/queue/:id', authenticate.requiredValidUser, 
-						  queue.update); 																				// create or replace a list of ids
-	app.get('/queue', ACLAPI.requiredAuthentication("admin"), 
-					  queue.listAll); 																					// list all ids in a queue
-	app.get('/queue/:id', authenticate.requiredValidUser, 
-					      queue.listWithId);																			// info on a queue
-	app.get('/queue/:id/next', authenticate.requiredValidUser, 
-							   queue.getNext);																			// get next annotation of a queue
-	app.put('/queue/:id/next', authenticate.requiredValidUser, 
-							   queue.putnext);																			// add new annotation in a queue
-	app.delete('/queue/:id', authenticate.requiredValidUser, 
-							 queue.remove);																				// delete a queue
-	
-	// You can view your own histories, or as a root user you can check all other users' histories
-	app.get('/history/:name', authenticate.requiredValidUser, 
-							  compound.retrieveUserHistory);															// retrieve histories of a user, 
-
-	// --- ASL routes --- \\
-	// corpus
-	app.get("/corpus/:id/acl", ACLAPI.requiredAuthentication("user", 'A', "corpus"), 
-							   ACLAPI.listWithIdOfResource);															// Get acl of a corpus
-	app.put("/corpus/:id/acl", ACLAPI.requiredAuthentication("user", 'A', "corpus"), 
-							   authenticate.requiredRightUGname("user"), 
-							   ACLAPI.updateWithIdOfResource);															// Set acl of a corpus for user or a group
-	// media
-	app.get("/media/:id/acl", ACLAPI.requiredAuthentication("user", 'A', "media"), 
-							  ACLAPI.listWithIdOfResource);										// Get acl of a media
-	app.put("/media/:id/acl", ACLAPI.requiredAuthentication("user", 'A', "media"), 
-							  authenticate.requiredRightUGname("user"), 
-							  ACLAPI.updateWithIdOfResource);									// Set acl of a media for user or a group
-	// layer
-	app.get("/layer/:id/acl", ACLAPI.requiredAuthentication("user", 'A', "layer"), 
-							  ACLAPI.listWithIdOfResource);						// Get acl of a media
-	app.put("/layer/:id/acl", ACLAPI.requiredAuthentication("user", 'A', "layer"), 
-							  authenticate.requiredRightUGname("user"), 
-							  ACLAPI.updateWithIdOfResource);					// Set acl of a layer for user or a group
 	// annotation
-	app.get("/annotation/:id/acl", ACLAPI.requiredAuthentication("user", 'A', "annotation"),
-								   ACLAPI.listWithIdOfResource);	// Get acl of an annotation
-	app.put("/annotation/:id/acl", ACLAPI.requiredAuthentication("user", 'A', "annotation"), 
-								   authenticate.requiredRightUGname("user"),	
-								   ACLAPI.updateWithIdOfResource);// Set acl of an annotation for user or a group
+	app.get('/annotation/:id_annotation', acl.AllowUser("layer", ["O", "W", "V"]),
+										  annotation.id_annotationExist,
+										  annotation.getInfoOnAnnotation);				// info on a particular annotation
+	app.put('/annotation/:id_annotation', acl.AllowUser("layer", ["O", "W"]),
+										  annotation.id_annotationExist,
+										  annotation.updateAnnotation);					// update info of an annotation
+	app.delete('/annotation/:id_annotation', acl.AllowUser("layer", ["O"),
+											 annotation.id_annotationExist,
+											 annotation.deleteAnnotation); 				// delete annotation
+
+	// --- queue routes --- \\
+	app.post('/queue', user.currentUserExist,
+					   queue.addQueue);													// create a queue
+	app.get('/queue', user.userIsRoot,
+					  queue.getAllQueue); 												// list all ids in a queue
+	app.get('/queue/:id_queue', user.currentUserExist,
+								queue.id_queueExist,
+								queue.getInfoOnAQueue);									// info on a queue
+	app.put('/queue/:id_queue', user.currentUserExist,
+								queue.id_queueExist,
+								queue.updateQueue); 									// create or replace a list of ids
+	app.put('/queue/:id_queue/next/:element', user.currentUserExist,
+											  queue.id_queueExist,
+											  queue.putFront);							// add new annotation in a queue
+	app.put('/queue/:id_queue/last/:element', user.currentUserExist,
+											  queue.id_queueExist,
+											  queue.putBack);							// add new annotation in a queue
+	app.get('/queue/:id_queue/next/', user.currentUserExist,
+									  queue.id_queueExist,  
+									  queue.popFront);									// get next annotation of a queue
+	app.delete('/queue/:id_queue', user.currentUserExist,
+								   queue.id_queueExist,
+								   queue.deleteQueue);									// delete a queue
 }

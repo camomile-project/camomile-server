@@ -480,7 +480,7 @@ exports.createRootUser = function(){
 	});
 }
 //check if a user exists
-exports.userExist = function(req, res, next) {
+exports.userNameFree = function(req, res, next) {
     User.count({username: req.body.username}, function (error, count) {
         if (count === 0)  next();
         else res.status(400).json( {error:"this user name already exists", message:error});
