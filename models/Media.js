@@ -22,18 +22,16 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-var mongoose = require('mongoose')
-   , Schema = mongoose.Schema
-   , ObjectId = Schema.ObjectId
-   , CorpusSchema = require('./Corpus').CorpusSchema;
-/**
- * Url is the relative path to the media (video)
- */
+var mongoose = require('mongoose');
+var Schema = mongoose.Schema;
+var ObjectId = Schema.ObjectId;
+var CorpusSchema = require('./Corpus').CorpusSchema;
  
 exports.MediaSchema = MediaSchema = new Schema({
-	id_corpus : {type : ObjectId, ref : 'CorpusSchema'}
-	, name: {type: String, required: true, trim: true}
-	, url : {type: String, default:""} 	
+	id_corpus : {type : ObjectId, ref : 'CorpusSchema'},
+	name: {type: String, required: true, trim: true},
+	description: {type : Schema.Types.Mixed, 'default' : ''},   	
+	url : {type: String, default:""} 	
 }, { versionKey: false });
 
 exports.Media = Media = mongoose.model('Media', MediaSchema);
