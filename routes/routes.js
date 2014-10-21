@@ -49,7 +49,7 @@ exports.initialize = function(app){
 	authenticate.createRootUser();
 
 	app.post("/login", authenticate.login);
-	app.post('/logout', authenticate.requiredAuthentication("user", "R", 0), authenticate.logout);
+	app.post('/logout', authenticate.logout);
 
 	app.get('/user', authenticate.requiredAuthentication("user", "R", 0), user.listUsers);
 	app.get('/user/:id', authenticate.requiredAuthentication("user", "R", 0), user.listWithId);
