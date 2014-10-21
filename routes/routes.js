@@ -39,7 +39,7 @@ exports.index = function(req, res){
 exports.initialize = function(app){
 	app.post("/login", authenticate.login);
 	app.post('/logout', authenticate.logout);
-	app.post('/whoiam', authenticate.whoIAm);
+	app.post('/me', authenticate.me);
 
 	// --- user routes --- \\
 	app.post("/user", user.userRoleAllowed("admin"), 
