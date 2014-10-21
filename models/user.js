@@ -26,7 +26,7 @@ var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
 
 exports.UserSchema = UserSchema = new Schema({
-    name: {type:String, lowercase: true, trim: true, required: true},
+    username: {type:String, lowercase: true, trim: true, required: true},
     description: {type : Schema.Types.Mixed, 'default' : ''},   	
     role: String,
     salt: String,
