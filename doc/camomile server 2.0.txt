@@ -1,0 +1,541 @@
+Camomile-server 2.0 
+
+
+
+
+Root : all rights - especially to create Administrators
+Administrators : can create a corpus (and become corpus owner), can create users (including other administrators ?) and groups, manage inclusion of users into groups ?
+Users
+Corpus owner (O) : can create medias inside the corpus, can create layers inside the corpus (and become layer owner), can share corpus ownership (?), can destroy the corpus, can grant media player rights (+ has the media player rights)
+Media player (R) : can read the media in the corpus
+Layer owner (O) : can share layer ownership (?) or grant annotator rights to users or groups, can destroy the layer (+ has the Annotator rights) 
+Annotator (W) : can create/modify/destroy annotations in the layer (+ has the Vizualizer rights)
+Vizualizer (R) : can read the annotations in the layer
+
+
+
+app.js
+\config
+?  index.js
+	config.global.js
+   config.production.js
+?  config.test.js
+\routes
+?  index.js
+	routes.js
+
+\models
+   User.js 
+      UserSchema = UserSchema = new Schema({
+         name: {type:String, lowercase: true, trim: true, required: true},
+         description: {type : Schema.Types.Mixed, 'default' : ''},      
+         role: String,
+         salt: String,
+         hash: String
+      }
+   Group.js
+      GroupSchema = GroupSchema = new Schema({
+         name: {type:String, lowercase: true, trim: true, required: true},
+         description: {type : Schema.Types.Mixed, 'default' : ''},      
+         users_List: [{ type:String, lowercase: true, trim:true}]
+      }
+   Corpus.js   
+      CorpusSchema = CorpusSchema = new Schema({
+         name: {type: String, required: true, trim: true},
+         description : {type : Schema.Types.Mixed, 'default' : ''},
+         ACL_users: {},
+         ACL_groups: {}
+      }
+   Media.js
+      MediaSchema = MediaSchema = new Schema({
+         id_corpus : {type : ObjectId, ref : 'CorpusSchema'},
+         name: {type: String, required: true, trim: true},
+         description: {type : Schema.Types.Mixed, 'default' : ''},      
+         url : {type: String, default:""}    
+      }
+   Layer.js
+      LayerSchema = LayerSchema = new Schema({
+         id_corpus : {type : ObjectId, ref : 'CorpusSchema'},
+         name: {type:String, lowercase: true, trim: true, required: true},
+         description: {type : Schema.Types.Mixed, 'default' : ''},      
+         fragment_type : {type : Schema.Types.Mixed, 'default' : ''}, 
+         data_type : {type : Schema.Types.Mixed, 'default' : ''}, 
+         history : [HistorySchema],
+         ACL_users: {},
+         ACL_groups: {}
+      }
+   Annotation.js
+      AnnotationSchema = AnnotationSchema = new Schema({
+         id_layer : {type : ObjectId, ref : 'LayerSchema'},
+         id_media : {type : ObjectId, ref : 'MediaSchema'},
+         fragment : {type : Schema.Types.Mixed, index : true, 'default' : ''},
+         data : {type : Schema.Types.Mixed, 'default' : ''},
+         history : [HistorySchema]  
+      }
+   Queue.js
+      QueueSchema = QueueSchema = new Schema({
+         name: {type: String, required: true, trim: true},
+         description: {type : Schema.Types.Mixed, 'default' : ''},      
+         queue: [Schema.Types.Mixed]
+      }
+   History.js
+      History = HistorySchema = new Schema({
+         date : {type: Date, 'default': Date.now},
+         id_user: {type: String, required: true, trim: true, index : true},
+         modification: {type: Schema.Types.Mixed, 'default' : '', index : true}  
+      }
+   Session.js
+      module.exports = function(db) {
+        var Sessions = new db.Schema({
+          session: {
+            lastAccess: Date,
+            cookie: {
+              originalMaxAge: Date,
+              expires: Date,
+              httpOnly: Boolean,
+              path: String
+            },
+            user : {
+               username: String,
+               affiliation: String,
+            role: String,
+            salt: String,
+            hash: String
+            },
+            "_csrf": String
+          },
+          expires: Date
+        });
+        return db.model('Sessions', Sessions);
+      }
+
+\lib
+   commonFuncs.js      
+      printRessourceInfo(id_ressource)
+         add info (without ACL) on id_ressource in res
+      ressourceExits(id_ressource)
+         return true if id_ressource exist
+      getDate()Ò
+
+\middleware
+?  pass.js
+      hash(password)                                                           // à déplacer dans authenticate.js
+   authenticate.js
+      POST /login --data '{"username":"root", "password":"camomile"}' --cookie-jar "cookies.txt"
+      POST /login --data '{"username":"name34", "password":"test"}' --cookie-jar "cookies.txt"
+      login(data{username, password})  
+
+      POST /logout --cookie-jar "cookies.txt"
+      logout()
+
+      POST /me --cookie-jar "cookies.txt"
+      me()
+
+\controllers
+?  CompoundAPI.js
+
+	UserAPI.js   
+      POST /user --data '{"username":"new user", "password":"pwd", "role":"admin", "description":{"...":"..."}}'
+		createUser(data)
+         if (userRoleAllowed(id_current_user, "admin"))
+            if (username not already used) && (username != "") && (password != "") && (role == 'admin' || 'user')
+               add new user with (username, password, role, description) 
+               getInfoOnUser(id_current_user)
+
+      GET /user
+		getAllUsers()
+         if (userRoleAllowed(id_current_user, "admin"))
+            for each id_user
+               printRessourceInfo(id_user)
+
+      GET /user/id_user
+		getInfoOnUser(id_user)
+         if (ressourceExits(id_user))
+            if (userRoleAllowed(id_current_user, "admin"))
+               printRessourceInfo(id_user)
+
+      PUT /user/id_user --data '{"password":"pwd", "role":"admin", "description":{"...":"..."}}'
+      updateUser(id_user, data)
+         if (ressourceExits(id_user)) && (password != "") && (description != {}) && (role == 'admin' || 'user')
+            if (userIsRoot)
+               update info of id_user with (password, description) 
+            else if (userRoleAllowed(id_current_user, "admin")) && (current_user.username != root)
+               update info of id_user with (password, role, description) 
+
+      DELETE /user/id_user
+      deleteUser(id_user)
+         if (ressourceExits(id_user))
+            if (userIsRoot)
+               remove id_user from db
+               for each id_group
+                  if (id_user is inside id_group)
+                      remove id_user from id_group
+               for each id_corpus                                              // suppresion id_user des ACL, problème de droit de lecture des ressources -> utile ?
+                  for each id_layer in id_corpus
+                     removeUserFromACL(id_layer, id_user)
+                  removeUserFromACL(id_corpus, id_user)
+
+      GET /user/id_user/group
+		getAllGroupOfAUser(id_user)  	            
+         if (ressourceExits(id_user))
+            if (userRoleAllowed(id_current_user, "admin")) || (id_user == id_currentuser)
+               for each id_group
+                  if (id_user is inside id_group)
+                     add id_group to res
+
+      userRoleAllowed(id_user, role)
+         if id_user.role == role
+             return true
+
+      userIsRoot
+         if current_user.username == root
+             return true
+
+   GroupAPI.js
+      POST /group --data '{"name":"new group", "description":{"...":"..."}}}}'
+		createGroup(data)
+         if (userRoleAllowed(id_current_user, "admin"))
+            if (name not already used) && (name != "")
+               add new group to the db with (name, description)
+               getInfoOnGroup(id_group)
+
+      GET /group
+		getAllGroup()
+         if (userRoleAllowed(id_current_user, "admin"))
+            for each id_group
+               printRessourceInfo(id_group)
+
+		GET /group/id_group
+      getInfoOnGroup(id_group)
+         if (ressourceExits(id_group))
+            if (userRoleAllowed(id_current_user, "admin"))
+               printRessourceInfo(id_group)
+		
+      PUT /group/id_group --data '{"description":"desc"}'
+      updateGroup(id_group, data)
+         if (ressourceExits(id_group))
+            if (userRoleAllowed(id_current_user, "admin"))
+               update info of id_group with (description)
+		
+      DELETE /group/id_group
+      deleteGroup(id_group)
+         if (ressourceExits(id_group))
+            if (userIsRoot)
+               for each id_corpus                                              // suppresion id_group des ACL, problème de droit de lecture des ressources -> utile ?
+                  for id_layer in id_corpus
+                     removeUserFromACL(id_layer, id_group)
+                  removeUserFromACL(id_corpus, id_group)
+      
+      POST /group/id_group/user/id_user
+      addUserToGroup(id_group, id_user)
+         if (ressourceExits(id_group)) && (ressourceExits(id_user))
+            if (userRoleAllowed(id_current_user, "admin"))
+               add id_user to id_group.id_list
+
+      GET /group/id_group/user
+      getAllUserOfAGroup(id_group)  
+         if (ressourceExits(id_group))
+            if (userRoleAllowed(id_current_user, "admin"))
+               add all id_user of id_group to res
+
+      DELETE /group/id_group/user/id_user
+      removeUserFromGroup(id_group, id_user)
+         if (ressourceExits(id_group)) && (ressourceExits(id_user))
+            if (userRoleAllowed(id_current_user, "admin"))
+               remove id_user from id_group.id_list
+
+   CorpusAPI.js   			
+      POST /corpus --data '{"name":"new corpus", "description":{"...":"..."}' 
+      createCorpus(data)
+         if (name != "") && (description != null)
+            if (userRoleAllowed(id_current_user, "admin"))
+               add new corpus to the db with (name, description)
+               add to history ("user":current_user.id, "data":date.now, "modification":"initial add")
+               updateACLUser(id_corpus, id_current_user, 'O')            
+               getInfoOnCorpus(id_corpus)  
+
+      GET /corpus
+      getAllcorpus()
+         for each id_corpus: 
+            if (AllowUser(id_corpus, id_current_user, ['O', 'W', 'R'])
+               printRessourceInfo(id_corpus)
+      
+      GET /corpus/id_corpus
+      getInfoOnCorpus(id_corpus)
+         if (ressourceExits(id_corpus))
+            if (AllowUser(id_corpus, id_current_user, ['O', 'W', 'R'])
+               printRessourceInfo(id_corpus)
+      
+      PUT /corpus/id_corpus --data '{"name":"new corpus", "description":{"...":"..."}}'
+      updateCorpus(id_corpus, data)
+         if (ressourceExits(id_corpus)) && (name != "") && (description != null)
+            if (AllowUser(id_corpus, id_current_user, ['O'])
+               update info of id_corpus with (name, description)   
+      
+      DELETE /corpus/id_corpus
+      deleteCorpus(id_corpus)
+         if (ressourceExits(id_corpus))
+            if (AllowUser(id_corpus, id_current_user, ['O']) && (getAllMedia(id_corpus) == []) && (getAllLayer(id_corpus) == []) 
+               remove id_corpus from db
+            if (userRoleAllowed(id_current_user, "admin"))
+               for id_media in id_corpus
+                  deleteMedia(id_media)
+               for id_layer in id_corpus
+                  deleteLayer(id_layer)
+               remove id_corpus from db
+      
+      POST /corpus/id_corpus/media --data '{"name":"media", "url":"path", "description":{"...":"..."}}' 
+      addMedia(id_corpus, data)
+         if (ressourceExits(id_corpus)) && (name != "") && (description != {})
+            if (AllowUser(id_corpus, id_current_user, ['O', 'W'])
+               add new media with (id_corpus, name, url, description)
+               add to history ("user":current_user.id, "data":date.now, "modification":"initial add")
+               getInfoOnMedia(id_media)
+
+      POST /corpus/id_corpus/layer --data '{"name":"new layer", "description":{"...":"..."}, "fragment_type":{"...":"..."}, "data_type":{"...":"..."}}' 
+      addLayer(id_corpus, data)
+         if (ressourceExits(id_corpus)) && (name != "") && (description!=null) && (fragment_type!= null) && (data_type!=null)
+            if (AllowUser(id_corpus, id_current_user, ['O', 'W'])
+               add new Layer with (id_corpus, name, description, fragment_type, data_type)
+               add to history ("user":current_user.id, "data":date.now, "modification":"initial add")
+               updateACLUser(id_layer, id_current_user, 'O')
+               getInfoOnLayer(id_layer)
+
+      GET /corpus/id_corpus/media
+      getAllMedia(id_corpus)
+         if (ressourceExits(id_corpus))
+            if (AllowUser(id_corpus, id_current_user, ['O', 'W', 'R'])
+               for each id_media in id_corpus
+                  printRessourceInfo(id_media)
+      
+      GET /corpus/id_corpus/layer
+      getAllLayer(id_corpus)
+         if (ressourceExits(id_corpus))
+            for id_layer in id_corpus
+               if (AllowUser(id_layer, id_current_user, ['O', 'W', 'R'])
+                  printRessourceInfo(id_layer)
+
+      GET /acl/id_corpus
+      getInfoOnACL(id_corpus, "corpus")
+
+      PUT /acl/id_corpus/user/id_user --data '{"right":"P"}'
+      updateACLUser(id_corpus, id_user, "corpus", data)
+
+      PUT /acl/id_corpus/group/id_group --data '{"right":"P"}'
+      updateACLGroup(id_corpus, id_group, "corpus", data)
+
+      DELETE /acl/id_corpus/user/id_user
+      removeUserFromACL(id_corpus, id_user, "corpus")
+
+      DELETE /acl/id_corpus/group/id_group
+      removeGroupFromACL(id_corpus, id_group, "corpus")
+
+      GET /acl/id_corpus/user/is_user
+      getUserRight(id_corpus, id_user, "corpus")
+
+   MediaAPI.js   			
+      GET /media/id_media
+      getInfoOnMedia(id_media)
+         if (ressourceExits(id_media))
+            if (AllowUser(id_media.id_corpus, id_current_user, ['O', 'W', 'R'])
+               printRessourceInfo(id_media)
+      
+      PUT /media/id_media --data '{"name":"media1b", "url":"path", "description":{"...":"..."}}'
+      updateMedia(id_media, data, description) 
+         if (ressourceExits(id_media)) && (name != "") && (description != {})
+            if (AllowUser(id_media.id_corpus, id_current_user, ['O'])
+               update info of id_media with (name, url)
+               add to history ("user":current_user.id, "data":date.now, "modification":"update")
+		
+      DELETE /media/5422ec8500e5c11a8fc723a2
+      deleteMedia(id_media)
+         if (ressourceExits(id_media))
+            if (AllowUser(id_media.id_corpus, id_current_user, ['O']) && (there is no annotation link to this media)
+               remove id_media from db
+            if (userRoleAllowed(id_current_user, "admin"))
+               for each id_annotation link to id_media 
+                  deleteAnnotation(id_annotation)
+               remove id_media from db
+      
+      GET /media/id_media/video
+      GET /media/id_media/extension
+      getVideo(id_media, extension)
+         if (ressourceExits(id_media))
+            if (AllowUser(id_media.id_corpus, id_current_user, ['O', 'W', 'R'])
+               add video stream to res
+
+   LayerAPI.js
+		GET /layer/id_layer
+      getInfoOnLayer(id_layer)
+         if (ressourceExits(id_layer))
+            if (AllowUser(id_layer, id_current_user, ['O', 'W', 'R'])
+               printRessourceInfo(id_layer)
+
+      PUT /layer/id_layer --data '{"name":"speaker", "description":{"...":"..."}}'
+      updateLayer(id_layer, data)
+         if (ressourceExits(id_layer)) && (name != "") && (description!=null)
+            if (AllowUser(id_layer, id_current_user, ['O'])
+               update info of id_layer with (name, description)
+               add to history ("user":current_user.id, "data":date.now, "modification":"update")
+
+      DELETE /layer/id_layer
+      deleteLayer(id_layer)
+         if (ressourceExits(id_layer))
+            if (AllowUser(id_layer, id_current_user, ['O'])
+               for id_annotation in id_layer
+                  deleteAnnotation(id_annotation)
+               remove id_layer from db
+      
+      POST /layer/id_layer/annotation --data '{"fragment":{"start":0, "end":15}, "data":"value", "id_media":""}' 
+      addAnnotation(id_layer, data)
+         if (ressourceExits(id_layer)) && (ressourceExits(id_media)) && (fragment != null) && (data != null)
+            if (AllowUser(id_layer, id_current_user, ['O', 'W'])
+               add new annotation with (id_layer, fragment, data)
+               add to history ("user":current_user.id, "data":date.now, "modification":"initial add")
+               getInfoOnAnnotation(id_annotation)
+      
+      GET /layer/id_layer/annotation
+      getAllAnnotation(id_layer)
+         if (ressourceExits(id_layer))
+            if (AllowUser(id_layer, id_current_user, ['O', 'W', 'R'])
+               for id_annotation in id_layer
+                  printRessourceInfo(id_annotation) 
+
+      GET /acl/id_layer
+      getInfoOnACL(id_layer, "layer")
+
+      PUT /acl/id_layer/user/id_user --data '{"right":"P"}'
+      updateACLUser(id_layer, id_user, "layer", data)
+
+      PUT /acl/id_layer/group/id_group --data '{"right":"P"}'
+      updateACLGroup(id_layer, id_group, "layer", data)
+
+      DELETE /acl/id_layer/user/id_user
+      removeUserFromACL(id_layer, id_user, "layer")
+
+      DELETE /acl/id_layer/group/id_group
+      removeGroupFromACL(id_layer, id_group, "layer")
+
+      GET /acl/id_layer/user/is_user
+      getUserRight(id_layer, id_user, "layer")
+
+   AnnotationAPI.js   			
+      GET /annotation/id_annotation
+      getInfoOnAnnotation(id_annotation)
+         if ressourceExits(id_annotation)
+            if (AllowUser(id_annotation.id_layer, id_current_user, ['O', 'W', 'R'])
+               printRessourceInfo(id_annotation)
+      
+      PUT /annotation/id_annotation --data '{"user":"id_user", fragment":{"start":0, "end":15}, "data":"value", "id_media":""}'
+      updateAnnotation(id_annotation, data)
+         if (ressourceExits(id_annotation)) && (ressourceExits(id_media)) && (fragment != null) && (data != null)
+            if (AllowUser(id_annotation.id_layer, id_current_user, ['O', 'W'])
+               update info of id_annotation with (fragment, data)
+               add to history ("user":id_user, "data":date.now, "duration"=date.now-start_data_annotation, "modification":"update")
+ 
+      
+      DELETE /annotation/id_annotation
+      deleteAnnotation(id_annotation)
+         if (ressourceExits(id_annotation))
+            if (AllowUser(id_annotation.id_layer, id_current_user, ['O'])
+               remove id_annotation from db
+
+   ACLAPI.js
+      getInfoOnACL(id_ressource, type_ressource)
+         if (ressourceExits(id_ressource)) && (id_ressource have ACL)
+            if (AllowUser(id_ressource, id_current_user, ['O'])
+               return ACL info on id_ressource in res
+
+      updateACLUser(id_ressource, id_user, type_ressource, data)
+         if (ressourceExits(id_user)) && (ressourceExits(id_ressource)) && (new_right in ['O', 'W', 'R']) 
+            if (AllowUser(id_ressource, id_current_user, ['O'])
+               update ACL of id_ressource for id_user with the right
+      
+      updateACLGroup(id_ressource, id_group, type_ressource, data)
+         if (ressourceExits(id_group)) && (ressourceExits(id_ressource)) && (new_right in ['O', 'W', 'R']) 
+            if (AllowUser(id_ressource, id_current_user, ['O'])
+               update ACL of id_ressource for id_group with the right
+		
+      removeUserFromACL(id_ressource, id_user, type_ressource)
+         if (ressourceExits(id_user)) && (ressourceExits(id_ressource)) 
+            if (AllowUser(id_ressource, id_current_user, ['O'])
+               remove id_user from the ACL of id_ressource
+		
+      removeGroupFromACL(id_ressource, id_group, type_ressource)
+         if (ressourceExits(id_ressource)) && (ressourceExits(id_group)) 
+            if (AllowUser(id_ressource, id_current_user, ['O'])
+               remove id_group from the ACL of id_ressource
+		   			
+      getUserRight(id_ressource, id_user, type_ressource)
+         if (ressourceExits(id_ressource)) && (ressourceExits(id_user))
+            if (AllowUser(id_ressource, id_current_user, {O}))
+               add userRight(id_ressource, id_user) to res
+               for id_group in getAllGroupOfAUser(id_user)
+                  add groupRight(id_ressource, id_group) to res
+
+      AllowUser(id_ressource, id_user, RightsNeeded)
+         if (userIsRoot)
+            return true
+         if (userRight(id_ressource, id_user)) is in RightsNeeded
+            return true
+         for id_group in getAllGroupOfAUser(id_user)
+            if (groupRight(id_ressource, id_group))) in RightsNeeded
+               return true
+         return false
+
+      userRight(id_ressource, id_user)
+         return ACL of id_user for id_ressource
+      
+      groupRight(id_ressource, id_group)
+         return ACL of id_group for id_ressource
+
+   QueueAPI.js
+		POST /queue --data '{"id_list":[], "description":{"name":"queue", "interface":"head"}}'
+      addQueue(data)
+         if (name !="") && (name not already used)  && (description != {})
+            add new queue to the db with (name, id_list)
+            getInfoOnAQueue(id_queue)
+		
+      GET /queue
+      getAllQueue()
+         if (userRoleAllowed(id_current_user, "admin"))
+            for each id_queue 
+               printRessourceInfo(id_queue) 
+		
+      GET /queue/getid_queue/QueueName
+      getid_queueOfQueueName()
+         for each id_queue 
+            if id_queue.name == QueueName
+               add id_queue to res
+
+      GET /queue/id_queue
+      getInfoOnAQueue(id_queue)  
+         if (ressourceExits(id_queue))
+            printRessourceInfo(id_queue)
+		
+      PUT /queue/id_queue --data '{"id_list":["value":"", "id_context_layer":"", "...":"..."]} '
+      updateQueue(id_queue, data)
+         if (ressourceExits(id_queue))
+            for object in id_list
+               putFront(id_queue, object)
+		
+      PUT /queue/id_queue/next --data '{"value":"", "id_context_layer":"", "...":"..."}'
+      putFront(id_queue, data)
+         if (ressourceExits(id_queue))
+            add data to the top of the queue              
+		
+      PUT /queue/id_queue/last --data '{"value":"", "id_context_layer":"", "...":"..."}'
+      putBack(id_queue, data)
+         if (ressourceExits(id_queue))
+            add data to the back of the queue
+		
+      GET /queue/id_queue/next
+      popFront(id_queue)
+         if (ressourceExits(id_queue))
+            add first element to res 
+		
+      DELETE /queue/id_queue
+      deleteQueue(id_queue)
+         if (ressourceExits(id_queue))
+            if (userRoleAllowed(id_current_user, "admin"))
+               remove id_queue from db      
