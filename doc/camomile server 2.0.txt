@@ -315,22 +315,22 @@ app.js
                if (AllowUser(id_layer, id_current_user, ['O', 'W', 'R'])
                   printRessourceInfo(id_layer)
 
-      GET /acl/id_corpus
+      GET /corpus/id_corpus/acl
       getInfoOnACL(id_corpus, "corpus")
 
-      PUT /acl/id_corpus/user/id_user --data '{"right":"P"}'
+      PUT /corpus/id_corpus/acluser/id_user --data '{"right":"P"}'
       updateACLUser(id_corpus, id_user, "corpus", data)
 
-      PUT /acl/id_corpus/group/id_group --data '{"right":"P"}'
+      PUT /corpus/id_corpus/aclgroup/id_group --data '{"right":"P"}'
       updateACLGroup(id_corpus, id_group, "corpus", data)
 
-      DELETE /acl/id_corpus/user/id_user
+      DELETE /corpus/id_corpus/acluser/id_user
       removeUserFromACL(id_corpus, id_user, "corpus")
 
-      DELETE /acl/id_corpus/group/id_group
+      DELETE /corpus/id_corpus/aclgroup/id_group
       removeGroupFromACL(id_corpus, id_group, "corpus")
 
-      GET /acl/id_corpus/user/is_user
+      GET /corpus/id_corpus/acluser/is_user
       getUserRight(id_corpus, id_user, "corpus")
 
    MediaAPI.js   			
@@ -401,22 +401,22 @@ app.js
                for id_annotation in id_layer
                   printRessourceInfo(id_annotation) 
 
-      GET /acl/id_layer
+      GET /layer/id_layer/acl
       getInfoOnACL(id_layer, "layer")
 
-      PUT /acl/id_layer/user/id_user --data '{"right":"P"}'
+      PUT /layer/id_layer/acluser/id_user --data '{"right":"P"}'
       updateACLUser(id_layer, id_user, "layer", data)
 
-      PUT /acl/id_layer/group/id_group --data '{"right":"P"}'
+      PUT /layer/id_layer/aclgroup/id_group --data '{"right":"P"}'
       updateACLGroup(id_layer, id_group, "layer", data)
 
-      DELETE /acl/id_layer/user/id_user
+      DELETE /layer/id_layer/acluser/id_user
       removeUserFromACL(id_layer, id_user, "layer")
 
-      DELETE /acl/id_layer/group/id_group
+      DELETE /layer/id_layer/aclgroup/id_group
       removeGroupFromACL(id_layer, id_group, "layer")
 
-      GET /acl/id_layer/user/is_user
+      GET /layer/id_layer/acluser/is_user
       getUserRight(id_layer, id_user, "layer")
 
    AnnotationAPI.js   			
@@ -490,9 +490,11 @@ app.js
          return ACL of id_group for id_ressource
 
    QueueAPI.js
-		POST /queue --data '{"name":"...", "description":{"...":"..."}}'
+		POST /queue --data '{"name":"...", "description":{"...":"..."}, "list": [{"element:"...", ...}, {"element:"...", ...}, ...]}'
       addQueue(data)
-         add new queue to the db with (name, description)
+         add new queue to the db with (data.name, data.description)
+         for e in data.list
+            putNext(id_queue, e)
          getInfoOnAQueue(id_queue)
 		
       GET /queue
@@ -506,20 +508,23 @@ app.js
          if (ressourceExits(id_queue))
             printRessourceInfo(id_queue)
 		
-      POST /queue/id_queue/clear
-      clearQueue(id_queue)
+      PUT /queue/id_queue --data '{"name":"...", "description":{"...":"..."}, "list": [{"element:"...", ...}, {"element:"...", ...}, ...]}'
+      updateQueue(id_queue)
          if (ressourceExits(id_queue))
-            empty id_queue.queue
-		
+            update id_queue with (data.name, data.description)         
+            for e in data.list
+               putNext(id_queue, e)
+
       PUT /queue/id_queue/next --data '{"element":"...", "id_context_layer":"...", "...":"..."}'
-      putFront(id_queue, data)
+      push(id_queue, data)
          if (ressourceExits(id_queue))
-            add data to the top of the id_queue.queue              
+            add data at the end of the id_queue.queue              
 		
       GET /queue/id_queue/next
-      popFront(id_queue)
+      pop(id_queue)
          if (ressourceExits(id_queue))
-            add first data of id_queue.queue to res and remove it from id_queue.queue
+            add first element of id_queue.queue to res 
+            remove first element from id_queue.queue
 		
       DELETE /queue/id_queue
       deleteQueue(id_queue)
