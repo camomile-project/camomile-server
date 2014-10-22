@@ -490,49 +490,36 @@ app.js
          return ACL of id_group for id_ressource
 
    QueueAPI.js
-		POST /queue --data '{"id_list":[], "description":{"name":"queue", "interface":"head"}}'
+		POST /queue --data '{"name":"...", "description":{"...":"..."}}'
       addQueue(data)
-         if (name !="") && (name not already used)  && (description != {})
-            add new queue to the db with (name, id_list)
-            getInfoOnAQueue(id_queue)
+         add new queue to the db with (name, description)
+         getInfoOnAQueue(id_queue)
 		
       GET /queue
       getAllQueue()
          if (userRoleAllowed(id_current_user, "admin"))
             for each id_queue 
                printRessourceInfo(id_queue) 
-		
-      GET /queue/getid_queue/QueueName
-      getid_queueOfQueueName()
-         for each id_queue 
-            if id_queue.name == QueueName
-               add id_queue to res
 
       GET /queue/id_queue
       getInfoOnAQueue(id_queue)  
          if (ressourceExits(id_queue))
             printRessourceInfo(id_queue)
 		
-      PUT /queue/id_queue --data '{"id_list":["value":"", "id_context_layer":"", "...":"..."]} '
-      updateQueue(id_queue, data)
+      POST /queue/id_queue/clear
+      clearQueue(id_queue)
          if (ressourceExits(id_queue))
-            for object in id_list
-               putFront(id_queue, object)
+            empty id_queue.queue
 		
-      PUT /queue/id_queue/next --data '{"value":"", "id_context_layer":"", "...":"..."}'
+      PUT /queue/id_queue/next --data '{"element":"...", "id_context_layer":"...", "...":"..."}'
       putFront(id_queue, data)
          if (ressourceExits(id_queue))
-            add data to the top of the queue              
-		
-      PUT /queue/id_queue/last --data '{"value":"", "id_context_layer":"", "...":"..."}'
-      putBack(id_queue, data)
-         if (ressourceExits(id_queue))
-            add data to the back of the queue
+            add data to the top of the id_queue.queue              
 		
       GET /queue/id_queue/next
       popFront(id_queue)
          if (ressourceExits(id_queue))
-            add first element to res 
+            add first data of id_queue.queue to res and remove it from id_queue.queue
 		
       DELETE /queue/id_queue
       deleteQueue(id_queue)

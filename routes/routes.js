@@ -223,15 +223,12 @@ exports.initialize = function(app){
 	app.get('/queue/:id_queue', user.currentUserExist,
 								queue.id_queueExist,
 								queue.getInfoOnAQueue);									// info on a queue
-	app.put('/queue/:id_queue', user.currentUserExist,
-								queue.id_queueExist,
-								queue.updateQueue); 									// create or replace a list of ids
-	app.put('/queue/:id_queue/next/:element', user.currentUserExist,
-											  queue.id_queueExist,
-											  queue.putFront);							// add new annotation in a queue
-	app.put('/queue/:id_queue/last/:element', user.currentUserExist,
-											  queue.id_queueExist,
-											  queue.putBack);							// add new annotation in a queue
+	app.post('/queue/:id_queue/clear', user.currentUserExist,
+									   queue.id_queueExist,
+									   queue.clearQueue); 									// create or replace a list of ids
+	app.put('/queue/:id_queue/next/', user.currentUserExist,
+									  queue.id_queueExist,
+									  queue.putFront);									// add new annotation in a queue
 	app.get('/queue/:id_queue/next/', user.currentUserExist,
 									  queue.id_queueExist,  
 									  queue.popFront);									// get next annotation of a queue
