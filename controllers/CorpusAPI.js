@@ -29,12 +29,6 @@ SOFTWARE.
    * listWithId - Returns a specific corpus of a given id
 */
 
-var Corpus = require('../models/Corpus').Corpus;
-var ACL = require('../models/ACL').ACL,
-	ACLAPI = require('../controllers/ACLAPI'),
-	Group = require('../models/Group').Group,
-	commonFuncs = require('../lib/commonFuncs');
-var async = require('async');
 
 // for the uri : app.get('/corpus', 
 /*

@@ -30,14 +30,7 @@ SOFTWARE.
    * listAll - Returns a list of layers
    * listWithId - Returns a specific layer of a given id
 */
-var Media = require('../models/Media').Media; //get the media model for cross-check
-var Layer = require('../models/Layer').Layer; //get the layer model
 
-var ACL = require('../models/ACL').ACL,
-	ACLAPI = require('../controllers/ACLAPI'),
-	Group = require('../models/Group').Group,
-	compound = require('../controllers/CompoundAPI'),
-	commonFuncs = require('../lib/commonFuncs');
 
 /*
 	- First: retrieves all layers regardless of user/group's rights

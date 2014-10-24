@@ -22,7 +22,15 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-var	authenticate = require('../middleware/authenticate');
+
+var userModel = require('../models/User').User;
+var	groupModel = require('../models/Group');
+var corpusModel = require('../models/Corpus');
+var	mediaModel = require('../models/Media');
+var	layerModel = require('../models/Layer');
+var	annotationModel = require('../models/Annotation');
+var	queueModel = require('../models/Queue');
+
 var	userAPI = require('../controllers/UserAPI');
 var	groupAPI = require('../controllers/GroupAPI');
 var corpusAPI = require('../controllers/CorpusAPI');
@@ -30,6 +38,7 @@ var	mediaAPI = require('../controllers/MediaAPI');
 var	layerAPI = require('../controllers/LayerAPI');
 var	annotationAPI = require('../controllers/AnnotationAPI');
 var	queueAPI = require('../controllers/QueueAPI');
+var	authenticate = require('../middleware/authenticate');
 
 exports.index = function(req, res){
 	res.render('index', { title: 'Camomille' });

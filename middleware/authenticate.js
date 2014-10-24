@@ -25,7 +25,6 @@ SOFTWARE.
 
 
 var crypto = require('crypto');
-var User = require('../models/user').User;
 
 var len = 128;				//Bytesize
 var iterations = 12000;

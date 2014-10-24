@@ -29,12 +29,6 @@ SOFTWARE.
    * listWithId - Returns a specific media of a given id
 */
 
-var Media = require('../models/Media').Media; 
-var Corpus = require('../models/Corpus').Corpus;
-var ACL = require('../models/ACL').ACL,
-	ACLAPI = require('../controllers/ACLAPI'),
-	Group = require('../models/Group').Group,
-	commonFuncs = require('../lib/commonFuncs');
 
 var fileSystem = require('fs'); //working with video streaming
 

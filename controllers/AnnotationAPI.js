@@ -40,13 +40,6 @@ SOFTWARE.
    * listWithId - Returns a specific annotation of a given id
 */
 
-var Layer = require('../models/Layer').Layer; //get the layer model
-var Annotation = require('../models/Annotation').Annotation; //get the annotation model
-
-var ACL = require('../models/ACL').ACL,
-	ACLAPI = require('../controllers/ACLAPI'),
-	Group = require('../models/Group').Group,
-	commonFuncs = require('../lib/commonFuncs');
 
 // for the uri : app.get('/corpus/:id_corpus/media/:id_media/layer/:id_layer/annotation'
 /*
