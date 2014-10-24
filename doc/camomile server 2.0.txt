@@ -121,7 +121,8 @@ app.js
    authenticate.js
       authenticate.login(data{username, password})
       authenticate.logout()
-      userAPI.getInfo(req.session.user)
+      authenticate.islogin()
+      authenticate.me()
 
 \controllers
    UserAPI.js
