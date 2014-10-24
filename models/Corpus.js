@@ -25,7 +25,8 @@ SOFTWARE.
 var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
 var ObjectId = Schema.ObjectId;
- 
+var HistorySchema = require('./History').HistorySchema;
+
 exports.CorpusSchema = CorpusSchema = new Schema({
 	name: {type: String, required: true, trim: true},
 	description : {type : Schema.Types.Mixed, 'default' : ''},
