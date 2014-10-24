@@ -106,13 +106,13 @@ exports.initialize = function(app){
 					  groupAPI.getAll);
 	// info on a specific group
 	// GET /group/id_group
-	/*app.get('/group/:id_group', authenticate.islogin,
+	app.get('/group/:id_group', authenticate.islogin,
 								groupAPI.exist, 
 								userAPI.currentUserIsAdmin,  
 								groupAPI.getInfo);
 	// update information of a group
 	// PUT /group/id_group --data '{"description":"desc"}'
-	app.put('/group/:id_group', authenticate.islogin,
+	/*app.put('/group/:id_group', authenticate.islogin,
 								groupAPI.exist, 
 								userAPI.currentUserIsAdmin,  
 								groupAPI.update);
