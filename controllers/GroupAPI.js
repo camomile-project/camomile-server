@@ -24,33 +24,83 @@ SOFTWARE.
 
 /* The API controller for group's methods */
 
+var async = require('async');
+
+exports.exist = function(req, res, next) {
+	Group.findById(req.params.id_group, function(error, group){
+		if (error) res.status(400).json(error);
+		else if (!group) res.status(400).json({"message":"id_group don't exists"});
+		else next();
+	});
+}
 
 //list all groups to which the connected user belong
 exports.getAll = function (req, res) {
 	Group.find({}, function (error, groups) {
-		if (error) res.status(400).json({error:"error", message:error});
+		if (error) res.status(400).json(error);
 		if (groups) res.status(200).json(groups);
 		else return res.status(200).json([]);
 	});
 }
 
-exports.exist = function(req, res, next) {
-	Group.findById(req.params.id_group, function(error, data){
+//retrieve a particular group (with id)
+exports.getInfo = function(req, res){
+	Group.findById(req.params.id_group, function(error, group){
 		if (error) res.status(400).json(error);
-		else if (!data) res.status(400).json({"message":"id_user don't exists"});
-		else next();
+		else  res.status(200).json(group);
 	});
 }
 
-//retrieve a particular group (with id)
-exports.getInfo = function(req, res){
-	var connectedUser = req.session.user;
-	Group.findById(req.params.id_group, function(error, data){
-		if (error) res.status(400).json({error:"error", message:error});
-		else if (data == null) res.status(400).json({error:"no such id!"});
-		else  res.status(200).json(data);
+exports.create = function(req, res){
+	var error=null;
+	async.waterfall([
+		function(callback) {
+			if (req.body.name == undefined) error="the name is not define";
+			if (req.body.name == "") 		error="empty string for name is not allow";
+			callback(error);
+		},
+		function(callback) {
+			Group.count({name: req.body.name}, function (error, count) {	
+				if ((!error) && (count != 0)) error = "the name is already used, choose another name";
+		        callback(error);
+		    });
+		},
+		function(callback) {
+			var group = new Group({
+				name: req.body.name,
+				description: req.body.description,
+				users_list: []
+			}).save(function (error, newGroup) {
+				if (newGroup) res.status(200).json(newGroup);
+				callback(error);
+			});			
+		}
+	], function (error) {
+		if (error) res.status(400).json({"message":error});
+	});
+};
+
+// remove a given group ID
+exports.remove = function (req, res) {
+	var error;
+	async.waterfall([		
+		function(callback) {
+			Group.remove({_id : req.params.id_group}, function (error, group) {
+				if (!error && group == 1) res.status(200).json({message:"The group as been delete"});
+				callback(error);
+			});
+		}
+		// delete group from corpus acl
+		// delete group from layer acl
+	], function (error) {
+		if (error) res.status(400).json({"message":error});
 	});
 }
+
+
+
+
+
 
 /*
 
