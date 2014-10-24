@@ -26,7 +26,7 @@ var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
 var ObjectId = Schema.ObjectId;
 var LayerSchema = require('./Layer').LayerSchema;
-var MediaSchema = require('./Mediar').MediaSchema;
+var MediaSchema = require('./Media').MediaSchema;
 var HistorySchema = require('./History').HistorySchema;
  
 exports.AnnotationSchema = AnnotationSchema = new Schema({
