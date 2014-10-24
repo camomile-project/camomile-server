@@ -116,6 +116,9 @@ exports.logout = function (req, res) {
     }
 }
 
+exports.me = function (req, res) {
+    if (req.session.user) res.status(200).json({message:'user is logged as ' + req.session.user.username});
+}
 }
 
 
