@@ -98,7 +98,7 @@ exports.create = function (req, res) {
 
 // retrieve all users
 exports.getAll = function (req, res) {	
-	User.find({}, 'username role affiliation', function (error, users) {
+	User.find({}, 'username role description', function (error, users) {
     	if (error) res.status(400).json({error:"error", message:error});
     	if (users) res.status(200).json(users);
 		else res.status(200).json([]);
@@ -177,27 +177,15 @@ exports.remove  = function(req, res){
 	});
 }
 
-
-/*
 //retrieve the list of group of a particular user (with id)
-exports.listGroupsOfUserId = function(req, res){
-	if (req.params.id == undefined) return res.status(400).json({error:"the given ID is not correct"});
-	var connectedUser = req.session.user;	
-	User.findById(req.params.id, 'username affiliation role', function(error, data){
+exports.getAllGroupOfAUser = function(req, res){
+	User.findById(req.params.id_user, 'username affiliation role', function(error, user){
 		if (error) res.status(400).json({error:"error", message:error});
-		else if (data == null) res.status(200).json(400, '{"error":"no such user"}')
 		else {			
-			Group.find({'usersList' : {$regex : new RegExp('^'+ data.username + '$', "i")}}, function(error2, dataGroup) {
+			Group.find({'users_list' : {$regex : new RegExp('^'+ req.params.id_user + '$', "i")}}, function(error2, Groups) {
 				if (error2) res.status(400).json({error:"error", message:error2});
-				else {
-					if (connectedUser.role == "admin")  res.status(200).json(dataGroup);
-					else {				
-						if (data.username == connectedUser.username)	res.status(200).json(dataGroup);
-						else res.status(403).json({error:"You dont have enough right to access this resource"});
-					}
-				}
+				else res.status(200).json(Groups);
 			});
 		}
 	});
 }
-*/
