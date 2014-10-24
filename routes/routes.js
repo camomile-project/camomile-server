@@ -68,8 +68,6 @@ exports.initialize = function(app){
 	app.get('/user', authenticate.islogin,
 					 userAPI.currentUserIsAdmin, 
 					 userAPI.getAll);
-	
-	/*
 	// info on a specific user
 	// GET /user/id_user
 	app.get('/user/:id_user', authenticate.islogin,
@@ -84,6 +82,8 @@ exports.initialize = function(app){
 							  userAPI.update);
 	// delete a specific user
 	// DELETE /user/id_user
+	
+	/*
 	app.delete('/user/:id_user', authenticate.islogin,
 								 userAPI.exist, 
 								 userAPI.isRoot, 

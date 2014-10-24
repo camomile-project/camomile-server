@@ -60,8 +60,18 @@ authenticateElem = function(name, pass, fn) {
        	if (user) {
            	if (error)  return fn(new Error('could not find user'));
            	hash(pass, user.salt, function (error2, hash) {
+
+            	console.log("hash "+hash);
+				console.log("user.hash "+user.hash);
+
             	if (error2) return fn(error2);
-            	if (hash == user.hash) return fn(null, user);
+            	if (hash == user.hash) {
+            		console.log("lala cest bon")
+            		return fn(null, user);	
+            	} 
+
+				console.log("beurk cest pas bon")
+
             	fn(new Error('invalid password'));
            	});
        	} 
@@ -81,7 +91,7 @@ exports.login = function (req, res) {
 					res.status(200).json({message:"You have been successfully logged in as "+username}); 
 				});
 			} 			
-			else res.status(400).json({message:error});
+			else res.status(400).json({message:"authentication failed, check your username or password"});
 		});
 	}
 }

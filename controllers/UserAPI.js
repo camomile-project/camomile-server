@@ -29,21 +29,12 @@ exports.currentUserIsAdmin = function(req, res, next) {
 	else res.status(400).json( {message:"Acces denied, you are not an admin user"});
 }
 
-// retrieve all users
-exports.getAll = function (req, res) {	
-	User.find({}, 'username role affiliation', function (error, users) {
-    	if (error) res.status(400).json({error:"error", message:error});
-    	if (users) res.status(200).json(users);
-		else res.status(200).json([]);
-	});
-}
-
-//check if a user already exists
+//check if a id_user exists
 exports.exist = function(req, res, next) {
-    User.count({username: req.body.username}, function (error, count) {
-        if (count === 0)  next();
-        else res.status(400).json( {error:"this user name already exists", message:error});
-    });
+	User.findById(req.params.id_user, 'username affiliation role', function(error, data){
+		if (!error) next();
+		else res.status(400).json({"message":"id_user don't exists"});
+	});
 }
 
 // create a user
@@ -87,7 +78,71 @@ exports.create = function (req, res) {
 	});
 }
 
+printRes = function(data, res) {
+	var p = {
+		"username":data.username,
+		"role":data.role,
+		"description":data.description
+	};
+	res.status(200).json(p);
+}
 
+// retrieve all users
+exports.getAll = function (req, res) {	
+	User.find({}, 'username role affiliation', function (error, users) {
+    	if (error) res.status(400).json({error:"error", message:error});
+    	if (users) res.status(200).json(users);
+		else res.status(200).json([]);
+	});
+}
+
+//retrieve a particular user (with id)
+exports.getInfo = function(req, res){
+	User.findById(req.params.id_user, function(error, data){
+		printRes(data,res);
+	});
+}
+
+exports.update = function(req, res){
+	var error;
+	var update = {};
+	async.waterfall([		
+		function(callback) {
+			if (req.body.password == "") 								error="empty password for username is not allow";
+			if (req.body.role && req.body.role != 'admin' && req.body.role != 'user')	error="the role must be 'user' or 'admin'";	
+			callback(error);
+		},
+		function(callback) {
+			User.findById(req.params.id_user, function(error, data){
+				if (req.body.role && data.username == "root") error = "change the role of this id_user is not allowed"
+				else if (req.body.role) update.role = req.body.role
+				callback(error, update);
+			});
+		},
+		function(update, callback) {
+			if (req.body.password) {
+				hash(req.body.password, function (error, salt, hash) {
+					if (req.body.password) {
+						update.salt = salt;
+						update.hash = hash;	
+					}
+					callback(error, update);				
+				});
+			}
+			else callback(error, update);
+		},
+		function(update, callback) {
+			if (req.body.description) update.description = req.body.description;
+			User.findByIdAndUpdate(req.params.id_user, update, function (error, data) {
+				if (error) res.status(400).json({message:error});
+				else printRes(data, res);
+				callback(error)
+			});			
+		}
+	], function (error) {
+		if (error) res.status(400).json({"message":error});
+	});
+}
 
 /*
 
@@ -128,21 +183,7 @@ exports.requiredRightUGname = function(role) {
 
 
 
-//retrieve a particular user (with id)
-exports.listWithId = function(req, res){
-	if (req.params.id == undefined) return res.status(400).json({error:"the given ID is not correct"});
-	var connectedUser = req.session.user;	
-	User.findById(req.params.id, 'username affiliation role', function(error, data){
-		if (error) res.status(400).json({error:"error", message:error});
-		else if (data == null) res.status(400).json({error:"no such user"});
-		else
-			if (connectedUser.role == "admin")  res.status(200).json(data);
-			else {				
-				if (data.username == connectedUser.username)	res.status(200).json(data);
-				else res.status(403).json({error:"You dont have enough right to access this resource"});
-			}
-	});
-}
+
 
 //retrieve a particular user (with id)
 exports.listGroupsOfUserId = function(req, res){
