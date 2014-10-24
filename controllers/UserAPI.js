@@ -144,8 +144,7 @@ exports.update = function(req, res){
 		function(update, callback) {
 			if (req.body.description) update.description = req.body.description;
 			User.findByIdAndUpdate(req.params.id_user, update, function (error, user) {
-				if (error) res.status(400).json({message:error});
-				else printRes(user, res);
+				if (!error) printRes(user, res);
 				callback(error)
 			});			
 		}
