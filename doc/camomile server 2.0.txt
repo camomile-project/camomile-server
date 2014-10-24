@@ -126,22 +126,22 @@ app.js
 
 \controllers
    UserAPI.js
-		userAPI.create()
+^		userAPI.create()
          if (data.username not already used) && (data.username != "") && (data.password != "") && (data.role == 'admin' || 'user')
             add new user(data.username, data.password, data.role, data.description) to db -> id_user
             userAPI.getInfo(id_user)
          res.status().json({"message":"error: ..."})
 
-		userAPI.getAll()
+^		userAPI.getAll()
          res = []
          for each id_user in db
             res.push({id_user.username + id_user.role + id_user.description})
          res.status().json(res)
 
-		userAPI.getInfo(id_user)
+^		userAPI.getInfo(id_user)
          res.status().json({id_user.username + id_user.role + id_user.description})
 
-      userAPI.update(id_user)
+^     userAPI.update(id_user)
          if (data.password != "") && (data.description != {}) && (data.role != 'admin' || 'user')
             id_user.password = data.password                                    // with hash
             id_user.description = data.description
@@ -151,7 +151,7 @@ app.js
          else:
             res.status().json({"message":"error: ..."})
 
-      userAPI.remove(id_user)
+^     userAPI.remove(id_user)
          remove id_user from db
          for each id_group
             if (id_user is inside id_group)
@@ -169,26 +169,26 @@ app.js
                res.push(id_group)
          res.status().json(res)
 
-      userAPI.exist(id_user)
+^     userAPI.exist(id_user)
          if id_user is in the db
             return next()
          else
             res.status().json({"message":"error: user don't exist"})
 
-      userAPI.currentUserIsRoot()
+^     userAPI.currentUserIsRoot()
          if req.session.user.username == "root"
             return next()
          else
             res.status().json({"message":"error: acces refused"})
 
-      userAPI.currentUserIsAdmin()
+^     userAPI.currentUserIsAdmin()
          if req.session.user.role == "Admin"
             return next()
          else
             res.status().json({"message":"error: acces refused"})
 
    GroupAPI.js
-		groupAPI.create()
+^  	groupAPI.create()
          if (name not already used) && (name != "")
             add new group to the db -> id_group
             id_group.name = data.name
@@ -198,13 +198,13 @@ app.js
          else:
             res.status().json({"message":"error: ..."})
 
-		groupAPI.getAll()
+^		groupAPI.getAll()
          res = []
          for each id_group in db
             res.push({id_group.name + id_group.description + id_group.users_list})
          res.status().json(res)
 
-      groupAPI.getInfo(id_group)
+^     groupAPI.getInfo(id_group)
          res.status().json({id_group.name + id_group.description + id_group.users_list})
 
       groupAPI.update(id_group)

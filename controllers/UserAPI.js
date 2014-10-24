@@ -75,7 +75,7 @@ exports.create = function (req, res) {
 				salt: salt,
 				hash: hash,
 			}).save(function (error, newUser) {
-				if (newUser) res.status(200).json(newUser);
+				if (newUser) printRes(newUser, res);
 				callback(error);
 			});			
 		}
