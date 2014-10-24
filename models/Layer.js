@@ -35,8 +35,8 @@ exports.LayerSchema = LayerSchema = new Schema({
 	fragment_type : {type : Schema.Types.Mixed, 'default' : ''}, 
 	data_type : {type : Schema.Types.Mixed, 'default' : ''}, 
 	history : [HistorySchema],
-    ACL_users: {},
-    ACL_groups: {}
+    users_ACL: {},
+    groups_ACL: {}
 }, { versionKey: false });
 
 exports.Layer = Layer = mongoose.model('Layer', LayerSchema);

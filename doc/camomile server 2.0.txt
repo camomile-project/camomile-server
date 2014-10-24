@@ -37,23 +37,23 @@ app.js
       GroupSchema = GroupSchema = new Schema({
          name: {type:String, lowercase: true, trim: true, required: true},
          description: {type : Schema.Types.Mixed, 'default' : ''},
-         userList: [{ type:String, lowercase: true, trim:true}]
+         users_list: [{ type:String, lowercase: true, trim:true}]
       }
    Corpus.js
       CorpusSchema = CorpusSchema = new Schema({
          name: {type: String, required: true, trim: true},
          description : {type : Schema.Types.Mixed, 'default' : ''},
          history : [HistorySchema],
-         ACL_users: {},
-         ACL_groups: {}
+         users_ACL: {},
+         groups_ACL: {}
       }
    Media.js
       MediaSchema = MediaSchema = new Schema({
          id_corpus : {type : ObjectId, ref : 'CorpusSchema'},
          name: {type: String, required: true, trim: true},
-         description: {type : Schema.Types.Mixed, 'default' : ''},
-         url : {type: String, default:""}
-         history : [HistorySchema],
+         description: {type : Schema.Types.Mixed, 'default' : ''},         
+         url : {type: String, default:""},
+         history : [HistorySchema]
       }
    Layer.js
       LayerSchema = LayerSchema = new Schema({
@@ -63,8 +63,8 @@ app.js
          fragment_type : {type : Schema.Types.Mixed, 'default' : ''},
          data_type : {type : Schema.Types.Mixed, 'default' : ''},
          history : [HistorySchema],
-         ACL_users: {},
-         ACL_groups: {}
+         users_ACL: {},
+         groups_ACL: {}
       }
    Annotation.js
       AnnotationSchema = AnnotationSchema = new Schema({
@@ -154,7 +154,7 @@ app.js
          remove id_user from db
          for each id_group
             if (id_user is inside id_group)
-                remove id_user from id_group.userList
+                remove id_user from id_group.users_list
          for each id_corpus                                                      // suppresion id_user des ACL, problème de droit de lecture des ressources -> utile ?
             for each id_layer in id_corpus
                layerAPI.removeUserFromACL(id_layer, id_user)
@@ -164,7 +164,7 @@ app.js
 		userAPI.getAllGroupOfAUser(id_user)  	
          res = []
          for each id_group
-            if (id_user is inside id_group.userList)
+            if (id_user is inside id_group.users_list)
                res.push(id_group)
          res.status().json(res)
 
@@ -192,7 +192,7 @@ app.js
             add new group to the db -> id_group
             id_group.name = data.name
             id_group.description = data.description
-            id_group.userList = []
+            id_group.users_list = []
             groupAPI.getInfo(id_group)
          else:
             res.status().json({"message":"error: ..."})
@@ -200,11 +200,11 @@ app.js
 		groupAPI.getAll()
          res = []
          for each id_group in db
-            res.push({id_group.name + id_group.description + id_group.userList})
+            res.push({id_group.name + id_group.description + id_group.users_list})
          res.status().json(res)
 
       groupAPI.getInfo(id_group)
-         res.status().json({id_group.name + id_group.description + id_group.userList})
+         res.status().json({id_group.name + id_group.description + id_group.users_list})
 
       groupAPI.update(id_group)
          id_group.description = data.description

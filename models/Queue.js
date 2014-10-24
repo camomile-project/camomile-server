@@ -29,7 +29,7 @@ var ObjectId = Schema.ObjectId;
 exports.QueueSchema = QueueSchema = new Schema({
 	name: {type: String, required: true, trim: true},
 	description: {type : Schema.Types.Mixed, 'default' : ''},   	
-	queue: [Schema.Types.Mixed]
+	list: [Schema.Types.Mixed]
 }, { versionKey: false });
 
 exports.Queue = Queue = mongoose.model('Queue', QueueSchema);

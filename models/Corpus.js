@@ -29,8 +29,9 @@ var ObjectId = Schema.ObjectId;
 exports.CorpusSchema = CorpusSchema = new Schema({
 	name: {type: String, required: true, trim: true},
 	description : {type : Schema.Types.Mixed, 'default' : ''},
-	ACL_users: {},
-	ACL_groups: {}
+	history : [HistorySchema],
+	users_ACL: {},
+	groups_ACL: {}
 }, { versionKey: false });
 
 exports.Corpus = Corpus = mongoose.model('Corpus', CorpusSchema);
