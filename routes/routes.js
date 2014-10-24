@@ -88,25 +88,25 @@ exports.initialize = function(app){
 							 	 userAPI.remove);
 	// get all group of a user
 	// GET /user/id_user/group
-	app.get('/user/:id_user', authenticate.islogin,
+	/*app.get('/user/:id_user', authenticate.islogin,
 							  userAPI.exist, 
 							  userAPI.currentUserIsAdmin, 
 							  userAPI.getAllGroupOfAUser);
-	
+	*/
 	// --- group routes --- \\
 	// create a group
 	// POST /group --data '{"name":"...", "description":{"...":"..."}}}}'
-	app.post("/group", authenticate.islogin,
+	/*app.post("/group", authenticate.islogin,
 					   userAPI.currentUserIsAdmin, 
 					   groupAPI.create);
-	// get list of all groups
+	*/// get list of all groups
 	// GET /group
 	app.get('/group', authenticate.islogin,
 					  userAPI.currentUserIsAdmin, 
 					  groupAPI.getAll);
 	// info on a specific group
 	// GET /group/id_group
-	app.get('/group/:id_group', authenticate.islogin,
+	/*app.get('/group/:id_group', authenticate.islogin,
 								groupAPI.exist, 
 								userAPI.currentUserIsAdmin,  
 								groupAPI.getInfo);

@@ -25,24 +25,20 @@ SOFTWARE.
 /* The API controller for group's methods */
 
 
-
 //list all groups to which the connected user belong
-exports.listAll = function (req, res) {
-	var connectedUser = req.session.user;	
-	if (connectedUser.role == "admin") {				
-		Group.find({}, function (error, groups) {
-			if (error) res.status(400).json({error:"error", message:error});
-			if (groups) res.status(200).json(groups);
-			else return res.status(200).json([]);
-		});
-	}
-    else {
-    	Group.find({'usersList' : {$regex : new RegExp('^'+ connectedUser.username + '$', "i")}}, function(error, dataGroup) {
-			if (error) res.status(400).json({error:"error", message:error});
-			else res.status(200).json(dataGroup);
-		});
-    }
+exports.getAll = function (req, res) {
+	Group.find({}, function (error, groups) {
+		if (error) res.status(400).json({error:"error", message:error});
+		if (groups) res.status(200).json(groups);
+		else return res.status(200).json([]);
+	});
 }
+
+
+/*
+
+
+
 
 // remove a given group ID, also remove this group in the ACL table
 exports.removeGroupByID  = function (req, res) {
@@ -219,3 +215,4 @@ exports.removeUserFromGroup  = function(req, res){
 		}
 	});
 }
+*/
