@@ -22,6 +22,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
+var async = require('async');
 
 exports.currentUserIsAdmin = function(req, res, next) {
 	if (req.session.user.role == "admin") return next();
@@ -46,26 +47,49 @@ exports.exist = function(req, res, next) {
 }
 
 // create a user
-exports.signup = function (req, res) {
-	if (req.body.password == undefined || req.body.username == undefined) res.status(400).json( {error:"the username and/or password fields have not been filled up with data"});
-	else {
-		var roleuser = req.body.role;
-		if (GLOBAL.list_user_role.indexOf(roleuser)==-1)  roleuser = "user";
-		hash(req.body.password, function (error, salt, hash) {
-			if (error) res.status(400).json({error:"error", message:error});
+exports.create = function (req, res) {
+	var error=null;
+	async.waterfall([
+		function(callback) {
+			if (req.body.username == undefined) 						error="the username is not define";
+			if (req.body.username == "") 								error="empty string for username is not allow";
+			if (req.body.password == undefined)							error="the password is not define";
+			if (req.body.password == "") 								error="empty password for username is not allow";
+			if (req.body.role == undefined) 							error="the role is not define";
+			if (req.body.role != 'admin' && req.body.role != 'user')	error="the role must be 'user' or 'admin'";	
+			callback(error);
+		},
+		function(callback) {
+			User.count({username: req.body.username}, function (error, count) {	
+				if ((!error) && (count != 0)) error = "the username is already used, choose another name";
+		        callback(error);
+		    });
+		},
+		function(callback) {
+			hash(req.body.password, function (error, salt, hash) {
+				callback(error, salt, hash);
+			});			
+		},
+		function(salt, hash, callback) {
 			var user = new User({
 				username: req.body.username,
-				affiliation: req.body.affiliation,
-				role: roleuser,//req.body.role,
+				description: req.body.description,
+				role: req.body.role,
 				salt: salt,
 				hash: hash,
-			}).save(function (error2, newUser) {
-				if (error2) res.status(400).json({error:"error", message:error2});
-				if (newUser)res.status(200).json( newUser);
-			});
-		});		
-	}
+			}).save(function (error, newUser) {
+				if (newUser) res.status(200).json(newUser);
+				callback(error);
+			});			
+		}
+	], function (error) {
+		if (error) res.status(400).json({"message":error});
+	});
 }
+
+
+
+/*
 
 
 // check if the given user name or group name exists
@@ -188,3 +212,4 @@ exports.remove  = function(req, res){
 		else  res.status(200).json({message:"The user do not exist"});
 	});
 }
+*/
