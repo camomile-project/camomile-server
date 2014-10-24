@@ -85,7 +85,7 @@ exports.initialize = function(app){
 	app.delete('/user/:id_user', authenticate.islogin,
 								 userAPI.currentUserIsroot,
 								 userAPI.exist, 
-							 	 userAPI.remove);
+							 	 userAPI.remove);				// rajouter la suppression dans les acl
 	// get all group of a user
 	// GET /user/id_user/group
 	/*app.get('/user/:id_user', authenticate.islogin,
@@ -96,10 +96,10 @@ exports.initialize = function(app){
 	// --- group routes --- \\
 	// create a group
 	// POST /group --data '{"name":"...", "description":{"...":"..."}}}}'
-	/*app.post("/group", authenticate.islogin,
+	app.post("/group", authenticate.islogin,
 					   userAPI.currentUserIsAdmin, 
 					   groupAPI.create);
-	*/// get list of all groups
+	// get list of all groups
 	// GET /group
 	app.get('/group', authenticate.islogin,
 					  userAPI.currentUserIsAdmin, 
@@ -116,15 +116,15 @@ exports.initialize = function(app){
 								groupAPI.exist, 
 								userAPI.currentUserIsAdmin,  
 								groupAPI.update);
-	// delete a group
+	*/// delete a group
 	// DELETE /group/id_group
 	app.delete('/group/:id_group', authenticate.islogin,
 								   groupAPI.exist, 
-								   userAPI.userIsRoot,  
-								   groupAPI.remove);
+								   userAPI.currentUserIsroot,  
+								   groupAPI.remove);				// rajouter la suppression dans les acl
 	// add user to a group
 	// POST /group/id_group/user/id_user
-	app.post("/group/:id_group/user/:id_user", authenticate.islogin,
+	/*app.post("/group/:id_group/user/:id_user", authenticate.islogin,
 											   groupAPI.exist, 
 											   userAPI.exist,
 											   userAPI.currentUserIsAdmin,  

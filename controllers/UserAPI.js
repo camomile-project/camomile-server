@@ -25,20 +25,20 @@ SOFTWARE.
 var async = require('async');
 
 exports.currentUserIsAdmin = function(req, res, next) {
-	if (req.session.user.role == "admin") next();
+	if (req.session.user.role === "admin") next();
 	else res.status(400).json({message:"Acces denied, you are not an admin user"});
 }
 
 exports.currentUserIsroot = function(req, res, next) {
-	if (req.session.user.username == "root") next();
+	if (req.session.user.username === "root") next();
 	else res.status(400).json({message:"Acces denied, you are not an admin user"});
 }
 
 //check if a id_user exists
 exports.exist = function(req, res, next) {
-	User.findById(req.params.id_user, function(error, data){
+	User.findById(req.params.id_user, function(error, user){
 		if (error) res.status(400).json(error);
-		else if (!data) res.status(400).json({"message":"id_user don't exists"});
+		else if (!user) res.status(400).json({"message":"id_user don't exists"});
 		else next();
 	});
 }
@@ -84,11 +84,11 @@ exports.create = function (req, res) {
 	});
 }
 
-printRes = function(data, res) {
+printRes = function(user, res) {
 	var p = {
-		"username":data.username,
-		"role":data.role,
-		"description":data.description
+		"username":user.username,
+		"role":user.role,
+		"description":user.description
 	};
 	res.status(200).json(p);
 }
@@ -104,8 +104,8 @@ exports.getAll = function (req, res) {
 
 //retrieve a particular user (with id)
 exports.getInfo = function(req, res){
-	User.findById(req.params.id_user, function(error, data){
-		printRes(data,res);
+	User.findById(req.params.id_user, function(error, user){
+		printRes(user,res);
 	});
 }
 
@@ -120,8 +120,8 @@ exports.update = function(req, res){
 			callback(error);
 		},
 		function(callback) {
-			User.findById(req.params.id_user, function(error, data){
-				if (req.body.role && data.username == "root") error = "change the role of this id_user is not allowed"
+			User.findById(req.params.id_user, function(error, user){
+				if (req.body.role && user.username == "root") error = "change the role of this id_user is not allowed"
 				else if (req.body.role) update.role = req.body.role
 				callback(error, update);
 			});
@@ -140,9 +140,9 @@ exports.update = function(req, res){
 		},
 		function(update, callback) {
 			if (req.body.description) update.description = req.body.description;
-			User.findByIdAndUpdate(req.params.id_user, update, function (error, data) {
+			User.findByIdAndUpdate(req.params.id_user, update, function (error, user) {
 				if (error) res.status(400).json({message:error});
-				else printRes(data, res);
+				else printRes(user, res);
 				callback(error)
 			});			
 		}
@@ -156,17 +156,19 @@ exports.remove  = function(req, res){
 	var error;
 	async.waterfall([		
 		function(callback) {
-			User.findById(req.params.id_user, function(error, data){
-				if (data.username == "root") error = "You can't delete the root user"
+			User.findById(req.params.id_user, function(error, user){
+				if (user.username == "root") error = "You can't delete the root user"
 				callback(error);
 			});
 		},
 		function(callback) {
-			User.remove({_id : req.params.id_user}, function (error, data) {
-				if (!error && data == 1) res.status(200).json({message:"The user as been delete"});
+			User.remove({_id : req.params.id_user}, function (error, user) {
+				if (!error && user == 1) res.status(200).json({message:"The user as been delete"});
 				callback(error);
 			});
 		}
+		// delete user from acl
+		// delete user from group
 	], function (error) {
 		if (error) res.status(400).json({"message":error});
 	});
