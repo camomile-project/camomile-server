@@ -25,6 +25,7 @@ SOFTWARE.
 
 exports.currentUserIsAdmin = function(req, res, next) {
 	if (req.session.user.role == "admin") return next();
+	else res.status(400).json( {message:"Acces denied, you are not an admin user"});
 }
 
 // retrieve all users

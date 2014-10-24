@@ -40,6 +40,7 @@ var	annotationAPI = require('../controllers/AnnotationAPI');
 var	queueAPI = require('../controllers/QueueAPI');
 var	authenticate = require('../middleware/authenticate');
 
+
 exports.index = function(req, res){
 	res.render('index', { title: 'Camomille' });
 };
@@ -68,6 +69,7 @@ exports.initialize = function(app){
 					 userAPI.currentUserIsAdmin, 
 					 userAPI.getAll);
 	
+	/*
 	// info on a specific user
 	// GET /user/id_user
 	app.get('/user/:id_user', authenticate.islogin,
@@ -390,4 +392,5 @@ exports.initialize = function(app){
 								   queueAPI.exist,
 								   userAPI.currentUserIsAdmin,  
 								   queueAPI.delete);
+*/
 }
