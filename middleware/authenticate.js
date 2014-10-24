@@ -71,28 +71,6 @@ hash = function (pwd, salt, fn) {
 
 /***************************************************** old part ********************************************************/
 
-var hash = require('./pass').hash,
-    User = require('../models/user').User,
-    ACLModel = require('../models/ACL').ACL,
-    ACL = require('../controllers/ACLAPI'),
-    Group = require('../models/Group').Group,
-    GroupAPI = require('../controllers/GroupAPI'),
-    commonFuncs = require('../lib/commonFuncs'),
-    mongoose = require('mongoose'),
-    ses = require('../models/sessions')(mongoose); //for listing all sessions
-
-var corpus = require('../controllers/CorpusAPI'),
-  	media = require('../controllers/MediaAPI'),
-  	layer = require('../controllers/LayerAPI'),
-  	anno = require('../controllers/AnnotationAPI'),
-  	compound = require('../controllers/CompoundAPI');
-
-var CorpusModel = require('../models/Corpus').Corpus
-var MediaModel = require('../models/Media').Media
-var LayerModel = require('../models/Layer').Layer
-var AnnotationModel = require('../models/Annotation').Annotation
-var async = require('async');
-
 
 
 // check for authentication
