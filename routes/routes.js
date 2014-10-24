@@ -51,18 +51,21 @@ exports.initialize = function(app){
 	// POST /logout --cookie-jar "cookies.txt"
 	app.post('/logout', authenticate.logout);
 	// POST /me --cookie-jar "cookies.txt"
-	app.post('/me', userAPI.getInfo(req.session.user));
+	app.post('/me', authenticate.me);
 
 
 	// --- user routes --- \\
 	// create user
 	// POST /user --data '{"username":"...", "password":"...", "role":"admin", "description":{"...":"..."}}'
+	/*
 	app.post("/user", userAPI.currentUserIsAdmin, 
 					  userAPI.create);
+	*/
 	// get list of all users
 	// GET /user
 	app.get('/user', userAPI.currentUserIsAdmin, 
 					 userAPI.getAll);
+	/*
 	// info on a specific user
 	// GET /user/id_user
 	app.get('/user/:id_user', userAPI.exist, 
@@ -333,4 +336,5 @@ exports.initialize = function(app){
 	app.delete('/queue/:id_queue', queueAPI.exist,
 								   userAPI.currentUserIsAdmin,  
 								   queueAPI.delete);
+*/
 }

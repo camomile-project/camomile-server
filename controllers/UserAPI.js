@@ -22,16 +22,10 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-/* The API controller for user's methods
-   
-*/
 
-//var Corpus = require('../models/Corpus').Corpus;
-//var Media = require('../models/Media').Media; //get the media model
-//var Layer = require('../models/Layer').Layer; //get the layer model
-//var Annotation = require('../models/Annotation').Annotation; //get the annotation model
-
-//var Group = require('../models/Group').Group;
+exports.currentUserIsAdmin = function(req, res, next) {
+	if (req.session.user.role == "admin") return next();
+}
 
 // retrieve all users
 exports.listUsers = function (req, res) {

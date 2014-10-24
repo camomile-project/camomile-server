@@ -55,6 +55,8 @@ hash = function (pwd, salt, fn) {
   }
 };
 
+
+
 authenticateElem = function(name, pass, fn) {
     User.findOne({username: name}, function (error, user) {
        	if (user) {
