@@ -28,22 +28,12 @@ exports.currentUserIsAdmin = function(req, res, next) {
 }
 
 // retrieve all users
-exports.listUsers = function (req, res) {
-	var connectedUser = req.session.user;	
-	if (connectedUser.role == "admin") {				
-		User.find({}, 'username role affiliation', function (error, users) {
-        	if (error) res.status(400).json({error:"error", message:error});
-        	if (users) res.status(200).json(users);
-			else return res.status(200).json([]);
-    	});
-	}
-    else {
-    	User.findOne({username: connectedUser.username}, 'username role affiliation', function (error, users) {
-        	if (error) res.status(400).json({error:"error", message:error});
-        	if (users) res.status(200).json(users);
-        	else return res.status(200).json([]);
-    	});
-    }
+exports.getAll = function (req, res) {	
+	User.find({}, 'username role affiliation', function (error, users) {
+    	if (error) res.status(400).json({error:"error", message:error});
+    	if (users) res.status(200).json(users);
+		else res.status(200).json([]);
+	});
 }
 
 // check if user is login
