@@ -24,11 +24,13 @@ SOFTWARE.
 
 var async = require('async');
 
+//check if the current user is admin
 exports.currentUserIsAdmin = function(req, res, next) {
 	if (req.session.user.role === "admin") next();
 	else res.status(400).json({message:"Acces denied, you are not an admin user"});
 }
 
+//check if the current user is root
 exports.currentUserIsroot = function(req, res, next) {
 	if (req.session.user.username === "root") next();
 	else res.status(400).json({message:"Acces denied, you are not an admin user"});
@@ -41,6 +43,16 @@ exports.exist = function(req, res, next) {
 		else if (!user) res.status(400).json({"message":"id_user don't exists"});
 		else next();
 	});
+}
+
+// only print username, role and description
+printRes = function(user, res) {
+	var p = {
+		"username":user.username,
+		"role":user.role,
+		"description":user.description
+	};
+	res.status(200).json(p);
 }
 
 // create a user
@@ -84,15 +96,6 @@ exports.create = function (req, res) {
 	});
 }
 
-printRes = function(user, res) {
-	var p = {
-		"username":user.username,
-		"role":user.role,
-		"description":user.description
-	};
-	res.status(200).json(p);
-}
-
 // retrieve all users
 exports.getAll = function (req, res) {	
 	User.find({}, 'username role affiliation', function (error, users) {
@@ -115,14 +118,14 @@ exports.update = function(req, res){
 	var update = {};
 	async.waterfall([		
 		function(callback) {
-			if (req.body.password == "") 								error="empty password for username is not allow";
+			if (req.body.password == "") 												error="empty password for username is not allow";
 			if (req.body.role && req.body.role != 'admin' && req.body.role != 'user')	error="the role must be 'user' or 'admin'";	
 			callback(error);
 		},
 		function(callback) {
 			User.findById(req.params.id_user, function(error, user){
-				if (req.body.role && user.username == "root") error = "change the role of this id_user is not allowed"
-				else if (req.body.role) update.role = req.body.role
+				if (req.body.role && user.username == "root") 	error = "change the role of this id_user is not allowed"
+				else if (req.body.role) 						update.role = req.body.role
 				callback(error, update);
 			});
 		},
@@ -176,10 +179,6 @@ exports.remove  = function(req, res){
 
 
 /*
-
-
-
-
 //retrieve the list of group of a particular user (with id)
 exports.listGroupsOfUserId = function(req, res){
 	if (req.params.id == undefined) return res.status(400).json({error:"the given ID is not correct"});
@@ -201,6 +200,4 @@ exports.listGroupsOfUserId = function(req, res){
 		}
 	});
 }
-
-
 */
