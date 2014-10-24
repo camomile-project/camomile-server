@@ -90,8 +90,30 @@ authenticateElem = function(name, pass, fn) {
 
 exports.authenticate = function(name, pass, fn) {
     return authenticateElem(name, pass, fn);
+exports.login = function (req, res) {
+	var username = req.body.username;
+	var	pass = req.body.password;
+	if (username == undefined || pass == undefined) res.status(400).json({error:"authentication failed, username or password are not define"});
+	else {
+		authenticateElem(username, pass, function (error, user) {
+			if (user) {
+				req.session.regenerate(function () {
+					req.session.user = user;
+					res.status(200).json({message:"You have been successfully logged in as "+username}); 
+				});
+			} 			
+			else res.status(400).json({message:error});
+		});
+	}
 }
 
+exports.logout = function (req, res) {
+    if (req.session.user) {
+    	var uname = req.session.user.username;
+    	req.session.destroy(function () {
+        	res.status(200).json({message:uname +" is logged out"});
+    	});
+    }
 }
 
 }
