@@ -80,6 +80,27 @@ exports.create = function(req, res){
 	});
 };
 
+//update information of a user
+exports.update = function(req, res){
+	var error=null;
+	var update = {};
+	async.waterfall([
+		function(callback) {
+			if (req.body.description == undefined) error="one or more data fields are not filled out properly";
+			else update.description = req.body.description;
+			callback(error, update);
+		},
+		function(update, callback) {
+				Group.findByIdAndUpdate(req.params.id_group, update, function (error, group) {
+				if (!error) res.status(200).json(group);
+				callback(error);
+			});
+		}
+	], function (error) {
+		if (error) res.status(400).json({"message":error});
+	});
+}
+
 // remove a given group ID
 exports.remove = function (req, res) {
 	var error;
