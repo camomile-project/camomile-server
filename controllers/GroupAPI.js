@@ -50,6 +50,18 @@ exports.listAll = function (req, res) {
     }
 }
 
+// remove a given group ID, also remove this group in the ACL table
+exports.removeGroupByID  = function (req, res) {
+    if (req.params.id == undefined) return res.status(400).json( {error:"The id parameter has not been sent"});
+	Group.remove({_id : req.params.id}, function(error, data){
+		if (error) res.status(400).json({error:"error", message:error});			//Error in deleting one annotation		
+		else {
+			ACLAPI.removeAGroupFromALC(data.groupname);
+			res.status(200).json(data);
+		}
+	});    
+}
+
 exports.createGroup = function(req, res){
 	if (req.body.groupname == undefined || req.body.description == undefined)
 		return res.status(400).json({error:"one or more data fields are not filled out properly"});

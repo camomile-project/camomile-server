@@ -92,43 +92,8 @@ exports.authenticate = function(name, pass, fn) {
     return authenticateElem(name, pass, fn);
 }
 
-exports.requiredValidUser = function(req, res, next) {
-	if (req.session.user) next();
-	else res.status(403).json({error:"access denied"});
 }
 
-// check if the given user name or group name exists
-exports.requiredRightUGname = function(role) {
-	return function(req, res, next) {
-    	if (req.session.user) { 
-    		if (req.session.user.role == "admin") next();
-			else if (commonFuncs.isAllowedUser(req.session.user.role, role) < 0) res.status(403).json({error:"access denied"});
-			else {
-				var userLogin = req.body.username;
-				var groupLogin = req.body.groupname;
-				if (userLogin == undefined) userLogin = "root";
-				User.findOne({username : {$regex : new RegExp('^'+ userLogin + '$', "i")}}, function(error, data){
-					if (error) res.status(403).json( {error:"access denied", message:error});
-					else {
-						if (data == null) res.status(400).json( {error:"this user does not exist"});
-						else {
-							if (groupLogin == undefined) next();
-							else {
-								Group.findOne({groupname : {$regex : new RegExp('^'+ groupLogin + '$', "i")}}, function(error2, data){
-									if (error2) res.status(403).json( {error:"access denied", message:error2});
-									else {
-										if (data == null)res.status(400).json( {error:"this group does not exist"});
-										else next();
-									}
-								});
-							}
-						}
-					}
-				});
-			}
-		}
-		else res.status(403).json( {error:"access denied"});
-	}
 }
 
 
@@ -488,13 +453,6 @@ exports.createRootUser = function(){
    		}
 	});
 }
-//check if a user exists
-exports.userNameFree = function(req, res, next) {
-    User.count({username: req.body.username}, function (error, count) {
-        if (count === 0)  next();
-        else res.status(400).json( {error:"this user name already exists", message:error});
-    });
-}
 
 exports.login = function (req, res) {
 	var username = req.body.username;
@@ -517,27 +475,6 @@ exports.login = function (req, res) {
 	}
 }
 
-// create a user
-exports.signup = function (req, res) {
-	if (req.body.password == undefined || req.body.username == undefined) res.status(400).json( {error:"the username and/or password fields have not been filled up with data"});
-	else {
-		var roleuser = req.body.role;
-		if (GLOBAL.list_user_role.indexOf(roleuser)==-1)  roleuser = "user";
-		hash(req.body.password, function (error, salt, hash) {
-			if (error) res.status(400).json({error:"error", message:error});
-			var user = new User({
-				username: req.body.username,
-				affiliation: req.body.affiliation,
-				role: roleuser,//req.body.role,
-				salt: salt,
-				hash: hash,
-			}).save(function (error2, newUser) {
-				if (error2) res.status(400).json({error:"error", message:error2});
-				if (newUser)res.status(200).json( newUser);
-			});
-		});		
-	}
-}
 
 exports.racine = function (req, res) {
     if (req.session.user) res.status(200).json({message:"user is logged as ' + req.session.user.username+'"});
@@ -553,14 +490,3 @@ exports.logout = function (req, res) {
     }
 }
 
-// remove a given group ID, also remove this group in the ACL table
-exports.removeGroupByID  = function (req, res) {
-    if (req.params.id == undefined) return res.status(400).json( {error:"The id parameter has not been sent"});
-	Group.remove({_id : req.params.id}, function(error, data){
-		if (error) res.status(400).json({error:"error", message:error});			//Error in deleting one annotation		
-		else {
-			ACLAPI.removeAGroupFromALC(data.groupname);
-			res.status(200).json(data);
-		}
-	});    
-}
