@@ -82,12 +82,10 @@ exports.initialize = function(app){
 							  userAPI.update);
 	// delete a specific user
 	// DELETE /user/id_user
-	
-	/*
 	app.delete('/user/:id_user', authenticate.islogin,
+								 userAPI.currentUserIsroot,
 								 userAPI.exist, 
-								 userAPI.isRoot, 
-							 	 userAPI.delete);
+							 	 userAPI.remove);
 	// get all group of a user
 	// GET /user/id_user/group
 	app.get('/user/:id_user', authenticate.islogin,
@@ -123,7 +121,7 @@ exports.initialize = function(app){
 	app.delete('/group/:id_group', authenticate.islogin,
 								   groupAPI.exist, 
 								   userAPI.userIsRoot,  
-								   groupAPI.delete);
+								   groupAPI.remove);
 	// add user to a group
 	// POST /group/id_group/user/id_user
 	app.post("/group/:id_group/user/:id_user", authenticate.islogin,
@@ -167,7 +165,7 @@ exports.initialize = function(app){
 	app.delete('/corpus/:id_corpus', authenticate.islogin,
 									 corpusAPI.exist, 
 									 corpusAPI.currentUserIsAdmin,
-									 corpusAPI.delete);
+									 corpusAPI.remove);
 	// create a media for a corpus
 	// POST /corpus/id_corpus/media --data '{"name":"...", "url":"...", "description":{"...":"..."}}' 
 	app.post('/corpus/:id_corpus/media', authenticate.islogin,
@@ -288,7 +286,7 @@ exports.initialize = function(app){
 	app.delete('/layer/:id_layer', authenticate.islogin,
 								   layerAPI.exist,
 								   layerAPI.AllowUser(['O'], next()),
-								   layerAPI.delete);
+								   layerAPI.remove);
 	// create an annotation
 	// POST /layer/id_layer/annotation --data '{"fragment":{"start":0, "end":15}, "data":"value", "id_media":""}' 
 	app.post('/layer/:id_layer/annotation', authenticate.islogin,
@@ -354,7 +352,7 @@ exports.initialize = function(app){
 	app.delete('/annotation/:id_annotation', authenticate.islogin,
 											 annotationAPI.exist,
 											 layerAPI.AllowUser(['O'], next()),
-											 annotationAPI.delete);
+											 annotationAPI.remove);
 
 	// --- queue routes --- \\
 	// create a queue
@@ -391,6 +389,6 @@ exports.initialize = function(app){
 	app.delete('/queue/:id_queue', authenticate.islogin,
 								   queueAPI.exist,
 								   userAPI.currentUserIsAdmin,  
-								   queueAPI.delete);
+								   queueAPI.remove);
 */
 }

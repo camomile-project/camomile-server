@@ -151,7 +151,7 @@ app.js
          else:
             res.status().json({"message":"error: ..."})
 
-      userAPI.delete(id_user)
+      userAPI.remove(id_user)
          remove id_user from db
          for each id_group
             if (id_user is inside id_group)
@@ -175,7 +175,7 @@ app.js
          else
             res.status().json({"message":"error: user don't exist"})
 
-      userAPI.isRoot()
+      userAPI.currentUserIsRoot()
          if req.session.user.username == "root"
             return next()
          else
@@ -211,7 +211,7 @@ app.js
          id_group.description = data.description
          groupAPI.getInfo(id_group)
 
-      groupAPI.delete(id_group)
+      groupAPI.remove(id_group)
          remove id_group from db
          for each id_corpus                                              // suppresion id_group des ACL, problème de droit de lecture des ressources -> utile ?
             for id_layer in id_corpus
@@ -264,11 +264,11 @@ app.js
          else:
             res.status().json({"message":"error: ..."})
 
-      corpusAPI.delete(id_corpus)
+      corpusAPI.remove(id_corpus)
          for id_media in id_corpus
-            mediaAPI.delete(id_media)
+            mediaAPI.remove(id_media)
          for id_layer in id_corpus
-            layerAPI.delete(id_layer)
+            layerAPI.remove(id_layer)
          remove id_corpus from db
          res.status().json({"message":"succes"})
 
@@ -361,7 +361,7 @@ app.js
          else:
             res.status().json({"message":"error: ..."})
 
-      mediaAPI.delete(id_media)
+      mediaAPI.remove(id_media)
          if there is no annotation link to this media
             remove id_media from db
          if userAPI.currentUserIsAdmin()
@@ -403,9 +403,9 @@ app.js
          else:
             res.status().json({"message":"error: ..."})
 
-      layerAPI.delete(id_layer)
+      layerAPI.remove(id_layer)
          for id_annotation in id_layer
-            annotationAPI.delete(id_annotation)
+            annotationAPI.remove(id_annotation)
          remove id_layer from db
          res.status().json({"message":"succes"})
 
@@ -485,7 +485,7 @@ app.js
          else:
             res.status().json({"message":"error: ..."})
 
-      annotationAPI.delete(id_annotation)
+      annotationAPI.remove(id_annotation)
          remove id_annotation from db
          res.status().json({"message":"succes"})
 
@@ -526,6 +526,6 @@ app.js
          remove first element from id_queue.queue
          res.status().json({element})
 
-      queueAPI.delete(id_queue)
+      queueAPI.remove(id_queue)
          remove id_queue from db
          res.status().json({"message":"succes"})
