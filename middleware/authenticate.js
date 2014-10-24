@@ -88,8 +88,6 @@ authenticateElem = function(name, pass, fn) {
     }); 
 }
 
-exports.authenticate = function(name, pass, fn) {
-    return authenticateElem(name, pass, fn);
 exports.login = function (req, res) {
 	var username = req.body.username;
 	var	pass = req.body.password;
