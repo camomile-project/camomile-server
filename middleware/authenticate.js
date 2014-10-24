@@ -55,8 +55,6 @@ hash = function (pwd, salt, fn) {
   }
 };
 
-
-
 authenticateElem = function(name, pass, fn) {
     User.findOne({username: name}, function (error, user) {
        	if (user) {
@@ -98,9 +96,13 @@ exports.logout = function (req, res) {
 }
 
 exports.me = function (req, res) {
-    if (req.session.user) res.status(200).json({message:'user is logged as ' + req.session.user.username});
+    res.status(200).json({message:'user is logged as ' + req.session.user.username});
 }
 
+exports.islogin = function (req, res, next) {
+    if (req.session.user) next();
+    else res.status(400).json( {message:"Acces denied, you are not login"});
+}
 
 
 
