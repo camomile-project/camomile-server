@@ -51,6 +51,7 @@ exports.getInfo = function(req, res){
 	});
 }
 
+//create a group
 exports.create = function(req, res){
 	var error=null;
 	async.waterfall([
@@ -80,7 +81,7 @@ exports.create = function(req, res){
 	});
 };
 
-//update information of a user
+//update information of a group
 exports.update = function(req, res){
 	var error=null;
 	var update = {};
@@ -118,90 +119,36 @@ exports.remove = function (req, res) {
 	});
 }
 
-
-
 //add a user to a group
 exports.addUser = function(req, res){
 	Group.findById(req.params.id_group, function (error, group) {
-		if (error) res.status(400).json({message:error});
+		if (error) res.status(400).json(error);
 		else if (group.users_list.indexOf(req.params.id_user) != -1) res.status(400).json({error:"This user is already in the group"})
 		else {
 			group.users_list.push(req.params.id_user);			
 			group.save(function(error3, dat){
-				if (error3) res.status(400).json({error:"error", message:error3});
+				if (error3) res.status(400).json(error);
 				else res.status(200).json(dat);
 			}); 			
 		}
 	});
 };
 
-
-/*
-
-//retrieve a particular group (with id)
-exports.listUserOfGroupId = function(req, res){
-	if (req.params.id == undefined) return res.status(400).send({error:"the given ID is not correct"});//id of the group
-	var connectedUser = req.session.user;	
-	Group.findById(req.params.id, function(error, data){
-		if (error) res.status(400).json({error:"error", message:error});
-		else if (data == null) res.json({error:"no such id!"})
-		else {
-			if (connectedUser.role == "admin")  res.json(data.usersList);
-			else res.status(403).json({error:"You dont have enough right to access this resource"});
-		}
-	});
-}
-
-// add a group
-exports.addGroup = function (req, res) {
-	if (req.body.groupname == undefined) return res.status(400).json({error:"The groupname field has not been filled in"});
-	Group.findOne({groupname : {$regex : new RegExp('^'+ req.body.groupname + '$', "i")}}, function(error, group) {
-		if (error) res.status(400).json({error:"error", message:error});
-		else if (group == null) {
-			var groupItem = {
-				groupname : req.body.groupname,
-				description : req.body.description || "unknown",
-				usersList : []
-			};
-			var g = new Group(groupItem);
-
-			g.save(function(error2, data){
-				if (error2) res.status(400).json({error:"error", message:error2});
-				else res.send(200, data);
-			});
-		} 
-		else res.status(400).json({error:"This group already exists"});
-	});    
-}
-
-// update information of a group: put /group/:id
-exports.update = function(req, res){
-	if (req.params.id == undefined) return res.status(400).json({error:"one or more data fields are not filled out properly"});
-	var update = {};
-	if (req.body.groupname) update.groupname = req.body.groupname;
-	if (req.body.description) update.description = req.body.description;
-	Group.findByIdAndUpdate(req.params.id, update, function (error, data) {
-		if (error) res.status(400).json({error:"error", message:error});
-		else res.json(data);
-	});
-}
 //remove a user from a group
-exports.removeUserFromGroup  = function(req, res){
-	if (req.params.id == undefined || req.params.username == undefined)
-		return res.status(400).json({error:"one or more data fields are not filled out properly"});
-	Group.findById(req.params.id, function (error, data) {
-		if (error) res.status(400).json({error:"error", message:error});
+exports.removeUser  = function(req, res){
+	Group.findById(req.params.id_group, function (error, group) {
+		if (error) res.status(400).json(error);
 		else {
-			var index = data.usersList.indexOf(req.params.username);
-			if (index > -1) {//not working on IE8 and below
-				data.usersList.splice(index, 1);
-				data.save(function(error2, dat){
-					if (error) res.status(400).json({error:"error", message:error});
+			var index = group.users_list.indexOf(req.params.id_user);
+			if (index > -1) {
+				group.users_list.splice(index, 1);
+				group.save(function(error2, dat){
+					if (error) res.status(400).json(error);
 					else res.json(dat);
 				}); 
 			}
-			else res.json(data);
+			else res.status(400).json({message:"This user is not in the group"});
 		}
 	});
 }
-*/
+	
