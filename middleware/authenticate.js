@@ -24,6 +24,37 @@ SOFTWARE.
 
 
 
+var crypto = require('crypto');
+var User = require('../models/user').User;
+
+var len = 128;				//Bytesize
+var iterations = 12000;
+
+/**
+ * Hashes a password with optional `salt`, otherwise
+ * generate a salt for `pass` and invoke `fn(error, salt, hash)`.
+ *
+ * @param {String} password to hash
+ * @param {String} optional salt
+ * @param {Function} callback
+ * @api public
+ */
+
+hash = function (pwd, salt, fn) {
+  if (3 == arguments.length) {
+    crypto.pbkdf2(pwd, salt, iterations, len, fn);
+  } else {
+    fn = salt;
+    crypto.randomBytes(len, function(error, salt){
+      if (error) return fn(error);
+      salt = salt.toString('base64');
+      crypto.pbkdf2(pwd, salt, iterations, len, function(error2, hash){
+        if (error2) return fn(error);
+        fn(null, salt, hash);
+      });
+    });
+  }
+};
 
 
 
