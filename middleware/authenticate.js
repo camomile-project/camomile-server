@@ -56,24 +56,6 @@ hash = function (pwd, salt, fn) {
   }
 };
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-/***************************************************** old part ********************************************************/
-
-
-
-// check for authentication
 authenticateElem = function(name, pass, fn) {
     User.findOne({username: name}, function (error, user) {
        	if (user) {
@@ -117,7 +99,32 @@ exports.logout = function (req, res) {
 exports.me = function (req, res) {
     if (req.session.user) res.status(200).json({message:'user is logged as ' + req.session.user.username});
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/***************************************************** old part ********************************************************/
+
+
+/*
+exports.authenticate = function(name, pass, fn) {
+    return authenticateElem(name, pass, fn);
 }
+*/
+
+
 
 
 /*
@@ -444,6 +451,7 @@ exports.requiredAuthentication = function(role, minimumRightRequired, level) {
 */
 
 
+/*
 // create a root user if it does not exist
 exports.createRootUser = function(){
 	User.findOne({username:"root"}, function(error, data){
@@ -476,40 +484,13 @@ exports.createRootUser = function(){
    		}
 	});
 }
-
-exports.login = function (req, res) {
-	var username = req.body.username;
-	var	pass = req.body.password;
-	if (username == undefined) { //login via a GET
-		username = req.params.username;
-		pass = req.params.password;
-	}
-	if (username == undefined || pass == undefined) res.status(400).json({error:"authentication failed, username or password are not define"});
-	else {
-		authenticateElem(username, pass, function (error, user) {
-			if (user) {
-				req.session.regenerate(function () {
-					req.session.user = user;
-					res.status(200).json({message:"You have been successfully logged in as "+username}); 
-				});
-			} 			
-			else res.status(400).json({error:"authentication failed, please check your username or password", message:error});
-		});
-	}
-}
+*/
 
 
-exports.racine = function (req, res) {
-    if (req.session.user) res.status(200).json({message:"user is logged as ' + req.session.user.username+'"});
-}
 
-// used for test, and it will be removed from the production version
-exports.logout = function (req, res) {
-    if (req.session.user) {
-    	var uname = req.session.user.username;
-    	req.session.destroy(function () {
-        	res.status(200).json({message:uname +" is logged out"});
-    	});
-    }
-}
+
+
+
+
+
 
