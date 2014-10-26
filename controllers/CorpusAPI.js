@@ -128,6 +128,34 @@ exports.exist = function(req, res, next) {
 }
 
 
+exports.updateUserACL = function(req, res){
+	var update = {};
+	var error=null;
+	async.waterfall([
+		function(callback) {
+			if (req.body.Right != 'O' && req.body.Right != 'W' && req.body.Right != 'R') error="Right must be 'O' or 'W' or 'R'";
+			callback(error);
+		},		
+		function(callback) {
+			Corpus.findById(req.params.id_corpus, function(error, corpus){
+				if (!error){
+					update.users_ACL = corpus.users_ACL;
+					update.users_ACL[req.params.id_user]=req.body.Right;
+				}
+				callback(error, update);
+			});
+		},
+		function(update, callback) {
+			Corpus.findByIdAndUpdate(req.params.id_corpus, update, function (error, corpus) {
+				if (!error) printRes(corpus, res);
+				else res.status(400).json({"message":error});
+				callback(error);
+			});			
+		}
+	], function (error) {
+		if (error) res.status(400).json({"message":error});
+	});
+}
 
 
 
