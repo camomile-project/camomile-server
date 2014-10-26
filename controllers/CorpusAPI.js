@@ -197,8 +197,14 @@ exports.removeUserFromACL = function(req, res){
 			Corpus.findById(req.params.id_corpus, function(error, corpus){
 				if (!error){
 					update.users_ACL = corpus.users_ACL;
-					if (update.users_ACL[req.params.id_user]) delete update.users_ACL[req.params.id_user]
-					else error=req.params.id_user+" not in users_ACL"
+					if (!update.users_ACL) error=req.params.id_user+" not in users_ACL";
+					else {
+						if (update.users_ACL[req.params.id_user]) {
+							delete update.users_ACL[req.params.id_user];
+							if (Object.getOwnPropertyNames(update.users_ACL).length === 0) update.users_ACL = undefined;
+						}
+						else error=req.params.id_user+" not in users_ACL";
+					}
 				}
 				callback(error, update);
 			});
