@@ -189,6 +189,32 @@ exports.updateGroupACL = function(req, res){
 	});
 }
 
+exports.removeUserFromACL = function(req, res){
+	var update = {};
+	var error=null;
+	async.waterfall([
+		function(callback) {
+			Corpus.findById(req.params.id_corpus, function(error, corpus){
+				if (!error){
+					update.users_ACL = corpus.users_ACL;
+					if (update.users_ACL[req.params.id_user]) delete update.users_ACL[req.params.id_user]
+					else error=req.params.id_user+" not in users_ACL"
+				}
+				callback(error, update);
+			});
+		},
+		function(update, callback) {
+			Corpus.findByIdAndUpdate(req.params.id_corpus, update, function (error, corpus) {
+				if (!error) printRes(corpus, res);
+				else res.status(400).json({"message":error});
+				callback(error);
+			});			
+		}
+	], function (error) {
+		if (error) res.status(400).json({"message":error});
+	});
+}
+
 
 
 
