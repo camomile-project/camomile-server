@@ -77,8 +77,34 @@ exports.listAll = function(req, res){
 				}); 
 			} 
 			else res.status(403).json({error:"You dont have permission to access this resource"});
+var async = require('async');
+
+//create a group
+exports.create = function(req, res){
+	var error=null;
+	async.waterfall([
+		function(callback) {
+			if (req.body.name == undefined) error="the name is not define";
+			if (req.body.name == "") 		error="empty string for name is not allow";
+			callback(error);
+		},
+		function(callback) {
+			var new_corpus = {};
+			new_corpus.name = req.body.name;
+			new_corpus.description = req.body.description;
+			new_corpus.history = []
+			new_corpus.history.push({data:new Date(), id_user:req.session.user._id, modification:"initial add"});
+			new_corpus.users_ACL = {};
+			new_corpus.groups_ACL = {};
+			new_corpus.users_ACL[req.session.user._id]='O';
+			var corpus = new Corpus(new_corpus).save(function (error, newCorpus) {
+				if (newCorpus) res.status(200).json(newCorpus);
+				callback(error);
+			});			
 		}
-	}); 
+	], function (error) {
+		if (error) res.status(400).json({"message":error});
+	});
 };
 
 
