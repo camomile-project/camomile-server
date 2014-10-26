@@ -108,6 +108,16 @@ exports.create = function(req, res){
 };
 
 
+//check if a id_user exists
+exports.exist = function(req, res, next) {
+	Corpus.findById(req.params.id_corpus, function(error, corpus){
+		if (error) res.status(400).json(error);
+		else if (!corpus) res.status(400).json({"message":"id_corpus don't exists"});
+		else next();
+	});
+}
+
+
 
 
 
