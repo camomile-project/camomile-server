@@ -221,62 +221,35 @@ exports.removeUserFromACL = function(req, res){
 	});
 }
 
-
-
-
-
-
-
-
-//for the uri app.get('/corpus/:id', 
-exports.listWithId = function(req, res){
+exports.removeGroupFromACL = function(req, res){
+	var update = {};
 	var error=null;
 	async.waterfall([
 		function(callback) {
-			ACLAPI.checkRightCorpus(req, 'R', callback);
-		},		
-		function(userAllow, callback){
-			Corpus.findById(req.params.id, function(error, data){
-				if (error) res.status(400).json({error:"error", message:error});
-				else if (data==null) res.status(400).json({error:'no such id_corpus!'});
-  				else res.status(200).json(data);
-				callback(null);
+			Corpus.findById(req.params.id_corpus, function(error, corpus){
+				if (!error){
+					update.groups_ACL = corpus.groups_ACL;
+					if (!update.groups_ACL) error=req.params.id_group+" not in groups_ACL";
+					else {
+						if (update.groups_ACL[req.params.id_group]) {
+							delete update.groups_ACL[req.params.id_group];
+							if (Object.getOwnPropertyNames(update.groups_ACL).length === 0) update.groups_ACL = undefined;
+						}
+						else error=req.params.id_group+" not in groups_ACL";
+					}
+				}
+				callback(error, update);
 			});
+		},
+		function(update, callback) {
+			Corpus.findByIdAndUpdate(req.params.id_corpus, update, function (error, corpus) {
+				if (!error) printRes(corpus, res);
+				else res.status(400).json({"message":error});
+				callback(error);
+			});			
 		}
-	],  function(err) { }); 
-};
-
-
-
-
-
-
-
-
-
-//test for Posting corpus
-//app.post('/corpus', 
-exports.post = function(req, res){
-	if (req.body.name == undefined) return res.status(400).json({error:"one or more data fields are not filled out properly"});
-	var corpus_data = {name: req.body.name};
-	var corpus = new Corpus(corpus_data);
-	corpus.save(function(error, data){
-		if (error) res.status(400).json({error:"error", message:error});
-		else {
-			var connectedUser = "root";
-			if (req.session.user) connectedUser = req.session.user.username;
-			ACLAPI.addUserRightGeneric(data._id, connectedUser, 'A');
-			res.status(200).json(data);
-		}
+	], function (error) {
+		if (error) res.status(400).json({"message":error});
 	});
 }
 
-//app.put('/corpus/:id', 
-exports.update = function(req, res){
-	if (req.body.name == undefined) return res.status(400).send({error:"one or more data fields are not filled out properly"});
-	var update = {name: req.body.name};
-	Corpus.findByIdAndUpdate(req.params.id, update, function (error, data) {
-		if (error) res.status(400).json({error:"error", message:error});
-		else res.status(200).json(data);
-	});
-}
