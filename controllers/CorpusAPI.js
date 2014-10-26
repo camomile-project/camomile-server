@@ -140,6 +140,7 @@ exports.updateUserACL = function(req, res){
 			Corpus.findById(req.params.id_corpus, function(error, corpus){
 				if (!error){
 					update.users_ACL = corpus.users_ACL;
+					if (!update.users_ACL) update.users_ACL = {};
 					update.users_ACL[req.params.id_user]=req.body.Right;
 				}
 				callback(error, update);
