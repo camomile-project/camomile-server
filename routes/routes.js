@@ -88,11 +88,11 @@ exports.initialize = function(app){
 							 	 userAPI.remove);				// rajouter la suppression dans les acl
 	// get all group of a user
 	// GET /user/id_user/group
-	/*app.get('/user/:id_user', authenticate.islogin,
-							  userAPI.exist, 
-							  userAPI.currentUserIsAdmin, 
-							  userAPI.getAllGroupOfAUser);
-	*/
+	app.get('/user/:id_user/group', authenticate.islogin,
+									userAPI.exist, 
+									userAPI.currentUserIsAdmin, 
+									userAPI.getAllGroupOfAUser);
+	
 	// --- group routes --- \\
 	// create a group
 	// POST /group --data '{"name":"...", "description":{"...":"..."}}}}'
@@ -112,11 +112,11 @@ exports.initialize = function(app){
 								groupAPI.getInfo);
 	// update information of a group
 	// PUT /group/id_group --data '{"description":"desc"}'
-	/*app.put('/group/:id_group', authenticate.islogin,
+	app.put('/group/:id_group', authenticate.islogin,
 								groupAPI.exist, 
 								userAPI.currentUserIsAdmin,  
 								groupAPI.update);
-	*/// delete a group
+	// delete a group
 	// DELETE /group/id_group
 	app.delete('/group/:id_group', authenticate.islogin,
 								   groupAPI.exist, 
@@ -124,7 +124,7 @@ exports.initialize = function(app){
 								   groupAPI.remove);				// rajouter la suppression dans les acl
 	// add user to a group
 	// POST /group/id_group/user/id_user
-	/*app.post("/group/:id_group/user/:id_user", authenticate.islogin,
+	app.post("/group/:id_group/user/:id_user", authenticate.islogin,
 											   groupAPI.exist, 
 											   userAPI.exist,
 											   userAPI.currentUserIsAdmin,  
@@ -152,7 +152,7 @@ exports.initialize = function(app){
 	// GET /corpus/id_corpus
 	app.get('/corpus/:id_corpus', authenticate.islogin,
 								  corpusAPI.exist,
-								  corpusAPI.AllowUser(['O', 'W', 'R'], next()),
+								  corpusAPI.AllowUser(['O', 'W', 'R']),
 								  corpusAPI.getInfo);
 	// update info of a corpus
 	// PUT /corpus/id_corpus --data '{"name":"new corpus", "description":{"...":"..."}}'
@@ -164,7 +164,7 @@ exports.initialize = function(app){
 	// DELETE /corpus/id_corpus
 	app.delete('/corpus/:id_corpus', authenticate.islogin,
 									 corpusAPI.exist, 
-									 corpusAPI.currentUserIsAdmin,
+									 userAPI.currentUserIsAdmin,
 									 corpusAPI.remove);
 	// create a media for a corpus
 	// POST /corpus/id_corpus/media --data '{"name":"...", "url":"...", "description":{"...":"..."}}' 
@@ -197,32 +197,32 @@ exports.initialize = function(app){
 									  corpusAPI.getACL);
 	// update user ACL for a corpus
     // PUT /corpus/id_corpus/user/id_user --data '{"Right":"O"}'
-    app.put('/acl/id_corpus/user/id_user', authenticate.islogin,
-										   corpusAPI.exist, 
-										   userAPI.exist, 
-										   corpusAPI.AllowUser(['O'], next()),
-										   corpusAPI.updateUserACL);
-    // update group ACL for a corpus
-    // PUT /corpus/id_corpus/group/id_group --data '{"Right":"O"}'
-    app.put('/acl/id_corpus/group/id_group', authenticate.islogin,
-											 corpusAPI.exist,
-											 groupAPI.exist, 
-											 corpusAPI.AllowUser(['O'], next()),
-											 corpusAPI.updateGroupACL);
-    
-    // DELETE /corpus/id_corpus/user/id_user 
-    app.delete('/acl/id_corpus/user/id_user', authenticate.islogin,
+    app.put('/corpus/id_corpus/user/id_user', authenticate.islogin,
 											  corpusAPI.exist, 
 											  userAPI.exist, 
 											  corpusAPI.AllowUser(['O'], next()),
-											  corpusAPI.removeUserFromACL);
-    // delete a group right for a corpus
-    // DELETE /corpus/id_corpus/group/id_group 
-    app.delete('/acl/id_corpus/group/id_group', authenticate.islogin,
+											  corpusAPI.updateUserACL);
+    // update group ACL for a corpus
+    // PUT /corpus/id_corpus/group/id_group --data '{"Right":"O"}'
+    app.put('/corpus/id_corpus/group/id_group', authenticate.islogin,
 												corpusAPI.exist,
 												groupAPI.exist, 
 												corpusAPI.AllowUser(['O'], next()),
-												corpusAPI.removeGroupFromACL);
+												corpusAPI.updateGroupACL);
+    
+    // DELETE /corpus/id_corpus/user/id_user 
+    app.delete('/corpus/id_corpus/user/id_user', authenticate.islogin,
+												 corpusAPI.exist, 
+												 userAPI.exist, 
+												 corpusAPI.AllowUser(['O'], next()),
+												 corpusAPI.removeUserFromACL);
+    // delete a group right for a corpus
+    // DELETE /corpus/id_corpus/group/id_group 
+    app.delete('/corpus/id_corpus/group/id_group', authenticate.islogin,
+												   corpusAPI.exist,
+												   groupAPI.exist, 
+												   corpusAPI.AllowUser(['O'], next()),
+												   corpusAPI.removeGroupFromACL);
 
 	// media
 	// info on a particular media
@@ -307,32 +307,32 @@ exports.initialize = function(app){
 									layerAPI.getACL("layer"));
 	// update user ACL for a layer
 	// PUT /corpus/id_layer/user/id_user --data '{"Right":"O"}'
-	app.put('/acl/id_layer/user/id_user', authenticate.islogin,
-										  layerAPI.exist, 
-										  userAPI.exist, 
-										  layerAPI.AllowUser(['O'], next()),
-										  layerAPI.updateUserACL("layer"));
+	app.put('/layer/id_layer/user/id_user', authenticate.islogin,
+											layerAPI.exist, 
+											userAPI.exist, 
+											layerAPI.AllowUser(['O'], next()),
+											layerAPI.updateUserACL("layer"));
 	// update group ACL for a layer
 	// PUT /corpus/id_layer/group/id_group --data '{"Right":"O"}'
-	app.put('/acl/id_layer/group/id_group', authenticate.islogin,
-											layerAPI.exist,
-											groupAPI.exist, 
-											layerAPI.AllowUser(['O'], next()),
-											layerAPI.updateGroupACL("layer"));
+	app.put('/layer/id_layer/group/id_group', authenticate.islogin,
+											  layerAPI.exist,
+											  groupAPI.exist, 
+											  layerAPI.AllowUser(['O'], next()),
+											  layerAPI.updateGroupACL("layer"));
 	// delete a user right for a layer
 	// DELETE /corpus/id_layer/user/id_user 
-    app.delete('/acl/id_layer/user/id_user', authenticate.islogin,
-											 layerAPI.exist, 
-											 userAPI.exist, 
-											 layerAPI.AllowUser(['O'], next()),
-											 layerAPI.removeUserFromACL("layer"));
+    app.delete('/layer/id_layer/user/id_user', authenticate.islogin,
+											   layerAPI.exist, 
+											   userAPI.exist, 
+											   layerAPI.AllowUser(['O'], next()),
+											   layerAPI.removeUserFromACL("layer"));
     // delete a group right for a layer
 	// DELETE /corpus/id_layer/group/id_group
-    app.delete('/acl/id_layer/group/id_group', authenticate.islogin,
-											   layerAPI.exist,
-											   groupAPI.exist, 
-											   layerAPI.AllowUser(['O'], next()),
-											   layerAPI.removeGroupFromACL("layer"));
+    app.delete('/layer/id_layer/group/id_group', authenticate.islogin,
+												 layerAPI.exist,
+												 groupAPI.exist, 
+												 layerAPI.AllowUser(['O'], next()),
+												 layerAPI.removeGroupFromACL("layer"));
 
 	// annotation
 	// info on a particular annotation
