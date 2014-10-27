@@ -39,7 +39,7 @@ SOFTWARE.
 
 var async = require('async');
 
-//create a group
+//create a corpus
 exports.create = function(req, res){
 	var error=null;
 	async.waterfall([
