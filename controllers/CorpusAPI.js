@@ -53,7 +53,7 @@ exports.create = function(req, res){
 			new_corpus.name = req.body.name;
 			new_corpus.description = req.body.description;
 			new_corpus.history = []
-			new_corpus.history.push({data:new Date(), id_user:req.session.user._id, modification:"initial add"});
+			new_corpus.history.push({date:new Date(), id_user:req.session.user._id, modification:{"name":new_corpus.name, "description":new_corpus.description}});
 			new_corpus.users_ACL = {};
 			new_corpus.groups_ACL = {};
 			new_corpus.users_ACL[req.session.user._id]='O';
