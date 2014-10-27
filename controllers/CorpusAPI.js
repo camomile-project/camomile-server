@@ -361,3 +361,43 @@ exports.addMedia = function(req, res){
 	});
 };
 
+
+//create a layer
+exports.addLayer = function(req, res){
+	var error=null;
+	async.waterfall([
+		function(callback) {
+			if (req.body.name == undefined) 			error="the name is not define";
+			if (req.body.name == "") 					error="empty string for name is not allow";
+			if (req.body.fragment_type == undefined) 	error="the fragment_type is not define";
+			if (req.body.data_type == undefined) 		error="the data_type is not define";
+			callback(error);
+		},
+		function(callback) {
+			var new_layer = {};
+			new_layer.name = req.body.name;
+			new_layer.description = req.body.description;
+			new_layer.id_corpus = req.params.id_corpus;
+			new_layer.fragment_type = req.params.id_fragment_typecorpus;
+			new_layer.data_type = req.params.data_type;
+			new_layer.history = []
+			new_layer.history.push({date:new Date(), 
+									id_user:req.session.user._id, modification:{"name":new_layer.name, 
+																				"description":new_layer.description,
+																				"fragment_type":new_layer.fragment_type,
+																				"data_type":new_layer.data_type}
+									});
+			new_layer.users_ACL = {};
+			new_layer.groups_ACL = {};
+			new_layer.users_ACL[req.session.user._id]='O';
+			var layer = new Layer(new_layer).save(function (error, newLayer) {
+				if (newLayer) res.status(200).json(newLayer);
+				callback(error);
+			});			
+		}
+	], function (error) {
+		if (error) res.status(400).json({"message":error});
+	});
+};
+
+
