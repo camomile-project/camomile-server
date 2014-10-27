@@ -173,6 +173,32 @@ exports.getInfo = function(req, res){
 	});
 }
 
+//update information of a corpus
+exports.update = function(req, res){
+	var update = {};
+	if (req.body.name) {
+		if (req.body.name == "") res.status(400).json({"message":"name can't be empty"});
+		else update.name = req.body.name;		
+	}
+	if (req.body.description) update.description = req.body.description;
+	Corpus.findByIdAndUpdate(req.params.id_corpus, update, function (error, corpus) {
+		if (error) res.status(400).json(error);
+		else res.status(200).json(corpus);
+	});
+}
+
+// remove a given corpus
+exports.remove = function (req, res) {
+
+	// check if corpus is empty
+
+	Corpus.remove({_id : req.params.id_corpus}, function (error, corpus) {
+		if (!error && corpus == 1) res.status(200).json({message:"The corpus as been delete"});
+		else res.status(400).json({"message":error});
+	});
+}
+
+
 // update ACL of a user
 exports.updateUserACL = function(req, res){
 	var update = {};
@@ -203,7 +229,6 @@ exports.updateUserACL = function(req, res){
 		if (error) res.status(400).json({"message":error});
 	});
 }
-
 
 // update ACL of a group
 exports.updateGroupACL = function(req, res){
