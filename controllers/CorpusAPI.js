@@ -127,6 +127,27 @@ exports.exist = function(req, res, next) {
 	});
 }
 
+// check if user have the good right for corpus
+checkRight = function (corpus, user, groups, list_right) {
+	var userInAcl = false;
+	if (user.username == "root") return true
+	else {
+		if (corpus.users_ACL) {
+			if (user._id in corpus.users_ACL) {
+				if (list_right.indexOf(corpus.users_ACL[user._id])!=-1) return true;
+				userInAcl = true;
+			}
+		}
+		if (!userInAcl && corpus.groups_ACL) {
+			for(var i = 0; i < groups.length; i++)	{
+				if (groups[i]._id in corpus.groups_ACL) {
+					if (list_right.indexOf(corpus.groups_ACL[groups[i]._id])!=-1) return true;
+				}
+			}
+		}
+	}
+	return false;
+}
 
 exports.updateUserACL = function(req, res){
 	var update = {};
