@@ -334,3 +334,30 @@ exports.removeGroupFromACL = function(req, res){
 	});
 }
 
+//add a media
+exports.addMedia = function(req, res){
+	var error=null;
+	async.waterfall([
+		function(callback) {
+			if (req.body.name == undefined) error="the name is not define";
+			if (req.body.name == "") 		error="empty string for name is not allow";
+			callback(error);
+		},
+		function(callback) {
+			var new_media = {};
+			new_media.name = req.body.name;
+			new_media.description = req.body.description;
+			new_media.url = req.body.url;
+			new_media.id_corpus = req.params.id_corpus;
+			new_media.history = []
+			new_media.history.push({date:new Date(), id_user:req.session.user._id, modification:{"name":new_media.name, "description":new_media.description, "url":new_media.url}});
+			var media = new Media(new_media).save(function (error, newMedia) {
+				if (newMedia) res.status(200).json(newMedia);
+				callback(error);
+			});			
+		}
+	], function (error) {
+		if (error) res.status(400).json({"message":error});
+	});
+};
+
