@@ -204,6 +204,15 @@ exports.getAll = function (req, res) {
 		if (error) res.status(400).json({"message":error});
 	});
 }
+
+//retrieve a particular user (with id)
+exports.getInfo = function(req, res){
+	Corpus.findById(req.params.id_corpus, 'name description history users_ACL groups_ACL', function(error, corpus){
+		if (error) res.status(400).json({error:"error", message:error});
+    	else res.status(200).json(corpus);
+	});
+}
+
 exports.updateUserACL = function(req, res){
 	var update = {};
 	var error=null;
