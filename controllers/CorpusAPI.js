@@ -213,6 +213,7 @@ exports.getInfo = function(req, res){
 	});
 }
 
+// update ACL of a user
 exports.updateUserACL = function(req, res){
 	var update = {};
 	var error=null;
@@ -244,6 +245,7 @@ exports.updateUserACL = function(req, res){
 }
 
 
+// update ACL of a group
 exports.updateGroupACL = function(req, res){
 	var update = {};
 	var error=null;
@@ -274,6 +276,7 @@ exports.updateGroupACL = function(req, res){
 	});
 }
 
+// remove a user from ACL
 exports.removeUserFromACL = function(req, res){
 	var update = {};
 	var error=null;
@@ -306,6 +309,7 @@ exports.removeUserFromACL = function(req, res){
 	});
 }
 
+// remove a group from ACL
 exports.removeGroupFromACL = function(req, res){
 	var update = {};
 	var error=null;
