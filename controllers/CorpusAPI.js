@@ -36,47 +36,7 @@ SOFTWARE.
 	- Second: finds all groups belonging to the connected user
 	- For each found corpus, check ACLs (the permission of the connected user and its groups) 
 */
-exports.listAll = function(req, res){  	
-	console.log('ici');
 
-	Corpus.find({}, function(error, data){
-		if (error) res.status(400).json({error:"error", message:error});
-		else {
-			var connectedUser = req.session.user;
-			if (GLOBAL.no_auth == true || (connectedUser != undefined && connectedUser.role == "admin")) {
-				res.status(200).json(data); 
-				return;
-			}
-			else if (connectedUser != undefined && data != null)	{
-				
-				Group.find({'usersList' : {$regex : new RegExp('^'+ connectedUser.username + '$', "i")}}, function(error2, dataGroup) {		//first find groups to which the connected user belongs
-					if (error2) res.status(400).json({error:"error", message:error2});
-					else {
-						result = [];
-						resultReturn = [];						
-						for(var i = 0; i < data.length; i++) result.push(data[i]._id);
-						
-						ACL.find({id:{$in:result}}, function(error3, dataACL){																// then find all acls of the data
-							if (error3) res.status(500).json({error:"error in ACL-corpusListall:", message:error3});
-							else if (dataACL != null) {
-								for(var i = 0; i < dataACL.length; i++){
-									var foundPos = commonFuncs.findUsernameInACL(connectedUser.username, dataACL[i].users);
-
-									if (foundPos != -1 && dataACL[i].users[foundPos].right != 'N') resultReturn.push(data[i]);
-									else {
-										foundPos = commonFuncs.findUsernameInGroupACL(dataGroup, dataACL[i].groups);
-										if (foundPos != -1 && dataACL[i].groups[foundPos].right != 'N') resultReturn.push(data[i]);
-									}
-								} 
-								if (resultReturn.length == 0) res.status(403).json({error:"You dont have enough permission to get this resource"});
-								else res.status(200).json(resultReturn);
-							} 
-							else res.status(400).json({error:"error in finding acl"});
-						}); 
-					} 
-				}); 
-			} 
-			else res.status(403).json({error:"You dont have permission to access this resource"});
 var async = require('async');
 
 //create a group
