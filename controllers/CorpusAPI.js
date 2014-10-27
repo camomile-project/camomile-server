@@ -149,6 +149,33 @@ checkRight = function (corpus, user, groups, list_right) {
 	return false;
 }
 
+// check if req.session.user._id have the good right to see this req.params.id_corpus
+exports.AllowUser = function (list_right){
+	return function(req, res, next) {
+		async.waterfall([
+			function(callback) {
+				User.findById(req.session.user._id, function(error, user){
+					callback(error, user);
+				});
+			},
+			function(user, callback) {
+				Group.find({'users_list' : {$regex : new RegExp('^'+ req.session.user._id + '$', "i")}}, function(error, groups) {
+					callback(error, user, groups);
+				});
+			},
+			function(user, groups, callback) {
+				Corpus.findById(req.params.id_corpus, function(error, corpus){
+					if (checkRight(corpus, user, groups, list_right)) next();
+					else error = "Acces denied";
+					callback(error);
+	    		});
+			},
+		], function (error, trueOrFalse) {
+			if (error) res.status(400).json({"message":error});
+		});
+	}
+}
+
 exports.updateUserACL = function(req, res){
 	var update = {};
 	var error=null;
