@@ -176,6 +176,34 @@ exports.AllowUser = function (list_right){
 	}
 }
 
+// retrieve all corpus
+exports.getAll = function (req, res) {
+	async.waterfall([
+		function(callback) {
+			User.findById(req.session.user._id, function(error, user){
+				callback(error, user);
+			});
+		},
+		function(user, callback) {
+			Group.find({'users_list' : {$regex : new RegExp('^'+ req.session.user._id + '$', "i")}}, function(error, groups) {
+				callback(error, user, groups);
+			});
+		},
+		function(user, groups, callback) {
+			Corpus.find({}, function(error, l_corpus){
+    			async.filter(l_corpus, 
+    			        	 function(corpus, callback) {
+    			          		callback (checkRight(corpus, user, groups, ['O', 'W', 'R']));
+    			        	 },
+    			        	 function(results) { res.status(200).json(results); } 
+    			);	
+    			callback(error);		
+    		});
+		},
+	], function (error, trueOrFalse) {
+		if (error) res.status(400).json({"message":error});
+	});
+}
 exports.updateUserACL = function(req, res){
 	var update = {};
 	var error=null;
