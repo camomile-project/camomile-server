@@ -178,13 +178,8 @@ exports.remove  = function(req, res){
 
 //retrieve the list of group of a particular user (with id)
 exports.getAllGroupOfAUser = function(req, res){
-	User.findById(req.params.id_user, 'username affiliation role', function(error, user){
-		if (error) res.status(400).json({error:"error", message:error});
-		else {			
-			Group.find({'users_list' : {$regex : new RegExp('^'+ req.params.id_user + '$', "i")}}, function(error2, Groups) {
-				if (error2) res.status(400).json({error:"error", message:error2});
-				else res.status(200).json(Groups);
-			});
-		}
+	Group.find({'users_list' : {$regex : new RegExp('^'+ req.params.id_user + '$', "i")}}, function(error2, groups) {
+		if (error2) res.status(400).json({error:"error", message:error2});
+		else res.status(200).json(groups);
 	});
 }
