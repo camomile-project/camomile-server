@@ -167,7 +167,7 @@ exports.getAll = function (req, res) {
 
 //retrieve a particular user (with id)
 exports.getInfo = function(req, res){
-	Corpus.findById(req.params.id_corpus, 'name description history users_ACL groups_ACL', function(error, corpus){
+	Corpus.findById(req.params.id_corpus, 'name description history', function(error, corpus){
 		if (error) res.status(400).json({error:"error", message:error});
     	else res.status(200).json(corpus);
 	});
@@ -198,6 +198,13 @@ exports.remove = function (req, res) {
 	});
 }
 
+//retrieve a particular user (with id)
+exports.getACL = function(req, res){
+	Corpus.findById(req.params.id_corpus, 'users_ACL groups_ACL', function(error, corpus){
+		if (error) res.status(400).json({error:"error", message:error});
+    	else res.status(200).json(corpus);
+	});
+}
 
 // update ACL of a user
 exports.updateUserACL = function(req, res){
