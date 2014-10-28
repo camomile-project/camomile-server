@@ -72,11 +72,11 @@ exports.create = function(req, res){
 
 // only print username, role and description
 printRes = function(corpus, res) {
-	var p = {
-		"name":corpus.name,
-		"description":corpus.description,
-		"history":corpus.history
-	};
+	var p = {"_id":corpus._id,
+			 "name":corpus.name,
+			 "description":corpus.description,
+			 "history":corpus.history
+			};
 	res.status(200).json(p);
 }
 
@@ -84,7 +84,8 @@ printRes = function(corpus, res) {
 printMultiRes = function(l_corpus, res) {
 	var p = [];
 	for (i = 0; i < l_corpus.length; i++) { 
-		p.push({"name":l_corpus[i].name,
+		p.push({"_id":l_corpus[i]._id,
+				"name":l_corpus[i].name,
 				"description":l_corpus[i].description,
 				"history":l_corpus[i].history
 		  	   })
