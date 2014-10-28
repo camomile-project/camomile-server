@@ -100,12 +100,12 @@ exports.remove = function (req, res) {
 }
 
 function getVideoWithExtension(req, res, extension) {
-	Media.findById(req.params.id_media, function(error, data){
-		if (error) res.status(400).json({error:"error", message:error});
-		else if (data == null) res.status(400).json({error: 'no such id_media!'})
+	Media.findById(req.params.id_media, function(error, media){
+		if (error) res.status(400).json({message:error});
+		else if (media == null) res.status(400).json({message: 'no such id_media!'})
 		else {			
-			var filePath = data.url + '.' + extension;
-			if (data.url == undefined) return res.status(404).send({error:'not found the video corresponding to this media'});
+			var filePath = media.url + '.' + extension;
+			if (media.url == undefined) return res.status(404).send({message:'not found the video corresponding to this media'});
 			if (GLOBAL.video_path) filePath = GLOBAL.video_path + '/' + filePath;
 			res.status(200).sendfile(filePath);
 		}
