@@ -35,8 +35,6 @@ exports.exist = function(req, res, next) {
 	});
 }
 
-
-
 // only print username, role and description
 printRes = function(layer, res) {
 	var p = {"id_layer":layer._id,
@@ -110,3 +108,10 @@ exports.getAll = function (req, res) {
 	});
 }
 
+// remove a given layer
+exports.remove = function (req, res) {
+	Layer.remove({_id : req.params.id_layer}, function (error, layer) {
+		if (!error && layer == 1) res.status(200).json({message:"The layer as been delete"});
+		else res.status(400).json({message:error});
+	});
+}
