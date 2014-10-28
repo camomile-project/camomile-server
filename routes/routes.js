@@ -31,6 +31,7 @@ var	layerModel = require('../models/Layer');
 var	annotationModel = require('../models/Annotation');
 var	queueModel = require('../models/Queue');
 
+var commonFuncs = require('../lib/commonFuncs');
 var	userAPI = require('../controllers/UserAPI');
 var	groupAPI = require('../controllers/GroupAPI');
 var corpusAPI = require('../controllers/CorpusAPI');
@@ -158,7 +159,7 @@ exports.initialize = function(app){
 	// PUT /corpus/id_corpus --data '{"name":"new corpus", "description":{"...":"..."}}'
 	app.put('/corpus/:id_corpus', authenticate.islogin,
 								  corpusAPI.exist, 
-								  corpusAPI.AllowUser(['O'], next()),
+								  corpusAPI.AllowUser(['O']),
 								  corpusAPI.update);
 	// delete a corpus
 	// DELETE /corpus/id_corpus
@@ -170,19 +171,19 @@ exports.initialize = function(app){
 	// POST /corpus/id_corpus/media --data '{"name":"...", "url":"...", "description":{"...":"..."}}' 
 	app.post('/corpus/:id_corpus/media', authenticate.islogin,
 										 corpusAPI.exist, 
-										 corpusAPI.AllowUser(['O', 'W'], next()),
+										 corpusAPI.AllowUser(['O', 'W']),
 										 corpusAPI.addMedia);
 	// create a layer
 	// POST /corpus/id_corpus/layer --data '{"name":"new layer", "description":{"...":"..."}, "fragment_type":{"...":"..."}, "data_type":{"...":"..."}}' 
 	app.post('/corpus/:id_corpus/layer', authenticate.islogin,
 										 corpusAPI.exist, 
-										 corpusAPI.AllowUser(['O', 'W'], next()),
+										 corpusAPI.AllowUser(['O', 'W']),
 										 corpusAPI.addLayer);
 	// list all media of a corpus
 	// GET /corpus/id_corpus/media
 	app.get('/corpus/:id_corpus/media', authenticate.islogin,
 										corpusAPI.exist,
-										corpusAPI.AllowUser(['O', 'W', 'R'], next()), 
+										corpusAPI.AllowUser(['O', 'W', 'R']), 
 										corpusAPI.getAllMedia);
 	// list all layer of a corpus	
 	// GET /corpus/id_corpus/layer
@@ -193,176 +194,191 @@ exports.initialize = function(app){
 	// GET /corpus/id_corpus/acl
 	app.get('/corpus/:id_corpus/ACL', authenticate.islogin,
 									  corpusAPI.exist,
-									  corpusAPI.AllowUser(['O'], next()),
+									  corpusAPI.AllowUser(['O']),
 									  corpusAPI.getACL);
 	// update user ACL for a corpus
     // PUT /corpus/id_corpus/user/id_user --data '{"Right":"O"}'
-    app.put('/corpus/id_corpus/user/id_user', authenticate.islogin,
-											  corpusAPI.exist, 
-											  userAPI.exist, 
-											  corpusAPI.AllowUser(['O'], next()),
-											  corpusAPI.updateUserACL);
+    app.put('/corpus/:id_corpus/user/:id_user', authenticate.islogin,
+												corpusAPI.exist, 
+												userAPI.exist, 
+												corpusAPI.AllowUser(['O']),
+												corpusAPI.updateUserACL);
     // update group ACL for a corpus
     // PUT /corpus/id_corpus/group/id_group --data '{"Right":"O"}'
-    app.put('/corpus/id_corpus/group/id_group', authenticate.islogin,
-												corpusAPI.exist,
-												groupAPI.exist, 
-												corpusAPI.AllowUser(['O'], next()),
-												corpusAPI.updateGroupACL);
+    app.put('/corpus/:id_corpus/group/:id_group', authenticate.islogin,
+												  corpusAPI.exist,
+												  groupAPI.exist, 
+												  corpusAPI.AllowUser(['O']),
+												  corpusAPI.updateGroupACL);
     
     // DELETE /corpus/id_corpus/user/id_user 
-    app.delete('/corpus/id_corpus/user/id_user', authenticate.islogin,
-												 corpusAPI.exist, 
-												 userAPI.exist, 
-												 corpusAPI.AllowUser(['O'], next()),
-												 corpusAPI.removeUserFromACL);
+    app.delete('/corpus/:id_corpus/user/:id_user', authenticate.islogin,
+												   corpusAPI.exist, 
+												   userAPI.exist, 
+												   corpusAPI.AllowUser(['O']),
+												   corpusAPI.removeUserFromACL);
     // delete a group right for a corpus
     // DELETE /corpus/id_corpus/group/id_group 
-    app.delete('/corpus/id_corpus/group/id_group', authenticate.islogin,
-												   corpusAPI.exist,
-												   groupAPI.exist, 
-												   corpusAPI.AllowUser(['O'], next()),
-												   corpusAPI.removeGroupFromACL);
+    app.delete('/corpus/:id_corpus/group/:id_group', authenticate.islogin,
+													 corpusAPI.exist,
+													 groupAPI.exist, 
+													 corpusAPI.AllowUser(['O']),
+													 corpusAPI.removeGroupFromACL);
 
 	// media
+	// get all media
+	// GET /media
+	app.get('/media', authenticate.islogin,
+					  userAPI.currentUserIsroot,
+					  mediaAPI.getAll);		
 	// info on a particular media
 	// GET /media/id_media
 	app.get('/media/:id_media', authenticate.islogin,
 								mediaAPI.exist,
-								corpusAPI.AllowUser(['O', 'W', 'R'], next()),
+								mediaAPI.AllowUser(['O', 'W', 'R']),
 								mediaAPI.getInfo);
 	// update info of a media
 	// PUT /media/id_media --data '{"name":"...", "url":"...", "description":{"...":"..."}}'
 	app.put('/media/:id_media', authenticate.islogin,
 								mediaAPI.exist, 
-								corpusAPI.AllowUser(['O'], next()),
+								mediaAPI.AllowUser(['O']),
 								mediaAPI.update);
 	// delete a media
 	// DELETE /media/id_media
 	app.delete('/media/:id_media', authenticate.islogin,
 								   mediaAPI.exist,
-								   corpusAPI.AllowUser(['O'], next()),
-								   corpusAPI.remove);
+								   mediaAPI.AllowUser(['O']),
+								   mediaAPI.remove);
 	// get video stream
 	// GET /media/id_media/video
 	app.get('/media/:id_media/video', authenticate.islogin,
 									  mediaAPI.exist, 
-									  corpusAPI.AllowUser(['O', 'W', 'R'], next()),
+									  mediaAPI.AllowUser(['O', 'W', 'R']),
 									  mediaAPI.getVideo);
 	// get webm stream
 	// GET /media/id_media/webm
 	app.get('/media/:id_media/webm', authenticate.islogin,
 									 mediaAPI.exist,
-									 corpusAPI.AllowUser(['O', 'W', 'R']), next(), 
+									 mediaAPI.AllowUser(['O', 'W', 'R']), 
 									 mediaAPI.getVideoWEBM);
 	// get mp4 stream
 	// GET /media/id_media/mp4
 	app.get('/media/:id_media/mp4', authenticate.islogin,
 									mediaAPI.exist, 
-									corpusAPI.AllowUser(['O', 'W', 'R'], next()),
+									mediaAPI.AllowUser(['O', 'W', 'R']),
 									mediaAPI.getVideoMP4);
 	// get ogv stream
 	// GET /media/id_media/ogv
 	app.get('/media/:id_media/ogv', authenticate.islogin,
 									mediaAPI.exist, 
-									corpusAPI.AllowUser(['O', 'W', 'R'], next()),
+									mediaAPI.AllowUser(['O', 'W', 'R']),
 									mediaAPI.getVideoOGV);
 
 	// layer
+	// get all layer
+	// GET /layer
+	app.get('/layer', authenticate.islogin,
+					  userAPI.currentUserIsroot,
+					  layerAPI.getAll);	
 	// info on a particular layer
 	// GET /layer/id_layer
 	app.get('/layer/:id_layer', authenticate.islogin,
 								layerAPI.exist,
-								layerAPI.AllowUser(['O', 'W', 'R'], next()),
+								layerAPI.AllowUser(['O', 'W', 'R']),
 								layerAPI.getInfo);
 	// update info of a layer
 	// PUT /layer/id_layer --data '{"name":"speaker", "description":{"...":"..."}}'
 	app.put('/layer/:id_layer', authenticate.islogin,
 								layerAPI.exist,
-								layerAPI.AllowUser(['O'], next()),
+								layerAPI.AllowUser(['O']),
 								layerAPI.update);
 	// delete a layer
 	// DELETE /layer/id_layer
 	app.delete('/layer/:id_layer', authenticate.islogin,
 								   layerAPI.exist,
-								   layerAPI.AllowUser(['O'], next()),
+								   layerAPI.AllowUser(['O']),
 								   layerAPI.remove);
 	// create an annotation
 	// POST /layer/id_layer/annotation --data '{"fragment":{"start":0, "end":15}, "data":"value", "id_media":""}' 
 	app.post('/layer/:id_layer/annotation', authenticate.islogin,
 											layerAPI.exist,
-											layerAPI.AllowUser(['O', 'W'], next()),
+											layerAPI.AllowUser(['O', 'W']),
 											layerAPI.addAnnotation);
 	// list all annotation of a layer
 	// GET /layer/id_layer/annotation
 	app.get('/layer/:id_layer/annotation', authenticate.islogin,
 										   layerAPI.exist,
-										   layerAPI.AllowUser(['O', 'W', 'R'], next()),
+										   layerAPI.AllowUser(['O', 'W', 'R']),
 										   layerAPI.getAllAnnotation);
 	// ACL of a particular layer
 	// GET /corpus/id_layer/acl
 	app.get('/layer/:id_layer/ACL', authenticate.islogin,
 									layerAPI.exist,
-									layerAPI.AllowUser(['O'], next()),
-									layerAPI.getACL("layer"));
+									layerAPI.AllowUser(['O']),
+									layerAPI.getACL);
 	// update user ACL for a layer
 	// PUT /corpus/id_layer/user/id_user --data '{"Right":"O"}'
-	app.put('/layer/id_layer/user/id_user', authenticate.islogin,
-											layerAPI.exist, 
-											userAPI.exist, 
-											layerAPI.AllowUser(['O'], next()),
-											layerAPI.updateUserACL("layer"));
+	app.put('/layer/:id_layer/user/:id_user', authenticate.islogin,
+											  layerAPI.exist, 
+											  userAPI.exist, 
+											  layerAPI.AllowUser(['O']),
+											  layerAPI.updateUserACL);
 	// update group ACL for a layer
 	// PUT /corpus/id_layer/group/id_group --data '{"Right":"O"}'
-	app.put('/layer/id_layer/group/id_group', authenticate.islogin,
-											  layerAPI.exist,
-											  groupAPI.exist, 
-											  layerAPI.AllowUser(['O'], next()),
-											  layerAPI.updateGroupACL("layer"));
+	app.put('/layer/:id_layer/group/:id_group', authenticate.islogin,
+												layerAPI.exist,
+												groupAPI.exist, 
+												layerAPI.AllowUser(['O']),
+												layerAPI.updateGroupACL);
 	// delete a user right for a layer
 	// DELETE /corpus/id_layer/user/id_user 
-    app.delete('/layer/id_layer/user/id_user', authenticate.islogin,
-											   layerAPI.exist, 
-											   userAPI.exist, 
-											   layerAPI.AllowUser(['O'], next()),
-											   layerAPI.removeUserFromACL("layer"));
+    app.delete('/layer/:id_layer/user/:id_user', authenticate.islogin,
+												 layerAPI.exist, 
+												 userAPI.exist, 
+												 layerAPI.AllowUser(['O']),
+												 layerAPI.removeUserFromACL);
     // delete a group right for a layer
 	// DELETE /corpus/id_layer/group/id_group
-    app.delete('/layer/id_layer/group/id_group', authenticate.islogin,
-												 layerAPI.exist,
-												 groupAPI.exist, 
-												 layerAPI.AllowUser(['O'], next()),
-												 layerAPI.removeGroupFromACL("layer"));
-
+    app.delete('/layer/:id_layer/group/:id_group', authenticate.islogin,
+												   layerAPI.exist,
+												   groupAPI.exist, 
+												   layerAPI.AllowUser(['O']),
+												   layerAPI.removeGroupFromACL);
+    
 	// annotation
+	// get all annotation
+	// GET /annotation
+	app.get('/annotation', authenticate.islogin,
+						   userAPI.currentUserIsroot,
+						   annotationAPI.getAll);		
 	// info on a particular annotation
 	// GET /annotation/id_annotation
 	app.get('/annotation/:id_annotation', authenticate.islogin,
 										  annotationAPI.exist,
-										  layerAPI.AllowUser(['O', 'W', 'R'], next()),
+										  layerAPI.AllowUser(['O', 'W', 'R']),
 										  annotationAPI.getInfo);
 	// update info of an annotation
 	// PUT /annotation/id_annotation --data '{"user":"id_user", fragment":{"start":0, "end":15}, "data":"value", "id_media":""}'
 	app.put('/annotation/:id_annotation', authenticate.islogin,
 										  annotationAPI.exist,
-										  layerAPI.AllowUser(['O', 'W'], next()),
+										  layerAPI.AllowUser(['O', 'W']),
 										  annotationAPI.update);
 	// delete annotation
 	// DELETE /annotation/id_annotation
 	app.delete('/annotation/:id_annotation', authenticate.islogin,
 											 annotationAPI.exist,
-											 layerAPI.AllowUser(['O'], next()),
+											 layerAPI.AllowUser(['O']),
 											 annotationAPI.remove);
 
 	// --- queue routes --- \\
 	// create a queue
 	// POST /queue --data '{"name":"...", "description":{"...":"..."}, "list": [{}, {}, ...]}'
 	app.post('/queue', authenticate.islogin,
-					   queueAPI.add);
+					   queueAPI.create);
 	// list all ids in a queue
 	// GET /queue
 	app.get('/queue', authenticate.islogin,
-					  userAPI.userIsRoot,
+					  userAPI.currentUserIsroot,
 					  queueAPI.getAll);
 	// info on a queue
 	// GET /queue/id_queue
@@ -376,12 +392,12 @@ exports.initialize = function(app){
 								queueAPI.update);
 	// add new annotation in a queue
 	// PUT /queue/id_queue/next --data '{}'
-	app.put('/queue/:id_queue/next/', authenticate.islogin,
+	app.put('/queue/:id_queue/next', authenticate.islogin,
 									  queueAPI.exist,
 									  queueAPI.push);
 	// get next annotation of a queue
 	// GET /queue/id_queue/next
-	app.get('/queue/:id_queue/next/', authenticate.islogin,
+	app.get('/queue/:id_queue/next', authenticate.islogin,
 									  queueAPI.exist,  
 									  queueAPI.pop);
 	// delete a queue
@@ -390,5 +406,4 @@ exports.initialize = function(app){
 								   queueAPI.exist,
 								   userAPI.currentUserIsAdmin,  
 								   queueAPI.remove);
-*/
 }
