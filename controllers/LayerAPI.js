@@ -22,3 +22,16 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
+// only print username, role and description for the list of l_layer
+exports.printMultiRes = function(l_layer, res) {
+	var p = [];
+	for (i = 0; i < l_layer.length; i++) { 
+		p.push({"name":l_layer[i].name,
+				"description":l_layer[i].description,
+				"fragment_type":l_layer[i].fragment_type,
+				"data_type":l_layer[i].data_type,				
+				"history":l_layer[i].history
+		  	   })
+	} 
+	res.status(200).json(p);
+}

@@ -39,6 +39,8 @@ SOFTWARE.
 
 var async = require('async');
 var commonFuncs = require('../lib/commonFuncs');
+var	layerAPI = require('../controllers/LayerAPI');
+
 
 //create a corpus
 exports.create = function(req, res){
@@ -78,6 +80,17 @@ printRes = function(corpus, res) {
 	res.status(200).json(p);
 }
 
+// only print username, role and description
+printMultiRes = function(l_corpus, res) {
+	var p = [];
+	for (i = 0; i < l_corpus.length; i++) { 
+		p.push({"name":l_corpus[i].name,
+				"description":l_corpus[i].description,
+				"history":l_corpus[i].history
+		  	   })
+	} 
+	res.status(200).json(p);
+}
 
 //check if a id_user exists
 exports.exist = function(req, res, next) {
@@ -136,7 +149,7 @@ exports.getAll = function (req, res) {
     			        	 function(corpus, callback) {
     			          		callback (commonFuncs.checkRightACL(corpus, user, groups, ['O', 'W', 'R']));
     			        	 },
-    			        	 function(results) { res.status(200).json(results); } 
+    			        	 function(results) { printMultiRes(results, res); } 
     			);	
     			callback(error);		
     		});
@@ -414,7 +427,7 @@ exports.getAllLayer = function (req, res) {
 		        	 			if (layer.id_corpus == req.params.id_corpus && commonFuncs.checkRightACL(layer, user, groups, ['O', 'W', 'R'])) callback(true);
 		        	 			else callback(false);    			        	 	
     			        	 },
-    			        	 function(results) { res.status(200).json(results); } 
+    			        	 function(results) { layerAPI.printMultiRes(results, res); } 
     			);	
     			callback(error);		
     		});
