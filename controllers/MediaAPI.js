@@ -120,6 +120,15 @@ exports.listAll = function(req, res){
 				else return([]);
 			}
 		}
+var async = require('async');
+var commonFuncs = require('../lib/commonFuncs');
+
+//check if a id_user exists
+exports.exist = function(req, res, next) {
+	Media.findById(req.params.id_media, function(error, media){
+		if (error) res.status(400).json(error);
+		else if (!media) res.status(400).json({message:"id_media don't exists"});
+		else next();
 	});
 } 
 
@@ -130,12 +139,39 @@ exports.listWithId = function(req, res) {
 						  
 
 	console.log('ici');
+}
 
-	Media.findById(req.params.id_media, function(error, data){
-		if (error) res.status(400).json({error:"error", message:error});
-		else if (data == null) res.status(400).json({error:'no such id_media!'})
-		else res.status(200).json(data);
-	});
+// check if req.session.user._id have the good right to see this media.id_corpus
+exports.AllowUser = function (list_right){
+	return function(req, res, next) {
+		async.waterfall([
+			function(callback) {
+				User.findById(req.session.user._id, function(error, user){
+					callback(error, user);
+				});
+			},
+			function(user, callback) {
+				Group.find({'users_list' : {$regex : new RegExp('^'+ req.session.user._id + '$', "i")}}, function(error, groups) {
+					callback(error, user, groups);
+				});
+			},
+			function(user, groups, callback) {
+				Media.findById(req.params.id_media, function(error, media){
+					callback(error, user, groups, media);
+	    		});
+			},
+			function(user, groups, media, callback) {
+				Corpus.findById(media.id_corpus, function(error, corpus){
+					if (commonFuncs.checkRightACL(corpus, user, groups, list_right)) next();
+					else error = "Acces denied";
+					callback(error);
+	    		});
+			},
+
+		], function (error, trueOrFalse) {
+			if (error) res.status(400).json({message:error});
+		});
+	}
 }
 
 //test for Posting corpus
