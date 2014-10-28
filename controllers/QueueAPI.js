@@ -107,3 +107,28 @@ exports.push = function(req, res){
 		if (error) res.status(400).json({"message":error});
 	});
 }
+
+//pop element at the end of the queue
+exports.pop = function(req, res){
+	var error;
+	var update = {};
+	async.waterfall([
+		function(callback) {
+			Queue.findById(req.params.id_queue, function (error, queue) {
+				if (queue.list.length <0) error = "list is empty";
+				callback(error, queue);
+			});
+		},
+		function(queue, callback) {
+    		ret = queue.list.slice(0,1);
+    		queue.list.splice(0,1);
+    		queue.save(function(error, Newqueue) {
+    			if (!error) res.status(200).json(ret[0]);
+    			callback(error);
+    		});
+    	}
+	], function (error) {
+		if (error) res.status(400).json({"message":error});
+	});
+}
+
