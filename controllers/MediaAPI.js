@@ -112,6 +112,15 @@ function getVideoWithExtension(req, res, extension) {
 	});
 }
 
+// retrieve all media
+exports.getAll = function (req, res) {	
+	Media.find({}, function (error, medias) {
+    	if (error) res.status(400).json({error:"error", message:error});
+    	if (medias) res.status(200).json(medias);
+		else res.status(200).json([]);
+	});
+}
+
 exports.getVideo = function(req, res) {
 	getVideoWithExtension(req, res, 'webm');
 }
