@@ -92,7 +92,7 @@ printMultiRes = function(l_corpus, res) {
 	res.status(200).json(p);
 }
 
-//check if a id_user exists
+//check if a id_corpus exists
 exports.exist = function(req, res, next) {
 	Corpus.findById(req.params.id_corpus, function(error, corpus){
 		if (error) res.status(400).json(error);
