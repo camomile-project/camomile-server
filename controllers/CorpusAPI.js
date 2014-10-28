@@ -38,6 +38,7 @@ SOFTWARE.
 */
 
 var async = require('async');
+var commonFuncs = require('../lib/commonFuncs');
 
 //create a corpus
 exports.create = function(req, res){
@@ -87,27 +88,7 @@ exports.exist = function(req, res, next) {
 	});
 }
 
-// check if user have the good right for corpus
-checkRight = function (corpus, user, groups, list_right) {
-	var userInAcl = false;
-	if (user.username == "root") return true
-	else {
-		if (corpus.users_ACL) {
-			if (user._id in corpus.users_ACL) {
-				if (list_right.indexOf(corpus.users_ACL[user._id])!=-1) return true;
-				userInAcl = true;
-			}
-		}
-		if (!userInAcl && corpus.groups_ACL) {
-			for(var i = 0; i < groups.length; i++)	{
-				if (groups[i]._id in corpus.groups_ACL) {
-					if (list_right.indexOf(corpus.groups_ACL[groups[i]._id])!=-1) return true;
-				}
-			}
-		}
-	}
-	return false;
-}
+
 
 // check if req.session.user._id have the good right to see this req.params.id_corpus
 exports.AllowUser = function (list_right){
@@ -125,7 +106,7 @@ exports.AllowUser = function (list_right){
 			},
 			function(user, groups, callback) {
 				Corpus.findById(req.params.id_corpus, function(error, corpus){
-					if (checkRight(corpus, user, groups, list_right)) next();
+					if (commonFuncs.checkRightACL(corpus, user, groups, list_right)) next();
 					else error = "Acces denied";
 					callback(error);
 	    		});
@@ -153,7 +134,7 @@ exports.getAll = function (req, res) {
 			Corpus.find({}, function(error, l_corpus){
     			async.filter(l_corpus, 
     			        	 function(corpus, callback) {
-    			          		callback (checkRight(corpus, user, groups, ['O', 'W', 'R']));
+    			          		callback (commonFuncs.checkRightACL(corpus, user, groups, ['O', 'W', 'R']));
     			        	 },
     			        	 function(results) { res.status(200).json(results); } 
     			);	
