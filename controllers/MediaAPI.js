@@ -26,7 +26,7 @@ var fileSystem = require('fs'); //working with video streaming
 var async = require('async');
 var commonFuncs = require('../lib/commonFuncs');
 
-//check if a id_user exists
+//check if a id_media exists
 exports.exist = function(req, res, next) {
 	Media.findById(req.params.id_media, function(error, media){
 		if (error) res.status(400).json(error);
