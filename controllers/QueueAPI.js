@@ -29,6 +29,7 @@ SOFTWARE.
    	- putnext: intert a list of id into the queue			
 */
 
+var async = require('async');
 
 exports.exist = function(req, res, next) {
 	Queue.findById(req.params.id_queue, function(error, queue){
@@ -80,3 +81,29 @@ exports.update = function(req, res){
 	});
 }
 
+//push element at the end of the queue
+exports.push = function(req, res){
+	var error;
+	var update = {};
+	async.waterfall([
+		function(callback) {
+			if (req.body.list == undefined) error="list field is empty";
+			callback(error);
+		},
+		function(callback) {
+			Queue.findById(req.params.id_queue, function (error, queue) {
+				update.list = queue.list;
+				for(var i = 0; i < req.body.list.length; i++) update.list.push(req.body.list[i]);
+				callback(error, update);
+			});
+		},
+		function(update, callback) {			
+			Queue.findByIdAndUpdate(req.params.id_queue, update, function (error, queue) {
+				if (!error) res.status(200).json(queue);
+				callback(error);
+			});
+		}
+	], function (error) {
+		if (error) res.status(400).json({"message":error});
+	});
+}
