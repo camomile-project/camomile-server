@@ -132,3 +132,10 @@ exports.pop = function(req, res){
 	});
 }
 
+// remove a given queue
+exports.remove = function (req, res) {
+	Queue.remove({_id : req.params.id_queue}, function (error, queue) {
+		if (!error && queue == 1) res.status(200).json({message:"The queue as been delete"});
+		else res.status(400).json({message:error});
+	});
+}
