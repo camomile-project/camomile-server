@@ -290,18 +290,46 @@ exports.removeGroupFromACL = function(req, res){
 	});
 }
 
+//add a annotation
+exports.addAnnotation = function(req, res){
+	var error=null;
+	async.waterfall([
+		function(callback) {
+			if (req.body.id_media == undefined) error="an annotation must be link to a id_media";
+			callback(error);
+		},
+		function(callback) {
+			var new_annotation = {};
+			new_annotation.fragment = req.body.fragment;
+			new_annotation.data = req.body.data;
+			new_annotation.id_layer = req.params.id_layer;
+			new_annotation.id_media = req.body.id_media;
+			new_annotation.history = []
+			new_annotation.history.push({date:new Date(), 
+										 id_user:req.session.user._id, 
+										 modification:{"fragment":new_annotation.fragment, 
+										 			   "data":new_annotation.data
+										 			  }
+										 });
+			var annotation = new Annotation(new_annotation).save(function (error, newAnnotation) {
+				if (newAnnotation) res.status(200).json(newAnnotation);
+				callback(error);
+			});			
+		}
+	], function (error) {
+		if (error) res.status(400).json({message:error});
+	});
+};
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+//get all annotation of a corpus
+exports.getAllAnnotation = function(req, res){
+	Annotation.find({}, function(error, annotations){
+		async.filter(annotations, 
+		        	 function(annotation, callback) { 
+		        	 	if (annotation.id_corpus == req.params.id_corpus) callback(true);
+		        	 	else callback(false);
+		        	 },
+		        	 function(results) { res.status(200).json(results); } 
+		);	
+	});
+}
