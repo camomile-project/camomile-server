@@ -37,3 +37,17 @@ exports.exist = function(req, res, next) {
 		else next();
 	});
 }
+
+// create a queue
+exports.create = function (req, res) {
+	if (req.body.name == undefined) res.status(400).json({message:"the name is not define"}); 
+	if (req.body.name == "") 		res.status(400).json({message:"empty string for name is not allow"});
+	var queue = new Queue({
+		name: req.body.name,
+		description: req.body.description,
+		list: [],
+	}).save(function (error, newQueue) {
+		if (error) res.status(400).json({message:error});
+		if (newQueue) printRes(newQueue, res);
+	});
+}
