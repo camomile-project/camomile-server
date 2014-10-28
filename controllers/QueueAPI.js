@@ -30,3 +30,10 @@ SOFTWARE.
 */
 
 
+exports.exist = function(req, res, next) {
+	Queue.findById(req.params.id_queue, function(error, queue){
+		if (error) res.status(400).json(error);
+		else if (!queue) res.status(400).json({message:"id_queue don't exists"});
+		else next();
+	});
+}
