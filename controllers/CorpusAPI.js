@@ -400,4 +400,16 @@ exports.addLayer = function(req, res){
 	});
 };
 
+//get all media of a corpus
+exports.getAllMedia = function(req, res){
+	Media.find({}, function(error, medias){
+		async.filter(medias, 
+		        	 function(media, callback) { 
+		        	 	if (media.id_corpus == req.params.id_corpus) callback(true);
+		        	 	else callback(false);
+		        	 },
+		        	 function(results) { res.status(200).json(results); } 
+		);	
+	});
+}
 
