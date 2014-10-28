@@ -100,3 +100,13 @@ exports.getInfo = function(req, res){
     	else res.status(200).json(layer);
 	});
 }
+
+// retrieve all layer
+exports.getAll = function (req, res) {	
+	Layer.find({}, function (error, layers) {
+    	if (error) res.status(400).json({error:"error", message:error});
+    	if (layers) res.status(200).json(layers);
+		else res.status(200).json([]);
+	});
+}
+
