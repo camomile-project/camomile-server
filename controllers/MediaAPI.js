@@ -91,6 +91,13 @@ exports.update = function(req, res){
 	});
 }
 
+// remove a given media
+exports.remove = function (req, res) {
+	Media.remove({_id : req.params.id_media}, function (error, media) {
+		if (!error && media == 1) res.status(200).json({message:"The media as been delete"});
+		else res.status(400).json({message:error});
+	});
+}
 
 function getVideoWithExtension(req, res, extension) {
 	Media.findById(req.params.id_media, function(error, data){
