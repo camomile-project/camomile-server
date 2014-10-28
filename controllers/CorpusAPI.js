@@ -63,7 +63,7 @@ exports.create = function(req, res){
 			});			
 		}
 	], function (error) {
-		if (error) res.status(400).json({"message":error});
+		if (error) res.status(400).json({message:error});
 	});
 };
 
@@ -82,7 +82,7 @@ printRes = function(corpus, res) {
 exports.exist = function(req, res, next) {
 	Corpus.findById(req.params.id_corpus, function(error, corpus){
 		if (error) res.status(400).json(error);
-		else if (!corpus) res.status(400).json({"message":"id_corpus don't exists"});
+		else if (!corpus) res.status(400).json({message:"id_corpus don't exists"});
 		else next();
 	});
 }
@@ -131,7 +131,7 @@ exports.AllowUser = function (list_right){
 	    		});
 			},
 		], function (error, trueOrFalse) {
-			if (error) res.status(400).json({"message":error});
+			if (error) res.status(400).json({message:error});
 		});
 	}
 }
@@ -161,14 +161,14 @@ exports.getAll = function (req, res) {
     		});
 		},
 	], function (error, trueOrFalse) {
-		if (error) res.status(400).json({"message":error});
+		if (error) res.status(400).json({message:error});
 	});
 }
 
 //retrieve a particular user (with id)
 exports.getInfo = function(req, res){
 	Corpus.findById(req.params.id_corpus, 'name description history', function(error, corpus){
-		if (error) res.status(400).json({error:"error", message:error});
+		if (error) res.status(400).json({message:error});
     	else res.status(200).json(corpus);
 	});
 }
@@ -177,7 +177,7 @@ exports.getInfo = function(req, res){
 exports.update = function(req, res){
 	var update = {};
 	if (req.body.name) {
-		if (req.body.name == "") res.status(400).json({"message":"name can't be empty"});
+		if (req.body.name == "") res.status(400).json({message:"name can't be empty"});
 		else update.name = req.body.name;		
 	}
 	if (req.body.description) update.description = req.body.description;
@@ -194,14 +194,14 @@ exports.remove = function (req, res) {
 
 	Corpus.remove({_id : req.params.id_corpus}, function (error, corpus) {
 		if (!error && corpus == 1) res.status(200).json({message:"The corpus as been delete"});
-		else res.status(400).json({"message":error});
+		else res.status(400).json({message:error});
 	});
 }
 
 //retrieve a particular user (with id)
 exports.getACL = function(req, res){
 	Corpus.findById(req.params.id_corpus, 'users_ACL groups_ACL', function(error, corpus){
-		if (error) res.status(400).json({error:"error", message:error});
+		if (error) res.status(400).json({message:error});
     	else res.status(200).json(corpus);
 	});
 }
@@ -228,12 +228,12 @@ exports.updateUserACL = function(req, res){
 		function(update, callback) {
 			Corpus.findByIdAndUpdate(req.params.id_corpus, update, function (error, corpus) {
 				if (!error) printRes(corpus, res);
-				else res.status(400).json({"message":error});
+				else res.status(400).json({message:error});
 				callback(error);
 			});			
 		}
 	], function (error) {
-		if (error) res.status(400).json({"message":error});
+		if (error) res.status(400).json({message:error});
 	});
 }
 
@@ -259,12 +259,12 @@ exports.updateGroupACL = function(req, res){
 		function(update, callback) {
 			Corpus.findByIdAndUpdate(req.params.id_corpus, update, function (error, corpus) {
 				if (!error) printRes(corpus, res);
-				else res.status(400).json({"message":error});
+				else res.status(400).json({message:error});
 				callback(error);
 			});			
 		}
 	], function (error) {
-		if (error) res.status(400).json({"message":error});
+		if (error) res.status(400).json({message:error});
 	});
 }
 
@@ -292,12 +292,12 @@ exports.removeUserFromACL = function(req, res){
 		function(update, callback) {
 			Corpus.findByIdAndUpdate(req.params.id_corpus, update, function (error, corpus) {
 				if (!error) printRes(corpus, res);
-				else res.status(400).json({"message":error});
+				else res.status(400).json({message:error});
 				callback(error);
 			});			
 		}
 	], function (error) {
-		if (error) res.status(400).json({"message":error});
+		if (error) res.status(400).json({message:error});
 	});
 }
 
@@ -325,12 +325,12 @@ exports.removeGroupFromACL = function(req, res){
 		function(update, callback) {
 			Corpus.findByIdAndUpdate(req.params.id_corpus, update, function (error, corpus) {
 				if (!error) printRes(corpus, res);
-				else res.status(400).json({"message":error});
+				else res.status(400).json({message:error});
 				callback(error);
 			});			
 		}
 	], function (error) {
-		if (error) res.status(400).json({"message":error});
+		if (error) res.status(400).json({message:error});
 	});
 }
 
@@ -357,7 +357,7 @@ exports.addMedia = function(req, res){
 			});			
 		}
 	], function (error) {
-		if (error) res.status(400).json({"message":error});
+		if (error) res.status(400).json({message:error});
 	});
 };
 
@@ -396,7 +396,7 @@ exports.addLayer = function(req, res){
 			});			
 		}
 	], function (error) {
-		if (error) res.status(400).json({"message":error});
+		if (error) res.status(400).json({message:error});
 	});
 };
 
