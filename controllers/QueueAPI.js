@@ -61,3 +61,10 @@ exports.getAll = function (req, res) {
 	});
 }
 
+//retrieve a particular queue (with id)
+exports.getInfo = function(req, res){
+	Queue.findById(req.params.id_queue, function(error, queue){
+		res.status(200).json(queue);
+	});
+}
+
