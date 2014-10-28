@@ -184,12 +184,31 @@ exports.update = function(req, res){
 
 // remove a given corpus
 exports.remove = function (req, res) {
-
-	// check if corpus is empty
-
-	Corpus.remove({_id : req.params.id_corpus}, function (error, corpus) {
-		if (!error && corpus == 1) res.status(200).json({message:"The corpus as been delete"});
-		else res.status(400).json({message:error});
+	async.waterfall([
+		function(callback) {
+			Layer.find({}, function(error, layers){
+				for (i = 0; i < layers.length; i++) { 
+					if (layers[i].id_corpus == req.params.id_corpus) error = "corpus is not empty (one or more layers is remaining)"; 
+				} 
+    			callback(error);		
+    		});
+		},
+		function(callback) {
+			Media.find({}, function(error, medias){
+				for (i = 0; i < medias.length; i++) { 
+					if (medias[i].id_corpus == req.params.id_corpus) error = "corpus is not empty (one or more medias is remaining)"; 
+				} 
+				callback(error);	
+			});
+		},	
+		function(callback) {
+			Corpus.remove({_id : req.params.id_corpus}, function (error, corpus) {
+				if (!error && corpus == 1) res.status(200).json({message:"The corpus as been delete"});
+				else res.status(400).json({message:error});
+			});
+		}
+	], function (error, trueOrFalse) {
+		if (error) res.status(400).json({message:error});
 	});
 }
 
