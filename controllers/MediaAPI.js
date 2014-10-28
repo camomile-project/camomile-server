@@ -197,6 +197,11 @@ exports.post = function(req, res){
 				}
 			});
 		}
+//retrieve a particular user (with id)
+exports.getInfo = function(req, res){
+	Media.findById(req.params.id_media, 'name description id_corpus url history', function(error, media){
+		if (error) res.status(400).json({message:error});
+    	else res.status(200).json(media);
 	});
 }
 
