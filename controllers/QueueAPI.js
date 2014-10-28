@@ -51,3 +51,13 @@ exports.create = function (req, res) {
 		if (newQueue) printRes(newQueue, res);
 	});
 }
+
+// retrieve all queues
+exports.getAll = function (req, res) {	
+	Queue.find({}, 'name description list', function (error, queues) {
+    	if (error) res.status(400).json({error:"error", message:error});
+    	if (queues) res.status(200).json(queues);
+		else res.status(200).json([]);
+	});
+}
+
