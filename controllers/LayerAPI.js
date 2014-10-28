@@ -22,6 +22,18 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
+var async = require('async');
+var commonFuncs = require('../lib/commonFuncs');
+
+
+//check if a id_layer exists
+exports.exist = function(req, res, next) {
+	Layer.findById(req.params.id_layer, function(error, layer){
+		if (error) res.status(400).json(error);
+		else if (!layer) res.status(400).json({message:"id_layer don't exists"});
+		else next();
+	});
+}
 // only print username, role and description for the list of l_layer
 exports.printMultiRes = function(l_layer, res) {
 	var p = [];
@@ -35,3 +47,4 @@ exports.printMultiRes = function(l_layer, res) {
 	} 
 	res.status(200).json(p);
 }
+exports.getInfo = function(req, res){
