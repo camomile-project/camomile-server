@@ -89,4 +89,10 @@ exports.AllowUser = function (list_right){
 	}
 }
 
+//retrieve a particular user (with id)
 exports.getInfo = function(req, res){
+	Layer.findById(req.params.id_layer, 'name description history fragment_type data_type', function(error, layer){
+		if (error) res.status(400).json({message:error});
+    	else res.status(200).json(layer);
+	});
+}
