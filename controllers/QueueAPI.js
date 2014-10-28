@@ -68,3 +68,15 @@ exports.getInfo = function(req, res){
 	});
 }
 
+//update information of a queue
+exports.update = function(req, res){
+	var error=null;
+	var update = {};
+	if (req.body.name) update.name = req.body.name;
+	if (req.body.description) update.description = req.body.description;
+	if (req.body.list) update.list = req.body.list;
+	Queue.findByIdAndUpdate(req.params.id_queue, update, function (error, queue) {
+		if (!error) res.status(200).json(queue);
+	});
+}
+
