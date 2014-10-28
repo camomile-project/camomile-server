@@ -394,3 +394,33 @@ exports.getAllMedia = function(req, res){
 	});
 }
 
+// retrieve all layer of a corpus if the checkRightACL is ok
+exports.getAllLayer = function (req, res) {
+	async.waterfall([
+		function(callback) {
+			User.findById(req.session.user._id, function(error, user){
+				callback(error, user);
+			});
+		},
+		function(user, callback) {
+			Group.find({'users_list' : {$regex : new RegExp('^'+ req.session.user._id + '$', "i")}}, function(error, groups) {
+				callback(error, user, groups);
+			});
+		},
+		function(user, groups, callback) {
+			Layer.find({}, function(error, layers){
+    			async.filter(layers, 
+    			        	 function(layer, callback) {
+		        	 			if (layer.id_corpus == req.params.id_corpus && commonFuncs.checkRightACL(layer, user, groups, ['O', 'W', 'R'])) callback(true);
+		        	 			else callback(false);    			        	 	
+    			        	 },
+    			        	 function(results) { res.status(200).json(results); } 
+    			);	
+    			callback(error);		
+    		});
+		},
+	], function (error, trueOrFalse) {
+		if (error) res.status(400).json({message:error});
+	});
+}
+
