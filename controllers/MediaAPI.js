@@ -79,15 +79,42 @@ exports.getInfo = function(req, res){
 //update information of a media
 exports.update = function(req, res){
 	var update = {};
-	if (req.body.name) {
-		if (req.body.name == "") res.status(400).json({message:"name can't be empty"});
-		else update.name = req.body.name;		
-	}
-	if (req.body.description) update.description = req.body.description;
-	if (req.body.url) update.description = req.body.url;
-	Media.findByIdAndUpdate(req.params.id_media, update, function (error, media) {
-		if (error) res.status(400).json(error);
-		else res.status(200).json(media);
+	var history = {};
+	var error=null;
+	async.waterfall([
+		function(callback) {
+			if (req.body.name) {
+				if (req.body.name == "") error = "name can't be empty";
+				else {
+					update.name = req.body.name;
+					history.name = req.body.name;
+				}
+			}				
+			if (req.body.description) {
+				update.description = req.body.description;
+				history.description = req.body.description;
+			}
+			if (req.body.url) {
+				update.description = req.body.url;
+				history.description = req.body.url;
+			}
+			callback(error, update);
+		},
+		function(update, callback) {
+			Media.findById(req.params.id_media, function(error, media){
+				update.history = media.history;
+				update.history.push({date:new Date(), id_user:req.session.user._id, modification:history})
+				callback(error, update);
+			});
+		},
+		function(update, callback) {
+			Media.findByIdAndUpdate(req.params.id_media, update, function (error, media) {
+				if (error) res.status(400).json(error);
+				else res.status(200).json(media);
+			});
+		},
+	], function (error, trueOrFalse) {
+		if (error) res.status(400).json({message:error});
 	});
 }
 
