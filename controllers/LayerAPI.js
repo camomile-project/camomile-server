@@ -34,6 +34,20 @@ exports.exist = function(req, res, next) {
 		else next();
 	});
 }
+
+
+
+// only print username, role and description
+printRes = function(layer, res) {
+	var p = {"name":layer.name,
+			 "description":layer.description,
+			 "fragment_type":layer.fragment_type,
+			 "data_type":layer.data_type,
+			 "history":layer.history,
+			};
+	res.status(200).json(p);
+}
+
 // only print username, role and description for the list of l_layer
 exports.printMultiRes = function(l_layer, res) {
 	var p = [];
