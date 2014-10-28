@@ -205,18 +205,21 @@ exports.getInfo = function(req, res){
 	});
 }
 
-//app.put('/corpus/:id_corpus/media/:id_media', 
+//update information of a media
 exports.update = function(req, res){
-	if (req.params.id_corpus == undefined && req.body.name == undefined && req.body.url == undefined) return res.status(400).json({error:"one or more data fields are not filled out properly"});
 	var update = {};
-	if (req.params.id_corpus) update.id_corpus = req.params.id_corpus;
-	if (req.body.name) update.name = req.body.name;
-	if (req.body.url) update.url = req.body.url;
-	Media.findByIdAndUpdate(req.params.id_media, update, function (error, data) {
-		if (error) res.status(400).json({error:"error", message:error});
-		else res.status(200).json(data);
+	if (req.body.name) {
+		if (req.body.name == "") res.status(400).json({message:"name can't be empty"});
+		else update.name = req.body.name;		
+	}
+	if (req.body.description) update.description = req.body.description;
+	if (req.body.url) update.description = req.body.url;
+	Media.findByIdAndUpdate(req.params.id_media, update, function (error, media) {
+		if (error) res.status(400).json(error);
+		else res.status(200).json(media);
 	});
 }
+
 
 function getVideoWithExtension(req, res, extension) {
 	Media.findById(req.params.id_media, function(error, data){
