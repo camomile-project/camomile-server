@@ -22,21 +22,6 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-/* The API controller for Corpus
-   Exports 3 methods:
-   * post - Creates a new corpus
-   * listAll - Returns a list of corpus
-   * listWithId - Returns a specific corpus of a given id
-*/
-
-
-// for the uri : app.get('/corpus', 
-/*
-	- First: retrieves all corpus regardless of user/group's rights
-	- Second: finds all groups belonging to the connected user
-	- For each found corpus, check ACLs (the permission of the connected user and its groups) 
-*/
-
 var async = require('async');
 var commonFuncs = require('../lib/commonFuncs');
 var	layerAPI = require('../controllers/LayerAPI');
