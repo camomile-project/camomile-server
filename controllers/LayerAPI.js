@@ -39,7 +39,9 @@ exports.exist = function(req, res, next) {
 
 // only print username, role and description
 printRes = function(layer, res) {
-	var p = {"name":layer.name,
+	var p = {"id_layer":layer._id,
+			 "id_corpus":layer.id_corpus,
+			 "name":layer.name,
 			 "description":layer.description,
 			 "fragment_type":layer.fragment_type,
 			 "data_type":layer.data_type,
@@ -52,7 +54,9 @@ printRes = function(layer, res) {
 exports.printMultiRes = function(l_layer, res) {
 	var p = [];
 	for (i = 0; i < l_layer.length; i++) { 
-		p.push({"name":l_layer[i].name,
+		p.push({"id_layer":l_layer[i]._id,
+			    "id_corpus":l_layer[i].id_corpus,
+				"name":l_layer[i].name,
 				"description":l_layer[i].description,
 				"fragment_type":l_layer[i].fragment_type,
 				"data_type":l_layer[i].data_type,				
