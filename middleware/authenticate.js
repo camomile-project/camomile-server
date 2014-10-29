@@ -41,19 +41,18 @@ var iterations = 12000;
 
 // to hash password
 hash = function (pwd, salt, fn) {
-  if (3 == arguments.length) {
-    crypto.pbkdf2(pwd, salt, iterations, len, fn);
-  } else {
-    fn = salt;
-    crypto.randomBytes(len, function(error, salt){
-      if (error) return fn(error);
-      salt = salt.toString('base64');
-      crypto.pbkdf2(pwd, salt, iterations, len, function(error2, hash){
-        if (error2) return fn(error);
-        fn(null, salt, hash);
-      });
-    });
-  }
+	if (arguments.length == 3) crypto.pbkdf2(pwd, salt, iterations, len, fn);		// if salt is known
+  	else {																			// else generate a new salt
+    	fn = salt;
+    	crypto.randomBytes(len, function(error, salt){
+			if (error) return fn(error);
+			salt = salt.toString('base64');
+			crypto.pbkdf2(pwd, salt, iterations, len, function(error2, hash){
+				if (error2) return fn(error);
+				fn(null, salt, hash);
+			);
+		});
+	}
 };
 
 authenticateElem = function(name, pass, fn) {
