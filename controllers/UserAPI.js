@@ -115,7 +115,6 @@ exports.getInfo = function(req, res){
 //update information of a user
 exports.update = function(req, res){
 	var error;
-	var update = {};
 	async.waterfall([		
 		function(callback) {
 			if (req.body.password == "") 												error="empty password for username is not allow";
@@ -125,25 +124,25 @@ exports.update = function(req, res){
 		function(callback) {
 			User.findById(req.params.id_user, function(error, user){
 				if (req.body.role && user.username == "root") 	error = "change the role of this id_user is not allowed"
-				else if (req.body.role) 						update.role = req.body.role
-				callback(error, update);
+				else if (req.body.role) 						user.role = req.body.role
+				callback(error, user);
 			});
 		},
-		function(update, callback) {
+		function(user, callback) {
 			if (req.body.password) {
 				hash(req.body.password, function (error, salt, hash) {
 					if (req.body.password) {
-						update.salt = salt;
-						update.hash = hash;	
+						user.salt = salt;
+						user.hash = hash;	
 					}
-					callback(error, update);				
+					callback(error, user);				
 				});
 			}
-			else callback(error, update);
+			else callback(error, user);
 		},
-		function(update, callback) {
-			if (req.body.description) update.description = req.body.description;
-			User.findByIdAndUpdate(req.params.id_user, update, function (error, user) {
+		function(user, callback) {
+			if (req.body.description) user.description = req.body.description;
+			user.save(function (error, user) {
 				if (!error) printRes(user, res);
 				callback(error)
 			});			
