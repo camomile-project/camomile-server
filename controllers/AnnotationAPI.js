@@ -34,6 +34,39 @@ exports.exist = function(req, res, next) {
 	});
 }
 
+// check if req.session.user._id have the good right to see this annotation.id_layer
+exports.AllowUser = function (list_right){
+	return function(req, res, next) {
+		async.waterfall([
+			function(callback) {										// find the user
+				User.findById(req.session.user._id, function(error, user){
+					callback(error, user);
+				});
+			},
+			function(user, callback) {									// find the list of group belong the user
+				Group.find({'users_list' : {$regex : new RegExp('^'+ req.session.user._id + '$', "i")}}, function(error, groups) {
+					callback(error, user, groups);
+				});
+			},
+			function(user, groups, callback) {							// find the annotation
+				Annotation.findById(req.params.id_annotation, function(error, annotation){
+					callback(error, user, groups, annotation);
+	    		});
+			},
+			function(user, groups, annotation, callback) {					// find the layer belong the annotation anc check if the user have the right to access this layer
+				Layer.findById(annotation.id_layer, function(error, layer){
+					if (commonFuncs.checkRightACL(layer, user, groups, list_right)) next();
+					else error = "Acces denied";
+					callback(error);
+	    		});
+			},
+
+		], function (error, trueOrFalse) {
+			if (error) res.status(400).json({message:error});
+		});
+	}
+}
+
 // retrieve a particular annotation with his _id  print _id, id_layer, fragment and data
 exports.getInfo = function(req, res){
 	Annotation.findById(req.params.id_annotation, function(error, annotation){

@@ -355,19 +355,19 @@ exports.initialize = function(app){
 	// GET /annotation/id_annotation
 	app.get('/annotation/:id_annotation', authenticate.islogin,
 										  annotationAPI.exist,
-										  layerAPI.AllowUser(['O', 'W', 'R']),
+										  annotationAPI.AllowUser(['O', 'W', 'R']),
 										  annotationAPI.getInfo);
 	// update info of an annotation
 	// PUT /annotation/id_annotation --data '{"user":"id_user", fragment":{"start":0, "end":15}, "data":"value", "id_media":""}'
 	app.put('/annotation/:id_annotation', authenticate.islogin,
 										  annotationAPI.exist,
-										  layerAPI.AllowUser(['O', 'W']),
+										  annotationAPI.AllowUser(['O', 'W']),
 										  annotationAPI.update);
 	// delete annotation
 	// DELETE /annotation/id_annotation
 	app.delete('/annotation/:id_annotation', authenticate.islogin,
 											 annotationAPI.exist,
-											 layerAPI.AllowUser(['O']),
+											 annotationAPI.AllowUser(['O']),
 											 annotationAPI.remove);
 
 	// --- queue routes --- \\
