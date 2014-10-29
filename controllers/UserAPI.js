@@ -155,21 +155,43 @@ exports.update = function(req, res){
 // delete a user
 exports.remove  = function(req, res){
 	var error;
-	async.waterfall([		
+	async.waterfall([	
 		function(callback) {
-			User.findById(req.params.id_user, function(error, user){
-				if (user.username == "root") error = "You can't delete the root user"
-				callback(error);
+			Corpus.find(function(error, l_corpus){
+				for(var i = 0; i < l_corpus.length; i++) {
+					if (l_corpus[i].users_ACL) {
+						if (l_corpus[i].users_ACL[req.params.id_user]) {
+							var update = {users_ACL : l_corpus[i].users_ACL};	
+							delete update.users_ACL[req.params.id_user];
+							if (Object.getOwnPropertyNames(update.users_ACL).length === 0) update.users_ACL = undefined;
+							Corpus.findByIdAndUpdate(l_corpus[i]._id, update, function (error, corpus) {});	
+						}
+					}
+				}
+				callback(error);				
 			});
 		},
+		function(callback) {
+			Layer.find(function(error, l_layer){
+				for(var i = 0; i < l_layer.length; i++) {
+					if (l_layer[i].users_ACL) {
+						if (l_layer[i].users_ACL[req.params.id_user]) {
+							var update = {users_ACL : l_layer[i].users_ACL};	
+							delete update.users_ACL[req.params.id_user];
+							if (Object.getOwnPropertyNames(update.users_ACL).length === 0) update.users_ACL = undefined;
+							Layer.findByIdAndUpdate(l_layer[i]._id, update, function (error, layer) {});	
+						}
+					}
+				}
+				callback(error);				
+			});
+		},		
 		function(callback) {
 			User.remove({_id : req.params.id_user}, function (error, user) {
 				if (!error && user == 1) res.status(200).json({message:"The user as been delete"});
 				callback(error);
 			});
-		}
-		// delete user from acl
-		// delete user from group
+		},		
 	], function (error) {
 		if (error) res.status(400).json({"message":error});
 	});

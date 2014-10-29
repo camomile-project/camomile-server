@@ -95,15 +95,43 @@ exports.update = function(req, res){
 // remove a given group ID
 exports.remove = function (req, res) {
 	var error;
-	async.waterfall([		
+	async.waterfall([	
+		function(callback) {
+			Corpus.find(function(error, l_corpus){
+				for(var i = 0; i < l_corpus.length; i++) {
+					if (l_corpus[i].groups_ACL) {
+						if (l_corpus[i].groups_ACL[req.params.id_group]) {
+							var update = {groups_ACL : l_corpus[i].groups_ACL};	
+							delete update.groups_ACL[req.params.id_group];
+							if (Object.getOwnPropertyNames(update.groups_ACL).length === 0) update.groups_ACL = undefined;
+							Corpus.findByIdAndUpdate(l_corpus[i]._id, update, function (error, corpus) {});	
+						}
+					}
+				}
+				callback(error);				
+			});
+		},
+		function(callback) {
+			Layer.find(function(error, l_layer){
+				for(var i = 0; i < l_layer.length; i++) {
+					if (l_layer[i].groups_ACL) {
+						if (l_layer[i].groups_ACL[req.params.id_group]) {
+							var update = {groups_ACL : l_layer[i].groups_ACL};	
+							delete update.groups_ACL[req.params.id_group];
+							if (Object.getOwnPropertyNames(update.groups_ACL).length === 0) update.groups_ACL = undefined;
+							Layer.findByIdAndUpdate(l_layer[i]._id, update, function (error, layer) {});	
+						}
+					}
+				}
+				callback(error);				
+			});
+		},		
 		function(callback) {
 			Group.remove({_id : req.params.id_group}, function (error, group) {
 				if (!error && group == 1) res.status(200).json({message:"The group as been delete"});
 				callback(error);
 			});
-		}
-		// delete group from corpus acl
-		// delete group from layer acl
+		},		
 	], function (error) {
 		if (error) res.status(400).json({"message":error});
 	});
