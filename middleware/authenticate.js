@@ -62,15 +62,13 @@ authenticateElem = function(name, pass, fn) {
 
 // login
 exports.login = function (req, res) {
-	var username = req.body.username;
-	var	pass = req.body.password;
-	if (username == undefined || pass == undefined) res.status(400).json({error:"authentication failed, username or password are not define"});
+	if (req.body.username == undefined || req.body.password == undefined) res.status(400).json({error:"authentication failed, username or password are not define"});
 	else {
-		authenticateElem(username, pass, function (error, user) {
+		authenticateElem(req.body.username, req.body.password, function (error, user) {
 			if (user) {
 				req.session.regenerate(function () {
 					req.session.user = user;
-					res.status(200).json({message:"You have been successfully logged in as "+username}); 
+					res.status(200).json({message:"You have been successfully logged in as "+req.body.username}); 
 				});
 			} 			
 			else res.status(400).json({message:"authentication failed, check your username or password"});
@@ -80,12 +78,9 @@ exports.login = function (req, res) {
 
 // logout
 exports.logout = function (req, res) {
-    if (req.session.user) {
-    	var uname = req.session.user.username;
-    	req.session.destroy(function () {
-        	res.status(200).json({message:uname +" is logged out"});
-    	});
-    }
+	req.session.destroy(function () {
+		res.status(200).json({message:req.session.user.username +" is logged out"});
+	});
 }
 
 // to now who is logged in
@@ -96,5 +91,5 @@ exports.me = function (req, res) {
 // check if a user is logged in
 exports.islogin = function (req, res, next) {
     if (req.session.user) next();
-    else res.status(400).json( {message:"Acces denied, you are not login"});
+    else res.status(400).json( {message:"Acces denied, you are not logged in"});
 }
