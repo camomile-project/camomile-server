@@ -41,7 +41,11 @@ exports.create = function(req, res){
 			new_corpus.name = req.body.name;
 			new_corpus.description = req.body.description;
 			new_corpus.history = []
-			new_corpus.history.push({date:new Date(), id_user:req.session.user._id, modification:{"name":new_corpus.name, "description":new_corpus.description}});
+			new_corpus.history.push({date:new Date(), 
+									 id_user:req.session.user._id, 
+									 modification:{"name":new_corpus.name, 
+									 			   "description":new_corpus.description}
+									});
 			new_corpus.users_ACL = {};
 			new_corpus.groups_ACL = {};
 			new_corpus.users_ACL[req.session.user._id]='O';				// set 'O' right to the user logged
@@ -293,7 +297,12 @@ exports.addMedia = function(req, res){
 			new_media.url = req.body.url;
 			new_media.id_corpus = req.params.id_corpus;
 			new_media.history = []
-			new_media.history.push({date:new Date(), id_user:req.session.user._id, modification:{"name":new_media.name, "description":new_media.description, "url":new_media.url}});
+			new_media.history.push({date:new Date(), 
+									id_user:req.session.user._id, 
+									modification:{"name":new_media.name, 
+												  "description":new_media.description, 
+												  "url":new_media.url}
+								   });
 			var media = new Media(new_media).save(function (error, newMedia) {	// save the new media
 				if (newMedia) res.status(200).json(newMedia);
 				callback(error);
@@ -324,10 +333,11 @@ exports.addLayer = function(req, res){
 			new_layer.data_type = req.params.data_type;
 			new_layer.history = []
 			new_layer.history.push({date:new Date(), 
-									id_user:req.session.user._id, modification:{"name":new_layer.name, 
-																				"description":new_layer.description,
-																				"fragment_type":new_layer.fragment_type,
-																				"data_type":new_layer.data_type}
+									id_user:req.session.user._id, 
+									modification:{"name":new_layer.name, 
+												  "description":new_layer.description,
+												  "fragment_type":new_layer.fragment_type,
+												  "data_type":new_layer.data_type}
 									});
 			new_layer.users_ACL = {};
 			new_layer.groups_ACL = {};
