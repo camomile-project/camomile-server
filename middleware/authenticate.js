@@ -29,16 +29,6 @@ var crypto = require('crypto');
 var len = 128;				//Bytesize
 var iterations = 12000;
 
-/**
- * Hashes a password with optional `salt`, otherwise
- * generate a salt for `pass` and invoke `fn(error, salt, hash)`.
- *
- * @param {String} password to hash
- * @param {String} optional salt
- * @param {Function} callback
- * @api public
- */
-
 // to hash password
 hash = function (pwd, salt, fn) {
 	if (arguments.length == 3) crypto.pbkdf2(pwd, salt, iterations, len, fn);		// if salt is known
@@ -55,13 +45,14 @@ hash = function (pwd, salt, fn) {
 	}
 };
 
+// check if login and pasword correspond
 authenticateElem = function(name, pass, fn) {
-    User.findOne({username: name}, function (error, user) {
+    User.findOne({username: name}, function (error, user) {							// find the first user with username
        	if (user) {
            	if (error)  return fn(new Error('could not find user'));
-           	hash(pass, user.salt, function (error2, hash) {
+           	hash(pass, user.salt, function (error2, hash) {							// ask the hash for this user
 				if (error2) return fn(error2);
-            	if (hash == user.hash) return fn(null, user);	
+            	if (hash == user.hash) return fn(null, user);						// check if the 2 hash correspond
 				fn(new Error('invalid password'));
            	});
        	} 
@@ -69,6 +60,7 @@ authenticateElem = function(name, pass, fn) {
     }); 
 }
 
+// login
 exports.login = function (req, res) {
 	var username = req.body.username;
 	var	pass = req.body.password;
@@ -86,6 +78,7 @@ exports.login = function (req, res) {
 	}
 }
 
+// logout
 exports.logout = function (req, res) {
     if (req.session.user) {
     	var uname = req.session.user.username;
@@ -95,10 +88,12 @@ exports.logout = function (req, res) {
     }
 }
 
+// to now who is logged in
 exports.me = function (req, res) {
     res.status(200).json({message:'user is logged as ' + req.session.user.username});
 }
 
+// check if a user is logged in
 exports.islogin = function (req, res, next) {
     if (req.session.user) next();
     else res.status(400).json( {message:"Acces denied, you are not login"});
