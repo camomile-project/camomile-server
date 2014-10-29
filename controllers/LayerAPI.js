@@ -133,7 +133,7 @@ exports.update = function(req, res){
 		layer.history.push({date:new Date(), id_user:req.session.user._id, modification:newHistory})	// update history with the modification
 		layer.save(function(error, newLayer) {						// save the layer in the db
 			if (error) res.status(400).json({message:error});
-			if (!error) res.status(200).json(newLayer);
+			else printRes(newLayer, res);
 		});
 	});
 }

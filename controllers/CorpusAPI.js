@@ -168,7 +168,7 @@ exports.update = function(req, res){
 		corpus.history.push({date:new Date(), id_user:req.session.user._id, modification:newHistory})	// update history with the modification
 		corpus.save(function(error, newCorpus) {						// save the corpus in the db
 			if (error) res.status(400).json({message:error});
-			if (!error) res.status(200).json(newCorpus);
+			else printRes(newCorpus, res);
 		});
 	});
 }
