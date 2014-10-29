@@ -84,8 +84,8 @@ exports.push = function(req, res){
 	if (req.body.list == undefined) res.status(400).json({message:"list field is empty"});
 	Queue.findById(req.params.id_queue, function (error, queue) {
 		for(var i = 0; i < req.body.list.length; i++) queue.list.push(req.body.list[i]);
-		queue.save(function(error, Newqueue) {
-			if (!error) res.status(200).json(queue);
+		queue.save(function(error, newQueue) {
+			if (!error) res.status(200).json(newQueue);
 		});		
 	});	
 }
@@ -96,7 +96,7 @@ exports.pop = function(req, res){
 		if (queue.list.length <0) res.status(400).json({message:"list is empty"});
 		ret = queue.list.slice(0,1);
 		queue.list.splice(0,1);
-		queue.save(function(error2, Newqueue) {
+		queue.save(function(error2, newQueue) {
 			if (error2) res.status(400).json({message:error2});
 			else res.status(200).json(ret[0]);
 		});		
