@@ -155,39 +155,25 @@ exports.getInfo = function(req, res){
 
 //update information of a corpus
 exports.update = function(req, res){
-	var update = {};
-	var history = {};
-	var error=null;
-	async.waterfall([
-		function(callback) {
-			if (req.body.name) {
-				if (req.body.name == "") error = "name can't be empty";
-				else {
-					update.name = req.body.name;
-					history.name = req.body.name;
-				}
-			}				
-			if (req.body.description) {
-				update.description = req.body.description;
-				history.description = req.body.description;
+	var newHistory = {};
+	Corpus.findById(req.params.id_corpus, function(error, corpus){
+		if (req.body.name) {
+			if (req.body.name == "") res.status(400).json({message:"name can't be empty"});
+			else {
+				corpus.name = req.body.name;
+				newHistory.name = req.body.name;
 			}
-			callback(error, update);
-		},
-		function(update, callback) {
-			Corpus.findById(req.params.id_corpus, function(error, corpus){
-				update.history = corpus.history;
-				update.history.push({date:new Date(), id_user:req.session.user._id, modification:history})
-				callback(error, update);
-			});
-		},
-		function(update, callback) {
-			Corpus.findByIdAndUpdate(req.params.id_corpus, update, function (error, corpus) {
-				if (error) res.status(400).json(error);
-				else res.status(200).json(corpus);
-			});
-		},
-	], function (error, trueOrFalse) {
-		if (error) res.status(400).json({message:error});
+		}				
+		if (req.body.description) {
+			corpus.description = req.body.description;
+			newHistory.description = req.body.description;
+		}
+		corpus.history.push({date:new Date(), id_user:req.session.user._id, modification:newHistory})
+		corpus.save(function(error, newCorpus) {
+			if (error) res.status(400).json({message:error});
+			if (!error) res.status(200).json(newCorpus);
+		});
+
 	});
 }
 
