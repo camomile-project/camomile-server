@@ -26,7 +26,6 @@ var async = require('async');
 var commonFuncs = require('../lib/commonFuncs');
 var	layerAPI = require('../controllers/LayerAPI');
 
-
 //create a corpus
 exports.create = function(req, res){
 	var error=null;
@@ -46,9 +45,8 @@ exports.create = function(req, res){
 									 modification:{"name":new_corpus.name, 
 									 			   "description":new_corpus.description}
 									});
-			new_corpus.users_ACL = {};
-			new_corpus.groups_ACL = {};
-			new_corpus.users_ACL[req.session.user._id]='O';				// set 'O' right to the user logged
+			new_corpus.ACL = {users:{}, groups:{}};
+			new_corpus.ACL.users[req.session.user._id]='O';				// set 'O' right to the user logged
 			var corpus = new Corpus(new_corpus).save(function (error, newCorpus) {		// save it into the db
 				if (newCorpus) res.status(200).json(newCorpus);
 				callback(error);
@@ -209,7 +207,7 @@ exports.remove = function (req, res) {
 
 // get ACL of the corpus
 exports.getACL = function(req, res){
-	Corpus.findById(req.params.id_corpus, 'users_ACL groups_ACL', function(error, corpus){
+	Corpus.findById(req.params.id_corpus, function(error, corpus){   //, 'ACL'
 		if (error) res.status(400).json({message:error});
     	else res.status(200).json(corpus);
 	});
@@ -219,13 +217,13 @@ exports.getACL = function(req, res){
 exports.updateUserACL = function(req, res){
 	if (req.body.Right != 'O' && req.body.Right != 'W' && req.body.Right != 'R') res.status(400).json({message:"Right must be 'O' or 'W' or 'R'"});
 	Corpus.findById(req.params.id_corpus, function(error, corpus){		// find the corpus
+		var update = {ACL:corpus.ACL};		
 		if (error) res.status(400).json({message:error});
-		var update = {users_ACL:corpus.users_ACL};
-		if (!update.users_ACL) update.users_ACL = {};
-		update.users_ACL[req.params.id_user]=req.body.Right;			// udpate acl
+		if (!update.ACL.users) update.ACL.users = {};
+		update.ACL.users[req.params.id_user]=req.body.Right;			// update acl
 		Corpus.findByIdAndUpdate(req.params.id_corpus, update, function (error, newCorpus) {	// save the corpus with the new ACL
 			if (error) res.status(400).json({message:error});
-			else res.status(200).json(newCorpus.users_ACL);
+			else res.status(200).json(newCorpus.ACL);
 		});	
 	});
 }
@@ -234,13 +232,13 @@ exports.updateUserACL = function(req, res){
 exports.updateGroupACL = function(req, res){
 	if (req.body.Right != 'O' && req.body.Right != 'W' && req.body.Right != 'R') res.status(400).json({message:"Right must be 'O' or 'W' or 'R'"});
 	Corpus.findById(req.params.id_corpus, function(error, corpus){		// find the corpus
+		var update = {ACL:corpus.ACL};		
 		if (error) res.status(400).json({message:error});
-		var update = {groups_ACL:corpus.groups_ACL};
-		if (!update.groups_ACL) update.groups_ACL = {};
-		update.groups_ACL[req.params.id_group]=req.body.Right;			// udpate acl
+		if (!update.ACL.groups) update.ACL.groups = {};
+		update.ACL.groups[req.params.id_group]=req.body.Right;			// update acl
 		Corpus.findByIdAndUpdate(req.params.id_corpus, update, function (error, newCorpus) {	// save the corpus with the new ACL
 			if (error) res.status(400).json({message:error});
-			else res.status(200).json(newCorpus.groups_ACL);
+			else res.status(200).json(newCorpus.ACL);
 		});	
 	});
 }
@@ -249,15 +247,15 @@ exports.updateGroupACL = function(req, res){
 exports.removeUserFromACL = function(req, res){	
 	Corpus.findById(req.params.id_corpus, function(error, corpus){		// find the corpus
 		if (error) res.status(400).json({message:error});
-		var update = {users_ACL : corpus.users_ACL};	
-		if (!update.users_ACL || update.users_ACL==null) res.status(400).json({message:req.params.id_user+" not in users_ACL"}); 
-		else if (!update.users_ACL[req.params.id_user]) res.status(400).json({message:req.params.id_user+" not in users_ACL"}); 
+		var update = {ACL:corpus.ACL};	
+		if (!update.ACL.users || update.ACL.users==null) res.status(400).json({message:req.params.id_user+" not in ACL.users"}); 
+		else if (!update.ACL.users[req.params.id_user]) res.status(400).json({message:req.params.id_user+" not in ACL.users"}); 
 		else {
-			delete update.users_ACL[req.params.id_user];				// delete the user from ACL
-			if (Object.getOwnPropertyNames(update.users_ACL).length === 0) update.users_ACL = undefined;
-			Corpus.findByIdAndUpdate(req.params.id_corpus, update, function (error, corpus) { 	// save the corpus with the new ACL
+			delete update.ACL.users[req.params.id_user];				// delete the user from ACL
+			if (Object.getOwnPropertyNames(update.ACL.users).length === 0) update.ACL.users = undefined;
+			Corpus.findByIdAndUpdate(req.params.id_corpus, update, function (error, newCorpus) {	// save the corpus with the new ACL
 				if (error) res.status(400).json({message:error});
-				else printRes(corpus, res);
+				else res.status(200).json(newCorpus.ACL);
 			});	
 		}				
 	});
@@ -267,15 +265,15 @@ exports.removeUserFromACL = function(req, res){
 exports.removeGroupFromACL = function(req, res){
 	Corpus.findById(req.params.id_corpus, function(error, corpus){		// find the corpus
 		if (error) res.status(400).json({message:error});
-		var update = {groups_ACL : corpus.groups_ACL};	
-		if (!update.groups_ACL || update.groups_ACL==null) res.status(400).json({message:req.params.id_group+" not in groups_ACL"}); 
-		else if (!update.groups_ACL[req.params.id_group]) res.status(400).json({message:req.params.id_group+" not in groups_ACL"}); 
+		var update = {ACL:corpus.ACL};	
+		if (!update.ACL.groups || update.ACL.groups==null) res.status(400).json({message:req.params.id_group+" not in ACL.groups"}); 
+		else if (!update.ACL.groups[req.params.id_group]) res.status(400).json({message:req.params.id_group+" not in ACL.groups"}); 
 		else {
-			delete update.groups_ACL[req.params.id_group];				// delete the group from ACL
-			if (Object.getOwnPropertyNames(update.groups_ACL).length === 0) update.groups_ACL = undefined;
-			Corpus.findByIdAndUpdate(req.params.id_corpus, update, function (error, corpus) {	// save the corpus with the new ACL
+			delete update.ACL.groups[req.params.id_group];				// delete the group from ACL
+			if (Object.getOwnPropertyNames(update.ACL.groups).length === 0) update.ACL.groups = undefined;
+			Corpus.findByIdAndUpdate(req.params.id_corpus, update, function (error, newCorpus) {	// save the corpus with the new ACL
 				if (error) res.status(400).json({message:error});
-				else printRes(corpus, res);
+				else res.status(200).json(newCorpus.ACL);
 			});	
 		}				
 	});
@@ -339,9 +337,8 @@ exports.addLayer = function(req, res){
 												  "fragment_type":new_layer.fragment_type,
 												  "data_type":new_layer.data_type}
 									});
-			new_layer.users_ACL = {};
-			new_layer.groups_ACL = {};
-			new_layer.users_ACL[req.session.user._id]='O';				// set 'O' right to the user logged
+			new_layer.ACL = {users:{}, groups:{}};
+			new_layer.ACL.users[req.session.user._id]='O';				// set 'O' right to the user logged
 			var layer = new Layer(new_layer).save(function (error, newLayer) {	// save the new layer
 				if (newLayer) res.status(200).json(newLayer);
 				callback(error);

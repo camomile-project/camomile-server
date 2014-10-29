@@ -31,8 +31,7 @@ exports.CorpusSchema = CorpusSchema = new Schema({
 	name: {type: String, required: true, trim: true},
 	description : {type : Schema.Types.Mixed, 'default' : ''},
 	history : [HistorySchema],
-	users_ACL: {},
-	groups_ACL: {}
+    ACL: {type : Schema.Types.Mixed, 'default' : null},
 }, { versionKey: false });
 
 exports.Corpus = Corpus = mongoose.model('Corpus', CorpusSchema);

@@ -140,7 +140,7 @@ exports.update = function(req, res){
 
 //retrieve a particular user (with id)
 exports.getACL = function(req, res){
-	Layer.findById(req.params.id_layer, 'users_ACL groups_ACL', function(error, layer){
+	Layer.findById(req.params.id_layer, 'ACL', function(error, layer){
 		if (error) res.status(400).json({message:error});
     	else res.status(200).json(layer);
 	});
@@ -151,12 +151,12 @@ exports.updateUserACL = function(req, res){
 	if (req.body.Right != 'O' && req.body.Right != 'W' && req.body.Right != 'R') res.status(400).json({message:"Right must be 'O' or 'W' or 'R'"});
 	Layer.findById(req.params.id_layer, function(error, layer){			// find the layer
 		if (error) res.status(400).json({message:error});
-		var update = {users_ACL:layer.users_ACL};
-		if (!update.users_ACL) update.users_ACL = {};
-		update.users_ACL[req.params.id_user]=req.body.Right;			// udpate acl
+		var update = {ACL:layer.ACL};	
+		if (!update.ACL.users) update.ACL.users = {};
+		update.ACL.users[req.params.id_user]=req.body.Right;			// udpate acl
 		Layer.findByIdAndUpdate(req.params.id_layer, update, function (error, newLayer) {	// save the layer with the new ACL
 			if (error) res.status(400).json({message:error});
-			else res.status(200).json(newLayer.users_ACL);
+			else res.status(200).json(newLayer.ACL);
 		});	
 	});
 }
@@ -166,12 +166,12 @@ exports.updateGroupACL = function(req, res){
 	if (req.body.Right != 'O' && req.body.Right != 'W' && req.body.Right != 'R') res.status(400).json({message:"Right must be 'O' or 'W' or 'R'"});
 	Layer.findById(req.params.id_layer, function(error, layer){			// find the layer
 		if (error) res.status(400).json({message:error});
-		var update = {groups_ACL:layer.groups_ACL};
-		if (!update.groups_ACL) update.groups_ACL = {};
-		update.groups_ACL[req.params.id_group]=req.body.Right;			// udpate acl
+		var update = {ACL:layer.ACL};	
+		if (!update.ACL.groups) update.ACL.groups = {};
+		update.ACL.groups[req.params.id_group]=req.body.Right;			// udpate acl
 		Layer.findByIdAndUpdate(req.params.id_layer, update, function (error, newLayer) {	// save the layer with the new ACL
 			if (error) res.status(400).json({message:error});
-			else res.status(200).json(newLayer.groups_ACL);
+			else res.status(200).json(newLayer.ACL);
 		});	
 	});
 }
@@ -180,15 +180,15 @@ exports.updateGroupACL = function(req, res){
 exports.removeUserFromACL = function(req, res){	
 	Layer.findById(req.params.id_layer, function(error, layer){			// find the layer
 		if (error) res.status(400).json({message:error});
-		var update = {users_ACL : layer.users_ACL};	
-		if (!update.users_ACL || update.users_ACL==null) res.status(400).json({message:req.params.id_user+" not in users_ACL"}); 
-		else if (!update.users_ACL[req.params.id_user]) res.status(400).json({message:req.params.id_user+" not in users_ACL"}); 
+		var update = {ACL:layer.ACL};	
+		if (!update.ACL.users || update.ACL.users==null) res.status(400).json({message:req.params.id_user+" not in ACL.users"}); 
+		else if (!update.ACL.users[req.params.id_user]) res.status(400).json({message:req.params.id_user+" not in ACL.users"}); 
 		else {
-			delete update.users_ACL[req.params.id_user];				// delete the user from ACL
-			if (Object.getOwnPropertyNames(update.users_ACL).length === 0) update.users_ACL = undefined;
-			Layer.findByIdAndUpdate(req.params.id_layer, update, function (error, layer) {	// save the layer with the new ACL
+			delete update.ACL.users[req.params.id_user];				// delete the user from ACL
+			if (Object.getOwnPropertyNames(update.ACL.users).length === 0) update.ACL.users = undefined;
+			Layer.findByIdAndUpdate(req.params.id_layer, update, function (error, newLayer) {	// save the layer with the new ACL
 				if (error) res.status(400).json({message:error});
-				else printRes(layer, res);
+				else res.status(200).json(newLayer.ACL);
 			});	
 		}				
 	});
@@ -198,15 +198,15 @@ exports.removeUserFromACL = function(req, res){
 exports.removeGroupFromACL = function(req, res){
 	Layer.findById(req.params.id_layer, function(error, layer){			// find the layer
 		if (error) res.status(400).json({message:error});
-		var update = {groups_ACL : layer.groups_ACL};	
-		if (!update.groups_ACL || update.groups_ACL==null) res.status(400).json({message:req.params.id_group+" not in groups_ACL"}); 
-		else if (!update.groups_ACL[req.params.id_group]) res.status(400).json({message:req.params.id_group+" not in groups_ACL"}); 
+		var update = {ACL:layer.ACL};	
+		if (!update.ACL.groups || update.ACL.groups==null) res.status(400).json({message:req.params.id_group+" not in ACL.groups"}); 
+		else if (!update.ACL.groups[req.params.id_group]) res.status(400).json({message:req.params.id_group+" not in ACL.groups"}); 
 		else {
-			delete update.groups_ACL[req.params.id_group];				// delete the group from ACL
-			if (Object.getOwnPropertyNames(update.groups_ACL).length === 0) update.groups_ACL = undefined;
-			Layer.findByIdAndUpdate(req.params.id_layer, update, function (error, layer) {	// save the layer with the new ACL
+			delete update.ACL.groups[req.params.id_group];				// delete the group from ACL
+			if (Object.getOwnPropertyNames(update.ACL.groups).length === 0) update.ACL.groups = undefined;
+			Layer.findByIdAndUpdate(req.params.id_layer, update, function (error, newLayer) {	// save the layer with the new ACL
 				if (error) res.status(400).json({message:error});
-				else printRes(layer, res);
+				else res.status(200).json(newLayer.ACL);
 			});	
 		}				
 	});
