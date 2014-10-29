@@ -22,19 +22,18 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-/* The API controller for group's methods */
-
 var async = require('async');
 
+// check if the id_group exists in the db
 exports.exist = function(req, res, next) {
 	Group.findById(req.params.id_group, function(error, group){
 		if (error) res.status(400).json(error);
-		else if (!group) res.status(400).json({"message":"id_group don't exists"});
+		else if (!group) res.status(400).json({message:"id_group don't exists"});
 		else next();
 	});
 }
 
-//list all groups to which the connected user belong
+// retrieve all group and print _id, name, description and the list of user belong the group
 exports.getAll = function (req, res) {
 	Group.find({}, function (error, groups) {
 		if (error) res.status(400).json(error);
@@ -43,7 +42,7 @@ exports.getAll = function (req, res) {
 	});
 }
 
-//retrieve a particular group (with id)
+// retrieve a particular group with his _id and print _id, name, description and list
 exports.getInfo = function(req, res){
 	Group.findById(req.params.id_group, function(error, group){
 		if (error) res.status(400).json(error);
@@ -51,37 +50,37 @@ exports.getInfo = function(req, res){
 	});
 }
 
-//create a group
+// create a new group
 exports.create = function(req, res){
 	var error=null;
 	async.waterfall([
-		function(callback) {
+		function(callback) {											// check field
 			if (req.body.name == undefined) error="the name is not define";
 			if (req.body.name == "") 		error="empty string for name is not allow";
 			callback(error);
 		},
-		function(callback) {
+		function(callback) {											// check is name not already used
 			Group.count({name: req.body.name}, function (error, count) {	
 				if ((!error) && (count != 0)) error = "the name is already used, choose another name";
 		        callback(error);
 		    });
 		},
-		function(callback) {
+		function(callback) {											// create the group
 			var group = new Group({
 				name: req.body.name,
 				description: req.body.description,
 				users_list: []
-			}).save(function (error, newGroup) {
+			}).save(function (error, newGroup) {						// save it into the db
 				if (newGroup) res.status(200).json(newGroup);
 				callback(error);
 			});			
 		}
 	], function (error) {
-		if (error) res.status(400).json({"message":error});
+		if (error) res.status(400).json({message:error});
 	});
 };
 
-//update information of a group
+// update the description of a group
 exports.update = function(req, res){
 	Group.findById(req.params.id_group, function(error, group){
 		if (req.body.description) group.description = req.body.description;
@@ -92,11 +91,11 @@ exports.update = function(req, res){
 	});
 }
 
-// remove a given group ID
+// remove a group
 exports.remove = function (req, res) {
 	var error;
 	async.waterfall([	
-		function(callback) {
+		function(callback) {											// remove id_group from ACL of all corpus
 			Corpus.find(function(error, l_corpus){
 				for(var i = 0; i < l_corpus.length; i++) {
 					if (l_corpus[i].groups_ACL) {
@@ -111,7 +110,7 @@ exports.remove = function (req, res) {
 				callback(error);				
 			});
 		},
-		function(callback) {
+		function(callback) {											// remove id_group from ACL of all layer
 			Layer.find(function(error, l_layer){
 				for(var i = 0; i < l_layer.length; i++) {
 					if (l_layer[i].groups_ACL) {
@@ -126,25 +125,25 @@ exports.remove = function (req, res) {
 				callback(error);				
 			});
 		},		
-		function(callback) {
+		function(callback) {											// delete the group from the db
 			Group.remove({_id : req.params.id_group}, function (error, group) {
 				if (!error && group == 1) res.status(200).json({message:"The group as been delete"});
 				callback(error);
 			});
 		},		
 	], function (error) {
-		if (error) res.status(400).json({"message":error});
+		if (error) res.status(400).json({message:error});
 	});
 }
 
-//add a user to a group
+// add a user to the group
 exports.addUser = function(req, res){
-	Group.findById(req.params.id_group, function (error, group) {
+	Group.findById(req.params.id_group, function (error, group) {		// find the group
 		if (error) res.status(400).json(error);
 		else if (group.users_list.indexOf(req.params.id_user) != -1) res.status(400).json({error:"This user is already in the group"})
 		else {
-			group.users_list.push(req.params.id_user);			
-			group.save(function(error3, dat){
+			group.users_list.push(req.params.id_user);					// add the user to the list
+			group.save(function(error3, dat){							// save the group
 				if (error3) res.status(400).json(error);
 				else res.status(200).json(dat);
 			}); 			
@@ -152,21 +151,20 @@ exports.addUser = function(req, res){
 	});
 };
 
-//remove a user from a group
+// remove a user from a group
 exports.removeUser  = function(req, res){
-	Group.findById(req.params.id_group, function (error, group) {
+	Group.findById(req.params.id_group, function (error, group) {		// find the group
 		if (error) res.status(400).json(error);
 		else {
-			var index = group.users_list.indexOf(req.params.id_user);
+			var index = group.users_list.indexOf(req.params.id_user);	// check if id_user is in the group
 			if (index > -1) {
 				group.users_list.splice(index, 1);
-				group.save(function(error2, dat){
+				group.save(function(error2, NewGroup){					// save the group
 					if (error) res.status(400).json(error);
-					else res.json(dat);
+					else res.json(NewGroup);
 				}); 
 			}
 			else res.status(400).json({message:"This user is not in the group"});
 		}
 	});
-}
-	
+}	

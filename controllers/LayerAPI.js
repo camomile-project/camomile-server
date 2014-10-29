@@ -26,7 +26,7 @@ var async = require('async');
 var commonFuncs = require('../lib/commonFuncs');
 
 
-//check if a id_layer exists
+//check if the id_layer exists in the db
 exports.exist = function(req, res, next) {
 	Layer.findById(req.params.id_layer, function(error, layer){
 		if (error) res.status(400).json(error);
@@ -35,7 +35,7 @@ exports.exist = function(req, res, next) {
 	});
 }
 
-// only print username, role and description
+// print _id, name, description, fragment_type, data_type and history 
 printRes = function(layer, res) {
 	var p = {"_id":layer._id,
 			 "id_corpus":layer.id_corpus,
@@ -48,7 +48,7 @@ printRes = function(layer, res) {
 	res.status(200).json(p);
 }
 
-// only print username, role and description for the list of l_layer
+// for the list of layer print _id, name, description, fragment_type, data_type and history 
 exports.printMultiRes = function(l_layer, res) {
 	var p = [];
 	for (i = 0; i < l_layer.length; i++) { 
@@ -68,17 +68,17 @@ exports.printMultiRes = function(l_layer, res) {
 exports.AllowUser = function (list_right){
 	return function(req, res, next) {
 		async.waterfall([
-			function(callback) {
+			function(callback) {										// find the user
 				User.findById(req.session.user._id, function(error, user){
 					callback(error, user);
 				});
 			},
-			function(user, callback) {
+			function(user, callback) {									// find the list of group belong the user
 				Group.find({'users_list' : {$regex : new RegExp('^'+ req.session.user._id + '$', "i")}}, function(error, groups) {
 					callback(error, user, groups);
 				});
 			},
-			function(user, groups, callback) {
+			function(user, groups, callback) {							// find if the user have the right to access this layer
 				Layer.findById(req.params.id_layer, function(error, layer){
 					if (commonFuncs.checkRightACL(layer, user, groups, list_right)) next();
 					else error = "Acces denied";
@@ -91,7 +91,7 @@ exports.AllowUser = function (list_right){
 	}
 }
 
-//retrieve a particular user (with id)
+// retrieve a particular layer with his _id, name, description, fragment_type, data_type and history 
 exports.getInfo = function(req, res){
 	Layer.findById(req.params.id_layer, 'name description history fragment_type data_type', function(error, layer){
 		if (error) res.status(400).json({message:error});
@@ -120,7 +120,7 @@ exports.remove = function (req, res) {
 exports.update = function(req, res){
 	var newHistory = {};
 	Layer.findById(req.params.id_layer, function(error, layer){
-		if (req.body.name) {
+		if (req.body.name) {											// check field
 			if (req.body.name == "") res.status(400).json({message:"name can't be empty"});
 			else {
 				layer.name = req.body.name;
@@ -131,8 +131,8 @@ exports.update = function(req, res){
 			layer.description = req.body.description;
 			newHistory.description = req.body.description;
 		}
-		layer.history.push({date:new Date(), id_user:req.session.user._id, modification:newHistory})
-		layer.save(function(error, newLayer) {
+		layer.history.push({date:new Date(), id_user:req.session.user._id, modification:newHistory})	// update history with the modification
+		layer.save(function(error, newLayer) {						// save the layer in the db
 			if (error) res.status(400).json({message:error});
 			if (!error) res.status(200).json(newLayer);
 		});
@@ -150,12 +150,12 @@ exports.getACL = function(req, res){
 // update ACL of a user
 exports.updateUserACL = function(req, res){
 	if (req.body.Right != 'O' && req.body.Right != 'W' && req.body.Right != 'R') res.status(400).json({message:"Right must be 'O' or 'W' or 'R'"});
-	Layer.findById(req.params.id_layer, function(error, layer){
+	Layer.findById(req.params.id_layer, function(error, layer){			// find the layer
 		if (error) res.status(400).json({message:error});
 		var update = {users_ACL:layer.users_ACL};
 		if (!update.users_ACL) update.users_ACL = {};
-		update.users_ACL[req.params.id_user]=req.body.Right;
-		Layer.findByIdAndUpdate(req.params.id_layer, update, function (error, newLayer) {
+		update.users_ACL[req.params.id_user]=req.body.Right;			// udpate acl
+		Layer.findByIdAndUpdate(req.params.id_layer, update, function (error, newLayer) {	// save the layer with the new ACL
 			if (error) res.status(400).json({message:error});
 			else res.status(200).json(newLayer.users_ACL);
 		});	
@@ -165,12 +165,12 @@ exports.updateUserACL = function(req, res){
 // update ACL of a group
 exports.updateGroupACL = function(req, res){
 	if (req.body.Right != 'O' && req.body.Right != 'W' && req.body.Right != 'R') res.status(400).json({message:"Right must be 'O' or 'W' or 'R'"});
-	Layer.findById(req.params.id_layer, function(error, layer){
+	Layer.findById(req.params.id_layer, function(error, layer){			// find the layer
 		if (error) res.status(400).json({message:error});
 		var update = {groups_ACL:layer.groups_ACL};
 		if (!update.groups_ACL) update.groups_ACL = {};
-		update.groups_ACL[req.params.id_group]=req.body.Right;
-		Layer.findByIdAndUpdate(req.params.id_layer, update, function (error, newLayer) {
+		update.groups_ACL[req.params.id_group]=req.body.Right;			// udpate acl
+		Layer.findByIdAndUpdate(req.params.id_layer, update, function (error, newLayer) {	// save the layer with the new ACL
 			if (error) res.status(400).json({message:error});
 			else res.status(200).json(newLayer.groups_ACL);
 		});	
@@ -179,15 +179,15 @@ exports.updateGroupACL = function(req, res){
 
 // remove a user from ACL
 exports.removeUserFromACL = function(req, res){	
-	Layer.findById(req.params.id_layer, function(error, layer){
+	Layer.findById(req.params.id_layer, function(error, layer){			// find the layer
 		if (error) res.status(400).json({message:error});
 		var update = {users_ACL : layer.users_ACL};	
 		if (!update.users_ACL || update.users_ACL==null) res.status(400).json({message:req.params.id_user+" not in users_ACL"}); 
 		else if (!update.users_ACL[req.params.id_user]) res.status(400).json({message:req.params.id_user+" not in users_ACL"}); 
 		else {
-			delete update.users_ACL[req.params.id_user];
+			delete update.users_ACL[req.params.id_user];				// delete the user from ACL
 			if (Object.getOwnPropertyNames(update.users_ACL).length === 0) update.users_ACL = undefined;
-			Layer.findByIdAndUpdate(req.params.id_layer, update, function (error, layer) {
+			Layer.findByIdAndUpdate(req.params.id_layer, update, function (error, layer) {	// save the layer with the new ACL
 				if (error) res.status(400).json({message:error});
 				else printRes(layer, res);
 			});	
@@ -197,15 +197,15 @@ exports.removeUserFromACL = function(req, res){
 
 // remove a group from ACL
 exports.removeGroupFromACL = function(req, res){
-	Layer.findById(req.params.id_layer, function(error, layer){
+	Layer.findById(req.params.id_layer, function(error, layer){			// find the layer
 		if (error) res.status(400).json({message:error});
 		var update = {groups_ACL : layer.groups_ACL};	
 		if (!update.groups_ACL || update.groups_ACL==null) res.status(400).json({message:req.params.id_group+" not in groups_ACL"}); 
 		else if (!update.groups_ACL[req.params.id_group]) res.status(400).json({message:req.params.id_group+" not in groups_ACL"}); 
 		else {
-			delete update.groups_ACL[req.params.id_group];
+			delete update.groups_ACL[req.params.id_group];				// delete the group from ACL
 			if (Object.getOwnPropertyNames(update.groups_ACL).length === 0) update.groups_ACL = undefined;
-			Layer.findByIdAndUpdate(req.params.id_layer, update, function (error, layer) {
+			Layer.findByIdAndUpdate(req.params.id_layer, update, function (error, layer) {	// save the layer with the new ACL
 				if (error) res.status(400).json({message:error});
 				else printRes(layer, res);
 			});	
@@ -217,11 +217,11 @@ exports.removeGroupFromACL = function(req, res){
 exports.addAnnotation = function(req, res){
 	var error=null;
 	async.waterfall([
-		function(callback) {
+		function(callback) {											// check field
 			if (req.body.id_media == undefined) error="an annotation must be link to a id_media";
 			callback(error);
 		},
-		function(callback) {
+		function(callback) {											// create the new annotation
 			var new_annotation = {};
 			new_annotation.fragment = req.body.fragment;
 			new_annotation.data = req.body.data;
@@ -234,7 +234,7 @@ exports.addAnnotation = function(req, res){
 										 			   "data":new_annotation.data
 										 			  }
 										 });
-			var annotation = new Annotation(new_annotation).save(function (error, newAnnotation) {
+			var annotation = new Annotation(new_annotation).save(function (error, newAnnotation) {	// save the new annotation
 				if (newAnnotation) res.status(200).json(newAnnotation);
 				callback(error);
 			});			
@@ -244,7 +244,8 @@ exports.addAnnotation = function(req, res){
 	});
 };
 
-//get all annotation of a corpus
+// retrieve all annotation of a layer and where the user logged is 'O' or 'W' or 'R' on the corresponding layer
+// and print _id, id_layer, fragment and data
 exports.getAllAnnotation = function(req, res){
 	Annotation.find({}, function(error, annotations){
 		async.filter(annotations, 

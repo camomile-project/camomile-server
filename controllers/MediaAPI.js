@@ -26,7 +26,7 @@ var fileSystem = require('fs'); //working with video streaming
 var async = require('async');
 var commonFuncs = require('../lib/commonFuncs');
 
-//check if a id_media exists
+// check if the id_media exists in the db
 exports.exist = function(req, res, next) {
 	Media.findById(req.params.id_media, function(error, media){
 		if (error) res.status(400).json(error);
@@ -35,26 +35,27 @@ exports.exist = function(req, res, next) {
 	});
 }
 
+
 // check if req.session.user._id have the good right to see this media.id_corpus
 exports.AllowUser = function (list_right){
 	return function(req, res, next) {
 		async.waterfall([
-			function(callback) {
+			function(callback) {										// find the user
 				User.findById(req.session.user._id, function(error, user){
 					callback(error, user);
 				});
 			},
-			function(user, callback) {
+			function(user, callback) {									// find the list of group belong the user
 				Group.find({'users_list' : {$regex : new RegExp('^'+ req.session.user._id + '$', "i")}}, function(error, groups) {
 					callback(error, user, groups);
 				});
 			},
-			function(user, groups, callback) {
+			function(user, groups, callback) {							// find the media
 				Media.findById(req.params.id_media, function(error, media){
 					callback(error, user, groups, media);
 	    		});
 			},
-			function(user, groups, media, callback) {
+			function(user, groups, media, callback) {					// find the corpus belong the media anc check if the user have the right to access this corpus
 				Corpus.findById(media.id_corpus, function(error, corpus){
 					if (commonFuncs.checkRightACL(corpus, user, groups, list_right)) next();
 					else error = "Acces denied";
@@ -68,7 +69,7 @@ exports.AllowUser = function (list_right){
 	}
 }
 
-//retrieve a particular user (with id)
+// retrieve a particular media with his _id and print _id, name, description, url and history
 exports.getInfo = function(req, res){
 	Media.findById(req.params.id_media, 'name description id_corpus url history', function(error, media){
 		if (error) res.status(400).json({message:error});
@@ -80,7 +81,7 @@ exports.getInfo = function(req, res){
 exports.update = function(req, res){
 	var newHistory = {};
 	Media.findById(req.params.id_media, function(error, media){
-		if (req.body.name) {
+		if (req.body.name) {											// check field
 			if (req.body.name == "") res.status(400).json({message:"name can't be empty"});
 			else {
 				media.name = req.body.name;
@@ -95,8 +96,8 @@ exports.update = function(req, res){
 			media.description = req.body.url;
 			history.description = req.body.url;
 		}
-		media.history.push({date:new Date(), id_user:req.session.user._id, modification:newHistory})
-		media.save(function(error, newMedia) {
+		media.history.push({date:new Date(), id_user:req.session.user._id, modification:newHistory})	// update history with the modification
+		media.save(function(error, newMedia) {							// save the media in the db
 			if (error) res.status(400).json({message:error});
 			if (!error) res.status(200).json(newMedia);
 		});

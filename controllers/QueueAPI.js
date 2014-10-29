@@ -29,6 +29,7 @@ SOFTWARE.
    	- putnext: intert a list of id into the queue			
 */
 
+// check if the id_queue exists in the db
 exports.exist = function(req, res, next) {
 	Queue.findById(req.params.id_queue, function(error, queue){
 		if (error) res.status(400).json(error);
@@ -60,7 +61,7 @@ exports.getAll = function (req, res) {
 	});
 }
 
-//retrieve a particular queue (with id)
+// retrieve a particular queue with his _id
 exports.getInfo = function(req, res){
 	Queue.findById(req.params.id_queue, function(error, queue){
 		res.status(200).json(queue);

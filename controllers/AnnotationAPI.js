@@ -25,7 +25,7 @@ SOFTWARE.
 var async = require('async');
 var commonFuncs = require('../lib/commonFuncs');
 
-//check if a id_annotation exists
+// check if the id_annotation exists in the db
 exports.exist = function(req, res, next) {
 	Annotation.findById(req.params.id_annotation, function(error, annotation){
 		if (error) res.status(400).json(error);
@@ -34,7 +34,7 @@ exports.exist = function(req, res, next) {
 	});
 }
 
-//retrieve a particular user (with id)
+// retrieve a particular annotation with his _id  print _id, id_layer, fragment and data
 exports.getInfo = function(req, res){
 	Annotation.findById(req.params.id_annotation, function(error, annotation){
 		if (error) res.status(400).json({message:error});
@@ -42,7 +42,7 @@ exports.getInfo = function(req, res){
 	});
 }
 
-// retrieve all annotation
+// get all annotation
 exports.getAll = function (req, res) {	
 	Annotation.find({}, function (error, annotations) {
     	if (error) res.status(400).json({error:"error", message:error});
@@ -62,7 +62,7 @@ exports.remove = function (req, res) {
 exports.update = function(req, res){
 	var newHistory = {};
 	Annotation.findById(req.params.id_annotation, function(error, annotation){
-		if (req.body.fragment) {
+		if (req.body.fragment) {											// check field
 			annotation.fragment = req.body.fragment;
 			newHistory.fragment = req.body.fragment;
 		}
@@ -71,7 +71,7 @@ exports.update = function(req, res){
 			newHistory.data = req.body.data;
 		}	
 		annotation.history.push({date:new Date(), id_user:req.session.user._id, modification:newHistory})
-		annotation.save(function(error, newAnnotation) {
+		annotation.save(function(error, newAnnotation) {							// save the media in the db
 			if (error) res.status(400).json({message:error});
 			if (!error) res.status(200).json(newAnnotation);
 		});

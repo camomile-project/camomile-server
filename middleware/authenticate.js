@@ -40,7 +40,7 @@ hash = function (pwd, salt, fn) {
 			crypto.pbkdf2(pwd, salt, iterations, len, function(error2, hash){
 				if (error2) return fn(error);
 				fn(null, salt, hash);
-			);
+			});
 		});
 	}
 };
