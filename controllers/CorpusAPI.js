@@ -57,12 +57,11 @@ exports.create = function(req, res){
 
 // print _id, name, description and history
 printRes = function(corpus, res) {
-	var p = {"_id":corpus._id,
-			 "name":corpus.name,
-			 "description":corpus.description,
-			 "history":corpus.history
-			};
-	res.status(200).json(p);
+	res.status(200).json({"_id":corpus._id,
+			 			  "name":corpus.name,
+						  "description":corpus.description,
+						  "history":corpus.history
+						 });
 }
 
 // for the list of corpus print _id, name, description and history

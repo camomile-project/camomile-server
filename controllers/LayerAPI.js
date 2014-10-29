@@ -37,15 +37,14 @@ exports.exist = function(req, res, next) {
 
 // print _id, name, description, fragment_type, data_type and history 
 printRes = function(layer, res) {
-	var p = {"_id":layer._id,
-			 "id_corpus":layer.id_corpus,
-			 "name":layer.name,
-			 "description":layer.description,
-			 "fragment_type":layer.fragment_type,
-			 "data_type":layer.data_type,
-			 "history":layer.history,
-			};
-	res.status(200).json(p);
+	res.status(200).json({"_id":layer._id,
+						  "id_corpus":layer.id_corpus,
+						  "name":layer.name,
+						  "description":layer.description,
+						  "fragment_type":layer.fragment_type,
+						  "data_type":layer.data_type,
+						  "history":layer.history
+						});
 }
 
 // for the list of layer print _id, name, description, fragment_type, data_type and history 
