@@ -154,6 +154,12 @@ exports.update = function(req, res){
 exports.remove  = function(req, res){
 	var error;
 	async.waterfall([	
+		function(callback) {
+			User.findById(req.params.id_user, function(error, user){	// find the user
+				if (user.username == "root") 	error = "can't delete root user"
+				callback(error);
+			});
+		},		
 		function(callback) {											// remove id_user from ACL of all corpus
 			Corpus.find(function(error, l_corpus){
 				for(var i = 0; i < l_corpus.length; i++) {
