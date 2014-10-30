@@ -124,12 +124,12 @@ exports.initialize = function(app){
 								   userAPI.currentUserIsroot,  
 								   groupAPI.remove);				// rajouter la suppression dans les acl
 	// add user to a group
-	// POST /group/id_group/user/id_user
-	app.post("/group/:id_group/user/:id_user", authenticate.islogin,
-											   groupAPI.exist, 
-											   userAPI.exist,
-											   userAPI.currentUserIsAdmin,  
-											   groupAPI.addUser);
+	// PUT /group/id_group/user/id_user
+	app.put("/group/:id_group/user/:id_user", authenticate.islogin,
+											  groupAPI.exist, 
+											  userAPI.exist,
+											  userAPI.currentUserIsAdmin,  
+											  groupAPI.addUser);
 	// remove a user from a group
 	// DELETE /group/id_group/user/id_user
 	app.delete('/group/:id_group/user/:id_user', authenticate.islogin,
