@@ -36,7 +36,7 @@ exports.exist = function(req, res, next) {
 }
 
 // print _id, name, description, fragment_type, data_type and history 
-printRes = function(layer, res) {
+printResLayer = function(layer, res) {
 	res.status(200).json({"_id":layer._id,
 						  "id_corpus":layer.id_corpus,
 						  "name":layer.name,
@@ -133,7 +133,7 @@ exports.update = function(req, res){
 		layer.history.push({date:new Date(), id_user:req.session.user._id, modification:newHistory})	// update history with the modification
 		layer.save(function(error, newLayer) {						// save the layer in the db
 			if (error) res.status(400).json({message:error});
-			else printRes(newLayer, res);
+			else printResLayer(newLayer, res);
 		});
 	});
 }

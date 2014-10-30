@@ -46,8 +46,9 @@ exports.exist = function(req, res, next) {
 }
 
 // print _id, username, role and description
-printRes = function(user, res) {
+printResUser = function(user, res) {
 	res.status(200).json({
+		"_id":user._id,
 		"username":user.username,
 		"role":user.role,
 		"description":user.description
@@ -85,7 +86,7 @@ exports.create = function (req, res) {
 								 salt: salt,
 								 hash: hash,
 				}).save(function (error, newUser) {						// save it into the db
-					if (newUser) printRes(newUser, res);
+					if (newUser) printResUser(newUser, res);
 					callback(error);
 			});			
 		}
@@ -106,7 +107,7 @@ exports.getAll = function (req, res) {
 // retrieve a particular user with his _id and print _id, username, role and description
 exports.getInfo = function(req, res){
 	User.findById(req.params.id_user, function(error, user){
-		printRes(user,res);
+		printResUser(user,res);
 	});
 }
 
@@ -141,7 +142,7 @@ exports.update = function(req, res){
 		function(user, callback) {
 			if (req.body.description) user.description = req.body.description;
 			user.save(function (error, user) {							// save the user
-				if (!error) printRes(user, res);
+				if (!error) printResUser(user, res);
 				callback(error)
 			});			
 		}

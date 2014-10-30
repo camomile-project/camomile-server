@@ -48,7 +48,7 @@ exports.create = function (req, res) {
 		list: [],
 	}).save(function (error, newQueue) {
 		if (error) res.status(400).json({message:error});
-		if (newQueue) printRes(newQueue, res);
+		if (newQueue) res.status(200).json(newQueue);
 	});
 }
 

@@ -58,7 +58,7 @@ exports.create = function(req, res){
 };
 
 // print _id, name, description and history
-printRes = function(corpus, res) {
+printResCorpus = function(corpus, res) {
 	res.status(200).json({"_id":corpus._id,
 			 			  "name":corpus.name,
 						  "description":corpus.description,
@@ -170,7 +170,7 @@ exports.update = function(req, res){
 		corpus.history.push({date:new Date(), id_user:req.session.user._id, modification:newHistory})	// update history with the modification
 		corpus.save(function(error, newCorpus) {						// save the corpus in the db
 			if (error) res.status(400).json({message:error});
-			else printRes(newCorpus, res);
+			else printResCorpus(newCorpus, res);
 		});
 	});
 }
