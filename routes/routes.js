@@ -96,7 +96,7 @@ exports.initialize = function(app){
 	
 	// --- group routes --- \\
 	// create a group
-	// POST /group --data '{"name":"...", "description":{"...":"..."}}}}'
+	// POST /group --data '{"name":"...", "description":{"...":"..."}}'
 	app.post("/group", authenticate.islogin,
 					   userAPI.currentUserIsAdmin, 
 					   groupAPI.create);
