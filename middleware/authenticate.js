@@ -78,8 +78,9 @@ exports.login = function (req, res) {
 
 // logout
 exports.logout = function (req, res) {
+	var username = req.session.user.username;
 	req.session.destroy(function () {
-		res.status(200).json({message:req.session.user.username +" is logged out"});
+		res.status(200).json({message:username +" is logged out"});
 	});
 }
 
