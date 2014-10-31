@@ -85,16 +85,16 @@ exports.update = function(req, res){
 			if (req.body.name == "") res.status(400).json({message:"name can't be empty"});
 			else {
 				media.name = req.body.name;
-				history.name = req.body.name;
+				newHistory.name = req.body.name;
 			}
 		}				
 		if (req.body.description) {
 			media.description = req.body.description;
-			history.description = req.body.description;
+			newHistory.description = req.body.description;
 		}
 		if (req.body.url) {
-			media.description = req.body.url;
-			history.description = req.body.url;
+			media.url = req.body.url;
+			newHistory.url = req.body.url;
 		}
 		media.history.push({date:new Date(), id_user:req.session.user._id, modification:newHistory})	// update history with the modification
 		media.save(function(error, newMedia) {							// save the media in the db
