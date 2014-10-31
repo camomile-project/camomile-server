@@ -86,7 +86,11 @@ exports.logout = function (req, res) {
 
 // to now who is logged in
 exports.me = function (req, res) {
-    res.status(200).json({message:'user is logged as ' + req.session.user.username});
+    res.status(200).json({id_user:req.session.user._id, 
+    					  username:req.session.user.username,
+    					  role:req.session.user.role,
+    					  description:req.session.user.description
+    					});
 }
 
 // check if a user is logged in
