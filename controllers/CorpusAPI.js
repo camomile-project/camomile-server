@@ -207,7 +207,7 @@ exports.remove = function (req, res) {
 
 // get ACL of the corpus
 exports.getACL = function(req, res){
-	Corpus.findById(req.params.id_corpus, function(error, corpus){   //, 'ACL'
+	Corpus.findById(req.params.id_corpus, 'ACL', function(error, corpus){   //
 		if (error) res.status(400).json({message:error});
     	else res.status(200).json(corpus);
 	});
