@@ -169,7 +169,7 @@ exports.initialize = function(app){
 	// DELETE /corpus/id_corpus
 	app.delete('/corpus/:id_corpus', authenticate.islogin,
 									 corpusAPI.exist, 
-									 userAPI.currentUserIsAdmin,
+									 userAPI.currentUserIsroot,
 									 corpusAPI.remove);
 	// create a media for a corpus
 	// POST /corpus/id_corpus/media --data '{"name":"...", "url":"...", "description":{"...":"..."}}' 

@@ -1,6 +1,6 @@
 import glob, os
 
-words =["Session"]
+words =["printRes"]
 depth = 2
 path = "*"
 for i in range(depth):
