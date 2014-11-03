@@ -33,9 +33,12 @@
     <div class="page-wrapper">
       <div class="dark-box"></div>
       <div class="content">
-        <h1 id="create-an-object-user_client-for-python-and-javascript">create an object user_client for python and javascript</h1>
+        <h1 id="prerequisite">prerequisite</h1>
+
+<h2 id="create-an-object-user_client-for-python-and-javascript-client">Create an object user_client for python and javascript client</h2>
 <pre class="highlight javascript"></pre>
-<pre class="highlight python"><span class="n">user_client</span> <span class="o">=</span> <span class="n">camomile</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">CamomileClient</span><span class="p">(</span><span class="o">&lt;</span><span class="n">username</span><span class="o">&gt;</span><span class="p">,</span> <span class="o">&lt;</span><span class="n">password</span><span class="o">&gt;</span><span class="p">,</span> <span class="n">URL</span><span class="p">,</span> <span class="o">&lt;</span><span class="n">return_type</span><span class="o">&gt;</span><span class="p">)</span>
+<pre class="highlight python"><span class="kn">import</span> <span class="nn">camomile.client</span>
+<span class="n">user_client</span> <span class="o">=</span> <span class="n">camomile</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">CamomileClient</span><span class="p">(</span><span class="o">&lt;</span><span class="n">username</span><span class="o">&gt;</span><span class="p">,</span> <span class="o">&lt;</span><span class="n">password</span><span class="o">&gt;</span><span class="p">,</span> <span class="n">URL</span><span class="p">,</span> <span class="o">&lt;</span><span class="n">return_type</span><span class="o">&gt;</span><span class="p">)</span>
 </pre>
 
 <h4 id="query-parameters">QUERY PARAMETERS</h4>
@@ -50,30 +53,24 @@
 <tr>
 <td>username</td>
 <td>String</td>
-<td>The user name</td>
+<td>The user name  (required)</td>
 </tr>
 <tr>
 <td>password</td>
 <td>String</td>
-<td>The password</td>
+<td>The password (required)</td>
 </tr>
 <tr>
 <td>URL</td>
 <td>String</td>
-<td>base of the url (e.g. http://example.com/)</td>
+<td>base of the url (e.g. http://example.com/) (required)</td>
 </tr>
 <tr>
 <td>return_type</td>
 <td>Bool</td>
-<td>&ldquo;False&rdquo; for a python dictionnary, &ldquo;True&rdquo; for an objectifier return</td>
+<td>&ldquo;False&rdquo; for a python dictionnary, &ldquo;True&rdquo; for an objectifier</td>
 </tr>
 </tbody></table>
-
-<blockquote>
-<p>The above command returns JSON structured like this:</p>
-</blockquote>
-<pre class="highlight json"><span class="w">
-</span></pre>
 
 <h4 id="http-request">HTTP request</h4>
 
@@ -91,12 +88,12 @@
 <tr>
 <td>username</td>
 <td>String</td>
-<td>The user name</td>
+<td>The user name (required)</td>
 </tr>
 <tr>
 <td>password</td>
 <td>String</td>
-<td>The password</td>
+<td>The password (required)</td>
 </tr>
 </tbody></table>
 
@@ -112,7 +109,9 @@
 <blockquote>
 <p>The above command returns JSON structured like this:</p>
 </blockquote>
-<pre class="highlight json"><span class="w">
+<pre class="highlight json"><span class="p">{</span><span class="w">
+  </span><span class="s2">"message"</span><span class="p">:</span><span class="w"> </span><span class="s2">"You have been successfully logged in as user1"</span><span class="w">
+</span><span class="p">}</span><span class="w">
 </span></pre>
 
 <h4 id="http-request">HTTP request</h4>
@@ -131,16 +130,18 @@
 <tr>
 <td>username</td>
 <td>String</td>
-<td>The user name</td>
+<td>The user name (required)</td>
 </tr>
 <tr>
 <td>password</td>
 <td>String</td>
-<td>The password</td>
+<td>The password (required)</td>
 </tr>
 </tbody></table>
 
 <h2 id="logout">Logout</h2>
+
+<p><aside class="notice">Restriction: user logged in</aside></p>
 <pre class="highlight shell">curl -i -X POST http://example.com/logout -H <span class="s2">"Content-Type: application/json"</span> --cookie <span class="s2">"cookies.txt"</span> 
 
 </pre>
@@ -148,16 +149,30 @@
 <pre class="highlight python"><span class="n">user_client</span><span class="o">.</span><span class="n">logout</span><span class="p">()</span>
 </pre>
 
+<blockquote>
+<p>The above command returns JSON structured like this:</p>
+</blockquote>
+<pre class="highlight json"><span class="p">{</span><span class="w">
+  </span><span class="s2">"message"</span><span class="p">:</span><span class="w"> </span><span class="s2">"user1 is logged out"</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></pre>
+
 <h4 id="http-request">HTTP request</h4>
 
 <p><code class="prettyprint">POST http://example.com/logout</code></p>
 
 <h2 id="me">me</h2>
+
+<p><aside class="notice">Restriction: user logged in</aside></p>
 <pre class="highlight shell">curl -i -X POST http://example.com/me -H <span class="s2">"Content-Type: application/json"</span> --cookie <span class="s2">"cookies.txt"</span>
 </pre>
 <pre class="highlight javascript"></pre>
 <pre class="highlight python"><span class="n">user_client</span><span class="o">.</span><span class="n">me</span><span class="p">()</span>
 </pre>
+
+<blockquote>
+<p>The above command returns JSON structured like this:</p>
+</blockquote>
 <pre class="highlight json"><span class="p">{</span><span class="w">
   </span><span class="s2">"description"</span><span class="p">:</span><span class="w"> </span><span class="s2">""</span><span class="p">,</span><span class="w">
   </span><span class="s2">"id_user"</span><span class="p">:</span><span class="w"> </span><span class="s2">"5305d1a044dc07e805000003"</span><span class="p">,</span><span class="w">
@@ -170,11 +185,11 @@
 
 <p><code class="prettyprint">POST http://example.com/me</code></p>
 
-<h1 id="user-&amp;-group">User &amp; Group</h1>
+<h1 id="user">User</h1>
 
 <h2 id="create-new-user">Create new user</h2>
 
-<p><aside class="notice">admin user only</aside></p>
+<p><aside class="notice">Restriction: admin user only</aside></p>
 <pre class="highlight shell">curl -i -X POST http://example.com/user --data <span class="s1">'{"username":&lt;username&gt;, "password":&lt;password&gt;, "description":&lt;description&gt;, "role":&lt;role&gt;}'</span> -H <span class="s2">"Content-Type: application/json"</span> --cookie <span class="s2">"cookies.txt"</span> 
 </pre>
 <pre class="highlight javascript"></pre>
@@ -186,7 +201,7 @@
 </blockquote>
 <pre class="highlight json"><span class="p">{</span><span class="w">
   </span><span class="s2">"username"</span><span class="p">:</span><span class="w"> </span><span class="s2">"n1"</span><span class="p">,</span><span class="w">
-  </span><span class="s2">"description"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="s2">"..."</span><span class="p">:</span><span class="s2">"..."</span><span class="p">},</span><span class="w">
+  </span><span class="s2">"description"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="s2">"abc"</span><span class="p">:</span><span class="s2">"def"</span><span class="p">},</span><span class="w">
   </span><span class="s2">"role"</span><span class="p">:</span><span class="w"> </span><span class="s2">"user"</span><span class="p">,</span><span class="w">
   </span><span class="s2">"_id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"5422bd9396a223a62d901c75"</span><span class="w">
 </span><span class="p">}</span><span class="w">
@@ -208,12 +223,12 @@
 <tr>
 <td>username</td>
 <td>String</td>
-<td>The user name  (unique in the db and can&rsquo;t be update)</td>
+<td>The user name  (required, unique in the db and can&rsquo;t be update)</td>
 </tr>
 <tr>
 <td>password</td>
 <td>String</td>
-<td>The password</td>
+<td>The password  (required)</td>
 </tr>
 <tr>
 <td>description</td>
@@ -223,13 +238,13 @@
 <tr>
 <td>role</td>
 <td>String</td>
-<td>The user role (&ldquo;admin&rdquo; or &ldquo;user&rdquo;)</td>
+<td>The user role (&ldquo;admin&rdquo; or &ldquo;user&rdquo;)  (required)</td>
 </tr>
 </tbody></table>
 
 <h2 id="get-list-of-users">Get list of users</h2>
 
-<p><aside class="notice">admin user only</aside></p>
+<p><aside class="notice">Restriction: admin user only</aside></p>
 <pre class="highlight shell">curl -i -X GET http://example.com/user -H <span class="s2">"Content-Type: application/json"</span> --cookie <span class="s2">"cookies.txt"</span>
 </pre>
 <pre class="highlight javascript"></pre>
@@ -247,7 +262,7 @@
   </span><span class="p">},</span><span class="w">
   </span><span class="p">{</span><span class="w">
     </span><span class="s2">"username"</span><span class="p">:</span><span class="w"> </span><span class="s2">"name1"</span><span class="p">,</span><span class="w">
-    </span><span class="s2">"description"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="s2">"..."</span><span class="p">:</span><span class="s2">"..."</span><span class="p">},</span><span class="w">
+    </span><span class="s2">"description"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="s2">"abc"</span><span class="p">:</span><span class="s2">"def"</span><span class="p">},</span><span class="w">
     </span><span class="s2">"role"</span><span class="p">:</span><span class="w"> </span><span class="s2">"user"</span><span class="p">,</span><span class="w">
     </span><span class="s2">"_id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"5422bd9396a223a62d901c75"</span><span class="w">
   </span><span class="p">}</span><span class="w">
@@ -260,7 +275,7 @@
 
 <h2 id="get-a-user">Get a user</h2>
 
-<p><aside class="notice">admin user only</aside></p>
+<p><aside class="notice">Restriction: admin user only</aside></p>
 <pre class="highlight shell">curl -i -X GET http://example.com/user/&lt;id_user&gt; -H <span class="s2">"Content-Type: application/json"</span> --cookie <span class="s2">"cookies.txt"</span>
 </pre>
 <pre class="highlight javascript"></pre>
@@ -272,7 +287,7 @@
 </blockquote>
 <pre class="highlight json"><span class="p">{</span><span class="w">
   </span><span class="s2">"username"</span><span class="p">:</span><span class="w"> </span><span class="s2">"n1"</span><span class="p">,</span><span class="w">
-  </span><span class="s2">"description"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="s2">"..."</span><span class="p">:</span><span class="s2">"..."</span><span class="p">},</span><span class="w">
+  </span><span class="s2">"description"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="s2">"abc"</span><span class="p">:</span><span class="s2">"def"</span><span class="p">},</span><span class="w">
   </span><span class="s2">"role"</span><span class="p">:</span><span class="w"> </span><span class="s2">"user"</span><span class="p">,</span><span class="w">
   </span><span class="s2">"_id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"5422bd9396a223a62d901c75"</span><span class="w">
 </span><span class="p">}</span><span class="w">
@@ -294,13 +309,13 @@
 <tr>
 <td>id_user</td>
 <td>String</td>
-<td>The user identifier to retrieve</td>
+<td>The user identifier to retrieve  (required)</td>
 </tr>
 </tbody></table>
 
 <h2 id="update-a-user">Update a user</h2>
 
-<p><aside class="notice">admin user only</aside></p>
+<p><aside class="notice">Restriction: admin user only</aside></p>
 <pre class="highlight shell">curl -i -X PUT http://example.com/user/&lt;id_user&gt; --data <span class="s1">'{"description":&lt;description&gt;, "password":&lt;password&gt;, "role":&lt;role&gt;}'</span> -H <span class="s2">"Content-Type: application/json"</span> --cookie <span class="s2">"cookies.txt"</span>
 
 </pre>
@@ -313,7 +328,7 @@
 </blockquote>
 <pre class="highlight json"><span class="p">{</span><span class="w">
   </span><span class="s2">"username"</span><span class="p">:</span><span class="w"> </span><span class="s2">"n1"</span><span class="p">,</span><span class="w">
-  </span><span class="s2">"description"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="s2">"..."</span><span class="p">:</span><span class="s2">"..."</span><span class="p">},</span><span class="w">
+  </span><span class="s2">"description"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="s2">"abc"</span><span class="p">:</span><span class="s2">"def"</span><span class="p">},</span><span class="w">
   </span><span class="s2">"role"</span><span class="p">:</span><span class="w"> </span><span class="s2">"user"</span><span class="p">,</span><span class="w">
   </span><span class="s2">"_id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"5422bd9396a223a62d901c75"</span><span class="w">
 </span><span class="p">}</span><span class="w">
@@ -335,7 +350,7 @@
 <tr>
 <td>id_user</td>
 <td>String</td>
-<td>The user identifier to update</td>
+<td>The user identifier to update  (required)</td>
 </tr>
 <tr>
 <td>password</td>
@@ -356,7 +371,7 @@
 
 <h2 id="delete-a-user">Delete a user</h2>
 
-<p><aside class="notice">admin user only</aside></p>
+<p><aside class="warning">Restriction: root user only</aside></p>
 <pre class="highlight shell">curl -i -X DELETE http://example.com/user/&lt;id_user&gt; -H <span class="s2">"Content-Type: application/json"</span> --cookie <span class="s2">"cookies.txt"</span>
 </pre>
 <pre class="highlight javascript"></pre>
@@ -387,13 +402,13 @@
 <tr>
 <td>id_user</td>
 <td>String</td>
-<td>The user identifier to delete</td>
+<td>The user identifier to delete  (required)</td>
 </tr>
 </tbody></table>
 
 <h2 id="get-all-group-of-a-user">Get all group of a user</h2>
 
-<p><aside class="notice">admin user only</aside></p>
+<p><aside class="notice">Restriction: admin user only</aside></p>
 <pre class="highlight shell">curl -i -X GET http://example.com/user/&lt;id_user&gt;/group -H <span class="s2">"Content-Type: application/json"</span> --cookie <span class="s2">"cookies.txt"</span>
 </pre>
 <pre class="highlight javascript"></pre>
@@ -410,7 +425,7 @@
     </span><span class="s2">"users_list"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w">
       </span><span class="s2">"5425834830841d2577a439b8"</span><span class="w">
     </span><span class="p">],</span><span class="w">
-    </span><span class="s2">"description"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="s2">"..."</span><span class="p">:</span><span class="s2">"..."</span><span class="p">}</span><span class="w">
+    </span><span class="s2">"description"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="s2">"abc"</span><span class="p">:</span><span class="s2">"def"</span><span class="p">}</span><span class="w">
   </span><span class="p">},</span><span class="w">
   </span><span class="p">{</span><span class="w">
     </span><span class="s2">"_id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"544e049fd25b5c00001c1f2a"</span><span class="p">,</span><span class="w">
@@ -440,13 +455,15 @@
 <tr>
 <td>id_user</td>
 <td>String</td>
-<td>The user identifier to delete</td>
+<td>The user identifier to delete  (required)</td>
 </tr>
 </tbody></table>
 
+<h1 id="group">Group</h1>
+
 <h2 id="create-new-group">Create new group</h2>
 
-<p><aside class="notice">admin user only</aside></p>
+<p><aside class="notice">Restriction: admin user only</aside></p>
 <pre class="highlight shell">curl -i -X POST http://example.com/group --data <span class="s1">'{"name":&lt;name&gt;, "description":&lt;description&gt;}'</span> -H <span class="s2">"Content-Type: application/json"</span> --cookie <span class="s2">"cookies.txt"</span>
 </pre>
 <pre class="highlight javascript"></pre>
@@ -462,7 +479,7 @@
     </span><span class="s2">"users_list"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w">
       </span><span class="s2">"5425834830841d2577a439b8"</span><span class="w">
     </span><span class="p">],</span><span class="w">
-    </span><span class="s2">"description"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="s2">"..."</span><span class="p">:</span><span class="s2">"..."</span><span class="p">}</span><span class="w">
+    </span><span class="s2">"description"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="s2">"abc"</span><span class="p">:</span><span class="s2">"def"</span><span class="p">}</span><span class="w">
 </span><span class="p">}</span><span class="w">
 </span></pre>
 
@@ -482,7 +499,7 @@
 <tr>
 <td>name</td>
 <td>String</td>
-<td>The group name (unique in the db and can&rsquo;t be update)</td>
+<td>The group name (unique in the db and can&rsquo;t be update) (required)</td>
 </tr>
 <tr>
 <td>description</td>
@@ -492,6 +509,8 @@
 </tbody></table>
 
 <h2 id="get-list-of-groups">Get list of groups</h2>
+
+<p><aside class="notice">Restriction: admin user only</aside></p>
 <pre class="highlight shell">curl -i -X GET http://example.com/group -H <span class="s2">"Content-Type: application/json"</span> --cookie <span class="s2">"cookies.txt"</span>
 </pre>
 <pre class="highlight javascript"></pre>
@@ -508,7 +527,7 @@
     </span><span class="s2">"users_list"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w">
       </span><span class="s2">"5425834830841d2577a439b8"</span><span class="w">
     </span><span class="p">],</span><span class="w">
-    </span><span class="s2">"description"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="s2">"..."</span><span class="p">:</span><span class="s2">"..."</span><span class="p">}</span><span class="w">
+    </span><span class="s2">"description"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="s2">"abc"</span><span class="p">:</span><span class="s2">"def"</span><span class="p">}</span><span class="w">
   </span><span class="p">}</span><span class="w">
 </span><span class="p">]</span><span class="w">
 </span></pre>
@@ -519,7 +538,7 @@
 
 <h2 id="get-a-group">Get a group</h2>
 
-<p><aside class="notice">admin user only</aside></p>
+<p><aside class="notice">Restriction: admin user only</aside></p>
 <pre class="highlight shell">curl -i -X GET http://example.com/group/&lt;id_group&gt; -H <span class="s2">"Content-Type: application/json"</span> --cookie <span class="s2">"cookies.txt"</span>
 </pre>
 <pre class="highlight javascript"></pre>
@@ -535,7 +554,7 @@
   </span><span class="s2">"users_list"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w">
     </span><span class="s2">"5425834830841d2577a439b8"</span><span class="w">
   </span><span class="p">],</span><span class="w">
-  </span><span class="s2">"description"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="s2">"..."</span><span class="p">:</span><span class="s2">"..."</span><span class="p">}</span><span class="w">
+  </span><span class="s2">"description"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="s2">"abc"</span><span class="p">:</span><span class="s2">"def"</span><span class="p">}</span><span class="w">
 </span><span class="p">}</span><span class="w">
 </span></pre>
 
@@ -555,13 +574,13 @@
 <tr>
 <td>id_group</td>
 <td>String</td>
-<td>The group identifier to get</td>
+<td>The group identifier to get (required)</td>
 </tr>
 </tbody></table>
 
 <h2 id="update-a-group">Update a group</h2>
 
-<p><aside class="notice">admin user only</aside></p>
+<p><aside class="notice">Restriction: admin user only</aside></p>
 <pre class="highlight shell">curl -i -X PUT http://example.com/group/&lt;id_group&gt; --data <span class="s1">'{"description":&lt;description&gt;}'</span> -H <span class="s2">"Content-Type: application/json"</span> --cookie <span class="s2">"cookies.txt"</span>
 </pre>
 <pre class="highlight javascript"></pre>
@@ -577,7 +596,7 @@
   </span><span class="s2">"users_list"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w">
     </span><span class="s2">"5425834830841d2577a439b8"</span><span class="w">
   </span><span class="p">],</span><span class="w">
-  </span><span class="s2">"description"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="s2">"..."</span><span class="p">:</span><span class="s2">"..."</span><span class="p">}</span><span class="w">
+  </span><span class="s2">"description"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="s2">"abc"</span><span class="p">:</span><span class="s2">"def"</span><span class="p">}</span><span class="w">
 </span><span class="p">}</span><span class="w">
 </span></pre>
 
@@ -597,7 +616,7 @@
 <tr>
 <td>id_group</td>
 <td>String</td>
-<td>The group identifier to update</td>
+<td>The group identifier to update (required)</td>
 </tr>
 <tr>
 <td>description</td>
@@ -608,7 +627,7 @@
 
 <h2 id="delete-a-group">Delete a group</h2>
 
-<p><aside class="notice">admin user only</aside></p>
+<p><aside class="warning">Restriction: root user only</aside></p>
 <pre class="highlight shell">curl -i -X DELETE http://example.com/group/&lt;id_group&gt; -H <span class="s2">"Content-Type: application/json"</span> --cookie <span class="s2">"cookies.txt"</span>
 
 </pre>
@@ -640,13 +659,13 @@
 <tr>
 <td>id_group</td>
 <td>String</td>
-<td>The group identifier to delete</td>
+<td>The group identifier to delete (required)</td>
 </tr>
 </tbody></table>
 
 <h2 id="add-user-to-a-group">Add user to a group</h2>
 
-<p><aside class="notice">admin user only</aside></p>
+<p><aside class="notice">Restriction: admin user only</aside></p>
 <pre class="highlight shell">curl -i -X PUT http://example.com/group/&lt;id_group&gt;/user/&lt;id_user&gt; -H <span class="s2">"Content-Type: application/json"</span> --cookie <span class="s2">"cookies.txt"</span>
 </pre>
 <pre class="highlight javascript"></pre>
@@ -663,7 +682,7 @@
     </span><span class="s2">"5425834830841d2577a439b8"</span><span class="p">,</span><span class="w">
     </span><span class="s2">"5305d1a044dc07e805000003"</span><span class="w">
   </span><span class="p">],</span><span class="w">
-  </span><span class="s2">"description"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="s2">"..."</span><span class="p">:</span><span class="s2">"..."</span><span class="p">}</span><span class="w">
+  </span><span class="s2">"description"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="s2">"abc"</span><span class="p">:</span><span class="s2">"def"</span><span class="p">}</span><span class="w">
 </span><span class="p">}</span><span class="w">
 </span></pre>
 
@@ -683,18 +702,18 @@
 <tr>
 <td>id_group</td>
 <td>String</td>
-<td>The group identifier</td>
+<td>The group identifier (required)</td>
 </tr>
 <tr>
 <td>id_user</td>
 <td>String</td>
-<td>The user identifier to delete</td>
+<td>The user identifier to delete (required)</td>
 </tr>
 </tbody></table>
 
 <h2 id="remove-user-from-a-group">Remove user from a group</h2>
 
-<p><aside class="notice">admin user only</aside></p>
+<p><aside class="notice">Restriction: admin user only</aside></p>
 <pre class="highlight shell">curl -i -X DELETE http://example.com/group/&lt;id_group&gt;/user/&lt;id_user&gt; -H <span class="s2">"Content-Type: application/json"</span> --cookie <span class="s2">"cookies.txt"</span>
 </pre>
 <pre class="highlight javascript"></pre>
@@ -710,7 +729,7 @@
   </span><span class="s2">"users_list"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w">
     </span><span class="s2">"5425834830841d2577a439b8"</span><span class="p">,</span><span class="w">
   </span><span class="p">],</span><span class="w">
-  </span><span class="s2">"description"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="s2">"..."</span><span class="p">:</span><span class="s2">"..."</span><span class="p">}</span><span class="w">
+  </span><span class="s2">"description"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="s2">"abc"</span><span class="p">:</span><span class="s2">"def"</span><span class="p">}</span><span class="w">
 </span><span class="p">}</span><span class="w">
 </span></pre>
 
@@ -730,12 +749,12 @@
 <tr>
 <td>id_group</td>
 <td>String</td>
-<td>The group identifier</td>
+<td>The group identifier (required)</td>
 </tr>
 <tr>
 <td>id_user</td>
 <td>String</td>
-<td>The user identifier to delete</td>
+<td>The user identifier to delete (required)</td>
 </tr>
 </tbody></table>
 
@@ -743,7 +762,7 @@
 
 <h2 id="create-a-corpus">Create a corpus</h2>
 
-<p><aside class="notice">admin user only</aside></p>
+<p><aside class="notice">Restriction: admin user only</aside></p>
 <pre class="highlight shell">curl -i -X POST http://example.com/corpus --data <span class="s1">'{"name":&lt;name&gt;, "description":&lt;description&gt;}'</span> -H <span class="s2">"Content-Type: application/json"</span> --cookie <span class="s2">"cookies.txt"</span> 
 
 </pre>
@@ -796,7 +815,7 @@
 <tr>
 <td>name</td>
 <td>String</td>
-<td>The corpus name</td>
+<td>The corpus name (required)</td>
 </tr>
 <tr>
 <td>description</td>
@@ -806,6 +825,8 @@
 </tbody></table>
 
 <h2 id="get-list-of-corpus">Get list of corpus</h2>
+
+<p><aside class="notice">Restriction: only shows corpus where user/group rights is &lsquo;O&rsquo; or &lsquo;W&rsquo; or &lsquo;R&rsquo; for these corpus</aside></p>
 <pre class="highlight shell">curl -i -X GET http://example.com/corpus -H <span class="s2">"Content-Type: application/json"</span> --cookie <span class="s2">"cookies.txt"</span>
 </pre>
 <pre class="highlight javascript"></pre>
@@ -862,6 +883,8 @@
 <p><code class="prettyprint">GET http://example.com/corpus</code></p>
 
 <h2 id="get-a-corpus">Get a corpus</h2>
+
+<p><aside class="notice">Restriction: user/group rights is &lsquo;O&rsquo; or &lsquo;W&rsquo; or &lsquo;R&rsquo; for this corpus</aside></p>
 <pre class="highlight shell">curl -i -X GET http://example.com/corpus/&lt;id_corpus&gt; -H <span class="s2">"Content-Type: application/json"</span> --cookie <span class="s2">"cookies.txt"</span>
 </pre>
 <pre class="highlight javascript"></pre>
@@ -908,11 +931,13 @@
 <tr>
 <td>id_corpus</td>
 <td>String</td>
-<td>The corpus identifier</td>
+<td>The corpus identifier (required)</td>
 </tr>
 </tbody></table>
 
 <h2 id="update-a-corpus">Update a corpus</h2>
+
+<p><aside class="notice">Restriction: user/group rights is &lsquo;O&rsquo; for this corpus</aside></p>
 <pre class="highlight shell">curl -i -X PUT http://example.com/corpus/&lt;id_corpus&gt; --data <span class="s1">'{"name":&lt;name&gt;, "description":&lt;description&gt;}'</span> -H <span class="s2">"Content-Type: application/json"</span> --cookie <span class="s2">"cookies.txt"</span>
 </pre>
 <pre class="highlight javascript"></pre>
@@ -966,7 +991,7 @@
 <tr>
 <td>id_corpus</td>
 <td>String</td>
-<td>The corpus identifier</td>
+<td>The corpus identifier  (required)</td>
 </tr>
 <tr>
 <td>name</td>
@@ -981,6 +1006,8 @@
 </tbody></table>
 
 <h2 id="delete-a-corpus">Delete a corpus</h2>
+
+<p><aside class="warning">Restriction: root user only</aside></p>
 <pre class="highlight shell">curl -i -X DELETE http://example.com/corpus/&lt;id_corpus&gt; -H <span class="s2">"Content-Type: application/json"</span> --cookie <span class="s2">"cookies.txt"</span>
 
 </pre>
@@ -1012,11 +1039,13 @@
 <tr>
 <td>id_corpus</td>
 <td>String</td>
-<td>The corpus identifier</td>
+<td>The corpus identifier (required)</td>
 </tr>
 </tbody></table>
 
 <h2 id="add-a-media-into-a-corpus">Add a media into a corpus</h2>
+
+<p><aside class="notice">Restriction: user/group rights is &lsquo;O&rsquo; or &lsquo;W&rsquo; for this corpus</aside></p>
 <pre class="highlight shell">curl -i -X POST http://example.com/corpus/&lt;id_corpus&gt;/media --data <span class="s1">'{"name":&lt;name&gt;, "url":&lt;url&gt;, "description":&lt;description&gt;}'</span> -H <span class="s2">"Content-Type: application/json"</span> --cookie <span class="s2">"cookies.txt"</span> 
 </pre>
 <pre class="highlight javascript"></pre>
@@ -1060,12 +1089,12 @@
 <tr>
 <td>id_corpus</td>
 <td>String</td>
-<td>The corpus identifier</td>
+<td>The corpus identifier  (required)</td>
 </tr>
 <tr>
 <td>name</td>
 <td>String</td>
-<td>The media name</td>
+<td>The media name (required)</td>
 </tr>
 <tr>
 <td>url</td>
@@ -1080,6 +1109,8 @@
 </tbody></table>
 
 <h2 id="create-a-layer-into-a-corpus">Create a layer into a corpus</h2>
+
+<p><aside class="notice">Restriction: user/group rights is &lsquo;O&rsquo; or &lsquo;W&rsquo; for this corpus</aside></p>
 <pre class="highlight shell">curl -i -X POST http://example.com/corpus/&lt;id_corpus&gt;/layer --data <span class="s1">'{"name":&lt;name&gt;, "description":&lt;description&gt;, "fragment_type":&lt;fragment_typ&gt;, "data_type":&lt;data_typ&gt;}'</span> -H <span class="s2">"Content-Type: application/json"</span> --cookie <span class="s2">"cookies.txt"</span> 
 </pre>
 <pre class="highlight javascript"></pre>
@@ -1114,7 +1145,6 @@
   </span><span class="s2">"id_corpus"</span><span class="p">:</span><span class="w"> </span><span class="s2">"545387f8777a800000766bf2"</span><span class="p">,</span><span class="w">
   </span><span class="s2">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"new layer"</span><span class="w">
 </span><span class="p">}</span><span class="w">
-
 </span></pre>
 
 <h4 id="http-request">HTTP request</h4>
@@ -1133,12 +1163,12 @@
 <tr>
 <td>id_corpus</td>
 <td>String</td>
-<td>The corpus identifier</td>
+<td>The corpus identifier  (required)</td>
 </tr>
 <tr>
 <td>name</td>
 <td>String</td>
-<td>Name of the layer</td>
+<td>Name of the layer (required)</td>
 </tr>
 <tr>
 <td>description</td>
@@ -1148,16 +1178,18 @@
 <tr>
 <td>fragment_typ</td>
 <td>String</td>
-<td>The fragment type</td>
+<td>The fragment type (required)</td>
 </tr>
 <tr>
 <td>data_typ</td>
 <td>String</td>
-<td>The data type</td>
+<td>The data type (required)</td>
 </tr>
 </tbody></table>
 
 <h2 id="get-list-of-medias-into-a-corpus">Get list of medias into a corpus</h2>
+
+<p><aside class="notice">Restriction: user/group rights is &lsquo;O&rsquo; or &lsquo;W&rsquo; or &lsquo;R&rsquo; for this corpus</aside></p>
 <pre class="highlight shell">curl -i -X GET http://example.com/corpus/&lt;id_corpus&gt;/media -H <span class="s2">"Content-Type: application/json"</span> --cookie <span class="s2">"cookies.txt"</span>
 </pre>
 <pre class="highlight javascript"></pre>
@@ -1209,11 +1241,13 @@
 <tr>
 <td>id_corpus</td>
 <td>String</td>
-<td>The corpus identifier</td>
+<td>The corpus identifier  (required)</td>
 </tr>
 </tbody></table>
 
 <h2 id="get-list-of-layers-into-a-corpus">Get list of layers into a corpus</h2>
+
+<p><aside class="notice">Restriction: only shows layers where user/group rights is &lsquo;O&rsquo; or &lsquo;W&rsquo; or &lsquo;R&rsquo; for these layers</aside></p>
 <pre class="highlight shell">curl -i -X GET http://example.com/corpus/&lt;id_corpus&gt;/layer -H <span class="s2">"Content-Type: application/json"</span> --cookie <span class="s2">"cookies.txt"</span>
 
 </pre>
@@ -1266,23 +1300,258 @@
 <tr>
 <td>id_corpus</td>
 <td>String</td>
-<td>The corpus identifier</td>
+<td>The corpus identifier (required)</td>
 </tr>
 </tbody></table>
 
-<p>get_ACL_of_a_corpus(<id_corpus>)</p>
+<h2 id="get-acl-of-a-corpus">get ACL of a corpus</h2>
 
-<p>update_user_ACL_of_a_corpus(<id_corpus>, <id_user>, data)</p>
+<p><aside class="notice">Restriction: user/group rights is &lsquo;O&rsquo; for this corpus</aside></p>
+<pre class="highlight shell">curl -i -X GET http://example.com/corpus/&lt;id_corpus&gt;/ACL -H <span class="s2">"Content-Type: application/json"</span> --cookie <span class="s2">"cookies.txt"</span>
+</pre>
+<pre class="highlight javascript"></pre>
+<pre class="highlight python"><span class="n">user_client</span><span class="o">.</span><span class="n">get_ACL_of_a_corpus</span><span class="p">(</span><span class="o">&lt;</span><span class="n">id_corpus</span><span class="o">&gt;</span><span class="p">)</span>
+</pre>
 
-<p>update_group_ACL_of_a_corpus(<id_corpus>, <id_group>, data)</p>
+<blockquote>
+<p>The above command returns JSON structured like this:</p>
+</blockquote>
+<pre class="highlight json"><span class="p">{</span><span class="w">
+  </span><span class="s2">"ACL"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+    </span><span class="s2">"groups"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+      </span><span class="s2">"5453beb5d7007fe508e24246"</span><span class="p">:</span><span class="w"> </span><span class="s2">"R"</span><span class="w">
+    </span><span class="p">},</span><span class="w">
+    </span><span class="s2">"users"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+      </span><span class="s2">"5305d1a044dc07e805000003"</span><span class="p">:</span><span class="w"> </span><span class="s2">"O"</span><span class="p">,</span><span class="w">
+      </span><span class="s2">"5453beb5d7007fe508e24244"</span><span class="p">:</span><span class="w"> </span><span class="s2">"W"</span><span class="w">
+    </span><span class="p">}</span><span class="w">
+  </span><span class="p">},</span><span class="w">
+  </span><span class="s2">"_id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"5453beb5d7007fe508e24243"</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></pre>
 
-<p>remove_user_from_ACL_of_a_corpus(<id_corpus>, <id_user>)</p>
+<h4 id="http-request">HTTP request</h4>
 
-<p>remove_group_from_ACL_of_a_corpus(<id_corpus>, <id_group>)</p>
+<p><code class="prettyprint">GET http://example.com/corpus/&lt;id_corpus&gt;/ACL</code></p>
+
+<h4 id="query-parameters">QUERY PARAMETERS</h4>
+
+<table><thead>
+<tr>
+<th>Parameter</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead><tbody>
+<tr>
+<td>id_corpus</td>
+<td>String</td>
+<td>The corpus identifier  (required)</td>
+</tr>
+</tbody></table>
+
+<h2 id="update-user-acl-of-a-corpus">update user ACL of a corpus</h2>
+
+<p><aside class="notice">Restriction: user/group rights is &lsquo;O&rsquo; for this corpus</aside></p>
+
+<p><aside class="warning">User rights exceeds group rights</aside></p>
+<pre class="highlight shell">curl -i -X GET http://example.com/corpus/&lt;id_corpus&gt;/user/&lt;id_user&gt; --data <span class="s1">'{"Right":&lt;right&gt;}'</span> -H <span class="s2">"Content-Type: application/json"</span> --cookie <span class="s2">"cookies.txt"</span>
+</pre>
+<pre class="highlight javascript"></pre>
+<pre class="highlight python"><span class="n">user_client</span><span class="o">.</span><span class="n">update_user_ACL_of_a_corpus</span><span class="p">(</span><span class="o">&lt;</span><span class="n">id_corpus</span><span class="o">&gt;</span><span class="p">,</span> <span class="o">&lt;</span><span class="n">id_user</span><span class="o">&gt;</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
+</pre>
+
+<blockquote>
+<p>The above command returns JSON structured like this:</p>
+</blockquote>
+<pre class="highlight json"><span class="p">{</span><span class="w">
+  </span><span class="s2">"users"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+    </span><span class="s2">"5305d1a044dc07e805000003"</span><span class="p">:</span><span class="w"> </span><span class="s2">"O"</span><span class="p">,</span><span class="w">
+    </span><span class="s2">"5453bef0d7007fe508e24248"</span><span class="p">:</span><span class="w"> </span><span class="s2">"W"</span><span class="w">
+  </span><span class="p">}</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></pre>
+
+<h4 id="http-request">HTTP request</h4>
+
+<p><code class="prettyprint">GET http://example.com/corpus/&lt;id_corpus&gt;/user/&lt;id_user&gt;</code></p>
+
+<h4 id="query-parameters">QUERY PARAMETERS</h4>
+
+<table><thead>
+<tr>
+<th>Parameter</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead><tbody>
+<tr>
+<td>id_corpus</td>
+<td>String</td>
+<td>The corpus identifier  (required)</td>
+</tr>
+<tr>
+<td>id_user</td>
+<td>String</td>
+<td>The user identifier  (required)</td>
+</tr>
+<tr>
+<td>Right</td>
+<td>String</td>
+<td>&lsquo;O&rsquo; for Owner, &lsquo;W&rsquo; for Writter, &lsquo;R&rsquo; for Reader (required)</td>
+</tr>
+</tbody></table>
+
+<h2 id="update-group-acl-of-a-corpus">update group ACL of a corpus</h2>
+
+<p><aside class="notice">Restriction: user/group rights is &lsquo;O&rsquo; for this corpus</aside></p>
+<pre class="highlight shell">curl -i -X GET http://example.com/corpus/&lt;id_corpus&gt;/group/&lt;id_group&gt; --data <span class="s1">'{"Right":&lt;right&gt;}'</span> -H <span class="s2">"Content-Type: application/json"</span> --cookie <span class="s2">"cookies.txt"</span>
+</pre>
+<pre class="highlight javascript"></pre>
+<pre class="highlight python"><span class="n">user_client</span><span class="o">.</span><span class="n">update_group_ACL_of_a_corpus</span><span class="p">(</span><span class="o">&lt;</span><span class="n">id_corpus</span><span class="o">&gt;</span><span class="p">,</span> <span class="o">&lt;</span><span class="n">id_group</span><span class="o">&gt;</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
+</pre>
+
+<blockquote>
+<p>The above command returns JSON structured like this:</p>
+</blockquote>
+<pre class="highlight json"><span class="p">{</span><span class="w">
+  </span><span class="s2">"groups"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+    </span><span class="s2">"5453bef0d7007fe508e2424a"</span><span class="p">:</span><span class="w"> </span><span class="s2">"R"</span><span class="w">
+  </span><span class="p">},</span><span class="w">
+  </span><span class="s2">"users"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+    </span><span class="s2">"5305d1a044dc07e805000003"</span><span class="p">:</span><span class="w"> </span><span class="s2">"O"</span><span class="p">,</span><span class="w">
+    </span><span class="s2">"5453bef0d7007fe508e24248"</span><span class="p">:</span><span class="w"> </span><span class="s2">"W"</span><span class="w">
+  </span><span class="p">}</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></pre>
+
+<h4 id="http-request">HTTP request</h4>
+
+<p><code class="prettyprint">GET http://example.com/corpus/&lt;id_corpus&gt;/group/&lt;id_group&gt;</code></p>
+
+<h4 id="query-parameters">QUERY PARAMETERS</h4>
+
+<table><thead>
+<tr>
+<th>Parameter</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead><tbody>
+<tr>
+<td>id_corpus</td>
+<td>String</td>
+<td>The corpus identifier  (required)</td>
+</tr>
+<tr>
+<td>id_group</td>
+<td>String</td>
+<td>The user identifier  (required)</td>
+</tr>
+<tr>
+<td>Right</td>
+<td>String</td>
+<td>&lsquo;O&rsquo; for Owner, &lsquo;W&rsquo; for Writter, &lsquo;R&rsquo; for Reader (required)</td>
+</tr>
+</tbody></table>
+
+<h2 id="remove-user-from-acl-of-a-corpus">remove user from ACL of a corpus</h2>
+
+<p><aside class="notice">Restriction: user/group rights is &lsquo;O&rsquo; for this corpus</aside></p>
+<pre class="highlight shell">curl -i -X GET http://example.com/corpus/&lt;id_corpus&gt;/group/&lt;id_group&gt;  -H <span class="s2">"Content-Type: application/json"</span> --cookie <span class="s2">"cookies.txt"</span>
+</pre>
+<pre class="highlight javascript"></pre>
+<pre class="highlight python"><span class="n">user_client</span><span class="o">.</span><span class="n">remove_user_from_ACL_of_a_corpus</span><span class="p">(</span><span class="o">&lt;</span><span class="n">id_corpus</span><span class="o">&gt;</span><span class="p">,</span> <span class="o">&lt;</span><span class="n">id_user</span><span class="o">&gt;</span><span class="p">)</span>
+</pre>
+
+<blockquote>
+<p>The above command returns JSON structured like this:</p>
+</blockquote>
+<pre class="highlight json"><span class="p">{</span><span class="w">
+  </span><span class="s2">"groups"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+    </span><span class="s2">"5453bf22d7007fe508e2424e"</span><span class="p">:</span><span class="w"> </span><span class="s2">"R"</span><span class="w">
+  </span><span class="p">},</span><span class="w">
+  </span><span class="s2">"users"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+    </span><span class="s2">"5305d1a044dc07e805000003"</span><span class="p">:</span><span class="w"> </span><span class="s2">"O"</span><span class="w">
+  </span><span class="p">}</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></pre>
+
+<h4 id="http-request">HTTP request</h4>
+
+<p><code class="prettyprint">GET http://example.com/corpus/&lt;id_corpus&gt;/user/&lt;id_user&gt;</code></p>
+
+<h4 id="query-parameters">QUERY PARAMETERS</h4>
+
+<table><thead>
+<tr>
+<th>Parameter</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead><tbody>
+<tr>
+<td>id_corpus</td>
+<td>String</td>
+<td>The corpus identifier  (required)</td>
+</tr>
+<tr>
+<td>id_user</td>
+<td>String</td>
+<td>The user identifier  (required)</td>
+</tr>
+</tbody></table>
+
+<h2 id="remove-group-from-acl-of-a-corpus">remove group from ACL of a corpus</h2>
+
+<p><aside class="notice">Restriction: user/group rights is &lsquo;O&rsquo; for this corpus</aside></p>
+<pre class="highlight shell">curl -i -X GET http://example.com/corpus/&lt;id_corpus&gt;/group/&lt;id_group&gt;  -H <span class="s2">"Content-Type: application/json"</span> --cookie <span class="s2">"cookies.txt"</span>
+</pre>
+<pre class="highlight javascript"></pre>
+<pre class="highlight python"><span class="n">user_client</span><span class="o">.</span><span class="n">remove_group_from_ACL_of_a_corpus</span><span class="p">(</span><span class="o">&lt;</span><span class="n">id_corpus</span><span class="o">&gt;</span><span class="p">,</span> <span class="o">&lt;</span><span class="n">id_group</span><span class="o">&gt;</span><span class="p">)</span>
+</pre>
+
+<blockquote>
+<p>The above command returns JSON structured like this:</p>
+</blockquote>
+<pre class="highlight json"><span class="p">{</span><span class="w">
+  </span><span class="s2">"groups"</span><span class="p">:</span><span class="w"> </span><span class="err">null</span><span class="p">,</span><span class="w">
+  </span><span class="s2">"users"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+    </span><span class="s2">"5305d1a044dc07e805000003"</span><span class="p">:</span><span class="w"> </span><span class="s2">"O"</span><span class="w">
+  </span><span class="p">}</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></pre>
+
+<h4 id="http-request">HTTP request</h4>
+
+<p><code class="prettyprint">GET http://example.com/corpus/&lt;id_corpus&gt;/group/&lt;id_group&gt;</code></p>
+
+<h4 id="query-parameters">QUERY PARAMETERS</h4>
+
+<table><thead>
+<tr>
+<th>Parameter</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead><tbody>
+<tr>
+<td>id_corpus</td>
+<td>String</td>
+<td>The corpus identifier  (required)</td>
+</tr>
+<tr>
+<td>id_group</td>
+<td>String</td>
+<td>The user identifier  (required)</td>
+</tr>
+</tbody></table>
 
 <h1 id="media">Media</h1>
 
 <h2 id="get-all-media">get all media</h2>
+
+<p><aside class="warning">Restriction: root user only</aside></p>
 <pre class="highlight shell">curl -i -X GET http://example.com/media -H <span class="s2">"Content-Type: application/json"</span> --cookie <span class="s2">"cookies.txt"</span>
 </pre>
 <pre class="highlight javascript"></pre>
@@ -1323,6 +1592,8 @@
 <p><code class="prettyprint">GET http://example.com/media</code></p>
 
 <h2 id="get-a-media">Get a media</h2>
+
+<p><aside class="notice">Restriction: user/group rights is &lsquo;O&rsquo; or &lsquo;W&rsquo; or &lsquo;R&rsquo; for the corresponding corpus</aside></p>
 <pre class="highlight shell">curl -i -X GET http://example.com/media/&lt;id_media&gt; -H <span class="s2">"Content-Type: application/json"</span> --cookie <span class="s2">"cookies.txt"</span>
 </pre>
 <pre class="highlight javascript"></pre>
@@ -1372,11 +1643,13 @@
 <tr>
 <td>id_media</td>
 <td>String</td>
-<td>The media identifier</td>
+<td>The media identifier   (required)</td>
 </tr>
 </tbody></table>
 
 <h2 id="update-a-media">Update a media</h2>
+
+<p><aside class="notice">Restriction: user/group rights is &lsquo;O&rsquo; for the corresponding corpus</aside></p>
 <pre class="highlight shell">curl -i -X PUT http://example.com/media/&lt;id_media&gt; --data <span class="s1">'{"name":&lt;name&gt;, "url":&lt;url&gt;, "description":&lt;description&gt;}'</span> -H <span class="s2">"Content-Type: application/json"</span> --cookie <span class="s2">"cookies.txt"</span>
 </pre>
 <pre class="highlight javascript"></pre>
@@ -1431,6 +1704,11 @@
 </tr>
 </thead><tbody>
 <tr>
+<td>id_media</td>
+<td>String</td>
+<td>The media identifier  (required)</td>
+</tr>
+<tr>
 <td>name</td>
 <td>String</td>
 <td>The media name</td>
@@ -1448,6 +1726,8 @@
 </tbody></table>
 
 <h2 id="delete-a-media">Delete a media</h2>
+
+<p><aside class="notice">Restriction: user/group rights is &lsquo;O&rsquo; for the corresponding corpus</aside></p>
 <pre class="highlight shell">curl -i -X DELETE http://example.com/media/&lt;id_media&gt; -H <span class="s2">"Content-Type: application/json"</span> --cookie <span class="s2">"cookies.txt"</span>
 </pre>
 <pre class="highlight javascript"></pre>
@@ -1478,11 +1758,13 @@
 <tr>
 <td>id_media</td>
 <td>String</td>
-<td>The media identifier</td>
+<td>The media identifier  (required)</td>
 </tr>
 </tbody></table>
 
 <h2 id="read-video">Read video</h2>
+
+<p><aside class="notice">Restriction: user/group rights is &lsquo;O&rsquo; or &lsquo;W&rsquo; or &lsquo;R&rsquo; for the corresponding corpus</aside></p>
 <pre class="highlight shell">curl -i -X DELETE http://example.com/media/&lt;id_media&gt;/video -H <span class="s2">"Content-Type: application/json"</span> --cookie <span class="s2">"cookies.txt"</span>
 </pre>
 <pre class="highlight javascript"></pre>
@@ -1509,11 +1791,13 @@
 <tr>
 <td>id_media</td>
 <td>String</td>
-<td>The media identifier</td>
+<td>The media identifier  (required)</td>
 </tr>
 </tbody></table>
 
 <h2 id="read-webm">Read webm</h2>
+
+<p><aside class="notice">Restriction: user/group rights is &lsquo;O&rsquo; or &lsquo;W&rsquo; or &lsquo;R&rsquo; for the corresponding corpus</aside></p>
 <pre class="highlight shell">curl -i -X DELETE http://example.com/media/&lt;id_media&gt;/webm -H <span class="s2">"Content-Type: application/json"</span> --cookie <span class="s2">"cookies.txt"</span>
 </pre>
 <pre class="highlight javascript"></pre>
@@ -1540,11 +1824,13 @@
 <tr>
 <td>id_media</td>
 <td>String</td>
-<td>The media identifier</td>
+<td>The media identifier  (required)</td>
 </tr>
 </tbody></table>
 
 <h2 id="read-mp4">Read mp4</h2>
+
+<p><aside class="notice">Restriction: user/group rights is &lsquo;O&rsquo; or &lsquo;W&rsquo; or &lsquo;R&rsquo; for the corresponding corpus</aside></p>
 <pre class="highlight shell">curl -i -X DELETE http://example.com/media/&lt;id_media&gt;/mp4 -H <span class="s2">"Content-Type: application/json"</span> --cookie <span class="s2">"cookies.txt"</span>
 </pre>
 <pre class="highlight javascript"></pre>
@@ -1571,11 +1857,13 @@
 <tr>
 <td>id_media</td>
 <td>String</td>
-<td>The media identifier</td>
+<td>The media identifier  (required)</td>
 </tr>
 </tbody></table>
 
 <h2 id="read-ogv">Read ogv</h2>
+
+<p><aside class="notice">Restriction: user/group rights is &lsquo;O&rsquo; or &lsquo;W&rsquo; or &lsquo;R&rsquo; for the corresponding corpus</aside></p>
 <pre class="highlight shell">curl -i -X DELETE http://example.com/media/&lt;id_media&gt;/ogv -H <span class="s2">"Content-Type: application/json"</span> --cookie <span class="s2">"cookies.txt"</span>
 </pre>
 <pre class="highlight javascript"></pre>
@@ -1602,13 +1890,15 @@
 <tr>
 <td>id_media</td>
 <td>String</td>
-<td>The media identifier</td>
+<td>The media identifier  (required)</td>
 </tr>
 </tbody></table>
 
 <h1 id="layer">Layer</h1>
 
 <h2 id="get-list-of-layers">Get list of layers</h2>
+
+<p><aside class="warning">Restriction: root user only</aside></p>
 <pre class="highlight shell">curl -i -X GET http://example.com/layer -H <span class="s2">"Content-Type: application/json"</span> --cookie <span class="s2">"cookies.txt"</span>
 
 </pre>
@@ -1650,6 +1940,8 @@
 <p><code class="prettyprint">GET http://example.com/layer</code></p>
 
 <h2 id="get-a-layer">Get a layer</h2>
+
+<p><aside class="notice">Restriction: user/group rights is &lsquo;O&rsquo; or &lsquo;W&rsquo; or &lsquo;R&rsquo; for the layer</aside></p>
 <pre class="highlight shell">curl -i -X GET http://example.com/layer/&lt;id_layer&gt; -H <span class="s2">"Content-Type: application/json"</span> --cookie <span class="s2">"cookies.txt"</span>
 
 </pre>
@@ -1679,11 +1971,13 @@
 <tr>
 <td>id_layer</td>
 <td>String</td>
-<td>The layer identifier</td>
+<td>The layer identifier (required)</td>
 </tr>
 </tbody></table>
 
 <h2 id="update-a-layer">Update a layer</h2>
+
+<p><aside class="notice">Restriction: user/group rights is &lsquo;O&rsquo; for the layer</aside></p>
 <pre class="highlight shell">curl -i -X PUT http://example.com/layer/&lt;id_layer&gt; --data <span class="s1">'{"name":&lt;name&gt;, "description":&lt;description&gt;, "fragment_type":&lt;fragment_typ&gt;, "data_type":&lt;data_typ&gt;}'</span> -H <span class="s2">"Content-Type: application/json"</span> --cookie <span class="s2">"cookies.txt"</span>
 </pre>
 <pre class="highlight javascript"></pre>
@@ -1736,6 +2030,11 @@
 </tr>
 </thead><tbody>
 <tr>
+<td>id_layer</td>
+<td>String</td>
+<td>The layer identifier (required)</td>
+</tr>
+<tr>
 <td>name</td>
 <td>String</td>
 <td>Name of the layer</td>
@@ -1758,6 +2057,8 @@
 </tbody></table>
 
 <h2 id="delete-a-layer">Delete a layer</h2>
+
+<p><aside class="notice">Restriction: user/group rights is &lsquo;O&rsquo; for the layer</aside></p>
 <pre class="highlight shell">curl -i -X DELETE http://example.com/layer/&lt;id_layer&gt; -H <span class="s2">"Content-Type: application/json"</span> --cookie <span class="s2">"cookies.txt"</span>
 
 </pre>
@@ -1789,11 +2090,13 @@
 <tr>
 <td>id_layer</td>
 <td>String</td>
-<td>The layer identifier</td>
+<td>The layer identifier  (required)</td>
 </tr>
 </tbody></table>
 
 <h2 id="add-an-annotation-into-layer">Add an annotation into layer</h2>
+
+<p><aside class="notice">Restriction: user/group rights is &lsquo;O&rsquo; or &lsquo;W&rsquo; for the layer</aside></p>
 <pre class="highlight shell">curl -i -X POST http://example.com/layer/&lt;id_layer&gt;/annotation --data <span class="s1">'{"id_media":&lt;id_media&gt;, "fragment":&lt;fragment&gt;, "data":&lt;data&gt;}'</span> -H <span class="s2">"Content-Type: application/json"</span> --cookie <span class="s2">"cookies.txt"</span> 
 </pre>
 <pre class="highlight javascript"></pre>
@@ -1838,26 +2141,28 @@
 <tr>
 <td>id_media</td>
 <td>String</td>
-<td>The media identifier</td>
+<td>The media identifier  (required)</td>
 </tr>
 <tr>
 <td>id_layer</td>
 <td>String</td>
-<td>The layer identifier</td>
+<td>The layer identifier  (required)</td>
 </tr>
 <tr>
 <td>fragment</td>
 <td>Free</td>
-<td>Fragment</td>
+<td>Fragment (required)</td>
 </tr>
 <tr>
 <td>data</td>
 <td>Free</td>
-<td>Data</td>
+<td>Data (required)</td>
 </tr>
 </tbody></table>
 
 <h2 id="get-list-of-annotations-into-a-layer">Get list of annotations into a layer</h2>
+
+<p><aside class="notice">Restriction: user/group rights is &lsquo;O&rsquo; or &lsquo;W&rsquo; or &lsquo;R&rsquo; for the layer</aside></p>
 <pre class="highlight shell">curl -i -X GET http://example.com/layer/&lt;id_layer&gt;/annotation -H <span class="s2">"Content-Type: application/json"</span> --cookie <span class="s2">"cookies.txt"</span>
 </pre>
 <pre class="highlight javascript"></pre>
@@ -1921,23 +2226,258 @@
 <tr>
 <td>id_layer</td>
 <td>String</td>
-<td>The layer identifier</td>
+<td>The layer identifier  (required)</td>
 </tr>
 </tbody></table>
 
-<p>get_ACL_of_a_layer(<id_layer>)</p>
+<h2 id="get-acl-of-a-layer">get ACL of a layer</h2>
 
-<p>update_user_ACL_of_a_layer(<id_layer>, <id_user>, data)</p>
+<p><aside class="notice">Restriction: user/group rights is &lsquo;O&rsquo; for the layer</aside></p>
+<pre class="highlight shell">curl -i -X GET http://example.com/layer/&lt;id_layer&gt;/ACL -H <span class="s2">"Content-Type: application/json"</span> --cookie <span class="s2">"cookies.txt"</span>
+</pre>
+<pre class="highlight javascript"></pre>
+<pre class="highlight python"><span class="n">user_client</span><span class="o">.</span><span class="n">get_ACL_of_a_layer</span><span class="p">(</span><span class="o">&lt;</span><span class="n">id_layer</span><span class="o">&gt;</span><span class="p">)</span>
+</pre>
 
-<p>update_group_ACL_of_a_layer(<id_layer>, <id_group>, data)</p>
+<blockquote>
+<p>The above command returns JSON structured like this:</p>
+</blockquote>
+<pre class="highlight json"><span class="p">{</span><span class="w">
+  </span><span class="s2">"ACL"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+    </span><span class="s2">"groups"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+      </span><span class="s2">"5453beb5d7007fe508e24246"</span><span class="p">:</span><span class="w"> </span><span class="s2">"R"</span><span class="w">
+    </span><span class="p">},</span><span class="w">
+    </span><span class="s2">"users"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+      </span><span class="s2">"5305d1a044dc07e805000003"</span><span class="p">:</span><span class="w"> </span><span class="s2">"O"</span><span class="p">,</span><span class="w">
+      </span><span class="s2">"5453beb5d7007fe508e24244"</span><span class="p">:</span><span class="w"> </span><span class="s2">"W"</span><span class="w">
+    </span><span class="p">}</span><span class="w">
+  </span><span class="p">},</span><span class="w">
+  </span><span class="s2">"_id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"5453beb5d7007fe508e24243"</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></pre>
 
-<p>remove_user_from_ACL_of_a_layer(<id_layer>, <id_user>)</p>
+<h4 id="http-request">HTTP request</h4>
 
-<p>remove_group_from_ACL_of_a_layer(<id_layer>, <id_group>)</p>
+<p><code class="prettyprint">GET http://example.com/layer/&lt;id_layer&gt;/ACL</code></p>
+
+<h4 id="query-parameters">QUERY PARAMETERS</h4>
+
+<table><thead>
+<tr>
+<th>Parameter</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead><tbody>
+<tr>
+<td>id_layer</td>
+<td>String</td>
+<td>The layer identifier  (required)</td>
+</tr>
+</tbody></table>
+
+<h2 id="update-user-acl-of-a-layer">update user ACL of a layer</h2>
+
+<p><aside class="notice">Restriction: user/group rights is &lsquo;O&rsquo; for the layer</aside></p>
+
+<p><aside class="warning">User rights exceeds group rights</aside></p>
+<pre class="highlight shell">curl -i -X GET http://example.com/layer/&lt;id_layer&gt;/user/&lt;id_user&gt; --data <span class="s1">'{"Right":&lt;right&gt;}'</span> -H <span class="s2">"Content-Type: application/json"</span> --cookie <span class="s2">"cookies.txt"</span>
+</pre>
+<pre class="highlight javascript"></pre>
+<pre class="highlight python"><span class="n">user_client</span><span class="o">.</span><span class="n">update_user_ACL_of_a_layer</span><span class="p">(</span><span class="o">&lt;</span><span class="n">id_layer</span><span class="o">&gt;</span><span class="p">,</span> <span class="o">&lt;</span><span class="n">id_user</span><span class="o">&gt;</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
+</pre>
+
+<blockquote>
+<p>The above command returns JSON structured like this:</p>
+</blockquote>
+<pre class="highlight json"><span class="p">{</span><span class="w">
+  </span><span class="s2">"users"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+    </span><span class="s2">"5305d1a044dc07e805000003"</span><span class="p">:</span><span class="w"> </span><span class="s2">"O"</span><span class="p">,</span><span class="w">
+    </span><span class="s2">"5453bf22d7007fe508e2424c"</span><span class="p">:</span><span class="w"> </span><span class="s2">"W"</span><span class="w">
+  </span><span class="p">}</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></pre>
+
+<h4 id="http-request">HTTP request</h4>
+
+<p><code class="prettyprint">GET http://example.com/layer/&lt;id_layer&gt;/user/&lt;id_user&gt;</code></p>
+
+<h4 id="query-parameters">QUERY PARAMETERS</h4>
+
+<table><thead>
+<tr>
+<th>Parameter</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead><tbody>
+<tr>
+<td>id_layer</td>
+<td>String</td>
+<td>The layer identifier  (required)</td>
+</tr>
+<tr>
+<td>id_user</td>
+<td>String</td>
+<td>The user identifier  (required)</td>
+</tr>
+<tr>
+<td>Right</td>
+<td>String</td>
+<td>&lsquo;O&rsquo; for Owner, &lsquo;W&rsquo; for Writter, &lsquo;R&rsquo; for Reader (required)</td>
+</tr>
+</tbody></table>
+
+<h2 id="update-user-acl-of-a-layer">update user ACL of a layer</h2>
+
+<p><aside class="notice">Restriction: user/group rights is &lsquo;O&rsquo; for the layer</aside></p>
+<pre class="highlight shell">curl -i -X GET http://example.com/layer/&lt;id_layer&gt;/group/&lt;id_group&gt; --data <span class="s1">'{"Right":&lt;right&gt;}'</span> -H <span class="s2">"Content-Type: application/json"</span> --cookie <span class="s2">"cookies.txt"</span>
+</pre>
+<pre class="highlight javascript"></pre>
+<pre class="highlight python"><span class="n">user_client</span><span class="o">.</span><span class="n">update_group_ACL_of_a_layer</span><span class="p">(</span><span class="o">&lt;</span><span class="n">id_layer</span><span class="o">&gt;</span><span class="p">,</span> <span class="o">&lt;</span><span class="n">id_group</span><span class="o">&gt;</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
+</pre>
+
+<blockquote>
+<p>The above command returns JSON structured like this:</p>
+</blockquote>
+<pre class="highlight json"><span class="p">{</span><span class="w">
+  </span><span class="s2">"groups"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+    </span><span class="s2">"5453bf22d7007fe508e2424e"</span><span class="p">:</span><span class="w"> </span><span class="s2">"R"</span><span class="w">
+  </span><span class="p">},</span><span class="w">
+  </span><span class="s2">"users"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+    </span><span class="s2">"5305d1a044dc07e805000003"</span><span class="p">:</span><span class="w"> </span><span class="s2">"O"</span><span class="p">,</span><span class="w">
+    </span><span class="s2">"5453bf22d7007fe508e2424c"</span><span class="p">:</span><span class="w"> </span><span class="s2">"W"</span><span class="w">
+  </span><span class="p">}</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></pre>
+
+<h4 id="http-request">HTTP request</h4>
+
+<p><code class="prettyprint">GET http://example.com/layer/&lt;id_layer&gt;/layer</code></p>
+
+<h4 id="query-parameters">QUERY PARAMETERS</h4>
+
+<table><thead>
+<tr>
+<th>Parameter</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead><tbody>
+<tr>
+<td>id_layer</td>
+<td>String</td>
+<td>The layer identifier  (required)</td>
+</tr>
+<tr>
+<td>id_group</td>
+<td>String</td>
+<td>The user identifier  (required)</td>
+</tr>
+<tr>
+<td>Right</td>
+<td>String</td>
+<td>&lsquo;O&rsquo; for Owner, &lsquo;W&rsquo; for Writter, &lsquo;R&rsquo; for Reader (required)</td>
+</tr>
+</tbody></table>
+
+<h2 id="remove-user-from-acl-of-a-layer">remove user from ACL of a layer</h2>
+
+<p><aside class="notice">Restriction: user/group rights is &lsquo;O&rsquo; for the layer</aside></p>
+<pre class="highlight shell">curl -i -X GET http://example.com/layer/&lt;id_layer&gt;/user/&lt;id_user&gt;  -H <span class="s2">"Content-Type: application/json"</span> --cookie <span class="s2">"cookies.txt"</span>
+</pre>
+<pre class="highlight javascript"></pre>
+<pre class="highlight python"><span class="n">user_client</span><span class="o">.</span><span class="n">remove_user_from_ACL_of_a_layer</span><span class="p">(</span><span class="o">&lt;</span><span class="n">id_layer</span><span class="o">&gt;</span><span class="p">,</span> <span class="o">&lt;</span><span class="n">id_user</span><span class="o">&gt;</span><span class="p">)</span>
+</pre>
+
+<blockquote>
+<p>The above command returns JSON structured like this:</p>
+</blockquote>
+<pre class="highlight json"><span class="p">{</span><span class="w">
+  </span><span class="s2">"groups"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+    </span><span class="s2">"5453bf22d7007fe508e2424e"</span><span class="p">:</span><span class="w"> </span><span class="s2">"R"</span><span class="w">
+  </span><span class="p">},</span><span class="w">
+  </span><span class="s2">"users"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+    </span><span class="s2">"5305d1a044dc07e805000003"</span><span class="p">:</span><span class="w"> </span><span class="s2">"O"</span><span class="w">
+  </span><span class="p">}</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></pre>
+
+<h4 id="http-request">HTTP request</h4>
+
+<p><code class="prettyprint">GET http://example.com/layer/&lt;id_layer&gt;/user/&lt;id_user&gt;</code></p>
+
+<h4 id="query-parameters">QUERY PARAMETERS</h4>
+
+<table><thead>
+<tr>
+<th>Parameter</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead><tbody>
+<tr>
+<td>id_layer</td>
+<td>String</td>
+<td>The layer identifier  (required)</td>
+</tr>
+<tr>
+<td>id_user</td>
+<td>String</td>
+<td>The user identifier  (required)</td>
+</tr>
+</tbody></table>
+
+<h2 id="remove-group-from-acl-of-a-layer">remove group from ACL of a layer</h2>
+
+<p><aside class="notice">Restriction: user/group rights is &lsquo;O&rsquo; for the layer</aside></p>
+<pre class="highlight shell">curl -i -X GET http://example.com/layer/&lt;id_layer&gt;/group/&lt;id_group&gt;  -H <span class="s2">"Content-Type: application/json"</span> --cookie <span class="s2">"cookies.txt"</span>
+</pre>
+<pre class="highlight javascript"></pre>
+<pre class="highlight python"><span class="n">user_client</span><span class="o">.</span><span class="n">remove_group_from_ACL_of_a_layer</span><span class="p">(</span><span class="o">&lt;</span><span class="n">id_layer</span><span class="o">&gt;</span><span class="p">,</span> <span class="o">&lt;</span><span class="n">id_group</span><span class="o">&gt;</span><span class="p">)</span>
+</pre>
+
+<blockquote>
+<p>The above command returns JSON structured like this:</p>
+</blockquote>
+<pre class="highlight json"><span class="p">{</span><span class="w">
+  </span><span class="s2">"groups"</span><span class="p">:</span><span class="w"> </span><span class="err">null</span><span class="p">,</span><span class="w">
+  </span><span class="s2">"users"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+    </span><span class="s2">"5305d1a044dc07e805000003"</span><span class="p">:</span><span class="w"> </span><span class="s2">"O"</span><span class="w">
+  </span><span class="p">}</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></pre>
+
+<h4 id="http-request">HTTP request</h4>
+
+<p><code class="prettyprint">GET http://example.com/layer/&lt;id_layer&gt;/group/&lt;id_group&gt;</code></p>
+
+<h4 id="query-parameters">QUERY PARAMETERS</h4>
+
+<table><thead>
+<tr>
+<th>Parameter</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead><tbody>
+<tr>
+<td>id_layer</td>
+<td>String</td>
+<td>The layer identifier (required)</td>
+</tr>
+<tr>
+<td>id_group</td>
+<td>String</td>
+<td>The user identifier  (required)</td>
+</tr>
+</tbody></table>
 
 <h1 id="annotation">Annotation</h1>
 
 <h2 id="get-all-annotation">Get all annotation</h2>
+
+<p><aside class="warning">Restriction: root user only</aside></p>
 <pre class="highlight shell">curl -i -X GET http://example.com/annotation -H <span class="s2">"Content-Type: application/json"</span> --cookie <span class="s2">"cookies.txt"</span>
 </pre>
 <pre class="highlight javascript"></pre>
@@ -1990,6 +2530,8 @@
 <p><code class="prettyprint">GET http://example.com/annotation</code></p>
 
 <h2 id="get-an-annotation">Get an annotation</h2>
+
+<p><aside class="notice">Restriction: user/group rights is &lsquo;O&rsquo; or &lsquo;W&rsquo; or &lsquo;R&rsquo; for the corresponding layer</aside></p>
 <pre class="highlight shell">curl -i -X GET http://example.com/annotation/&lt;id_annotation&gt; -H <span class="s2">"Content-Type: application/json"</span> --cookie <span class="s2">"cookies.txt"</span>
 </pre>
 <pre class="highlight javascript"></pre>
@@ -2034,11 +2576,13 @@
 <tr>
 <td>id_annotation</td>
 <td>String</td>
-<td>The annotation identifier</td>
+<td>The annotation identifier  (required)</td>
 </tr>
 </tbody></table>
 
 <h2 id="update-an-annotation">Update an annotation</h2>
+
+<p><aside class="notice">Restriction: user/group rights is &lsquo;O&rsquo; or &lsquo;W&rsquo; for the corresponding layer</aside></p>
 <pre class="highlight shell">curl -i -X PUT http://example.com/annotation/&lt;id_annotation&gt; --data <span class="s1">'{"id_media":&lt;id_media&gt;, "fragment":&lt;fragment&gt;, "data":&lt;data&gt;}'</span> -H <span class="s2">"Content-Type: application/json"</span> --cookie <span class="s2">"cookies.txt"</span>
 </pre>
 <pre class="highlight javascript"></pre>
@@ -2090,7 +2634,7 @@
 <tr>
 <td>id_media</td>
 <td>String</td>
-<td>The media identifier</td>
+<td>The media identifier  (required)</td>
 </tr>
 <tr>
 <td>fragment</td>
@@ -2105,6 +2649,8 @@
 </tbody></table>
 
 <h2 id="delete-an-annotation">Delete an annotation</h2>
+
+<p><aside class="notice">Restriction: user/group rights is &lsquo;O&rsquo; for the corresponding layer</aside></p>
 <pre class="highlight shell">curl -i -X DELETE http://example.com/annotation/&lt;id_annotation&gt; -H <span class="s2">"Content-Type: application/json"</span> --cookie <span class="s2">"cookies.txt"</span>
 </pre>
 <pre class="highlight javascript"></pre>
@@ -2135,23 +2681,32 @@
 <tr>
 <td>id_annotation</td>
 <td>String</td>
-<td>The annotation identifier</td>
+<td>The annotation identifier (required)</td>
 </tr>
 </tbody></table>
 
 <h1 id="queues">Queues</h1>
 
 <h2 id="create-a-queue">Create a queue</h2>
-<pre class="highlight shell">curl -i -X POST http://example.com/queue --data <span class="s1">'{"name":&lt;name&gt;}'</span> -H <span class="s2">"Content-Type: application/json"</span> --cookie <span class="s2">"cookies.txt"</span> 
+
+<p><aside class="notice">Restriction: user logged in</aside></p>
+<pre class="highlight shell">curl -i -X POST http://example.com/queue --data <span class="s1">'{"name":&lt;name&gt;, "description":&lt;description&gt;}'</span> -H <span class="s2">"Content-Type: application/json"</span> --cookie <span class="s2">"cookies.txt"</span> 
 </pre>
 <pre class="highlight javascript"></pre>
-<pre class="highlight python"><span class="n">user_client</span><span class="o">.</span><span class="n">create_queue</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+<pre class="highlight python"><span class="n">user_client</span><span class="o">.</span><span class="n">create_queue</span><span class="p">({</span><span class="s">"name"</span><span class="p">:</span><span class="o">&lt;</span><span class="n">name</span><span class="o">&gt;</span><span class="p">,</span> <span class="s">"description"</span><span class="p">:</span><span class="o">&lt;</span><span class="n">description</span><span class="o">&gt;</span><span class="p">})</span>
 </pre>
 
 <blockquote>
 <p>The above command returns JSON structured like this:</p>
 </blockquote>
-<pre class="highlight json"><span class="w">
+<pre class="highlight json"><span class="p">{</span><span class="w">
+  </span><span class="s2">"_id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"5453bfc5d7007fe508e2424f"</span><span class="p">,</span><span class="w">
+  </span><span class="s2">"description"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+    </span><span class="s2">"abc"</span><span class="p">:</span><span class="w"> </span><span class="s2">"def"</span><span class="w">
+  </span><span class="p">},</span><span class="w">
+  </span><span class="s2">"list"</span><span class="p">:</span><span class="w"> </span><span class="p">[],</span><span class="w">
+  </span><span class="s2">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"queue1"</span><span class="w">
+</span><span class="p">}</span><span class="w">
 </span></pre>
 
 <h4 id="http-request">HTTP request</h4>
@@ -2170,13 +2725,18 @@
 <tr>
 <td>name</td>
 <td>String</td>
-<td>The queue name</td>
+<td>The queue name (required)</td>
+</tr>
+<tr>
+<td>description</td>
+<td>free</td>
+<td>A description of the media</td>
 </tr>
 </tbody></table>
 
 <h2 id="get-all-queues">Get all queues</h2>
 
-<p><aside class="notice">root user only</aside></p>
+<p><aside class="notice">Restriction: root user only</aside></p>
 <pre class="highlight shell">curl -i -X GET http://example.com/queue -H <span class="s2">"Content-Type: application/json"</span> --cookie <span class="s2">"cookies.txt"</span>
 </pre>
 <pre class="highlight javascript"></pre>
@@ -2186,7 +2746,24 @@
 <blockquote>
 <p>The above command returns JSON structured like this:</p>
 </blockquote>
-<pre class="highlight json"><span class="w">
+<pre class="highlight json"><span class="p">[</span><span class="w">
+  </span><span class="p">{</span><span class="w">
+    </span><span class="s2">"_id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"5453bfe5d7007fe508e24250"</span><span class="p">,</span><span class="w">
+    </span><span class="s2">"description"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+      </span><span class="s2">"abc"</span><span class="p">:</span><span class="w"> </span><span class="s2">"def"</span><span class="w">
+    </span><span class="p">},</span><span class="w">
+    </span><span class="s2">"list"</span><span class="p">:</span><span class="w"> </span><span class="p">[],</span><span class="w">
+    </span><span class="s2">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"queue1"</span><span class="w">
+  </span><span class="p">},</span><span class="w">
+  </span><span class="p">{</span><span class="w">
+    </span><span class="s2">"_id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"5453bfe5d7007fe508e24251"</span><span class="p">,</span><span class="w">
+    </span><span class="s2">"description"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+      </span><span class="s2">"abc"</span><span class="p">:</span><span class="w"> </span><span class="s2">"def"</span><span class="w">
+    </span><span class="p">},</span><span class="w">
+    </span><span class="s2">"list"</span><span class="p">:</span><span class="w"> </span><span class="p">[],</span><span class="w">
+    </span><span class="s2">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"queue2"</span><span class="w">
+  </span><span class="p">}</span><span class="w">
+</span><span class="p">]</span><span class="w">
 </span></pre>
 
 <h4 id="http-request">HTTP request</h4>
@@ -2194,7 +2771,9 @@
 <p><code class="prettyprint">GET http://example.com/queue</code></p>
 
 <h2 id="get-a-queue">Get a queue</h2>
-<pre class="highlight shell">curl -i -X GET http://example.com/queue/&lt;queue_ID&gt; -H <span class="s2">"Content-Type: application/json"</span> --cookie <span class="s2">"cookies.txt"</span>
+
+<p><aside class="notice">Restriction: user logged in</aside></p>
+<pre class="highlight shell">curl -i -X GET http://example.com/queue/&lt;id_queue&gt; -H <span class="s2">"Content-Type: application/json"</span> --cookie <span class="s2">"cookies.txt"</span>
 </pre>
 <pre class="highlight javascript"></pre>
 <pre class="highlight python"><span class="n">user_client</span><span class="o">.</span><span class="n">get_queue</span><span class="p">(</span><span class="o">&lt;</span><span class="n">id_queue</span><span class="o">&gt;</span><span class="p">)</span>
@@ -2203,12 +2782,19 @@
 <blockquote>
 <p>The above command returns JSON structured like this:</p>
 </blockquote>
-<pre class="highlight json"><span class="w">
+<pre class="highlight json"><span class="p">{</span><span class="w">
+  </span><span class="s2">"_id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"5453bfffd7007fe508e24252"</span><span class="p">,</span><span class="w">
+  </span><span class="s2">"description"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+    </span><span class="s2">"abc"</span><span class="p">:</span><span class="w"> </span><span class="s2">"def"</span><span class="w">
+  </span><span class="p">},</span><span class="w">
+  </span><span class="s2">"list"</span><span class="p">:</span><span class="w"> </span><span class="p">[],</span><span class="w">
+  </span><span class="s2">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"queue1"</span><span class="w">
+</span><span class="p">}</span><span class="w">
 </span></pre>
 
 <h4 id="http-request">HTTP request</h4>
 
-<p><code class="prettyprint">GET http://example.com/queue/&lt;queue_ID&gt;</code></p>
+<p><code class="prettyprint">GET http://example.com/queue/&lt;id_queue&gt;</code></p>
 
 <h4 id="query-parameters">QUERY PARAMETERS</h4>
 
@@ -2220,28 +2806,41 @@
 </tr>
 </thead><tbody>
 <tr>
-<td>queue_ID</td>
+<td>id_queue</td>
 <td>String</td>
-<td>The queue identifier</td>
+<td>The queue identifier (required)</td>
 </tr>
 </tbody></table>
 
 <h2 id="update-a-queue">Update a queue</h2>
-<pre class="highlight shell">curl -i -X PUT http://example.com/queue/&lt;queue_ID&gt; --data <span class="s1">'{"id_list":&lt;list_id_annotation&gt;}'</span> -H <span class="s2">"Content-Type: application/json"</span> --cookie <span class="s2">"cookies.txt"</span>
+
+<p><aside class="notice">Restriction: user logged in</aside></p>
+<pre class="highlight shell">curl -i -X PUT http://example.com/queue/&lt;id_queue&gt; --data <span class="s1">'{"name":&lt;name&gt;, "description":&lt;description&gt;, "list":&lt;list&gt;}}'</span> -H <span class="s2">"Content-Type: application/json"</span> --cookie <span class="s2">"cookies.txt"</span>
 </pre>
 <pre class="highlight javascript"></pre>
-<pre class="highlight python"><span class="n">user_client</span><span class="o">.</span><span class="n">update_queue</span><span class="p">(</span><span class="o">&lt;</span><span class="n">id_queue</span><span class="o">&gt;</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
+<pre class="highlight python"><span class="n">user_client</span><span class="o">.</span><span class="n">update_queue</span><span class="p">(</span><span class="o">&lt;</span><span class="n">id_queue</span><span class="o">&gt;</span><span class="p">,</span> <span class="p">{</span><span class="s">"name"</span><span class="p">:</span><span class="o">&lt;</span><span class="n">name</span><span class="o">&gt;</span><span class="p">,</span> <span class="s">"description"</span><span class="p">:</span><span class="o">&lt;</span><span class="n">description</span><span class="o">&gt;</span><span class="p">,</span> <span class="s">"list"</span><span class="p">:</span><span class="o">&lt;</span><span class="nb">list</span><span class="o">&gt;</span><span class="p">})</span>
 </pre>
 
 <blockquote>
 <p>The above command returns JSON structured like this:</p>
 </blockquote>
-<pre class="highlight json"><span class="w">
+<pre class="highlight json"><span class="p">{</span><span class="w">
+  </span><span class="s2">"_id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"5453c083d7007fe508e24258"</span><span class="p">,</span><span class="w">
+  </span><span class="s2">"description"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+    </span><span class="s2">"abc"</span><span class="p">:</span><span class="w"> </span><span class="s2">"def"</span><span class="w">
+  </span><span class="p">},</span><span class="w">
+  </span><span class="s2">"list"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w">
+    </span><span class="s2">"1"</span><span class="p">,</span><span class="w">
+    </span><span class="s2">"2"</span><span class="p">,</span><span class="w">
+    </span><span class="s2">"3"</span><span class="w">
+  </span><span class="p">],</span><span class="w">
+  </span><span class="s2">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"queue1"</span><span class="w">
+</span><span class="p">}</span><span class="w">
 </span></pre>
 
 <h4 id="http-request">HTTP request</h4>
 
-<p><code class="prettyprint">PUT http://example.com/queue/&lt;queue_ID&gt;</code></p>
+<p><code class="prettyprint">PUT http://example.com/queue/&lt;id_queue&gt;</code></p>
 
 <h4 id="query-parameters">QUERY PARAMETERS</h4>
 
@@ -2253,33 +2852,59 @@
 </tr>
 </thead><tbody>
 <tr>
-<td>queue_ID</td>
+<td>id_queue</td>
 <td>String</td>
-<td>The queue identifier</td>
+<td>The queue identifier (required)</td>
 </tr>
 <tr>
-<td>list_id_annotation</td>
-<td>String[]</td>
-<td>The list of annotation identifier to put into the queue</td>
+<td>name</td>
+<td>String</td>
+<td>The queue name</td>
+</tr>
+<tr>
+<td>description</td>
+<td>free</td>
+<td>A description of the media</td>
+</tr>
+<tr>
+<td>list</td>
+<td>list</td>
+<td>queue contain</td>
 </tr>
 </tbody></table>
 
 <h2 id="push-into-a-queue">Push into a queue</h2>
-<pre class="highlight shell">curl -i -X PUT http://example.com/queue/&lt;queue_ID&gt;/next --data <span class="s1">'{"id_list":&lt;list_id_annotation&gt;}'</span> -H <span class="s2">"Content-Type: application/json"</span> --cookie <span class="s2">"cookies.txt"</span>
+
+<p><aside class="notice">Restriction: user logged in</aside></p>
+<pre class="highlight shell">curl -i -X PUT http://example.com/queue/&lt;id_queue&gt;/next --data <span class="s1">'{"id_list":&lt;list&gt;}'</span> -H <span class="s2">"Content-Type: application/json"</span> --cookie <span class="s2">"cookies.txt"</span>
 </pre>
 <pre class="highlight javascript"></pre>
-<pre class="highlight python"><span class="n">user_client</span><span class="o">.</span><span class="n">push_into_a_queue</span><span class="p">(</span><span class="o">&lt;</span><span class="n">id_queue</span><span class="o">&gt;</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
+<pre class="highlight python"><span class="n">user_client</span><span class="o">.</span><span class="n">push_into_a_queue</span><span class="p">(</span><span class="o">&lt;</span><span class="n">id_queue</span><span class="o">&gt;</span><span class="p">,</span> <span class="p">{</span><span class="s">"id_list"</span><span class="p">:</span><span class="o">&lt;</span><span class="nb">list</span><span class="o">&gt;</span><span class="p">})</span>
 </pre>
 
 <blockquote>
 <p>The above command returns JSON structured like this:</p>
 </blockquote>
-<pre class="highlight json"><span class="w">
+<pre class="highlight json"><span class="p">{</span><span class="w">
+  </span><span class="s2">"_id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"5453c0c4d7007fe508e2425a"</span><span class="p">,</span><span class="w">
+  </span><span class="s2">"description"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+    </span><span class="s2">"abc"</span><span class="p">:</span><span class="w"> </span><span class="s2">"def"</span><span class="w">
+  </span><span class="p">},</span><span class="w">
+  </span><span class="s2">"list"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w">
+    </span><span class="s2">"1"</span><span class="p">,</span><span class="w">
+    </span><span class="s2">"2"</span><span class="p">,</span><span class="w">
+    </span><span class="s2">"3"</span><span class="p">,</span><span class="w">
+    </span><span class="s2">"3"</span><span class="p">,</span><span class="w">
+    </span><span class="s2">"4"</span><span class="p">,</span><span class="w">
+    </span><span class="s2">"5"</span><span class="w">
+  </span><span class="p">],</span><span class="w">
+  </span><span class="s2">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"queue1"</span><span class="w">
+</span><span class="p">}</span><span class="w">
 </span></pre>
 
 <h4 id="http-request">HTTP request</h4>
 
-<p><code class="prettyprint">PUT http://example.com/queue/&lt;queue_ID&gt;/next</code></p>
+<p><code class="prettyprint">PUT http://example.com/queue/&lt;id_queue&gt;/next</code></p>
 
 <h4 id="query-parameters">QUERY PARAMETERS</h4>
 
@@ -2291,27 +2916,35 @@
 </tr>
 </thead><tbody>
 <tr>
-<td>queue_ID</td>
+<td>id_queue</td>
 <td>String</td>
-<td>The queue identifier</td>
+<td>The queue identifier (required)</td>
+</tr>
+<tr>
+<td>list</td>
+<td>list</td>
+<td>queue contain (required)</td>
 </tr>
 </tbody></table>
 
 <h2 id="pop-a-queue">Pop a queue</h2>
-<pre class="highlight shell">curl -i -X GET http://example.com/queue/&lt;queue_ID&gt;/next -H <span class="s2">"Content-Type: application/json"</span> --cookie <span class="s2">"cookies.txt"</span>
+
+<p><aside class="notice">Restriction: user logged in</aside></p>
+<pre class="highlight shell">curl -i -X GET http://example.com/queue/&lt;id_queue&gt;/next -H <span class="s2">"Content-Type: application/json"</span> --cookie <span class="s2">"cookies.txt"</span>
 </pre>
 <pre class="highlight javascript"></pre>
-<pre class="highlight python"><span class="n">user_client</span><span class="o">.</span><span class="n">pop_a_queue</span><span class="p">(</span><span class="o">&lt;</span><span class="n">id_queue</span><span class="o">&gt;</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
+<pre class="highlight python"><span class="n">user_client</span><span class="o">.</span><span class="n">pop_a_queue</span><span class="p">(</span><span class="o">&lt;</span><span class="n">id_queue</span><span class="o">&gt;</span><span class="p">)</span>
 </pre>
 
 <blockquote>
 <p>The above command returns JSON structured like this:</p>
 </blockquote>
-<pre class="highlight json"></pre>
+<pre class="highlight json"><span class="s2">"1"</span><span class="w">
+</span></pre>
 
 <h4 id="http-request">HTTP request</h4>
 
-<p><code class="prettyprint">GET http://example.com/queue/&lt;queue_ID&gt;/next</code></p>
+<p><code class="prettyprint">GET http://example.com/queue/&lt;id_queue&gt;/next</code></p>
 
 <h4 id="query-parameters">QUERY PARAMETERS</h4>
 
@@ -2323,14 +2956,16 @@
 </tr>
 </thead><tbody>
 <tr>
-<td>queue_ID</td>
+<td>id_queue</td>
 <td>String</td>
-<td>The queue identifier</td>
+<td>The queue identifier (required)</td>
 </tr>
 </tbody></table>
 
 <h2 id="delete-a-queue">Delete a queue</h2>
-<pre class="highlight shell">curl -i -X DELETE http://example.com/queue/&lt;queue_ID&gt; -H <span class="s2">"Content-Type: application/json"</span> --cookie <span class="s2">"cookies.txt"</span>
+
+<p><aside class="notice">Restriction: admin user only</aside></p>
+<pre class="highlight shell">curl -i -X DELETE http://example.com/queue/&lt;id_queue&gt; -H <span class="s2">"Content-Type: application/json"</span> --cookie <span class="s2">"cookies.txt"</span>
 </pre>
 <pre class="highlight javascript"></pre>
 <pre class="highlight python"><span class="n">user_client</span><span class="o">.</span><span class="n">delete_queue</span><span class="p">(</span><span class="o">&lt;</span><span class="n">id_queue</span><span class="o">&gt;</span><span class="p">)</span>
@@ -2339,12 +2974,14 @@
 <blockquote>
 <p>The above command returns JSON structured like this:</p>
 </blockquote>
-<pre class="highlight json"><span class="w">
+<pre class="highlight json"><span class="p">{</span><span class="w">
+  </span><span class="s2">"message"</span><span class="p">:</span><span class="w"> </span><span class="s2">"The queue as been delete"</span><span class="w">
+</span><span class="p">}</span><span class="w">
 </span></pre>
 
 <h4 id="http-request">HTTP request</h4>
 
-<p><code class="prettyprint">DELETE http://example.com/queue/&lt;queue_ID&gt;</code></p>
+<p><code class="prettyprint">DELETE http://example.com/queue/&lt;id_queue&gt;</code></p>
 
 <h4 id="query-parameters">QUERY PARAMETERS</h4>
 
@@ -2356,11 +2993,34 @@
 </tr>
 </thead><tbody>
 <tr>
-<td>queue_ID</td>
+<td>id_queue</td>
 <td>String</td>
-<td>The queue identifier</td>
+<td>The queue identifier (required)</td>
 </tr>
 </tbody></table>
+
+<h1 id="tools">tools</h1>
+
+<h2 id="get-server-date">Get server date</h2>
+
+<p><aside class="notice">Restriction: user logged in</aside></p>
+<pre class="highlight shell">curl -i -X GET http://example.com/date -H <span class="s2">"Content-Type: application/json"</span> --cookie <span class="s2">"cookies.txt"</span>
+</pre>
+<pre class="highlight javascript"></pre>
+<pre class="highlight python"><span class="n">user_client</span><span class="o">.</span><span class="n">get_date</span><span class="p">()</span>
+</pre>
+
+<blockquote>
+<p>The above command returns JSON structured like this:</p>
+</blockquote>
+<pre class="highlight json"><span class="p">{</span><span class="w">
+  </span><span class="s2">"date"</span><span class="p">:</span><span class="w"> </span><span class="s2">"2014-11-03T10:21:27.549Z"</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></pre>
+
+<h4 id="http-request">HTTP request</h4>
+
+<p><code class="prettyprint">GET http://example.com/date</code></p>
 
           <h1 id="http-status-codes">HTTP status codes</h1>
 
