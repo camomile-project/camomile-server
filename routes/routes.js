@@ -53,10 +53,14 @@ exports.initialize = function(app){
 	// POST /logout --cookie-jar "cookies.txt"
 	app.post('/logout', authenticate.islogin,
 						authenticate.logout);
-	// POST /me --cookie-jar "cookies.txt"
+	// GET /me --cookie-jar "cookies.txt"
 	app.get('/me', authenticate.islogin,
 				   authenticate.me);
 
+	// --- tooles routes --- \\
+	// GET /date --cookie-jar "cookies.txt"
+	app.get('/date', authenticate.islogin,
+				     commonFuncs.date);
 
 	// --- user routes --- \\
 	// create user
