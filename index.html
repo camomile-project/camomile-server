@@ -72,31 +72,6 @@
 </tr>
 </tbody></table>
 
-<h4 id="http-request">HTTP request</h4>
-
-<p><code class="prettyprint">POST http://example.com/login</code></p>
-
-<h4 id="query-parameters">QUERY PARAMETERS</h4>
-
-<table><thead>
-<tr>
-<th>Parameter</th>
-<th>Type</th>
-<th>Description</th>
-</tr>
-</thead><tbody>
-<tr>
-<td>username</td>
-<td>String</td>
-<td>The user name (required)</td>
-</tr>
-<tr>
-<td>password</td>
-<td>String</td>
-<td>The password (required)</td>
-</tr>
-</tbody></table>
-
 <h1 id="authentication">Authentication</h1>
 
 <h2 id="login">Login</h2>
@@ -1149,7 +1124,7 @@
 
 <h4 id="http-request">HTTP request</h4>
 
-<p><code class="prettyprint">POST http://example.com/corpus/&lt;id_corpus&gt;/media/&lt;id_media&gt;/layer</code></p>
+<p><code class="prettyprint">POST http://example.com/corpus/&lt;id_corpus&gt;/layer</code></p>
 
 <h4 id="query-parameters">QUERY PARAMETERS</h4>
 
@@ -1173,7 +1148,7 @@
 <tr>
 <td>description</td>
 <td>free</td>
-<td>A description of the media</td>
+<td>A description of the layer</td>
 </tr>
 <tr>
 <td>fragment_typ</td>
@@ -1355,7 +1330,7 @@
 <p><aside class="notice">Restriction: user/group rights is &lsquo;O&rsquo; for this corpus</aside></p>
 
 <p><aside class="warning">User rights exceeds group rights</aside></p>
-<pre class="highlight shell">curl -i -X GET http://example.com/corpus/&lt;id_corpus&gt;/user/&lt;id_user&gt; --data <span class="s1">'{"Right":&lt;right&gt;}'</span> -H <span class="s2">"Content-Type: application/json"</span> --cookie <span class="s2">"cookies.txt"</span>
+<pre class="highlight shell">curl -i -X PUT http://example.com/corpus/&lt;id_corpus&gt;/user/&lt;id_user&gt; --data <span class="s1">'{"Right":&lt;right&gt;}'</span> -H <span class="s2">"Content-Type: application/json"</span> --cookie <span class="s2">"cookies.txt"</span>
 </pre>
 <pre class="highlight javascript"></pre>
 <pre class="highlight python"><span class="n">user_client</span><span class="o">.</span><span class="n">update_user_ACL_of_a_corpus</span><span class="p">(</span><span class="o">&lt;</span><span class="n">id_corpus</span><span class="o">&gt;</span><span class="p">,</span> <span class="o">&lt;</span><span class="n">id_user</span><span class="o">&gt;</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
@@ -1374,7 +1349,7 @@
 
 <h4 id="http-request">HTTP request</h4>
 
-<p><code class="prettyprint">GET http://example.com/corpus/&lt;id_corpus&gt;/user/&lt;id_user&gt;</code></p>
+<p><code class="prettyprint">PUT http://example.com/corpus/&lt;id_corpus&gt;/user/&lt;id_user&gt;</code></p>
 
 <h4 id="query-parameters">QUERY PARAMETERS</h4>
 
@@ -1405,7 +1380,7 @@
 <h2 id="update-group-acl-of-a-corpus">update group ACL of a corpus</h2>
 
 <p><aside class="notice">Restriction: user/group rights is &lsquo;O&rsquo; for this corpus</aside></p>
-<pre class="highlight shell">curl -i -X GET http://example.com/corpus/&lt;id_corpus&gt;/group/&lt;id_group&gt; --data <span class="s1">'{"Right":&lt;right&gt;}'</span> -H <span class="s2">"Content-Type: application/json"</span> --cookie <span class="s2">"cookies.txt"</span>
+<pre class="highlight shell">curl -i -X PUT http://example.com/corpus/&lt;id_corpus&gt;/group/&lt;id_group&gt; --data <span class="s1">'{"Right":&lt;right&gt;}'</span> -H <span class="s2">"Content-Type: application/json"</span> --cookie <span class="s2">"cookies.txt"</span>
 </pre>
 <pre class="highlight javascript"></pre>
 <pre class="highlight python"><span class="n">user_client</span><span class="o">.</span><span class="n">update_group_ACL_of_a_corpus</span><span class="p">(</span><span class="o">&lt;</span><span class="n">id_corpus</span><span class="o">&gt;</span><span class="p">,</span> <span class="o">&lt;</span><span class="n">id_group</span><span class="o">&gt;</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
@@ -1427,7 +1402,7 @@
 
 <h4 id="http-request">HTTP request</h4>
 
-<p><code class="prettyprint">GET http://example.com/corpus/&lt;id_corpus&gt;/group/&lt;id_group&gt;</code></p>
+<p><code class="prettyprint">PUT http://example.com/corpus/&lt;id_corpus&gt;/group/&lt;id_group&gt;</code></p>
 
 <h4 id="query-parameters">QUERY PARAMETERS</h4>
 
@@ -1458,7 +1433,7 @@
 <h2 id="remove-user-from-acl-of-a-corpus">remove user from ACL of a corpus</h2>
 
 <p><aside class="notice">Restriction: user/group rights is &lsquo;O&rsquo; for this corpus</aside></p>
-<pre class="highlight shell">curl -i -X GET http://example.com/corpus/&lt;id_corpus&gt;/group/&lt;id_group&gt;  -H <span class="s2">"Content-Type: application/json"</span> --cookie <span class="s2">"cookies.txt"</span>
+<pre class="highlight shell">curl -i -X DELETE http://example.com/corpus/&lt;id_corpus&gt;/group/&lt;id_group&gt;  -H <span class="s2">"Content-Type: application/json"</span> --cookie <span class="s2">"cookies.txt"</span>
 </pre>
 <pre class="highlight javascript"></pre>
 <pre class="highlight python"><span class="n">user_client</span><span class="o">.</span><span class="n">remove_user_from_ACL_of_a_corpus</span><span class="p">(</span><span class="o">&lt;</span><span class="n">id_corpus</span><span class="o">&gt;</span><span class="p">,</span> <span class="o">&lt;</span><span class="n">id_user</span><span class="o">&gt;</span><span class="p">)</span>
@@ -1479,7 +1454,7 @@
 
 <h4 id="http-request">HTTP request</h4>
 
-<p><code class="prettyprint">GET http://example.com/corpus/&lt;id_corpus&gt;/user/&lt;id_user&gt;</code></p>
+<p><code class="prettyprint">DELETE http://example.com/corpus/&lt;id_corpus&gt;/user/&lt;id_user&gt;</code></p>
 
 <h4 id="query-parameters">QUERY PARAMETERS</h4>
 
@@ -1505,7 +1480,7 @@
 <h2 id="remove-group-from-acl-of-a-corpus">remove group from ACL of a corpus</h2>
 
 <p><aside class="notice">Restriction: user/group rights is &lsquo;O&rsquo; for this corpus</aside></p>
-<pre class="highlight shell">curl -i -X GET http://example.com/corpus/&lt;id_corpus&gt;/group/&lt;id_group&gt;  -H <span class="s2">"Content-Type: application/json"</span> --cookie <span class="s2">"cookies.txt"</span>
+<pre class="highlight shell">curl -i -X DELETE http://example.com/corpus/&lt;id_corpus&gt;/group/&lt;id_group&gt;  -H <span class="s2">"Content-Type: application/json"</span> --cookie <span class="s2">"cookies.txt"</span>
 </pre>
 <pre class="highlight javascript"></pre>
 <pre class="highlight python"><span class="n">user_client</span><span class="o">.</span><span class="n">remove_group_from_ACL_of_a_corpus</span><span class="p">(</span><span class="o">&lt;</span><span class="n">id_corpus</span><span class="o">&gt;</span><span class="p">,</span> <span class="o">&lt;</span><span class="n">id_group</span><span class="o">&gt;</span><span class="p">)</span>
@@ -1524,7 +1499,7 @@
 
 <h4 id="http-request">HTTP request</h4>
 
-<p><code class="prettyprint">GET http://example.com/corpus/&lt;id_corpus&gt;/group/&lt;id_group&gt;</code></p>
+<p><code class="prettyprint">DELETE http://example.com/corpus/&lt;id_corpus&gt;/group/&lt;id_group&gt;</code></p>
 
 <h4 id="query-parameters">QUERY PARAMETERS</h4>
 
@@ -2042,7 +2017,7 @@
 <tr>
 <td>description</td>
 <td>free</td>
-<td>A description of the media</td>
+<td>A description of the layer</td>
 </tr>
 <tr>
 <td>fragment_typ</td>
@@ -2281,7 +2256,7 @@
 <p><aside class="notice">Restriction: user/group rights is &lsquo;O&rsquo; for the layer</aside></p>
 
 <p><aside class="warning">User rights exceeds group rights</aside></p>
-<pre class="highlight shell">curl -i -X GET http://example.com/layer/&lt;id_layer&gt;/user/&lt;id_user&gt; --data <span class="s1">'{"Right":&lt;right&gt;}'</span> -H <span class="s2">"Content-Type: application/json"</span> --cookie <span class="s2">"cookies.txt"</span>
+<pre class="highlight shell">curl -i -X PUT http://example.com/layer/&lt;id_layer&gt;/user/&lt;id_user&gt; --data <span class="s1">'{"Right":&lt;right&gt;}'</span> -H <span class="s2">"Content-Type: application/json"</span> --cookie <span class="s2">"cookies.txt"</span>
 </pre>
 <pre class="highlight javascript"></pre>
 <pre class="highlight python"><span class="n">user_client</span><span class="o">.</span><span class="n">update_user_ACL_of_a_layer</span><span class="p">(</span><span class="o">&lt;</span><span class="n">id_layer</span><span class="o">&gt;</span><span class="p">,</span> <span class="o">&lt;</span><span class="n">id_user</span><span class="o">&gt;</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
@@ -2300,7 +2275,7 @@
 
 <h4 id="http-request">HTTP request</h4>
 
-<p><code class="prettyprint">GET http://example.com/layer/&lt;id_layer&gt;/user/&lt;id_user&gt;</code></p>
+<p><code class="prettyprint">PUT http://example.com/layer/&lt;id_layer&gt;/user/&lt;id_user&gt;</code></p>
 
 <h4 id="query-parameters">QUERY PARAMETERS</h4>
 
@@ -2328,10 +2303,10 @@
 </tr>
 </tbody></table>
 
-<h2 id="update-user-acl-of-a-layer">update user ACL of a layer</h2>
+<h2 id="update-group-acl-of-a-layer">update group ACL of a layer</h2>
 
 <p><aside class="notice">Restriction: user/group rights is &lsquo;O&rsquo; for the layer</aside></p>
-<pre class="highlight shell">curl -i -X GET http://example.com/layer/&lt;id_layer&gt;/group/&lt;id_group&gt; --data <span class="s1">'{"Right":&lt;right&gt;}'</span> -H <span class="s2">"Content-Type: application/json"</span> --cookie <span class="s2">"cookies.txt"</span>
+<pre class="highlight shell">curl -i -X PUT http://example.com/layer/&lt;id_layer&gt;/group/&lt;id_group&gt; --data <span class="s1">'{"Right":&lt;right&gt;}'</span> -H <span class="s2">"Content-Type: application/json"</span> --cookie <span class="s2">"cookies.txt"</span>
 </pre>
 <pre class="highlight javascript"></pre>
 <pre class="highlight python"><span class="n">user_client</span><span class="o">.</span><span class="n">update_group_ACL_of_a_layer</span><span class="p">(</span><span class="o">&lt;</span><span class="n">id_layer</span><span class="o">&gt;</span><span class="p">,</span> <span class="o">&lt;</span><span class="n">id_group</span><span class="o">&gt;</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
@@ -2353,7 +2328,7 @@
 
 <h4 id="http-request">HTTP request</h4>
 
-<p><code class="prettyprint">GET http://example.com/layer/&lt;id_layer&gt;/layer</code></p>
+<p><code class="prettyprint">PUT http://example.com/layer/&lt;id_layer&gt;/group</code></p>
 
 <h4 id="query-parameters">QUERY PARAMETERS</h4>
 
@@ -2384,7 +2359,7 @@
 <h2 id="remove-user-from-acl-of-a-layer">remove user from ACL of a layer</h2>
 
 <p><aside class="notice">Restriction: user/group rights is &lsquo;O&rsquo; for the layer</aside></p>
-<pre class="highlight shell">curl -i -X GET http://example.com/layer/&lt;id_layer&gt;/user/&lt;id_user&gt;  -H <span class="s2">"Content-Type: application/json"</span> --cookie <span class="s2">"cookies.txt"</span>
+<pre class="highlight shell">curl -i -X DELETE http://example.com/layer/&lt;id_layer&gt;/user/&lt;id_user&gt;  -H <span class="s2">"Content-Type: application/json"</span> --cookie <span class="s2">"cookies.txt"</span>
 </pre>
 <pre class="highlight javascript"></pre>
 <pre class="highlight python"><span class="n">user_client</span><span class="o">.</span><span class="n">remove_user_from_ACL_of_a_layer</span><span class="p">(</span><span class="o">&lt;</span><span class="n">id_layer</span><span class="o">&gt;</span><span class="p">,</span> <span class="o">&lt;</span><span class="n">id_user</span><span class="o">&gt;</span><span class="p">)</span>
@@ -2405,7 +2380,7 @@
 
 <h4 id="http-request">HTTP request</h4>
 
-<p><code class="prettyprint">GET http://example.com/layer/&lt;id_layer&gt;/user/&lt;id_user&gt;</code></p>
+<p><code class="prettyprint">DELETE http://example.com/layer/&lt;id_layer&gt;/user/&lt;id_user&gt;</code></p>
 
 <h4 id="query-parameters">QUERY PARAMETERS</h4>
 
@@ -2431,7 +2406,7 @@
 <h2 id="remove-group-from-acl-of-a-layer">remove group from ACL of a layer</h2>
 
 <p><aside class="notice">Restriction: user/group rights is &lsquo;O&rsquo; for the layer</aside></p>
-<pre class="highlight shell">curl -i -X GET http://example.com/layer/&lt;id_layer&gt;/group/&lt;id_group&gt;  -H <span class="s2">"Content-Type: application/json"</span> --cookie <span class="s2">"cookies.txt"</span>
+<pre class="highlight shell">curl -i -X DELETE http://example.com/layer/&lt;id_layer&gt;/group/&lt;id_group&gt;  -H <span class="s2">"Content-Type: application/json"</span> --cookie <span class="s2">"cookies.txt"</span>
 </pre>
 <pre class="highlight javascript"></pre>
 <pre class="highlight python"><span class="n">user_client</span><span class="o">.</span><span class="n">remove_group_from_ACL_of_a_layer</span><span class="p">(</span><span class="o">&lt;</span><span class="n">id_layer</span><span class="o">&gt;</span><span class="p">,</span> <span class="o">&lt;</span><span class="n">id_group</span><span class="o">&gt;</span><span class="p">)</span>
@@ -2450,7 +2425,7 @@
 
 <h4 id="http-request">HTTP request</h4>
 
-<p><code class="prettyprint">GET http://example.com/layer/&lt;id_layer&gt;/group/&lt;id_group&gt;</code></p>
+<p><code class="prettyprint">DELETE http://example.com/layer/&lt;id_layer&gt;/group/&lt;id_group&gt;</code></p>
 
 <h4 id="query-parameters">QUERY PARAMETERS</h4>
 
