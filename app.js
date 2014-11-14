@@ -110,14 +110,14 @@ async.waterfall([
     },
     function(salt, hash, callback) {
         User.findOne({username:"root"}, function (error, user) {
-            user.salt = salt;
-            user.hash = hash; 
             callback(error, salt, hash, user);
         });
     },
     function(salt, hash, user, callback) {                                                     // create or update root user with the new password if it exist
         if (user) {
             if (program.root_pass != undefined) {
+                user.salt = salt;
+                user.hash = hash;               
                 user.save(function (error, user) {                                             // save the user
                     if (!error) console.log("update root password")
                     callback(error)
