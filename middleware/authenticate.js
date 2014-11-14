@@ -23,377 +23,78 @@ SOFTWARE.
 */
 
 
-var hash = require('./pass').hash,
-    User = require('../models/user').User,
-    ACLModel = require('../models/ACL').ACL,
-    ACL = require('../controllers/ACLAPI'),
-    Group = require('../models/Group').Group,
-    GroupAPI = require('../controllers/GroupAPI'),
-    commonFuncs = require('../lib/commonFuncs'),
-    mongoose = require('mongoose'),
-    ses = require('../models/sessions')(mongoose); //for listing all sessions
 
-var corpus = require('../controllers/CorpusAPI'),
-  	media = require('../controllers/MediaAPI'),
-  	layer = require('../controllers/LayerAPI'),
-  	anno = require('../controllers/AnnotationAPI'),
-  	compound = require('../controllers/CompoundAPI');
+var crypto = require('crypto');
 
-// check for authentication
+var len = 128;				//Bytesize
+var iterations = 12000;
+
+// to hash password
+hash = function (pwd, salt, fn) {
+	if (arguments.length == 3) crypto.pbkdf2(pwd, salt, iterations, len, fn);		// if salt is known
+  	else {																			// else generate a new salt
+    	fn = salt;
+    	crypto.randomBytes(len, function(error, salt){
+			if (error) return fn(error);
+			salt = salt.toString('base64');
+			crypto.pbkdf2(pwd, salt, iterations, len, function(error2, hash){
+				if (error2) return fn(error);
+				fn(null, salt, hash);
+			});
+		});
+	}
+};
+
+// check if login and pasword correspond
 authenticateElem = function(name, pass, fn) {
-    User.findOne({username: name}, function (error, user) {
+    User.findOne({username: name}, function (error, user) {							// find the first user with username
        	if (user) {
            	if (error)  return fn(new Error('could not find user'));
-           	hash(pass, user.salt, function (error2, hash) {
-            	if (error2) return fn(error2);
-            	if (hash == user.hash) return fn(null, user);
-            	fn(new Error('invalid password'));
+           	hash(pass, user.salt, function (error2, hash) {							// ask the hash for this user
+				if (error2) return fn(error2);
+            	if (hash == user.hash) return fn(null, user);						// check if the 2 hash correspond
+				fn(new Error('invalid password'));
            	});
        	} 
        	else return fn(new Error('could not find this user'));
     }); 
 }
 
-exports.authenticate = function(name, pass, fn) {
-    return authenticateElem(name, pass, fn);
-}
-
-exports.requiredValidUser = function(req, res, next) {
-	if (req.session.user) next();
-	else res.status(403).json({error:"access denied"});
-}
-
-// check if the given user name or group name exists
-exports.requiredRightUGname = function(role) {
-	return function(req, res, next) {
-    	if (req.session.user) { 
-    		if (req.session.user.role == "admin") next();
-			else if (commonFuncs.isAllowedUser(req.session.user.role, role) < 0) res.status(403).json({error:"access denied"});
-			else {
-				var userLogin = req.body.username;
-				var groupLogin = req.body.groupname;
-				if (userLogin == undefined) userLogin = "root";
-				User.findOne({username : {$regex : new RegExp('^'+ userLogin + '$', "i")}}, function(error, data){
-					if (error) res.status(403).json( {error:"access denied", message:error});
-					else {
-						if (data == null) res.status(400).json( {error:"this user does not exist"});
-						else {
-							if (groupLogin == undefined) next();
-							else {
-								Group.findOne({groupname : {$regex : new RegExp('^'+ groupLogin + '$', "i")}}, function(error2, data){
-									if (error2) res.status(403).json( {error:"access denied", message:error2});
-									else {
-										if (data == null)res.status(400).json( {error:"this group does not exist"});
-										else next();
-									}
-								});
-							}
-						}
-					}
-				});
-			}
-		}
-		else res.status(403).json( {error:"access denied"});
-	}
-}
-
-
-checkRequiredConsistentID_corpus = function(req, res, next) {
-	var id_corpus = req.params.id;
-	if (id_corpus == undefined) id_corpus = req.params.id_corpus;
-	Corpus.findById(id_corpus, function(error, data){
-		if (error) res.status(403).json({error:"access denied!", message:error});
-		else if (data == null) res.status(403).json( {error:"access denied"});
-		else next();
-	});
-}
-
-checkRequiredConsistentID_media = function(req, res, next) {
-	Media.findById(req.params.id_media, function(error, data){
-		if (error) res.status(403).json({error:"access denied!", message:error});
-		else if (data == null) res.status(400).json( {error:"Not found this id"});
-		else if (req.params.id_corpus == data.id_corpus)  next();
-		else res.status(400).json( {error:"One of these ids is not correct"});
-	});
-}
-
-checkRequiredConsistentID_layer = function(req, res, next) {
-	Layer.findById(req.params.id_layer, function(error, data){
-		if (error) res.status(403).json({error:"access denied!", message:error});
-		else if (data == null) res.status(400).json( {error:"Not found this id"});
-		else if (data.id_media != req.params.id_media)  res.status(400).json( {error:"One of these ids is not correct"});
-		else checkRequiredConsistentID_media(req, res, next);
-	});
-}
-
-checkRequiredConsistentID_annotation = function(req, res, next) {
-	Annotation.findById(req.params.id_anno, function(error, data){
-		if (error) res.status(403).json({error:"access denied!", message:error});
-		else if (data == null) res.status(400).json( {error:"Not found this id"});
-		else if (data.id_layer != req.params.id_layer) res.status(400).json( {error:"One of these ids is not correct"});
-		else checkRequiredConsistentID_layer(req, res, next);
-	});
-}
-
-// check if the IDs given for an operation are consistent, 
-// ie., id_layer is under its id_media, ...
-exports.requiredConsistentID = function(role, minimumRightRequired, level) {
-	return function(req, res, next) {
-		if (req.session.user) {
-    		if (req.session.user.role == "admin" || minimumRightRequired == 'N') next();
-			else if (commonFuncs.isAllowedUser(req.session.user.role, role) < 0) res.status(403).json({error:"access denied"});
-			else {
-				switch(level){
-					case "corpus":
-						checkRequiredConsistentID_corpus(req, res, next);
-						break;						
-					case "media":
-						checkRequiredConsistentID_media(req, res, next);
-						break;						
-					case "layer":
-						checkRequiredConsistentID_layer(req, res, next);					
-						break;					
-					case "annotation":
-						checkRequiredConsistentID_annotation(req, res, next);					
-						break;						
-					default:
-						break;
-				}	
-			}
-		}
-		else res.status(401).json({error:"You are not connected"});
-	}
-}
-
-
-checkRequiredAuthentication = function(req, res, result, connectedUser, dataGroup, minimumRightRequired, next){
-	ACLModel.find({id:{$in:result}}, function(error, dataACL) {
-		if (error) res.status(400).json({error:"access denied!", message:error});
-		else if (dataACL != null) {
-			var contd = true;
-			for(var i = 0; i < dataACL.length && contd; i++){
-				var foundPos = commonFuncs.findUsernameInACL(connectedUser.username, dataACL[i].users);
-				if (foundPos != -1 && commonFuncs.isAllowedRight(minimumRightRequired, dataACL[i].users[foundPos].right) >= 0) {
-					found = true; 
-					contd = false;
-					next();
-				}	
-				else {
-					foundPos = commonFuncs.findUsernameInGroupACL(dataGroup, dataACL[i].groups);
-					if (foundPos != -1 && commonFuncs.isAllowedRight(minimumRightRequired, dataACL[i].groups[foundPos].right) >= 0) {
-						found = true; 
-						contd = false; 
-						next(); 
-					}
-				}
-				if (foundPos != -1 && contd)  contd = false;  // found the user right, but not satisfied
-			} 
-			if (found == false)  res.status(403).json( {error:"access denied"});
-		}
-		else res.status(403).json( {error:"access denied"}); 
-	});
-}
-
-checkRequiredAuthenticationCorpus = function(req, res, id_corpus, connectedUser, dataGroup, minimumRightRequired, next){
-	ACLModel.findOne({id:id_corpus}, function(error, dataACL) {
-		if (error) res.status(400).json({error:"access denied!", message:error});
-		else if (dataACL != null) {										
-			var foundPos = commonFuncs.findUsernameInACL(connectedUser.username, dataACL.users);
-			if (foundPos != -1 && commonFuncs.isAllowedRight(minimumRightRequired, dataACL.users[foundPos].right) >= 0) {
-				found = true;
-				next();
-			}	
-			else {
-				foundPos = commonFuncs.findUsernameInGroupACL(dataGroup, dataACL.groups);
-				if (foundPos != -1 && commonFuncs.isAllowedRight(minimumRightRequired, dataACL.groups[foundPos].right) >= 0) {
-					found = true; 
-					next();
-				}
-			}
-			if (found == false) res.status(403).json({error:"access denied"});
-		}
-		else res.status(403).json({error:"access denied"});
-	});
-}
-
-exports.requiredAuthentication = function(role, minimumRightRequired, level) {
-	return function(req, res, next) {
-		if (req.session.user) { 
-    		if (req.session.user.role == "admin" || minimumRightRequired == 'N')  next();
-			else if (commonFuncs.isAllowedUser(req.session.user.role, role) < 0)	 res.status(403).json({error:"access denied"});
-			else {
-				var connectedUser = req.session.user;
-				var i = level;
-				var found = false;
-				switch(i) {
-					case "annotation": 
-						Group.find({'usersList' : {$regex : new RegExp('^'+ connectedUser.username + '$', "i")}}, function(error, dataGroup) {
-							if (error) res.status(400).json({error:"access denied!", message:error});
-							else {
-								result = [];
-								result.push(req.params.id_anno);
-								result.push(req.params.id_layer);
-								result.push(req.params.id_media);
-								result.push(req.params.id_corpus);
-								checkRequiredAuthentication(req, res, result, connectedUser, dataGroup, minimumRightRequired, next);
-							}
-						});	
-						break;
-						
-					case  "layer": 
-						Group.find({'usersList' : {$regex : new RegExp('^'+ connectedUser.username + '$', "i")}}, function(error, dataGroup) {
-							if (error) res.status(400).json({error:"access denied!", message:error});
-							else {
-								result = [];
-								result.push(req.params.id_layer);
-								result.push(req.params.id_media);
-								result.push(req.params.id_corpus);
-								checkRequiredAuthentication(req, res, result, connectedUser, dataGroup, minimumRightRequired, next);
-							}
-						});	
-						break;
-						
-					case "media": 
-						var id_media = req.params.id_media;
-						Group.find({'usersList' : {$regex : new RegExp('^'+ connectedUser.username + '$', "i")}}, function(error, dataGroup) {
-							if (error) res.status(400).json({error:"access denied!", message:error});
-							else {
-								result = [];
-								result.push(req.params.id_media);
-								result.push(req.params.id_corpus);
-								checkRequiredAuthentication(req, res, result, connectedUser, dataGroup, minimumRightRequired, next);
-							}
-						});
-						break;
-						
-					case "corpus": 
-						var id_corpus = req.params.id;
-						if (id_corpus == undefined) id_corpus = req.params.id_corpus;						
-						Group.find({'usersList' : {$regex : new RegExp('^'+ connectedUser.username + '$', "i")}}, function(error, dataGroup) {
-							if (error) res.status(400).json({error:"access denied!", message:error});
-							else checkRequiredAuthenticationCorpus(req, res, id_corpus, connectedUser, dataGroup, minimumRightRequired, next);
-						});
-						break;
-					
-					case "global":						
-						if (commonFuncs.isAllowedUser(req.session.user.role, role) >= 0)	next();
-						else res.status(403).json({error:"access denied"});
-						break;
-						
-					default:
-						res.status(403).json({error:"access denied"});					//keep only the permitted resources
-				}
-			}  
-		} 
-		else res.status(403).json({error:"access denied"});	
-	}
-}
-
-// create a root user if it does not exist
-exports.createRootUser = function(){
-	User.findOne({username:"root"}, function(error, data){
-   		if (error) res.status(400).json({error:"error", message:error});
-   		if (!data) {
-   			var pass = GLOBAL.root_pass;
-   			
-			hash(pass, function (error2, salt, hash) {
-				if (error2) res.status(400).json({error:"error", message:error2});
-				var user = new User({
-					username: "root",
-					affiliation: "camomile",
-					role: "admin",
-					salt: salt,
-					hash: hash,
-				}).save(function (error3, newUser) {  // already added the root user
-					if (error3) res.status(400).json({error:"error", message:error3});
-				}); 
-			});	
-   		} 
-   		else if (GLOBAL.root_passdef != GLOBAL.root_pass){
-   			var pass = GLOBAL.root_pass;
-			hash(pass, function (error2, salt, hash) {
-				data.salt = salt;
-				data.hash = hash;
-				data.save(function (error3, newUser) {  // already updated the root pass
-					if (error3) res.status(400).json({error:"error", message:error3});
-				});
-			});
-   		}
-	});
-}
-//check if a user exists
-exports.userExist = function(req, res, next) {
-    User.count({username: req.body.username}, function (error, count) {
-        if (count === 0)  next();
-        else res.status(400).json( {error:"this user name already exists", message:error});
-    });
-}
-
+// login
 exports.login = function (req, res) {
-	var username = req.body.username;
-	var	pass = req.body.password;
-	if (username == undefined) { //login via a GET
-		username = req.params.username;
-		pass = req.params.password;
-	}
-	if (username == undefined || pass == undefined) res.status(400).json({error:"authentication failed, username or password are not define"});
+	if (req.body.username == undefined || req.body.password == undefined) res.status(400).json({error:"authentication failed, username or password are not define"});
 	else {
-		authenticateElem(username, pass, function (error, user) {
+		authenticateElem(req.body.username, req.body.password, function (error, user) {
 			if (user) {
 				req.session.regenerate(function () {
 					req.session.user = user;
-					res.status(200).json({message:"You have been successfully logged in as "+username}); 
+					res.status(200).json({message:"You have been successfully logged in as "+req.body.username}); 
 				});
 			} 			
-			else res.status(400).json({error:"authentication failed, please check your username or password", message:error});
+			else res.status(400).json({message:"authentication failed, check your username or password"});
 		});
 	}
 }
 
-// create a user
-exports.signup = function (req, res) {
-	if (req.body.password == undefined || req.body.username == undefined) res.status(400).json( {error:"the username and/or password fields have not been filled up with data"});
-	else {
-		var roleuser = req.body.role;
-		if (GLOBAL.list_user_role.indexOf(roleuser)==-1)  roleuser = "user";
-		hash(req.body.password, function (error, salt, hash) {
-			if (error) res.status(400).json({error:"error", message:error});
-			var user = new User({
-				username: req.body.username,
-				affiliation: req.body.affiliation,
-				role: roleuser,//req.body.role,
-				salt: salt,
-				hash: hash,
-			}).save(function (error2, newUser) {
-				if (error2) res.status(400).json({error:"error", message:error2});
-				if (newUser)res.status(200).json( newUser);
-			});
-		});		
-	}
-}
-
-exports.racine = function (req, res) {
-    if (req.session.user) res.status(200).json({message:"user is logged as ' + req.session.user.username+'"});
-}
-
-// used for test, and it will be removed from the production version
+// logout
 exports.logout = function (req, res) {
-    if (req.session.user) {
-    	var uname = req.session.user.username;
-    	req.session.destroy(function () {
-        	res.status(200).json({message:uname +" is logged out"});
-    	});
-    }
+	var username = req.session.user.username;
+	req.session.destroy(function () {
+		res.status(200).json({message:username +" is logged out"});
+	});
 }
 
-// remove a given group ID, also remove this group in the ACL table
-exports.removeGroupByID  = function (req, res) {
-    if (req.params.id == undefined) return res.status(400).json( {error:"The id parameter has not been sent"});
-	Group.remove({_id : req.params.id}, function(error, data){
-		if (error) res.status(400).json({error:"error", message:error});			//Error in deleting one annotation		
-		else {
-			ACLAPI.removeAGroupFromALC(data.groupname);
-			res.status(200).json(data);
-		}
-	});    
+// to now who is logged in
+exports.me = function (req, res) {
+    res.status(200).json({id_user:req.session.user._id, 
+    					  username:req.session.user.username,
+    					  role:req.session.user.role,
+    					  description:req.session.user.description
+    					});
+}
+
+// check if a user is logged in
+exports.islogin = function (req, res, next) {
+    if (req.session.user) next();
+    else res.status(400).json( {message:"Acces denied, you are not logged in"});
 }

@@ -22,22 +22,12 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-/*
-Module Dependencies 
-*/
-var mongoose = require('mongoose')
-   , Schema = mongoose.Schema;
-
-/*
-Database and Models
-*/
-//mongoose.connect("mongodb://localhost/myapp");
-
+var mongoose = require('mongoose');
+var Schema = mongoose.Schema;
 
 exports.UserSchema = UserSchema = new Schema({
     username: {type:String, lowercase: true, trim: true, required: true},
-   // password: String, //dont need to know, and should not know:D
-    affiliation: String,
+    description: {type : Schema.Types.Mixed, 'default' : ''},   	
     role: String,
     salt: String,
     hash: String

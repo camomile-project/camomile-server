@@ -29,104 +29,85 @@ SOFTWARE.
    	- putnext: intert a list of id into the queue			
 */
 
-var Queue = require('../models/Queue').Queue;
-
-// retrieve all queues, only admin users can do so
-exports.listAll = function (req, res) {
-	Queue.find({}, function (error, que) {
-        if (error) res.status(400).json({error:"error", message:error});
-        if (que) res.status(200).json(que);
-        else return res.status(200).json([]);
-    });
-}
-
-//retrieve a particular queue, any connected user can do it
-exports.listWithId = function(req, res){
-	if (req.params.id == undefined) return res.status(400).json({error:"the given ID is not correct"});
-	Queue.findById(req.params.id, function (error, que) {
-        if (error) res.status(400).json({error:"error", message:error});
-        if (que) res.status(200).json(que);
-        else return res.status(200).json([]);
-    });
-}
-
-//get(pop) the next annotation to be annotated
-exports.getNext = function(req, res){
-	if (req.params.id == undefined) return res.status(200).json({error:"the given ID is not correct"});
-	Queue.findById(req.params.id, function (error, que) {
-        if (error) res.status(400).json({error:"error", message:error});
-        if (que) {
-        	if (que.queue.length > 0){
-        		ret = que.queue.slice(0,1);
-        		que.queue.splice(0,1);
-        		que.save(function(error2, queNew) {
-        			if (error2) res.status(400).json({error:"error", message:error2});
-        			else res.status(200).json(ret[0]);
-        		});
-        	}
-			else res.status(200).json([]);
-        } 
-        else return res.status(200).json([]);
-    });
-}
-
-//create a queue with a given name (and a queue containing a list of ids, optional)
-exports.post = function(req, res){
-	if (req.body.name == undefined) return res.status(400).json({error:"You must fill in the name of the queue"});
-	var queue_data = {name: req.body.name, queue : []};
-	if (req.body.queue) queue_data = req.body.queue;
-	var queue = new Queue(queue_data);
-	queue.save(function(error, data){
-		if (error) res.status(400).json({error:"error", message:error});
-		else res.status(200).json(data);
+// check if the id_queue exists in the db
+exports.exist = function(req, res, next) {
+	Queue.findById(req.params.id_queue, function(error, queue){
+		if (error) res.status(400).json(error);
+		else if (!queue) res.status(400).json({message:"id_queue don't exists"});
+		else next();
 	});
 }
 
-// update information of a queue: 
+// create a queue
+exports.create = function (req, res) {
+	if (req.body.name == undefined) res.status(400).json({message:"the name is not define"}); 
+	if (req.body.name == "") 		res.status(400).json({message:"empty string for name is not allow"});
+	var queue = new Queue({
+		name: req.body.name,
+		description: req.body.description,
+		list: [],
+	}).save(function (error, newQueue) {
+		if (error) res.status(400).json({message:error});
+		if (newQueue) res.status(200).json(newQueue);
+	});
+}
+
+// retrieve all queues
+exports.getAll = function (req, res) {	
+	Queue.find({}, 'name description list', function (error, queues) {
+    	if (error) res.status(400).json({error:"error", message:error});
+    	if (queues) res.status(200).json(queues);
+		else res.status(200).json([]);
+	});
+}
+
+// retrieve a particular queue with his _id
+exports.getInfo = function(req, res){
+	Queue.findById(req.params.id_queue, function(error, queue){
+		res.status(200).json(queue);
+	});
+}
+
+//update information of a queue
 exports.update = function(req, res){
-	if (req.params.id == undefined || req.body.id_list == undefined)	return res.status(400).json({error:"one or more data fields are not filled out properly"});
-	Queue.findById(req.params.id, function(error, data){
-		if (error) res.status(400).json({error:"error", message:error});
-		else if (data == null) res.status(400).json({error:'no such id_queue!'})
-		else {
-			if (req.body.name) data.name = req.body.name;
-			if (req.body.id_list) data.queue = req.body.id_list;
-			data.save(function(error2, dat){
-				if (error2) res.status(400).json(error2);
-				else res.status(200).json(dat);
-			});
-		}
+	var error=null;
+	var update = {};
+	if (req.body.name) update.name = req.body.name;
+	if (req.body.description) update.description = req.body.description;
+	if (req.body.list) update.list = req.body.list;
+	Queue.findByIdAndUpdate(req.params.id_queue, update, function (error, queue) {
+		if (!error) res.status(200).json(queue);
 	});
 }
 
-// add a list of ids to the queue
-exports.putnext = function(req, res){
-	if (req.params.id == undefined || req.body.id_list == undefined) return res.status(400).json({error:"one or more data fields are not filled out properly"});
-	Queue.findById(req.params.id, function(error, data){
-		if (error) res.status(400).json({error:"error", message:error});
-		else if (data == null) res.status(400).json({error:'no such id_queue!'})
-		else {
-			if (req.body.name) data.name = req.body.name;
-			if (req.body.id_list){
-				var id_list = req.body.id_list;	
-				for(var i = 0; i < id_list.length; i++) {
-					var index = data.queue.indexOf(id_list[i]);
-					if (index < 0) data.queue.push(id_list[i]);										// not found, so insert it into the queue
-				}
-			}
-			data.save(function(error2, dat){
-				if (error2) res.status(400).json({error:"error", message:error2});
-				else res.status(200).json(dat);
-			});
-		}
+//push element at the end of the queue
+exports.push = function(req, res){
+	if (req.body.list == undefined) res.status(400).json({message:"list field is empty"});
+	Queue.findById(req.params.id_queue, function (error, queue) {
+		for(var i = 0; i < req.body.list.length; i++) queue.list.push(req.body.list[i]);
+		queue.save(function(error, newQueue) {
+			if (!error) res.status(200).json(newQueue);
+		});		
+	});	
+}
+
+//pop element at the end of the queue
+exports.pop = function(req, res){
+	Queue.findById(req.params.id_queue, function (error, queue) {
+		if (queue.list.length <0) res.status(400).json({message:"list is empty"});
+		ret = queue.list.slice(0,1);
+		queue.list.splice(0,1);
+		queue.save(function(error2, newQueue) {
+			if (error2) res.status(400).json({message:error2});
+			else res.status(200).json(ret[0]);
+		});		
 	});
 }
 
-// remove a queue
-exports.remove  = function(req, res){
-	if (req.params.id == undefined) return res.status(400).json({error:"one or more data fields are not filled out properly"});
-	Queue.remove({_id : req.params.id}, function (error, data) {
-		if (error) res.status(400).json({error:"error", message:error});
-		else res.status(200).json(data);
+// remove a given queue
+exports.remove = function (req, res) {
+	Queue.remove({_id : req.params.id_queue}, function (error, queue) {
+		if (!error && queue == 1) res.status(200).json({message:"The queue as been delete"});
+		else res.status(400).json({message:error});
 	});
 }

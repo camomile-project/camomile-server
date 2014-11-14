@@ -1,0 +1,561 @@
+Camomile-server 2.0
+
+
+## publication of the documentation at the page http://camomile-project.github.io/camomile-server/
+
+To run the documentation, go to the folder document/Users/poignant/Documents/Dev/camomile-serveration
+
+$ git clone https://github.com/camomile-project/documentation.git
+$ cd documentation
+$ bundle install
+$ bundle exec middleman server
+You can try your web site at the page http://localhost:4567/
+
+To build pages: 
+$ rake build
+
+To send the page to gh-pages :
+- copy ghp-import (from the repository camomile-project/ghp-import) into your /usr/local/bin path
+- make it executable (chmod -x /usr/local/bin/ghp-import)
+
+copy the folder documentation/build into
+$ cp build ../camomile-server/doc/build
+
+- from the local path camomile-server, run:
+$ ghp-import -n -m "a message" -p doc/build
+
+
+
+
+
+## Acces right
+
+
+Root : all rights - especially to create Administrators
+Administrators : can create a corpus (and become corpus owner), can create users (including other administrators ?) and groups, manage inclusion of users into groups ?
+Users
+Corpus owner (O) : can create medias inside the corpus, can create layers inside the corpus (and become layer owner), can share corpus ownership (?), can destroy the corpus, can grant media player rights (+ has the media player rights)
+Media player (R) : can read the media in the corpus
+Layer owner (O) : can share layer ownership (?) or grant annotator rights to users or groups, can destroy the layer (+ has the Annotator rights)
+Annotator (W) : can create/modify/destroy annotations in the layer (+ has the Vizualizer rights)
+Vizualizer (R) : can read the annotations in the layer
+
+
+
+app.js
+\config
+?  index.js
+	config.global.js
+   config.production.js
+?  config.test.js
+\routes
+?  index.js
+	routes.js
+
+\models
+   User.js
+      UserSchema = UserSchema = new Schema({
+         username: {type:String, lowercase: true, trim: true, required: true},
+         description: {type : Schema.Types.Mixed, 'default' : ''}, 
+         role: String,
+         salt: String,
+         hash: String
+      }
+   Group.js
+      GroupSchema = GroupSchema = new Schema({
+         name: {type:String, lowercase: true, trim: true, required: true},
+         description: {type : Schema.Types.Mixed, 'default' : ''},
+         users_list: [{ type:String, lowercase: true, trim:true}]
+      }
+   Corpus.js
+      CorpusSchema = CorpusSchema = new Schema({
+         name: {type: String, required: true, trim: true},
+         description : {type : Schema.Types.Mixed, 'default' : ''},
+         history : [HistorySchema],
+         users_ACL: {},
+         groups_ACL: {}
+      }
+   Media.js
+      MediaSchema = MediaSchema = new Schema({
+         id_corpus : {type : ObjectId, ref : 'CorpusSchema'},
+         name: {type: String, required: true, trim: true},
+         description: {type : Schema.Types.Mixed, 'default' : ''},         
+         url : {type: String, default:""},
+         history : [HistorySchema]
+      }
+   Layer.js
+      LayerSchema = LayerSchema = new Schema({
+         id_corpus : {type : ObjectId, ref : 'CorpusSchema'},
+         name: {type:String, lowercase: true, trim: true, required: true},
+         description: {type : Schema.Types.Mixed, 'default' : ''},
+         fragment_type : {type : Schema.Types.Mixed, 'default' : ''},
+         data_type : {type : Schema.Types.Mixed, 'default' : ''},
+         history : [HistorySchema],
+         users_ACL: {},
+         groups_ACL: {}
+      }
+   Annotation.js
+      AnnotationSchema = AnnotationSchema = new Schema({
+         id_layer : {type : ObjectId, ref : 'LayerSchema'},
+         id_media : {type : ObjectId, ref : 'MediaSchema'},
+         fragment : {type : Schema.Types.Mixed, index : true, 'default' : ''},
+         data : {type : Schema.Types.Mixed, 'default' : ''},
+         history : [HistorySchema]
+      }
+   Queue.js
+      QueueSchema = QueueSchema = new Schema({
+         name: {type: String, required: true, trim: true},
+         description: {type : Schema.Types.Mixed, 'default' : ''},
+         list: [Schema.Types.Mixed]
+      }
+   History.js
+      History = HistorySchema = new Schema({
+         date : {type: Date, 'default': Date.now},
+         id_user: {type: String, required: true, trim: true, index : true},
+         modification: {type: Schema.Types.Mixed, 'default' : '', index : true}
+      }
+   Session.js
+      module.exports = function(db) {
+        var Sessions = new db.Schema({
+          session: {
+            lastAccess: Date,
+            cookie: {
+              originalMaxAge: Date,
+              expires: Date,
+              httpOnly: Boolean,
+              path: String
+            },
+            user : {
+               username: String,
+               affiliation: String,
+            role: String,
+            salt: String,
+            hash: String
+            },
+            "_csrf": String
+          },
+          expires: Date
+        });
+        return db.model('Sessions', Sessions);
+      }
+
+\lib
+   commonFuncs.js
+      getDate()
+
+\middleware
+?  pass.js
+      hash(password)                                                           // à déplacer dans authenticate.js
+   authenticate.js
+      authenticate.login(data{username, password})
+      authenticate.logout()
+      authenticate.islogin()
+      authenticate.me()
+
+\controllers
+   UserAPI.js
+		userAPI.create()
+         if (data.username not already used) && (data.username != "") && (data.password != "") && (data.role == 'admin' || 'user')
+            add new user(data.username, data.password, data.role, data.description) to db -> id_user
+            userAPI.getInfo(id_user)
+         res.status().json({"message":"error: ..."})
+
+		userAPI.getAll()
+         res = []
+         for each id_user in db
+            res.push({id_user.username + id_user.role + id_user.description})
+         res.status().json(res)
+
+		userAPI.getInfo(id_user)
+         res.status().json({id_user.username + id_user.role + id_user.description})
+
+      userAPI.update(id_user)
+         if (data.password != "") && (data.description != {}) && (data.role != 'admin' || 'user')
+            id_user.password = data.password                                    // with hash
+            id_user.description = data.description
+            if req.session.user.username != "root"                              // can change the role of root
+               id_user.role = data.role
+            userAPI.getInfo(id_user)
+         else:
+            res.status().json({"message":"error: ..."})
+
+      userAPI.remove(id_user)
+         remove id_user from db
+         for each id_group
+            if (id_user is inside id_group)
+                remove id_user from id_group.users_list
+         for each id_corpus                                                      // suppresion id_user des ACL, problème de droit de lecture des ressources -> utile ?
+            for each id_layer in id_corpus
+               layerAPI.removeUserFromACL(id_layer, id_user)
+            corpusAPI.removeUserFromACL(id_corpus, id_user)
+         res.status().json({"message":"succes"})
+
+		userAPI.getAllGroupOfAUser(id_user)  	
+         res = []
+         for each id_group
+            if (id_user is inside id_group.users_list)
+               res.push(id_group)
+         res.status().json(res)
+
+      userAPI.exist(id_user)
+         if id_user is in the db
+            return next()
+         else
+            res.status().json({"message":"error: user don't exist"})
+
+      userAPI.currentUserIsRoot()
+         if req.session.user.username == "root"
+            return next()
+         else
+            res.status().json({"message":"error: acces refused"})
+
+      userAPI.currentUserIsAdmin()
+         if req.session.user.role == "Admin"
+            return next()
+         else
+            res.status().json({"message":"error: acces refused"})
+
+   GroupAPI.js
+   	groupAPI.create()
+         if (name not already used) && (name != "")
+            add new group to the db -> id_group
+            id_group.name = data.name
+            id_group.description = data.description
+            id_group.users_list = []
+            groupAPI.getInfo(id_group)
+         else:
+            res.status().json({"message":"error: ..."})
+
+ 		groupAPI.getAll()
+         res = []
+         for each id_group in db
+            res.push({id_group.name + id_group.description + id_group.users_list})
+         res.status().json(res)
+
+      groupAPI.getInfo(id_group)
+         res.status().json({id_group.name + id_group.description + id_group.users_list})
+
+      groupAPI.update(id_group)
+         id_group.description = data.description
+         groupAPI.getInfo(id_group)
+
+      groupAPI.remove(id_group)
+         remove id_group from db
+         for each id_corpus                                              // suppresion id_group des ACL, problème de droit de lecture des ressources -> utile ?
+            for id_layer in id_corpus
+               layerAPI.removeUserFromACL(id_layer, id_group)
+            corpusAPI.removeUserFromACL(id_corpus, id_group)
+         res.status().json({"message":"succes"})
+
+      groupAPI.addUser(id_group, id_user)
+         add id_user to id_group.id_list
+         groupAPI.getInfo(id_group)
+ 
+      groupAPI.removeUser(id_group, id_user)
+         remove id_user from id_group.id_list
+         groupAPI.getInfo(id_group)
+
+      groupAPI.exist(id_group)
+         if id_group exist in the db
+            return next()
+         else
+            res.status().json({"message":"error: group don't exist"})
+
+   CorpusAPI.js
+      corpusAPI.create()
+         if (name != "") && (description != {}})
+            add new corpus to the db -> id_corpus
+            id_corpus.name=data.name
+            id_corpus.description=data.description
+            id_corpus.history = [{"user":current_user.id, "data":date.now, "modification":"initial add"}]
+            id_corpus.ACL_user.req.session.user = 'O'
+            corpusAPI.getInfo(id_corpus)
+         else:
+            res.status().json({"message":"error: ..."})
+
+      corpusAPI.getAll()
+         res = []
+         for each id_corpus in db
+            if corpusAPI.AllowUser(id_corpus, req.session.user, ['O', 'W', 'R'], true)
+               res.push({id_corpus.name + id_corpus.description + id_corpus.history})
+         res.status().json(res)
+
+      corpusAPI.getInfo(id_corpus)
+         res.status().json({id_corpus.name + id_corpus.description + id_corpus.history})
+
+      corpusAPI.update(id_corpus)
+         if (name != "") && (description != null)
+            id_corpus.name=data.name
+            id_corpus.description=data.description
+            id_corpus.history.add({...})
+            corpusAPI.getInfo(id_corpus)
+         else:
+            res.status().json({"message":"error: ..."})
+
+      corpusAPI.remove(id_corpus)
+         for id_media in id_corpus
+            mediaAPI.remove(id_media)
+         for id_layer in id_corpus
+            layerAPI.remove(id_layer)
+         remove id_corpus from db
+         res.status().json({"message":"succes"})
+
+      corpusAPI.addMedia(id_corpus)
+         if (name != "") && (description != {})
+            add new media with (id_corpus, name, url, description)
+            id_media.history = [{"user":current_user.id, "data":date.now, "modification":"initial add"}]
+            mediaAPI.getInfo(id_media)
+         else:
+            res.status().json({"message":"error: ..."})
+
+      corpusAPI.addLayer(id_corpus)
+         if (name != "") && (description!=null) && (fragment_type!= null) && (data_type!=null)
+            add new Layer with (id_corpus, name, description, fragment_type, data_type)
+            id_layer.history = [{"user":current_user.id, "data":date.now, "modification":"initial add"}]
+            layerAPI.updateACLUser(id_layer, req.session.user, 'O')
+            layerAPI.getInfo(id_layer)
+         else:
+            res.status().json({"message":"error: ..."})
+
+      corpusAPI.getAllMedia(id_corpus)
+         res = []
+         for each id_media in id_corpus
+            res.push({id_media.name + id_media.url + id_media.description})
+         res.status().json(res)
+
+      corpusAPI.getAllLayer(id_corpus)
+         res = []
+         for id_layer in id_corpus
+            if layerAPI.AllowUser(id_layer, req.session.user, ['O', 'W', 'R'], true)
+               res.push({id_layer.name + id_layer.description + id_layer.fragment_type + id_layer.data_type + id_layer.history})
+         res.status().json(res)
+
+      corpusAPI.getACL(id_corpus)
+         res.status().json({id_corpus.ACL_user + id_corpus.ACL_group})
+
+      corpusAPI.updateUserACL(id_corpus, id_user, data.Right)
+         if data.Right in ['O', 'W', 'R']
+            id_corpus.ACL_user.id_user = data.Right
+            corpusAPI.getACL(id_corpus)
+         else:
+            res.status().json({"message":"error: ..."})
+
+      corpusAPI.updateGroupACL(id_corpus, id_group, data.Right)
+         if data.Right in ['O', 'W', 'R']
+            id_corpus.ACL_group.id_group = data.Right
+            corpusAPI.getACL(id_corpus)
+         else:
+            res.status().json({"message":"error: ..."})
+
+      corpusAPI.removeUserFromACL(id_corpus, id_user)
+         remove id_corpus.ACL_user.id_user
+         corpusAPI.getACL(id_corpus)
+
+      corpusAPI.removeGroupFromACL(id_corpus, id_group)
+         remove id_corpus.ACL_group.id_group
+         corpusAPI.getACL(id_corpus)
+
+      corpusAPI.AllowUser(id_corpus, id_user, RightsNeeded, rfunction)
+         if req.session.user.username == "root"
+            return rfunction
+         if id_user in corpusAPI.getACL(id_corpus)
+            if corpusAPI.getACL(id_corpus).user.id_user is in RightsNeeded
+               return rfunction
+         else
+            for id_group in getAllGroupOfAUser(id_user)
+               if corpusAPI.getACL(id_corpus).group.id_group in RightsNeeded
+                  return rfunction
+         if rfunction != true:
+            res.status().json({"message":"error: not allowed ressources"})
+         return false
+
+      corpusAPI.exist(id_corpus)
+         if id_corpus exist in the db
+            return next()
+         else
+            res.status().json({"message":"error: corpus don't exist"})
+
+   MediaAPI.js
+      mediaAPI.getInfo(id_media)
+         res.status().json({id_media.name + id_media.description + id_media.url + id_media.history})
+
+      mediaAPI.update(id_media, data, description)
+         if (name != "") && (description != {})
+            id_media.name = data.name
+            id_media.url = data.url
+            id_media.description = data.description
+            id_media.history.add({...})
+            mediaAPI.getInfo(id_media)
+         else:
+            res.status().json({"message":"error: ..."})
+
+      mediaAPI.remove(id_media)
+         if there is no annotation link to this media
+            remove id_media from db
+         if userAPI.currentUserIsAdmin()
+            for each id_annotation link to id_media
+               deleteAnnotation(id_annotation)
+            remove id_media from db
+         else:
+            res.status().json({"message":"error: ..."})
+         res.status().json({"message":"succes"})
+
+      mediaAPI.getVideo(id_media, extension)
+         return video stream
+
+      mediaAPI.getVideoWEBM(id_media, extension)
+         return  WEBM stream
+
+      mediaAPI.getVideoMP4(id_media, extension)
+         return  MP4 stream
+
+      mediaAPI.getVideoOGV(id_media, extension)
+         return  OGV stream
+
+      mediaAPI.exist(id_media)
+         if id_media exist
+            return next()
+         else
+            res.status().json({"message":"error: media don't exist"})
+
+   LayerAPI.js
+      layerAPI.getInfo(id_layer)
+         res.status().json({id_layer.name + id_layer.description + id_layer.fragment_type + id_layer.data_type + id_layer.history})
+
+      layerAPI.update(id_layer)
+         if (name != "") && (description!=null)
+            id_layer.name = data.name
+            id_layer.description = data.description
+            id_layer.history.add({...})
+            layerAPI.getInfo(id_layer)
+         else:
+            res.status().json({"message":"error: ..."})
+
+      layerAPI.remove(id_layer)
+         for id_annotation in id_layer
+            annotationAPI.remove(id_annotation)
+         remove id_layer from db
+         res.status().json({"message":"succes"})
+
+      layerAPI.addAnnotation(id_layer)
+         if (fragment != null) && (data != null)
+            add new annotation -> id_annotation
+            id_annotation.fragment = data.fragment
+            id_annotation.data = data.data
+            id_annotation.id_media = data.id_media
+            id_annotation.id_layer = data.id_layer
+            id_annotation.history = [{"user":current_user.id, "data":date.now, "modification":"initial add"}]
+            annotationAPI.getInfo(id_annotation)
+         else:
+            res.status().json({"message":"error: ..."})
+
+      layerAPI.getAllAnnotation(id_layer)
+         res = []
+         for id_annotation in id_layer
+            res.push({id_annotation.id_layer + id_annotation.id_media + id_annotation.fragment + id_annotation.data})
+         res.status().json(res)
+
+      layerAPI.getACL(id_layer)
+         res.status().json({id_layer.ACL_user + id_layer.ACL_group})
+
+      layerAPI.updateUserACL(id_layer, id_user, data.Right)
+         if data.Right in ['O', 'W', 'R']
+            id_layer.ACL_user.id_user = data.Right
+            layerAPI.getACL(id_layer)
+         else:
+            res.status().json({"message":"error: ..."})
+
+      layerAPI.updateGroupACL(id_layer, id_group, data.Right)
+         if data.Right in ['O', 'W', 'R']
+            id_layer.ACL_group.id_group = data.Right
+            layerAPI.getACL(id_layer)
+         else:
+            res.status().json({"message":"error: ..."})
+
+      layerAPI.removeUserFromACL(id_layer, id_user)
+         remove id_layer.ACL_user.id_user
+         layerAPI.getACL(id_layer)
+
+      layerAPI.removeGroupFromACL(id_layer, id_group)
+         remove id_layer.ACL_group.id_group
+         layerAPI.getACL(id_layer)
+
+      layerAPI.AllowUser(id_layer, id_user, RightsNeeded, rfunction)
+         if req.session.user.username == "root"
+            return rfunction
+         if id_user in layerAPI.getACL(id_layer)
+            if layerAPI.getACL(id_layer).user.id_user is in RightsNeeded
+               return rfunction
+         else
+            for id_group in getAllGroupOfAUser(id_user)
+               if layerAPI.getACL(id_layer).group.id_group in RightsNeeded
+                  return rfunction
+         if rfunction != true:
+            res.status().json({"message":"error: not allowed ressources")
+         return false
+
+      layerAPI.exist(id_layer)
+         if id_layer exist in the db
+            return next()
+         else
+            res.status().json({"message":"error: layer don't exist"})
+
+   AnnotationAPI.js   			
+      annotationAPI.getInfo(id_annotation)
+         res.status().json({id_annotation.id_layer + id_annotation.id_media + id_annotation.fragment + id_annotation.data + id_annotation.history})
+
+      annotationAPI.update(id_annotation)
+         if () && () && (fragment != null) && (data != null)
+            id_annotation.fragment = data.fragment
+            id_annotation.data = data.data
+            id_annotation.history.add({...})
+            annotationAPI.getInfo(id_annotation)
+         else:
+            res.status().json({"message":"error: ..."})
+
+      annotationAPI.remove(id_annotation)
+         remove id_annotation from db
+         res.status().json({"message":"succes"})
+
+      annotationAPI.exist(id_annotation)
+         if id_annotation exist in the db
+            return next()
+         else
+            res.status().json({"message":"error: annotation don't exist")
+
+   QueueAPI.js
+      queueAPI.add()
+         add new queue(data.name, data.description) to the db -> id_queue
+         for e in data.list
+            putNext(id_queue, e)
+         queueAPI.getInfo(id_queue)
+
+      queueAPI.getAll()
+         if userAPI.currentUserIsAdmin()
+            for each id_queue in db
+               queueAPI.getInfo(id_queue)
+         else:
+            res.status().json({"message":"error: ..."})
+
+      queueAPI.getInfo(id_queue)
+         queue = findOne(id_queue)
+         res.status().json({id_queue.name + id_queue.description + id_queue.list})
+
+      queueAPI.update(id_queue)
+         queue = findOne(id_queue)
+         update queue with (data.name, data.description, data.list)
+         queueAPI.getInfo(id_queue)
+
+      queueAPI.push(id_queue)
+         add data at the end of the id_queue.queue  
+
+      queueAPI.pop(id_queue)
+         element = first element of id_queue.queue
+         remove first element from id_queue.queue
+         res.status().json({element})
+
+      queueAPI.remove(id_queue)
+         remove id_queue from db
+         res.status().json({"message":"succes"})
+
+

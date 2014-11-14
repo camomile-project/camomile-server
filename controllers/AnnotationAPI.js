@@ -22,175 +22,92 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-/* The API controller
-   Exports 3 methods:
-   * post - Creates a new annotation
-   * listAll - Returns a list of annotations
-   * listWithId - Returns a specific annotation of a given id
-*/
+var async = require('async');
+var commonFuncs = require('../lib/commonFuncs');
 
-var Layer = require('../models/Layer').Layer; //get the layer model
-var Annotation = require('../models/Annotation').Annotation; //get the annotation model
+// check if the id_annotation exists in the db
+exports.exist = function(req, res, next) {
+	Annotation.findById(req.params.id_annotation, function(error, annotation){
+		if (error) res.status(400).json(error);
+		else if (!annotation) res.status(400).json({message:"id_annotation don't exists"});
+		else next();
+	});
+}
 
-var ACL = require('../models/ACL').ACL,
-	ACLAPI = require('../controllers/ACLAPI'),
-	Group = require('../models/Group').Group,
-	commonFuncs = require('../lib/commonFuncs');
+// check if req.session.user._id have the good right to see this annotation.id_layer
+exports.AllowUser = function (list_right){
+	return function(req, res, next) {
+		async.waterfall([
+			function(callback) {										// find the user
+				User.findById(req.session.user._id, function(error, user){
+					callback(error, user);
+				});
+			},
+			function(user, callback) {									// find the list of group belong the user
+				Group.find({'users_list' : {$regex : new RegExp('^'+ req.session.user._id + '$', "i")}}, function(error, groups) {
+					callback(error, user, groups);
+				});
+			},
+			function(user, groups, callback) {							// find the annotation
+				Annotation.findById(req.params.id_annotation, function(error, annotation){
+					callback(error, user, groups, annotation);
+	    		});
+			},
+			function(user, groups, annotation, callback) {					// find the layer belong the annotation anc check if the user have the right to access this layer
+				Layer.findById(annotation.id_layer, function(error, layer){
+					if (commonFuncs.checkRightACL(layer, user, groups, list_right)) next();
+					else error = "Acces denied";
+					callback(error);
+	    		});
+			},
 
-// for the uri : app.get('/corpus/:id_corpus/media/:id_media/layer/:id_layer/annotation'
-/*
-	- First: retrieves all annotations regardless of user/group's rights
-	- Second: finds all groups belonging to the connected user
-	- For each found annotation, check ACLs (the permission of the connected user and its groups)
-	- If not found, do a back propagation
-*/ 
-exports.listAll = function(req, res){
-	
-	function final(resultReturn, n) { 
-		if (resultReturn.length == 0 && n > 0) res.status(403).json({error: "You dont have enough permission to get this resource"});
-		else res.status(200).json(resultReturn);
+		], function (error, trueOrFalse) {
+			if (error) res.status(400).json({message:error});
+		});
 	}
-	Annotation.find({id_layer : req.params.id_layer}, function(error, data){	// get all annotations under this id
-		if (error) res.status(400).json({error:"error", message:error});
-		else {
-			var connectedUser = req.session.user;
-			if (GLOBAL.no_auth == true || (connectedUser != undefined && connectedUser.role == "admin")) res.status(200).json(data);
-			else if (connectedUser != undefined && data != null){
-				Group.find({'usersList' : {$regex : new RegExp('^'+ connectedUser.username + '$', "i")}}, function(error2, dataGroup) {				//first find the groups to which the connecteduser belongs
-					if (error2) res.status(400).json({error:"error", message:error2});
-					else {					
-						result = [];
-						resultReturn = [];
-						for(var i = 0; i < data.length; i++) result.push(data[i]._id);
-						ACL.find({id:{$in:result}}, function(error3, dataACL){												// then find all acls of these id
-							if (error3) res.status(500).json({error:"error in ACL-corpusListall", message:error3});
-							else if (dataACL != null){
-								var dataACLLen = dataACL.length;
-								var countTreatedACL = 0;
-								for(var i = 0; i < dataACL.length; i++){ 
-									var foundPos = commonFuncs.findUsernameInACL(connectedUser.username, dataACL[i].users);
+}
 
-									if (foundPos != -1) { 
-										if (dataACL[i].users[foundPos].right != 'N') {
-											resultReturn.push(data[i]);
-											countTreatedACL += 1;
-										}
-									} 
-									else {																					// not found user's right, find its group's one
-										foundPos = commonFuncs.findUsernameInGroupACL(dataGroup, dataACL[i].groups);
-										if (foundPos != -1) {
-											if (dataACL[i].groups[foundPos].right != 'N') {
-												resultReturn.push(data[i]);
-												countTreatedACL += 1;
-											}
-										}
-										else { 																				//not found user right, nor group one, do a back propagation
-											(function(d){
-												parentID = [];																//be careful, the order of push is important
-												parentID.push(req.params.id_layer);
-												parentID.push(req.params.id_media); 
-												parentID.push(req.params.id_corpus);
-												ACL.find({id:{$in:parentID}}, function(error4, dataACL1){					// get all parent's acl 
-													if (error4) res.status(400).json({error:"error", message:error4});
-													else if (dataACL1 != null) {
-														countTreatedACL += 1;
-														var contd = true; 													// stop when found any right
-														for(var j = 0; j < dataACL1.length && contd; j++) {
-															var foundPos = commonFuncs.findUsernameInACL(connectedUser.username, dataACL1[j].users);
-														
-															if (foundPos != -1) {
-																if (dataACL1[j].users[foundPos].right != 'N') {
-																	resultReturn.push(d); 
-																	contd = false;
-																}
-															}
-															else {
-																foundPos = commonFuncs.findUsernameInGroupACL(dataGroup, dataACL1[j].groups);
-							
-																if (foundPos != -1) {
-																	if (dataACL1[j].groups[foundPos].right != 'N') {
-																		resultReturn.push(d); 
-																		contd = false;
-																	}
-																	else contd = false; 									// stop because we already found the right N
-																}
-															}
-														} 
-														if (countTreatedACL == dataACLLen) {
-															countTreatedACL = -1
-															final(resultReturn, data.length);
-														}
-													} 
-												}); 
-											})(data[i]); 
-										} 
-									}
-								} 
-								if (countTreatedACL == dataACLLen) final(resultReturn, data.length);
-							}
-							else res.status(400).json({error: "error in finding acl"});
-						}); 
-					} 
-				}); 
-			} 
-			else res.status(403).json({error: "You dont have permission to access this resource"});
+// retrieve a particular annotation with his _id  print _id, id_layer, fragment and data
+exports.getInfo = function(req, res){
+	Annotation.findById(req.params.id_annotation, function(error, annotation){
+		if (error) res.status(400).json({message:error});
+    	else res.status(200).json(annotation);
+	});
+}
+
+// get all annotation
+exports.getAll = function (req, res) {	
+	Annotation.find({}, function (error, annotations) {
+    	if (error) res.status(400).json({error:"error", message:error});
+    	if (annotations) res.status(200).json(annotations);
+		else res.status(200).json([]);
+	});
+}
+
+// remove a given annotation
+exports.remove = function (req, res) {
+	Annotation.remove({_id : req.params.id_annotation}, function (error, annotation) {
+		if (!error && annotation == 1) res.status(200).json({message:"The annotation as been delete"});
+		else res.status(400).json({message:error});
+	});
+}
+//update information of a annotation
+exports.update = function(req, res){
+	var newHistory = {};
+	Annotation.findById(req.params.id_annotation, function(error, annotation){
+		if (req.body.fragment) {											// check field
+			annotation.fragment = req.body.fragment;
+			newHistory.fragment = req.body.fragment;
 		}
-	});
+		if (req.body.data) {
+			annotation.data = req.body.data;
+			newHistory.data = req.body.data;
+		}	
+		annotation.history.push({date:new Date(), id_user:req.session.user._id, modification:newHistory})
+		annotation.save(function(error, newAnnotation) {							// save the media in the db
+			if (error) res.status(400).json({message:error});
+			if (!error) res.status(200).json(newAnnotation);
+		});
+	});	
 }
 
-exports.listWithId = function(req, res){
-	Annotation.findById(req.params.id_anno, function(error, data){
-		if (error) res.status(400).json({error:"error", message:error});
-		else if (data == null) res.status(400).json({error:'no such id_layer!'})
-		else res.status(200).json(data);
-	});
-}
-
-exports.post = function(req, res){
-	if (req.body.fragment == undefined || req.body.data == undefined)
-		return res.status(400).json({error: "one or more data fields are not filled out properly"});
-		
-	Layer.findById(req.params.id_layer, function(error, data){
-		if (error) res.status(400).json({error:"error", message:error});
-		else if (data == null) res.status(400).json({error:'Could not post this annotation because the given id_layer is incorrect'});
-		else {		
-			var annoItem = {"id_layer" : req.params.id_layer, "fragment" : req.body.fragment, "data" : req.body.data, "history" : []};
-			var anno = new Annotation(annoItem);
-			var connectedUser = "root";
-			if (req.session.user) connectedUser = req.session.user.username;
-			var modified = {"id_layer" : req.params.id_layer, "fragment" : req.body.fragment, "data" : req.body.data};			// changed after the meeting with the CRP and grenoble
-			anno.history.push({name : connectedUser, date : new Date(), modification:modified});
-			anno.save( function(error2, annoData){
-				if (error2){
-					res.status(400).json({error:"error", message:error2});
-					return;
-				}
-				else{
-					ACLAPI.addUserRightGeneric(annoData._id, connectedUser, 'A');
-					res.status(200).json(annoData);
-				}
-			});
-		}
-	});
-}
-
-exports.updateAll = function(req, res){
-	if (req.body.fragment == undefined && req.body.data == undefined) return res.status(400).json({error: "one or more data fields are not filled out properly"});
-	var update = {};
-	if (req.body.fragment) update.fragment = req.body.fragment;
-	if (req.body.data) update.data = req.body.data;
-	
-	Annotation.findByIdAndUpdate(req.params.id_anno, update, function (error, anno) {
-		if (error) res.status(400).json({error:"error", message:error});
-		else {
-			var dateNow = new Date();
-			var uname = "root"; 
-			if (req.session.user) uname = req.session.user.username;
-			anno.history.push({name:uname, date: dateNow, modification: update});			//changed after the meeting with RCP and grenoble
-			anno.save( function(error2, data){
-				if (error2) res.status(400).json({error:"error", message:error2});
-				else res.status(200).json(data);
-			});
-		}
-	});
-}

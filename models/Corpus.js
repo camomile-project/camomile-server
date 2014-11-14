@@ -22,17 +22,16 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-var mongoose = require('mongoose')
-   ,Schema = mongoose.Schema
-   ,ObjectId = Schema.ObjectId;
-   
-/**
- * 
- */
- 
+var mongoose = require('mongoose');
+var Schema = mongoose.Schema;
+var ObjectId = Schema.ObjectId;
+var HistorySchema = require('./History').HistorySchema;
+
 exports.CorpusSchema = CorpusSchema = new Schema({
-	//_id: {type:mongoose.Schema.ObjectId, default: new mongoose.Types.ObjectId()},
-	name: {type: String, required: true, trim: true} 	
+	name: {type: String, required: true, trim: true},
+	description : {type : Schema.Types.Mixed, 'default' : ''},
+	history : [HistorySchema],
+    ACL: {type : Schema.Types.Mixed, 'default' : null},
 }, { versionKey: false });
 
 exports.Corpus = Corpus = mongoose.model('Corpus', CorpusSchema);

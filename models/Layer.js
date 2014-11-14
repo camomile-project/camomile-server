@@ -22,23 +22,20 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-var mongoose = require('mongoose')
-   , Schema = mongoose.Schema
-   , ObjectId = Schema.ObjectId
-   , MediaSchema = require('./Media').MediaSchema
-   , HistorySchema = require('./History').HistorySchema;
-/**
- * 
- */
+var mongoose = require('mongoose');
+var Schema = mongoose.Schema;
+var ObjectId = Schema.ObjectId;
+var HistorySchema = require('./History').HistorySchema;
+var CorpusSchema = require('./Corpus').CorpusSchema;
  
 exports.LayerSchema = LayerSchema = new Schema({
-	//_id: {type:mongoose.Schema.ObjectId, default: new mongoose.Types.ObjectId()},
-	id_media : {type : ObjectId, index : true, ref : 'MediaSchema'}
-	, layer_type : {type: String, required: true, trim: true} 
-	, fragment_type : {type : String, 'default' : 'segment'}
-	, data_type : {type : String, 'default' : 'label'}
-	, source : {type : Schema.Types.Mixed, 'default' : ''}	
-	, history : [HistorySchema]
+	id_corpus : {type : ObjectId, ref : 'CorpusSchema'},
+	name: {type:String, lowercase: true, trim: true, required: true},
+	description: {type : Schema.Types.Mixed, 'default' : ''},   	
+	fragment_type : {type : Schema.Types.Mixed, 'default' : ''}, 
+	data_type : {type : Schema.Types.Mixed, 'default' : ''}, 
+	history : [HistorySchema],
+    ACL: {type : Schema.Types.Mixed, 'default' : null},
 }, { versionKey: false });
 
 exports.Layer = Layer = mongoose.model('Layer', LayerSchema);
