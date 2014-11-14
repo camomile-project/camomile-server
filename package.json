@@ -1,6 +1,6 @@
 {
   "name": "camomile",
-  "version": "0.0.1",
+  "version": "0.1.1",
   "description": "",
   "main": "app.js",
   "repository": {
@@ -22,6 +22,6 @@
     "mongoose": "*",
     "connect-mongo": "*",
     "commander": "*", 
-    "async":"0.9.0",
+    "async": "0.9.0"
   }
 }
