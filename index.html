@@ -2138,10 +2138,10 @@
 <h2 id="get-list-of-annotations-into-a-layer">Get list of annotations into a layer</h2>
 
 <p><aside class="notice">Restriction: user/group rights is &lsquo;O&rsquo; or &lsquo;W&rsquo; or &lsquo;R&rsquo; for the layer</aside></p>
-<pre class="highlight shell">curl -i -X GET http://example.com/layer/&lt;id_layer&gt;/annotation -H <span class="s2">"Content-Type: application/json"</span> --cookie <span class="s2">"cookies.txt"</span>
+<pre class="highlight shell">curl -i -X GET http://example.com/layer/&lt;id_layer&gt;/annotation?id_media<span class="o">=</span>&lt;id_media&gt; -H <span class="s2">"Content-Type: application/json"</span> --cookie <span class="s2">"cookies.txt"</span>
 </pre>
 <pre class="highlight javascript"></pre>
-<pre class="highlight python"><span class="n">user_client</span><span class="o">.</span><span class="n">get_all_annotation_of_a_layer</span><span class="p">(</span><span class="o">&lt;</span><span class="n">id_layer</span><span class="o">&gt;</span><span class="p">)</span>
+<pre class="highlight python"><span class="n">user_client</span><span class="o">.</span><span class="n">get_all_annotation_of_a_layer</span><span class="p">(</span><span class="o">&lt;</span><span class="n">id_layer</span><span class="o">&gt;</span><span class="p">,</span> <span class="o">&lt;</span><span class="n">id_media</span><span class="o">&gt;</span><span class="p">)</span>
 </pre>
 
 <blockquote>
@@ -2187,7 +2187,7 @@
 
 <h4 id="http-request">HTTP request</h4>
 
-<p><code class="prettyprint">GET http://example.com/layer/&lt;id_layer&gt;/annotation</code></p>
+<p><code class="prettyprint">GET http://example.com/layer/&lt;id_layer&gt;/annotation?id_media=&lt;id_media&gt;</code></p>
 
 <h4 id="query-parameters">QUERY PARAMETERS</h4>
 
@@ -2202,6 +2202,11 @@
 <td>id_layer</td>
 <td>String</td>
 <td>The layer identifier  (required)</td>
+</tr>
+<tr>
+<td>id_media</td>
+<td>String</td>
+<td>id_media to filter annotation (optional)</td>
 </tr>
 </tbody></table>
 
