@@ -24,7 +24,6 @@ SOFTWARE.
 
 
 var config = require('./config.global');
-
 config.env = 'test';
 
 /* 
