@@ -115,7 +115,7 @@ async.waterfall([
     },
     function(salt, hash, user, callback) {                                                     // create or update root user with the new password if it exist
         if (user) {
-            if (program.root_pass != undefined) {
+            if (program.root_pass) {
                 user.salt = salt;
                 user.hash = hash;               
                 user.save(function (error, user) {                                             // save the user
@@ -123,6 +123,7 @@ async.waterfall([
                     callback(error)
                 });                 
             }
+            callback(null);
         }
         else if(program.root_pass != undefined) {
             var user = new User({username: "root", 
