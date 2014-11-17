@@ -19,7 +19,7 @@ To send the page to gh-pages :
 - make it executable (chmod -x /usr/local/bin/ghp-import)
 
 copy the folder documentation/build into
-$ cp build ../camomile-server/doc/build
+$ cp -R build ../camomile-server/doc/build
 
 - from the local path camomile-server, run:
 $ ghp-import -n -m "a message" -p doc/build
