@@ -334,9 +334,6 @@ exports.addLayer = function(req, res){
 					}										
 				}
 			}
-
-			console.log(req.body.annotations)
-
 			callback(error);
 		},
 		function(callback) {											// create the new layer
@@ -364,9 +361,6 @@ exports.addLayer = function(req, res){
 		function(newLayer, callback) {
 			if (req.body.annotations) {
 				for (i = 0; i < req.body.annotations.length; i++) { 
-
-					console.log(req.body.annotations[i])
-
 					var new_annotation = {};
 					new_annotation.fragment = req.body.annotations[i].fragment;
 					new_annotation.data 	= req.body.annotations[i].data;
