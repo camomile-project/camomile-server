@@ -320,6 +320,23 @@ exports.addLayer = function(req, res){
 			if (req.body.name == "") 					error="empty string for name is not allow";
 			if (req.body.fragment_type == undefined) 	error="the fragment_type is not define";
 			if (req.body.data_type == undefined) 		error="the data_type is not define";
+
+			if (req.body.annotations) {
+				for (i = 0; i < req.body.annotations.length; i++) { 
+					if (!req.body.annotations[i].data) {
+						error="data is not define for an annotation";
+					}
+					if (!req.body.annotations[i].fragment) {
+						error="fragment is not define for an annotation";
+					}
+					if (!req.body.annotations[i].id_media) {
+						error="media is not define for an annotation";
+					}										
+				}
+			}
+
+			console.log(req.body.annotations)
+
 			callback(error);
 		},
 		function(callback) {											// create the new layer
@@ -329,7 +346,7 @@ exports.addLayer = function(req, res){
 			new_layer.id_corpus = req.params.id_corpus;
 			new_layer.fragment_type = req.params.id_fragment_typecorpus;
 			new_layer.data_type = req.params.data_type;
-			new_layer.history = []
+			new_layer.history = [];
 			new_layer.history.push({date:new Date(), 
 									id_user:req.session.user._id, 
 									modification:{"name":new_layer.name, 
@@ -341,9 +358,35 @@ exports.addLayer = function(req, res){
 			new_layer.ACL.users[req.session.user._id]='O';				// set 'O' right to the user logged
 			var layer = new Layer(new_layer).save(function (error, newLayer) {	// save the new layer
 				if (newLayer) res.status(200).json(newLayer);
-				callback(error);
+				callback(error, newLayer);
 			});			
+		},
+		function(newLayer, callback) {
+			if (req.body.annotations) {
+				for (i = 0; i < req.body.annotations.length; i++) { 
+
+					console.log(req.body.annotations[i])
+
+					var new_annotation = {};
+					new_annotation.fragment = req.body.annotations[i].fragment;
+					new_annotation.data 	= req.body.annotations[i].data;
+					new_annotation.id_layer = newLayer._id;
+					new_annotation.id_media = req.body.annotations[i].id_media;
+					new_annotation.history 	= [];
+					new_annotation.history.push({date:new Date(), 
+												 id_user:req.session.user._id, 
+												 modification:{"fragment":new_annotation.fragment, 
+												 			   "data":new_annotation.data
+												 			  }
+												 });
+					var annotation = new Annotation(new_annotation).save(function (error, newAnnotation) {});
+				}
+				callback(error);
+			}
+			else callback(null);
+
 		}
+
 	], function (error) {
 		if (error) res.status(400).json({message:error});
 	});
