@@ -167,8 +167,8 @@ async.waterfall([
         
         http.createServer(app).listen(app.get('port'), process.env.IP, function(){             // finally boot up the server:
             console.log('Express server listening on port ' + app.get('port'));
-        });
-        callback(null);
+            callback(null);
+        });        
     }
     ], function (error) {
       if (error) console.log({message:error});                                                 // print error
