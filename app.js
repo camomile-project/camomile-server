@@ -76,7 +76,6 @@ db_name = db_host + '/' + db_name;
 mongoose.connect(db_name);                                                             // connect to the dbkey: "value", 
 mongoose.connection.on('open', function(){
     console.log("Connected to Mongoose:") ;
-    callback(null);
 });
 
 
@@ -125,86 +124,20 @@ if ('development' == app.get('env')) app.use(express.errorHandler());
 //start routes:
 routes.initialize(app);
 
-//finally boot up the server:
-http.createServer(app).listen(app.get('port'), process.env.IP, function(){
-    console.log('Express server listening on port ' + app.get('port'));
-});
-
-
-
-/*
-async.waterfall([
-    function(callback) {
+User.findOne({username:"root"}, function (error, user) {
+    if (user || program.root_pass) {
+        if (!user) var user = new User({username: "root", role: "admin"})
         if (program.root_pass) {
             hash(program.root_pass, function (error, salt, hash) {
-                callback(error, salt, hash); 
-            });
-        }
-        else callback(null, undefined, undefined); 
-    },
-    function(salt, hash, callback) {
-        User.findOne({username:"root"}, function (error, user) {
-            callback(error, salt, hash, user);
-        });
-    },
-    function(salt, hash, user, callback) {                                                     // create or update root user with the new password if it exist
-        if (user) {
-            if (program.root_pass) {
                 user.salt = salt;
                 user.hash = hash;               
-                user.save(function (error, user) {                                             // save the user
-                    if (!error) console.log("update root password")
-                    callback(error)
-                });                 
-            }
-            callback(null);
+                user.save(function (error, user) {});                      
+            });
         }
-        else if(program.root_pass != undefined) {
-            var user = new User({username: "root", 
-                                 role: "admin", 
-                                 salt: salt, 
-                                 hash: hash
-                               }).save(function (error, newUser) {                             // save it into the db
-                                  if (newUser) console.log("create root user")
-                                  callback(error);
-                               });     
-            }
-        else callback("root user does not exist and root password is not defined to create root user (add '--root_pass' option)")
-    },
-    function(callback) {                                                                       // store all information related to sessions
-        var sessionStore = new mongoStore({mongoose_connection: mongoose.connection, db: mongoose.connections[0].db, clear_interval: 60}, function(){
-            console.log('connect mongodb session success...');
-            callback(null, sessionStore);
-        });
-    },
-    function(sessionStore, callback) {                                                         // configure all environments
-        app.configure(function(){
-            app.set('port', server_port);
-            app.set('views', __dirname + '/views');
-            app.set('view engine', 'jade');
-            app.use(express.favicon());
-            app.use(express.logger('dev'));
-            app.use(express.bodyParser());
-            app.use(express.methodOverride());
-            app.use(allowCrossDomain); // for CORS problem!
-            app.use(express.cookieParser('your secret here'));
-            app.use(express.session({key : "camomile.sid", secret: "123camomile", cookie: { maxAge: cookie_timeout*3600000 }, store: sessionStore }));
-            //app.use(keepSession);     // pourquoi cette fonction est la ???
-            app.use(app.router);
-            app.use(express.static(path.join(__dirname, 'public')));
-        });
-
-        // development only
-        if ('development' == app.get('env')) app.use(express.errorHandler());
-       
-        routes.initialize(app);                                                                // start routes:
-        
-        http.createServer(app).listen(app.get('port'), process.env.IP, function(){             // finally boot up the server:
+        http.createServer(app).listen(app.get('port'), process.env.IP, function(){
             console.log('Express server listening on port ' + app.get('port'));
-            callback(null);
-        });        
+        });
     }
-    ], function (error) {
-      if (error) console.log({message:error});                                                 // print error
+    else console.log("root user does not exist and root password is not defined to create root user (add '--root_pass' option)");
 });
-*/
+
