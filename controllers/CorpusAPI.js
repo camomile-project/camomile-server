@@ -177,31 +177,54 @@ exports.update = function(req, res){
 
 // remove a given corpus
 exports.remove = function (req, res) {
+	var error;
 	async.waterfall([
-		function(callback) {											// check if there is no layer into the corpus
-			Layer.find({}, function(error, layers){
-				for (i = 0; i < layers.length; i++) { 
-					if (layers[i].id_corpus == req.params.id_corpus) error = "corpus is not empty (one or more layers is remaining)"; 
-				} 
-    			callback(error);		
+		function(callback) {											// check if there is no layer with annotation into the corpus
+			Layer.find({id_corpus:req.params.id_corpus}, function(error, layers){
+				if (layers.length>0) {
+					if (req.session.user.username === "root"){
+						for (i = 0; i < layers.length; i++) Annotation.remove({id_layer : layers[i]._id}, function (error, annotations) {
+							callback(error);
+						});
+					}
+				}
+				else callback(null);		
     		});
 		},
 		function(callback) {											// check if there is no layer into the media
-			Media.find({}, function(error, medias){
-				for (i = 0; i < medias.length; i++) { 
-					if (medias[i].id_corpus == req.params.id_corpus) error = "corpus is not empty (one or more medias is remaining)"; 
-				} 
-				callback(error);	
-			});
+			if (req.session.user.username === "root") {
+				Layer.remove({id_corpus:req.params.id_corpus}, function (error, layers) {
+					callback(error);
+				});				
+			}
+			else {
+				Layer.find({id_corpus:req.params.id_corpus}, function(error, layers){
+					if (layers.medias>0) error = "corpus is not empty (one or more layers is remaining)"
+					callback(error);
+				});
+			}
+		},			
+		function(callback) {											// check if there is no layer into the media
+			if (req.session.user.username === "root") {
+				Media.remove({id_corpus:req.params.id_corpus}, function (error, media) {
+					callback(error);
+				});				
+			}
+			else {
+				Media.find({id_corpus:req.params.id_corpus}, function(error, medias){
+					if (medias.length>0) error = "corpus is not empty (one or more media is remaining)";
+					callback(error);
+				});
+			}
 		},	
 		function(callback) {											// remove the corpus
 			Corpus.remove({_id : req.params.id_corpus}, function (error, corpus) {
-				if (!error && corpus == 1) res.status(200).json({message:"The corpus as been delete"});
-				else res.status(400).json({message:error});
+				callback(error);
 			});
 		}
 	], function (error, trueOrFalse) {
 		if (error) res.status(400).json({message:error});
+		else res.status(200).json({message:"The corpus as been delete"});
 	});
 }
 
