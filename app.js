@@ -33,7 +33,6 @@ var mongoStore = require('connect-mongo')(express);
 var app = express();
 var userAPI = require('./controllers/UserAPI');
 var authenticate = require('./middleware/authenticate');
-var async = require('async');
 	
 //parsing the arguments
 program
@@ -50,11 +49,11 @@ program
 // Cross-domain connections.
 // The current solution is to allow CORS by overloading the middleware function:
 var allowCrossDomain = function(req, res, next) {
-	  res.header('Access-Control-Allow-Credentials', true);
+	res.header('Access-Control-Allow-Credentials', true);
     res.header('Access-Control-Allow-Origin', req.headers.origin)
     res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE');
-	  res.header('Access-Control-Allow-Headers', 'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version');
-	  // intercept OPTIONS method
+	res.header('Access-Control-Allow-Headers', 'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version');
+	// intercept OPTIONS method
     if ('OPTIONS' == req.method) res.send(200); // force the server to treat such a request as a normal GET or POST request.
     else  next(); // otherwise, do anything else
 }
@@ -71,35 +70,70 @@ var server_port = program.server_port || config.server_port;
 var db_name   = program.db_name || config.mongo.db_name;
 var db_host   = process.env.MONGOLAB_URI || program.db_host || config.mongo.db_host;
 var video_path  = program.video_path || config.video_path;
-var list_user_role  = program.list_user_role || config.list_user_role;
 var cookie_timeout = program.cookie_timeout || config.cookie_timeout;
 
 db_name = db_host + '/' + db_name;
+mongoose.connect(db_name);                                                             // connect to the dbkey: "value", 
+mongoose.connection.on('open', function(){
+    console.log("Connected to Mongoose:") ;
+    callback(null);
+});
 
-// used to pass values to a template (mostly used in view)
-/*
+
 keepSession = function (req, res, next) {
-    var error = req.session.error;
-    var msg = req.session.success;
+    var err = req.session.error,
+        msg = req.session.success;
     delete req.session.error;
     delete req.session.success;
     res.locals.message = '';
-    if (error) res.locals.message = '<p class="msg error">' + error + '</p>';
+    if (err) res.locals.message = '<p class="msg error">' + err + '</p>';
     if (msg) res.locals.message = '<p class="msg success">' + msg + '</p>';
     next();
 }
-*/
+
+//store all information related to sessions
+var sessionStore = new mongoStore({mongoose_connection: mongoose.connection, 
+            db: mongoose.connections[0].db, clear_interval: 60}, function(){
+                          console.log('connect mongodb session sucacess...');
+});
+
+// configure all environments
+app.configure(function(){
+    app.set('port', server_port);
+    app.set('views', __dirname + '/views');
+    app.set('view engine', 'jade');
+    app.use(express.favicon());
+    app.use(express.logger('dev'));
+    app.use(express.bodyParser());
+    app.use(express.methodOverride());
+    app.use(allowCrossDomain); // for CORS problem!
+    app.use(express.cookieParser('your secret here'));    
+    app.use(express.session({
+        key : "camomile.sid",
+        secret: "123camomile",
+        cookie: {maxAge: cookie_timeout*3600000},
+        store: sessionStore
+    }));
+    app.use(keepSession);    
+    app.use(app.router);
+    app.use(express.static(path.join(__dirname, 'public')));
+});
+
+// development only
+if ('development' == app.get('env')) app.use(express.errorHandler());
+
+//start routes:
+routes.initialize(app);
+
+//finally boot up the server:
+http.createServer(app).listen(app.get('port'), process.env.IP, function(){
+    console.log('Express server listening on port ' + app.get('port'));
+});
 
 
-var error=null;
+
+/*
 async.waterfall([
-    function(callback) {        
-        mongoose.connect(db_name);                                                             // connect to the dbkey: "value", 
-        mongoose.connection.on('open', function(){
-            console.log("Connected to Mongoose:") ;
-            callback(null);
-        });
-    },
     function(callback) {
         if (program.root_pass) {
             hash(program.root_pass, function (error, salt, hash) {
@@ -173,3 +207,4 @@ async.waterfall([
     ], function (error) {
       if (error) console.log({message:error});                                                 // print error
 });
+*/
