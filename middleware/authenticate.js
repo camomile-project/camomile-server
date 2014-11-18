@@ -86,7 +86,7 @@ exports.logout = function (req, res) {
 
 // to now who is logged in
 exports.me = function (req, res) {
-    res.status(200).json({id_user:req.session.user._id, 
+    res.status(200).json({_id:req.session.user._id, 
     					  username:req.session.user.username,
     					  role:req.session.user.role,
     					  description:req.session.user.description
