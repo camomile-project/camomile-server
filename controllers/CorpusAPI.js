@@ -447,6 +447,7 @@ exports.addLayer = function(req, res){
 				    }
 				);
 	        }
+	        else callback(null, {})
         },
 		function(media_id_name, callback) {											// create the new layer
 			var new_layer = {};
