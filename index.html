@@ -1117,7 +1117,7 @@
 
 <h4 id="http-request">HTTP request</h4>
 
-<p><code class="prettyprint">POST http://example.com/corpus/&lt;id_corpus&gt;/media</code></p>
+<p><code class="prettyprint">POST http://example.com/corpus/&lt;id_corpus&gt;/medias</code></p>
 
 <h4 id="query-parameters">QUERY PARAMETERS</h4>
 
@@ -1161,7 +1161,7 @@
 <pre class="highlight shell">curl -i -X POST http://example.com/corpus/&lt;id_corpus&gt;/layer --data <span class="s1">'{"name":&lt;name&gt;, "description":&lt;description&gt;, "fragment_type":&lt;fragment_typ&gt;, "data_type":&lt;data_typ&gt;, "annotations":[{"media_name":&lt;media_name&gt;, "fragment":&lt;fragment&gt;, "data":&lt;data&gt;}]}'</span> -H <span class="s2">"Content-Type: application/json"</span> --cookie <span class="s2">"cookies.txt"</span> 
 </pre>
 <pre class="highlight javascript"></pre>
-<pre class="highlight python"><span class="n">user_client</span><span class="o">.</span><span class="n">add_layer</span><span class="p">(</span><span class="o">&lt;</span><span class="n">id_corpus</span><span class="o">&gt;</span><span class="p">,</span> <span class="p">{</span><span class="s">"name"</span><span class="p">:</span><span class="o">&lt;</span><span class="n">name</span><span class="o">&gt;</span><span class="p">,</span> <span class="s">"description"</span><span class="p">:</span><span class="o">&lt;</span><span class="n">description</span><span class="o">&gt;</span><span class="p">,</span> <span class="s">"fragment_type"</span><span class="p">:</span><span class="o">&lt;</span><span class="n">fragment_typ</span><span class="o">&gt;</span><span class="p">,</span> <span class="s">"data_type"</span><span class="p">:</span><span class="o">&lt;</span><span class="n">data_typ</span><span class="o">&gt;</span><span class="p">,</span> <span class="s">"annotations"</span><span class="p">:[{</span><span class="s">"media_name"</span><span class="p">:</span><span class="o">&lt;</span><span class="n">media_name</span><span class="o">&gt;</span><span class="p">,</span> <span class="s">"fragment"</span><span class="p">:</span><span class="o">&lt;</span><span class="n">fragment</span><span class="o">&gt;</span><span class="p">,</span> <span class="s">"data"</span><span class="p">:</span><span class="o">&lt;</span><span class="n">data</span><span class="o">&gt;</span><span class="p">}]})</span>
+<pre class="highlight python"><span class="n">user_client</span><span class="o">.</span><span class="n">add_layer</span><span class="p">(</span><span class="o">&lt;</span><span class="n">id_corpus</span><span class="o">&gt;</span><span class="p">,</span> <span class="p">{</span><span class="s">"name"</span><span class="p">:</span><span class="o">&lt;</span><span class="n">name</span><span class="o">&gt;</span><span class="p">,</span> <span class="s">"description"</span><span class="p">:</span><span class="o">&lt;</span><span class="n">description</span><span class="o">&gt;</span><span class="p">,</span> <span class="s">"fragment_type"</span><span class="p">:</span><span class="o">&lt;</span><span class="n">fragment_typ</span><span class="o">&gt;</span><span class="p">,</span> <span class="s">"data_type"</span><span class="p">:</span><span class="o">&lt;</span><span class="n">data_typ</span><span class="o">&gt;</span><span class="p">,</span> <span class="s">"annotations"</span><span class="p">:[{</span><span class="s">"media_name"</span><span class="p">:</span><span class="o">&lt;</span><span class="n">media_name</span><span class="o">&gt;</span><span class="p">,</span> <span class="s">"id_media"</span><span class="p">:</span><span class="o">&lt;</span><span class="n">id_media</span><span class="o">&gt;</span><span class="p">,</span> <span class="s">"fragment"</span><span class="p">:</span><span class="o">&lt;</span><span class="n">fragment</span><span class="o">&gt;</span><span class="p">,</span> <span class="s">"data"</span><span class="p">:</span><span class="o">&lt;</span><span class="n">data</span><span class="o">&gt;</span><span class="p">}]})</span>
 </pre>
 
 <blockquote>
@@ -1235,7 +1235,7 @@
 <tr>
 <td>annotations</td>
 <td>List</td>
-<td>list of annotations (<media_name>, <fragment>, <data>) to add to the new layer</td>
+<td>list of annotations (<media_name> OR <id_media>, <fragment>, <data>) to add to the new layer</td>
 </tr>
 </tbody></table>
 
@@ -2248,7 +2248,7 @@
 
 <h4 id="http-request">HTTP request</h4>
 
-<p><code class="prettyprint">POST http://example.com/layer/&lt;id_layer&gt;/annotation</code></p>
+<p><code class="prettyprint">POST http://example.com/layer/&lt;id_layer&gt;/annotations</code></p>
 
 <h4 id="query-parameters">QUERY PARAMETERS</h4>
 
