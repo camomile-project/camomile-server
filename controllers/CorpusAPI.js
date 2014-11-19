@@ -348,6 +348,9 @@ exports.addMedia = function(req, res){
 
 //add a medias
 exports.addMedias = function(req, res){
+
+	console.log("la1");
+
 	var error=null;
 	async.waterfall([
 		function(callback) {											// check field
@@ -362,6 +365,9 @@ exports.addMedias = function(req, res){
 			callback(null);
 		},		
         function(callback) {
+
+        	console.log("la10");
+
 			var l_media_name = [];
 			for (var i = 0; i < req.body.media_list.length; i++) l_media_name.push(req.body.media_list[i].name) ;
 			async.map(l_media_name, 
@@ -375,6 +381,9 @@ exports.addMedias = function(req, res){
 			);
         },
 		function(callback) {											// create the new medias
+
+			console.log("la20");
+
 			var l_medias = []
 			async.map(req.body.media_list, function(media, callback) {
 			  		var new_media = {};
@@ -399,6 +408,9 @@ exports.addMedias = function(req, res){
 			);
 		}
 	], function (error, l_medias) {
+
+		console.log("la30");
+
 		if (error) res.status(400).json({message:error});
 		else res.status(200).json(l_medias);
 	});
