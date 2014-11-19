@@ -276,25 +276,45 @@ exports.addAnnotation = function(req, res){
 };
 
 
+function find_id_media(media_name, callback) {
+	Media.findOne({"name":media_name}, function(error, media){
+		if (media) callback(error, media._id);
+		else callback("media '"+media_name+"' not found in the db", undefined);
+	});
+};
+
 //add a multi annotation
 exports.addAnnotations = function(req, res){
 	async.waterfall([
 		function(callback) {											// check field
-			if (req.body.annotation_list) {
-				for (var i = 0; i < req.body.annotation_list.length; i++) { 
-					if (req.body.annotation_list[i].id_media == undefined) callback("an annotation must be link to a id_media");
-				}
+			if (req.body.annotation_list == undefined) callback("the list of annotations is not define");
+			if (req.body.annotation_list.length == 0)  callback("the list of annotations is empty");				
+			for (var i = 0; i < req.body.annotation_list.length; i++) { 
+				if (!req.body.annotation_list[i].media_name && !req.body.annotation_list[i].id_media )  callback("media_name or id_media is not define for an annotation");
 			}
 			callback(null);
-		},
-		function(callback) {											// create the new annotation
+		},        
+		function(callback) {
+			var media_id_name = {};
+			for (var i = 0; i < req.body.annotation_list.length; i++) {
+				if (req.body.annotation_list[i].media_name) media_id_name[req.body.annotation_list[i].media_name] = '';
+			}
+			var l_media = Object.keys(media_id_name);
+			async.map(l_media, find_id_media, function(error, id_media) {
+					for (var i = 0; i < l_media.length; i++) media_id_name[l_media[i]] = id_media[i];
+		            callback(error, media_id_name);
+			    }
+			);
+        },
+		function(media_id_name, callback) {								// create the new annotation
 			var l_annotation = []
 			async.map(req.body.annotation_list, function(annotation, callback) {
 					var new_annotation = {};
 					new_annotation.fragment = annotation.fragment;
 					new_annotation.data = annotation.data;
 					new_annotation.id_layer = req.params.id_layer;
-					new_annotation.id_media = annotation.id_media;
+					if (annotation.media_name) new_annotation.id_media = media_id_name[annotation.media_name];
+					else new_annotation.id_media = annotation.id_media;
 					new_annotation.history = []
 					new_annotation.history.push({date:new Date(), 
 												 id_user:req.session.user._id, 
