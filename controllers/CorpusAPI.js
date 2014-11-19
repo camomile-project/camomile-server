@@ -34,6 +34,12 @@ exports.create = function(req, res){
 			if (req.body.name == undefined) error="the name is not define";
 			if (req.body.name == "") 		error="empty string for name is not allow";
 			callback(error);
+		},		
+		function(callback) {											// check if the name is not already used (name must be unique)
+			Corpus.count({name: req.body.name}, function (error, count) {	
+				if ((!error) && (count != 0)) error = "the corpus name is already used, choose another name";
+		        callback(error);
+		    });
 		},
 		function(callback) {											// create the group
 			var new_corpus = {};
@@ -310,6 +316,12 @@ exports.addMedia = function(req, res){
 			if (req.body.name == undefined) error="the name is not define";
 			if (req.body.name == "") 		error="empty string for name is not allow";
 			callback(error);
+		},		
+		function(callback) {											// check if the name is not already used (name must be unique)
+			Media.count({name: req.body.name, id_corpus: req.params.id_corpus}, function (error, count) {	
+				if ((!error) && (count != 0)) error = "the media name is already used, choose another name";
+		        callback(error);
+		    });
 		},
 		function(callback) {											// create the new media
 			var new_media = {};
@@ -359,6 +371,12 @@ exports.addLayer = function(req, res){
 				}
 			}
 			callback(null);
+		},		
+		function(callback) {											// check if the name is not already used (name must be unique)
+			Layer.count({name: req.body.name, id_corpus: req.params.id_corpus}, function (error, count) {	
+				if ((!error) && (count != 0)) error = "the layer name is already used, choose another name";
+		        callback(error);
+		    });
 		},
         function(callback) {
 			if (req.body.annotations) {
