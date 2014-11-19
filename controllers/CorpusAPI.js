@@ -334,32 +334,45 @@ exports.addMedia = function(req, res){
 	});
 };
 
+
+
+function find_id_media(media_name, callback) {
+	Media.findOne({"name":media_name}, function(error, media){
+		if (media) callback(error, media._id);
+		else callback("media '"+media_name+"' not found in the db", undefined);
+	});
+};
+
 //create a layer
 exports.addLayer = function(req, res){
-	var error=null;
 	async.waterfall([
 		function(callback) {											// check field
-			if (req.body.name == undefined) 			error="the name is not define";
-			if (req.body.name == "") 					error="empty string for name is not allow";
-			if (req.body.fragment_type == undefined) 	error="the fragment_type is not define";
-			if (req.body.data_type == undefined) 		error="the data_type is not define";
-
+			if (req.body.name == undefined) 			callback("the name is not define");
+			if (req.body.name == "") 					callback("empty string for name is not allow");
+			if (req.body.fragment_type == undefined) 	callback("the fragment_type is not define");
+			if (req.body.data_type == undefined) 		callback("the data_type is not define");
 			if (req.body.annotations) {
-				for (i = 0; i < req.body.annotations.length; i++) { 
-					if (!req.body.annotations[i].data) {
-						error="data is not define for an annotation";
-					}
-					if (!req.body.annotations[i].fragment) {
-						error="fragment is not define for an annotation";
-					}
-					if (!req.body.annotations[i].id_media) {
-						error="media is not define for an annotation";
-					}										
+				for (var i = 0; i < req.body.annotations.length; i++) { 
+					if (!req.body.annotations[i].data) 		  callback("data is not define for an annotation");
+					if (!req.body.annotations[i].fragment) 	  callback("fragment is not define for an annotation");
+					if (!req.body.annotations[i].media_name)  callback("media_name is not define for an annotation");
 				}
 			}
-			callback(error);
+			callback(null);
 		},
-		function(callback) {											// create the new layer
+        function(callback) {
+			if (req.body.annotations) {
+				var medias = {};
+				for (var i = 0; i < req.body.annotations.length; i++) medias[req.body.annotations[i].media_name] = '';
+				var l_media = Object.keys(medias);
+				async.map(l_media, find_id_media, function(error, id_medias) {
+						for (var i = 0; i < l_media.length; i++) medias[l_media[i]] = id_medias[i];
+			            callback(error, medias);
+				    }
+				);
+	        }
+        },
+		function(medias, callback) {											// create the new layer
 			var new_layer = {};
 			new_layer.name = req.body.name;
 			new_layer.description = req.body.description;
@@ -378,17 +391,17 @@ exports.addLayer = function(req, res){
 			new_layer.ACL.users[req.session.user._id]='O';				// set 'O' right to the user logged
 			var layer = new Layer(new_layer).save(function (error, newLayer) {	// save the new layer
 				if (newLayer) res.status(200).json(newLayer);
-				callback(error, newLayer);
+				callback(error, medias, newLayer);
 			});			
 		},
-		function(newLayer, callback) {
+		function(medias, newLayer, callback) {
 			if (req.body.annotations) {
 				for (i = 0; i < req.body.annotations.length; i++) { 
 					var new_annotation = {};
 					new_annotation.fragment = req.body.annotations[i].fragment;
 					new_annotation.data 	= req.body.annotations[i].data;
 					new_annotation.id_layer = newLayer._id;
-					new_annotation.id_media = req.body.annotations[i].id_media;
+					new_annotation.id_media = medias[req.body.annotations[i].media_name];
 					new_annotation.history 	= [];
 					new_annotation.history.push({date:new Date(), 
 												 id_user:req.session.user._id, 
@@ -396,9 +409,11 @@ exports.addLayer = function(req, res){
 												 			   "data":new_annotation.data
 												 			  }
 												 });
-					var annotation = new Annotation(new_annotation).save(function (error, newAnnotation) {});
+					var annotation = new Annotation(new_annotation).save(function (error, newAnnotation) {
+						if (error) callback(error);
+					});
 				}
-				callback(error);
+				callback(null);
 			}
 			else callback(null);
 
