@@ -177,6 +177,12 @@ exports.initialize = function(app){
 										 corpusAPI.exist, 
 										 corpusAPI.AllowUser(['O', 'W']),
 										 corpusAPI.addMedia);
+	// create multi media for a corpus
+	// POST /corpus/id_corpus/medias --data '{"media_list":[{"name":"...", "url":"...", "description":{"...":"..."}}, ...]}' 
+	app.post('/corpus/:id_corpus/medias', authenticate.islogin,
+										  corpusAPI.exist, 
+										  corpusAPI.AllowUser(['O', 'W']),
+										  corpusAPI.addMedias);	
 	// create a layer
 	// POST /corpus/id_corpus/layer --data '{"name":"new layer", "description":{"...":"..."}, "fragment_type":{"...":"..."}, "data_type":{"...":"..."}}' 
 	app.post('/corpus/:id_corpus/layer', authenticate.islogin,

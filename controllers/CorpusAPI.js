@@ -346,7 +346,63 @@ exports.addMedia = function(req, res){
 	});
 };
 
-
+//add a medias
+exports.addMedias = function(req, res){
+	var error=null;
+	async.waterfall([
+		function(callback) {											// check field
+			if (req.body.media_list == undefined) callback("the list of media is not define");
+			if (req.body.media_list.length == 0)  callback("the list of media is empty");
+			if (req.body.media_list) {
+				for (var i = 0; i < req.body.media_list.length; i++) { 
+					if (req.body.media_list[i].name == undefined) callback("One media name is not define");
+					if (req.body.media_list[i].name == "") 		  callback("One media name is empty (not allowed for media name)");
+				}
+			}
+			callback(null);
+		},		
+        function(callback) {
+			var l_media_name = [];
+			for (var i = 0; i < req.body.media_list.length; i++) l_media_name.push(req.body.media_list[i].name) ;
+			async.map(l_media_name, 
+					  function(media_name, callback) {
+							Media.count({name: media_name, id_corpus: req.params.id_corpus}, function (error, count) {
+								if (count != 0) callback("the name '"+media_name+"' is already used in this corpus, choose another name");
+								else callback(error);
+						    });
+					  }, 
+					  function(error) {callback(error); }
+			);
+        },
+		function(callback) {											// create the new medias
+			var l_medias = []
+			async.map(req.body.media_list, function(media, callback) {
+			  		var new_media = {};
+					new_media.name = media.name;
+					new_media.description = media.description;
+					new_media.url = media.url;
+					new_media.id_corpus = req.params.id_corpus;
+					new_media.history = []
+					new_media.history.push({date:new Date(), 
+											id_user:req.session.user._id, 
+											modification:{"name":new_media.name, 
+														  "description":new_media.description, 
+														  "url":new_media.url}
+										   });
+					var c_media = new Media(new_media).save(function (error, newMedia) {	// save the new media
+						l_medias.push(newMedia)
+						callback(error);
+					});
+				}, function(error) {
+					callback(error, l_medias); 
+				}
+			);
+		}
+	], function (error, l_medias) {
+		if (error) res.status(400).json({message:error});
+		else res.status(200).json(l_medias);
+	});
+};
 
 function find_id_media(media_name, callback) {
 	Media.findOne({"name":media_name}, function(error, media){
