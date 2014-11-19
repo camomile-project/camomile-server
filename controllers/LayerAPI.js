@@ -275,6 +275,48 @@ exports.addAnnotation = function(req, res){
 	});
 };
 
+
+//add a multi annotation
+exports.addAnnotations = function(req, res){
+	async.waterfall([
+		function(callback) {											// check field
+			if (req.body.annotation_list) {
+				for (var i = 0; i < req.body.annotation_list.length; i++) { 
+					if (req.body.annotation_list[i].id_media == undefined) callback("an annotation must be link to a id_media");
+				}
+			}
+			callback(null);
+		},
+		function(callback) {											// create the new annotation
+			var l_annotation = []
+			async.map(req.body.annotation_list, function(annotation, callback) {
+					var new_annotation = {};
+					new_annotation.fragment = annotation.fragment;
+					new_annotation.data = annotation.data;
+					new_annotation.id_layer = req.params.id_layer;
+					new_annotation.id_media = annotation.id_media;
+					new_annotation.history = []
+					new_annotation.history.push({date:new Date(), 
+												 id_user:req.session.user._id, 
+												 modification:{"fragment":new_annotation.fragment, 
+												 			   "data":new_annotation.data
+												 			  }
+												 });
+						var c_annotation = new Annotation(new_annotation).save(function (error, newAnnotation) {	// save the new media
+							l_annotation.push(newAnnotation)
+							callback(error);
+						});
+				}, function(error) {
+					callback(error, l_annotation); 
+				}
+			);
+		}
+	], function (error, l_annotation) {
+		if (error) res.status(400).json({message:error});
+		else res.status(200).json(l_annotation);
+	});
+};
+
 // retrieve all annotation of a layer and where the user logged is 'O' or 'W' or 'R' on the corresponding layer
 // and print _id, id_layer, fragment and data
 exports.getAllAnnotation = function(req, res){
