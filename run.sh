@@ -12,7 +12,7 @@ then
     exit
 fi
 
-node /app/app.js --root_pass=$ROOT_PASSWORD \
+forever /app/app.js --root_pass=$ROOT_PASSWORD \
                  --video_path=/media \
                  --db_port=$MONGODB_PORT_27017_TCP_PORT \
                  --db_host=$MONGODB_PORT_27017_TCP_ADDR

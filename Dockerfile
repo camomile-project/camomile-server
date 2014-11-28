@@ -16,12 +16,14 @@ RUN apt-get install -y python-software-properties python g++ make software-prope
 RUN add-apt-repository ppa:chris-lea/node.js
 RUN apt-get update
 RUN apt-get install -y nodejs
+RUN npm install -g forever
 
 # expose NodeJS app port
 EXPOSE 3000
 
 ADD . /app
-RUN cd /app; npm install
 
+RUN chmod +x /app/run.sh
+RUN cd /app; npm install
 ENTRYPOINT ["/bin/bash", "/app/run.sh"]
 
