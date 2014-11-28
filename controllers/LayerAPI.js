@@ -341,7 +341,7 @@ exports.addAnnotations = function(req, res){
 // and print _id, id_layer, fragment and data
 exports.getAllAnnotation = function(req, res){
 	var filter = {};
-	if (req.query.id_media) filter = {id_media:req.query.id_media};
+	if (req.query.id_media) filter = {id_media:req.query.media};
 	Annotation.find(filter, function(error, annotations){
 		async.filter(annotations, 
 		        	 function(annotation, callback) { 
