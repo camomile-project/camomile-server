@@ -342,10 +342,11 @@ exports.addAnnotations = function(req, res){
 exports.getAllAnnotation = function(req, res){
 	var filter = {};
 	if (req.query.media) filter = {id_media:req.query.media};
+	else 
 	Annotation.find(filter, function(error, annotations){
 		async.filter(annotations, 
 		        	 function(annotation, callback) { 
-		        	 	if (annotation.id_corpus == req.params.id_corpus) callback(true);
+		        	 	if (annotation.id_layer == req.params.id_layer) callback(true);
 		        	 	else callback(false);
 		        	 },
 		        	 function(results) { res.status(200).json(results); } 
