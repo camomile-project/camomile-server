@@ -340,16 +340,10 @@ exports.addAnnotations = function(req, res){
 // retrieve all annotation of a layer and where the user logged is 'O' or 'W' or 'R' on the corresponding layer
 // and print _id, id_layer, fragment and data
 exports.getAllAnnotation = function(req, res){
-	var filter = {};
-	if (req.query.media) filter = {id_media:req.query.media};
-	else 
+	var filter = {'id_layer': req.params.id_layer};
+	if (req.query.media) filter['id_media'] = req.query.media;
 	Annotation.find(filter, function(error, annotations){
-		async.filter(annotations, 
-		        	 function(annotation, callback) { 
-		        	 	if (annotation.id_layer == req.params.id_layer) callback(true);
-		        	 	else callback(false);
-		        	 },
-		        	 function(results) { res.status(200).json(results); } 
-		);	
+		if (error) res.status(400).json(error);
+		else res.status(200).json(annotations);
 	});
 }
