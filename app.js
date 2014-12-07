@@ -79,8 +79,6 @@ var session_options = {
 // configure all environments
 app.configure(function () {
   app.set('port', port);
-  app.set('views', __dirname + '/views');
-  app.set('view engine', 'jade');
   app.use(express.logger('dev'));
   app.use(express.bodyParser());
   app.use(express.methodOverride());
