@@ -22,7 +22,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-var express = require('express')
+var express = require('express');
 var http = require('http');
 var cors = require('cors');
 var app = express();
@@ -35,6 +35,7 @@ var MongoStore = require('connect-mongo')(express);
 var userAPI = require('./controllers/UserAPI');
 var routes = require('./routes/routes');
 var authenticate = require('./middleware/authenticate');
+
 
 program
     .option('--port <port>', 'Local port to listen to (default: 3000)', parseInt)
@@ -73,7 +74,7 @@ var session_options = {
     key : "camomile.sid",
     secret: "123camomile",
     cookie: {maxAge: 24 * 60 * 60 * 1000},  // sessions expire every day
-    store: sessionStore  
+    store: sessionStore
 };
 
 // configure all environments
