@@ -49,11 +49,11 @@ program
     .parse(process.argv);
 
 var port = program.port || process.env.PORT || 3000;
-var mongodb_host = program.mongodbHost || process.env.MONGODB_HOST || 'localhost';
-var mongodb_port = program.mongodbPort || process.env.MONGODB_PORT || 27017;
-var mongodb_name = program.mongodbName || process.env.MONGODB_NAME || 'camomile';
+var mongodb_host = program.mongodbHost || process.env.MONGO_HOST || process.env.MONGODB_PORT_27017_TCP_ADDR || 'localhost';
+var mongodb_port = program.mongodbPort || process.env.MONGO_PORT || process.env.MONGODB_PORT_27017_TCP_PORT || 27017;
+var mongodb_name = program.mongodbName || process.env.MONGO_NAME || 'camomile';
 var root_password = program.rootPassword || process.env.ROOT_PASSWORD;
-var media = program.media || process.env.MEDIA || '';
+var media = program.media || process.env.MEDIA || '/media';
 
 mongoose.connect('mongodb://' + mongodb_host + ':' + mongodb_port + '/' + mongodb_name);
 
