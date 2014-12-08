@@ -27,6 +27,8 @@ var http = require('http');
 var cors = require('cors');
 var app = express();
 
+var bcrypt = require('bcrypt');
+
 var program = require('commander');
 
 var mongoose = require('mongoose');
@@ -44,7 +46,6 @@ program
     .option('--mongodb-name <dbname>', 'MongoDB database name (default: camomile)')
     .option('--root-password <dbname>', 'Change/set root password')
     .option('--media <dir>', 'Path to media root directory')
-    // .option('--cookie-timeout <hours>', 'Set the cookie timeout (default: 3 hours)', parseInt)
     .parse(process.argv);
 
 var port = program.port || process.env.PORT || 3000;
@@ -101,6 +102,22 @@ User.findOne({username: "root"}, function (error, user) {
     if (!user) {
       user = new User({username: "root", role: "admin"});
     }
+
+    // if (root_password) {
+    //   bcrypt.genSalt(10, function(err, salt) {
+    //       bcrypt.hash(root_password, salt, function(err, hash) {
+    //           user.salt = salt;
+    //           user.hash = hash;
+    //           user.save(function (err, user) {
+    //             if (err) {
+    //               console.log('error when setting root password')
+    //             } else {
+    //               console.log('successfully set root password');
+    //             }
+    //           });
+    //       });
+    //   });
+    // }
 
     if (root_password) {
       hash(root_password, function (error, salt, hash) {
