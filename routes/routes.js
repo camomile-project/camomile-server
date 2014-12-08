@@ -42,10 +42,6 @@ var	queueAPI = require('../controllers/QueueAPI');
 var	authenticate = require('../middleware/authenticate');
 
 
-exports.index = function(req, res){
-	res.render('index', { title: 'Camomille' });
-};
-
 exports.initialize = function(app){
 	// --- authentification routes --- \\
 	// POST /login --data '{"username":"...", "password":"..."}' --cookie-jar "cookies.txt"

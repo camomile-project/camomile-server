@@ -24,6 +24,7 @@ SOFTWARE.
 
 var fileSystem = require('fs'); //working with video streaming
 var async = require('async');
+var path = require('path');
 var commonFuncs = require('../lib/commonFuncs');
 
 // check if the id_media exists in the db
@@ -117,9 +118,9 @@ function getVideoWithExtension(req, res, extension) {
 		if (error) res.status(400).json({message:error});
 		else if (media == null) res.status(400).json({message: 'no such id_media!'})
 		else {			
-			var filePath = media.url + '.' + extension;
 			if (media.url == undefined) return res.status(404).send({message:'not found the video corresponding to this media'});
-			if (GLOBAL.video_path) filePath = GLOBAL.video_path + '/' + filePath;
+			var filePath = media.url + '.' + extension;
+			filePath = path.join(req.app.get('media'), filePath);
 			res.status(200).sendfile(filePath);
 		}
 	});
