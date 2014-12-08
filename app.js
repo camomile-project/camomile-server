@@ -51,7 +51,7 @@ var mongodb_host = program.mongodbHost || process.env.MONGODB_HOST || 'localhost
 var mongodb_port = program.mongodbPort || process.env.MONGODB_PORT || 27017;
 var mongodb_name = program.mongodbName || process.env.MONGODB_NAME || 'camomile';
 var root_password = program.rootPassword || process.env.ROOT_PASSWORD;
-var media = program.media || process.env.MEDIA;
+var media = program.media || process.env.MEDIA || '';
 
 mongoose.connect('mongodb://' + mongodb_host + ':' + mongodb_port + '/' + mongodb_name);
 
@@ -79,6 +79,7 @@ var session_options = {
 // configure all environments
 app.configure(function () {
   app.set('port', port);
+  app.set('media', media);
   app.use(express.logger('dev'));
   app.use(express.bodyParser());
   app.use(express.methodOverride());
