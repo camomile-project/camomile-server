@@ -22,19 +22,14 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-var mongoose = require('mongoose')
-   , Schema = mongoose.Schema
-   , ObjectId = Schema.ObjectId;
-
-   
-/**
- * Schema for queue, which can be contain any kinds of data
- */
-
+var mongoose = require('mongoose');
+var Schema = mongoose.Schema;
+var ObjectId = Schema.ObjectId;
 
 exports.QueueSchema = QueueSchema = new Schema({
 	name: {type: String, required: true, trim: true},
-	queue: [Schema.Types.Mixed]//[annoID] 	
+	description: {type : Schema.Types.Mixed, 'default' : ''},   	
+	list: [Schema.Types.Mixed]
 }, { versionKey: false });
 
 exports.Queue = Queue = mongoose.model('Queue', QueueSchema);

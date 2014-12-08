@@ -22,136 +22,114 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-
-var express = require('express'), 
-    http = require('http'), 
-    path = require('path'), 
-	routes = require('./routes/routes'),
-    mongoose = require('mongoose'), 
-    program = require('commander'),
-    //config = require('./config'),
-    mongoStore = require('connect-mongo')(express);
-
+var express = require('express');
+var http = require('http');
+var cors = require('cors');
 var app = express();
-	
-	//parsing the arguments
-	program
-  	.option('-p, --server_port <port>', 'Local port to listen to (default: 3000)', parseInt)
-  	.option('-d, --db_host <dbhost>', 'Database host (default: mongodb://localhost)')
-  	.option('-P, --db_port <dbport>', 'Database port (default: 27017)', parseInt)
-  	.option('-n, --db_name <dbname>', 'Database name (default: camomile)')
-  	.option('-r, --root_pass <dbname>', 'Password of the root user (default: camomile)')
-  	.option('-v, --video_path <vpath>', 'Path to the video directory (default: /corpora/video)')
-  	.option('-c, --config_dir <cdir>', 'Path to the directory containing config. files (default: .)')
-  	.option('-t, --cookie_timeout <timeout>', 'Set the cookie timeout (unit is hour, default: 3h)', parseInt)
-  	.option('-a, --noauth', 'Disables authenticated mode (default: authenticated)')
-  	.parse(process.argv);
-	
-// Cross-domain connections.
-// The current solution is to allow CORS by overloading the middleware function:
-var allowCrossDomain = function(req, res, next) {
-	res.header('Access-Control-Allow-Credentials', true);
-    res.header('Access-Control-Allow-Origin', req.headers.origin)
-	//res.header('Access-Control-Allow-Origin', '*');
-    res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE');
-	res.header('Access-Control-Allow-Headers', 'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version');
-	// intercept OPTIONS method
-    if('OPTIONS' == req.method) {
-    	res.send(200); // force the server to treat such a request as a normal GET or POST request.
-    }
-    else {
-    	next(); // otherwise, do anything else, on s'en fiche (dont care)
-    }
-}
 
-//here is the configuration, where sever's parameters will be set
-var config;
-if(program.config_dir == undefined)
-	config = require('./config');
-else config = require(program.config_dir + '/config');
+var bcrypt = require('bcrypt');
+var program = require('commander');
+var mongoose = require('mongoose');
+var MongoStore = require('connect-mongo')(express);
 
-GLOBAL.config_dir = program.config_dir || false;
+var userAPI = require('./controllers/UserAPI');
+var routes = require('./routes/routes');
+var authenticate = require('./middleware/authenticate');
 
-GLOBAL.no_auth 		= program.no_auth || false;
-GLOBAL.video_path 	= program.video_path || config.video_path;
-GLOBAL.root_passdef = config.root_pass;
-GLOBAL.root_pass 	= program.root_pass || config.root_pass;
+program
+    .option('--port <port>', 'Local port to listen to (default: 3000)', parseInt)
+    .option('--mongodb-host <host>', 'MongoDB host (default: localhost)')
+    .option('--mongodb-port <port>', 'MongoDB port (default: 27017)', parseInt)
+    .option('--mongodb-name <dbname>', 'MongoDB database name (default: camomile)')
+    .option('--root-password <dbname>', 'Change/set root password')
+    .option('--media <dir>', 'Path to media root directory')
+    .parse(process.argv);
 
-var server_port = program.server_port || config.server_port;
-var db_name 	= program.db_name || config.mongo.db_name;
-var db_host 	= process.env.MONGOLAB_URI || program.db_host || config.mongo.db_host;
-var video_path 	= program.video_path || config.video_path;
-var cookie_timeout = program.cookie_timeout || config.cookie_timeout;
-//end of the configuration
+var port = program.port || process.env.PORT || 3000;
+var mongodb_host = program.mongodbHost || process.env.MONGO_HOST || process.env.MONGODB_PORT_27017_TCP_ADDR || 'localhost';
+var mongodb_port = program.mongodbPort || process.env.MONGO_PORT || process.env.MONGODB_PORT_27017_TCP_PORT || 27017;
+var mongodb_name = program.mongodbName || process.env.MONGO_NAME || 'camomile';
+var root_password = program.rootPassword || process.env.ROOT_PASSWORD;
+var media = program.media || process.env.MEDIA || '/media';
 
-// connect to the db:
-db_name = db_host + '/' + db_name;
-// mongoose.connect('mongodb://localhost/sampledb');
-mongoose.connect(db_name);
-mongoose.connection.on('open', function(){
-	console.log("Connected to Mongoose:") ;
-});
+mongoose.connect('mongodb://' + mongodb_host + ':' + mongodb_port + '/' + mongodb_name);
 
-// used to pass values to a template (mostly used in view)
-keepSession = function (req, res, next) {
-    var err = req.session.error,
-        msg = req.session.success;
-    delete req.session.error;
-    delete req.session.success;
-    res.locals.message = '';
-    if (err) res.locals.message = '<p class="msg error">' + err + '</p>';
-    if (msg) res.locals.message = '<p class="msg success">' + msg + '</p>';
-    next();
-}
+var cors_options = {
+  origin: true,
+  methods: ['GET', 'PUT', 'POST', 'DELETE'],
+  allowedHeaders: ['X-CSRF-Token', 'X-Requested-With', 'Accept', 'Accept-Version', 'Content-Length', 'Content-MD5', 'Content-Type', 'Date', 'X-Api-Version'],
+  credentials: true,
+};
 
-//store all information related to sessions
-var sessionStore = new mongoStore({mongoose_connection: mongoose.connection, 
-			db: mongoose.connections[0].db, clear_interval: 60}, function(){
-                          console.log('connect mongodb session success...');
-});
+var sessionStore = new MongoStore({
+    mongoose_connection: mongoose.connection,
+    db: mongoose.connections[0].db,
+    clear_interval: 60
+  });
 
-// configure all environments
-app.configure(function(){
-	app.set('port', server_port);
-	app.set('views', __dirname + '/views');
-	app.set('view engine', 'jade');
-	app.use(express.favicon());
-	app.use(express.logger('dev'));
-	app.use(express.bodyParser());
-	app.use(express.methodOverride());
-	
-    app.use(allowCrossDomain); // for CORS problem!
-    
-	app.use(express.cookieParser('your secret here'));
-	
-	app.use(express.session({
-    	key : "camomile.sid",
-    	secret: "123camomile",
-    	cookie: { 
-    		//expires: new Date(Date.now() + 60 * 10000) 
-    		maxAge: cookie_timeout*3600000 //equivalent to the above option
-  		},
-  		store: sessionStore
-    }));
-	app.use(keepSession);
-	
-	app.use(app.router);
-	app.use(express.static(path.join(__dirname, 'public')));
-});
+var session_options = {
+    key : "camomile.sid",
+    secret: "123camomile",
+    cookie: {maxAge: 24 * 60 * 60 * 1000},  // sessions expire every day
+    store: sessionStore
+};
 
-// development only
-if ('development' == app.get('env')) {
-	app.use(express.errorHandler());
-}
+app.set('port', port);
+app.set('media', media);
+app.use(express.logger('dev'));
+app.use(express.bodyParser());
+app.use(express.methodOverride());
+app.use(cors(cors_options));
+app.use(express.cookieParser('your secret here'));
+app.use(express.session(session_options));
+app.use(app.router);
+
+// handle CORS pre-flight requests
+// (must be added before any other route)
+app.options('*', cors(cors_options));
 
 //start routes:
 routes.initialize(app);
 
-//finally boot up the server:
-http.createServer(app).listen(app.get('port'), process.env.IP, function(){
-	console.log('Express server listening on port ' + app.get('port'));
-	if(GLOBAL.no_auth == true){
-		console.log('be careful: any user can access the data without authentication');
-	}
+User.findOne({username: "root"}, function (error, user) {
+  if (user || root_password) {
+
+    if (!user) {
+      user = new User({username: "root", role: "admin"});
+    }
+
+    // if (root_password) {
+    //   bcrypt.genSalt(10, function(err, salt) {
+    //       bcrypt.hash(root_password, salt, function(err, hash) {
+    //           user.salt = salt;
+    //           user.hash = hash;
+    //           user.save(function (err, user) {
+    //             if (err) {
+    //               console.log('error when setting root password')
+    //             } else {
+    //               console.log('successfully set root password');
+    //             }
+    //           });
+    //       });
+    //   });
+    // }
+
+    if (root_password) {
+      hash(root_password, function (error, salt, hash) {
+        user.salt = salt;
+        user.hash = hash;
+        user.save(function (error, user) {
+
+        });
+      });
+    }
+
+    http.createServer(app).listen(app.get('port'), process.env.IP, function () {
+      console.log('Express server listening on port ' + app.get('port'));
+    });
+
+  } else {
+    console.log("root user does not exist and root password is not defined to create root user (add '--root-password' option)");
+  }
 });
 

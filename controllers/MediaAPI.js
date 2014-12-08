@@ -22,278 +22,116 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-/* The API controller
-   Exports 3 methods:
-   * post - Creates a new media
-   * listAll - Returns a list of media
-   * listWithId - Returns a specific media of a given id
-*/
-
-var Media = require('../models/Media').Media; 
-var Corpus = require('../models/Corpus').Corpus;
-var ACL = require('../models/ACL').ACL,
-	ACLAPI = require('../controllers/ACLAPI'),
-	Group = require('../models/Group').Group,
-	commonFuncs = require('../lib/commonFuncs');
-
 var fileSystem = require('fs'); //working with video streaming
+var async = require('async');
+var path = require('path');
+var commonFuncs = require('../lib/commonFuncs');
 
-// for the uri : app.get('/corpus/:id/media'
-/*
-	- First: retrieves all media regardless of user/group's rights
-	- Second: finds all groups belonging to the connected user
-	- For each found media, check ACLs (the permission of the connected user and its groups)
-	- If not found, check ACLs of the related corpus 
-*/
-exports.listAll = function(req, res){
-	
-	function final(resultReturn, n) { 
-		if(resultReturn.length == 0 && n > 0)										
-			res.json(403, "You dont have enough permission to get this resource");
-		else res.json(resultReturn);
+// check if the id_media exists in the db
+exports.exist = function(req, res, next) {
+	Media.findById(req.params.id_media, function(error, media){
+		if (error) res.status(400).json(error);
+		else if (!media) res.status(400).json({message:"id_media don't exists"});
+		else next();
+	});
+}
+
+
+// check if req.session.user._id have the good right to see this media.id_corpus
+exports.AllowUser = function (list_right){
+	return function(req, res, next) {
+		async.waterfall([
+			function(callback) {										// find the user
+				User.findById(req.session.user._id, function(error, user){
+					callback(error, user);
+				});
+			},
+			function(user, callback) {									// find the list of group belong the user
+				Group.find({'users_list' : {$regex : new RegExp('^'+ req.session.user._id + '$', "i")}}, function(error, groups) {
+					callback(error, user, groups);
+				});
+			},
+			function(user, groups, callback) {							// find the media
+				Media.findById(req.params.id_media, function(error, media){
+					callback(error, user, groups, media);
+	    		});
+			},
+			function(user, groups, media, callback) {					// find the corpus belong the media anc check if the user have the right to access this corpus
+				Corpus.findById(media.id_corpus, function(error, corpus){
+					if (commonFuncs.checkRightACL(corpus, user, groups, list_right)) next();
+					else error = "Acces denied";
+					callback(error);
+	    		});
+			},
+
+		], function (error, trueOrFalse) {
+			if (error) res.status(400).json({message:error});
+		});
 	}
-	//find all media under this corpus
-	Media.find({id_corpus : req.params.id}, function(error, data){
-		if(error){
-			res.json(error);
-		}
-		else {
-			var connectedUser = req.session.user;
-			if(GLOBAL.no_auth == true || (connectedUser != undefined && connectedUser.role == "admin")){
-				res.json(data);
-			}
-			else if(connectedUser != undefined && data != null){
-				//first find groups to which the connected user belongs
-				Group.find({'usersList' : {$regex : new RegExp('^'+ connectedUser.username + '$', "i")}}, function(error, dataGroup) {
-					if(error) throw error;
-					else {
-						result = [];
-						resultReturn = [];
+}
 
-						for(var i = 0; i < data.length; i++){
-							result.push(data[i]._id);
-						}
-						// find all acl of these ids
-						ACL.find({id:{$in:result}}, function(error, dataACL){
-							if(error) console.log("error in ACL-corpusListall:");
-							else if(dataACL != null) {
-								var dataACLLen = dataACL.length;
-								var countTreatedACL = 0;
-								var  deferredCollection = [];
-								for(var i = 0; i < dataACL.length; i++) { 
-									var foundPos = commonFuncs.findUsernameInACL(connectedUser.username, dataACL[i].users);
-									// if the user has at least a R right on this resource
-									if(foundPos != -1) {
-										if(dataACL[i].users[foundPos].right != 'N') {
-											resultReturn.push(data[i]);
-											countTreatedACL += 1; 
-										}
-									} //not found this user's right on the current resource, look for its group's one
-									else {
-										foundPos = commonFuncs.findUsernameInGroupACL(dataGroup, dataACL[i].groups);
-
-										if(foundPos != -1) {
-										 	if(dataACL[i].groups[foundPos].right != 'N') {
-												resultReturn.push(data[i]);
-												countTreatedACL += 1;
-											}
-										}
-										else { //not found user right, nor group one, do a back propagation
-											(function(d){								
-												ACL.findOne({id:req.params.id}, function(error, dataACL1){
-													if(error) res.send(error);
-													else if(dataACL1 != null) {
-														countTreatedACL += 1;
-														var foundPos = commonFuncs.findUsernameInACL(connectedUser.username, dataACL1.users);
-
-														if(foundPos != -1) {
-															if(dataACL1.users[foundPos].right != 'N') {
-																resultReturn.push(d);
-															}
-														}
-														else {
-															foundPos = commonFuncs.findUsernameInGroupACL(dataGroup, dataACL1.groups);
-															if(foundPos != -1 && dataACL1.groups[foundPos].right != 'N')
-																resultReturn.push(d);
-														}
-														if(countTreatedACL == dataACLLen) {
-															countTreatedACL = -1
-															final(resultReturn, data.length);
-														}
-													}
-												}); //acl 2
-											})(data[i]);
-										} // else { //not found user right	
-									}
-								} //for
-								if(countTreatedACL == dataACLLen) 
-									final(resultReturn, data.length);			
-							} // else if(dataACL != null){
-							else {
-								res.json(404, "error in finding acl");
-							}
-						}); //ACL.find
-					} //else
-				}); // group
-			} // else if (connectedUser)
-			else { 
-				if(data != null)
-					res.json("You dont have permission to access this resource"); 
-				else return([]);
-			}
-		}
-	});
-} 
-
-//for the uri: app.get('/corpus/:id_corpus/media/:id_media', 
-exports.listWithId = function(req, res) {
-	Media.findById(req.params.id_media, function(error, data){
-		if(error) {
-			res.json(error);
-		}
-		else if(data == null) {
-			res.json('no such id_media!')
-		}
-		else
-			res.json(data);
+// retrieve a particular media with his _id and print _id, name, description, url and history
+exports.getInfo = function(req, res){
+	Media.findById(req.params.id_media, 'name description id_corpus url history', function(error, media){
+		if (error) res.status(400).json({message:error});
+    	else res.status(200).json(media);
 	});
 }
 
-//test for Posting corpus
-//app.post('/corpus/:id_corpus/media', 
-exports.post = function(req, res){
-	if(req.body.name == undefined)
-		return res.send(404, "one or more data fields are not filled out properly");
-		
-	Corpus.findById(req.params.id_corpus, function(error, data){
-		if(error){
-			res.json(error);
-		}
-		else if(data == null){
-			res.json('Could not post this media because the given id_corpus is incorrect');
-		}
-		else {
-			var media_data = {
-					id_corpus: req.params.id_corpus
-				  , name: req.body.name
-				  , url : ""
-			};
-			if(req.body.url)
-				media_data.url = req.body.url;
-				
-			var media = new Media(media_data);
-			// create a new media
-			media.save(function(error1, data1){
-				if(error1){
-					console.log('error in posting media data');
-					res.json(error1);
-				}
-				else {
-					console.log('Success on saving media data');
-					//add the current user to the ACL list
-					var connectedUser = "root";
-					if(req.session.user)
-						connectedUser = req.session.user.username;
-					
-					ACLAPI.addUserRightGeneric(data1._id, connectedUser, 'A');
-					res.json(data1);
-				}
-			});
-		}
-	});
-}
-
-//app.put('/corpus/:id_corpus/media/:id_media', 
+//update information of a media
 exports.update = function(req, res){
-	if(req.params.id_corpus == undefined && req.body.name == undefined && req.body.url == undefined)
-		return res.send(404, "one or more data fields are not filled out properly");
-		
-	var update = {};
-	if(req.params.id_corpus)
-		update.id_corpus = req.params.id_corpus;
-	if(req.body.name)
-		update.name = req.body.name;
-	if(req.body.url)
-		update.url = req.body.url;
-	
-	Media.findByIdAndUpdate(req.params.id_media, update, function (error, data) {
-		if(error){
-			console.log('error'); console.log(error);
-			res.json(error);
+	var newHistory = {};
+	Media.findById(req.params.id_media, function(error, media){
+		if (req.body.name) {											// check field
+			if (req.body.name == "") res.status(400).json({message:"name can't be empty"});
+			else {
+				media.name = req.body.name;
+				newHistory.name = req.body.name;
+			}
+		}				
+		if (req.body.description) {
+			media.description = req.body.description;
+			newHistory.description = req.body.description;
 		}
-		else{
-			res.json(data);
+		if (req.body.url) {
+			media.url = req.body.url;
+			newHistory.url = req.body.url;
 		}
+		media.history.push({date:new Date(), id_user:req.session.user._id, modification:newHistory})	// update history with the modification
+		media.save(function(error, newMedia) {							// save the media in the db
+			if (error) res.status(400).json({message:error});
+			if (!error) res.status(200).json(newMedia);
+		});
 	});
 }
 
-// exports.getVideo = function(req, res){
-// 	Media.findById(req.params.id_media, function(error, data){
-// 		if(error){
-// 			res.json(error);
-// 		}
-// 		else if(data == null){
-// 			res.json(404, 'no such id_media!')
-// 		}
-// 		else {
-			
-// 			var filePath = data.url + '.webm';
-// 			if(data.url == undefined) return res.send(404, 'not found the video corresponding to this media');
-// 			if(GLOBAL.video_path)
-// 				filePath = GLOBAL.video_path + '/' + filePath;
-			
-// 			var mineType = commonFuncs.getMineType(filePath);
-// 			if(mineType == "video/webm")
-// 				res.sendfile(filePath);
-// 			else {	
-// 				fileSystem.stat(filePath, function (err, stat){
-// 					if(stat) {
-// 						res.writeHead(200, {
-// 							'Content-Type': mineType,//'audio/mpeg', 
-// 							'Content-Length': stat.size
-// 						});
-	
-// 						var readStream = fileSystem.createReadStream(filePath);
-// 						readStream.on('data', function(dataS) {
-// 							var flushed = res.write(dataS);
-// 							// Pause the read stream when the write stream gets saturated
-// 							if(!flushed)
-// 								readStream.pause();
-// 						});
-	
-// 						res.on('drain', function() {
-// 							// Resume the read stream when the write stream gets hungry 
-// 							readStream.resume();    
-// 						});
-	
-// 						readStream.on('end', function() {
-// 							res.end();        
-// 						});
-// 					} //if
-// 					else res.send(404);
-// 				});
-// 			} //if(mineType
-// 		}
-// 	});
-// }
+// remove a given media
+exports.remove = function (req, res) {
+	Media.remove({_id : req.params.id_media}, function (error, media) {
+		if (!error && media == 1) res.status(200).json({message:"The media as been delete"});
+		else res.status(400).json({message:error});
+	});
+}
 
 function getVideoWithExtension(req, res, extension) {
+	Media.findById(req.params.id_media, function(error, media){
+		if (error) res.status(400).json({message:error});
+		else if (media == null) res.status(400).json({message: 'no such id_media!'})
+		else {			
+			if (media.url == undefined) return res.status(404).send({message:'not found the video corresponding to this media'});
+			var filePath = media.url + '.' + extension;
+			filePath = path.join(req.app.get('media'), filePath);
+			res.status(200).sendfile(filePath);
+		}
+	});
+}
 
-	Media.findById(req.params.id_media, function(error, data){
-		if(error){
-			res.json(error);
-		}
-		else if(data == null){
-			res.json(404, 'no such id_media!')
-		}
-		else {
-			
-			var filePath = data.url + '.' + extension;
-			if(data.url == undefined) return res.send(404, 'not found the video corresponding to this media');
-			if(GLOBAL.video_path)
-				filePath = GLOBAL.video_path + '/' + filePath;
-			res.sendfile(filePath);
-		}
+// retrieve all media
+exports.getAll = function (req, res) {	
+	Media.find({}, function (error, medias) {
+    	if (error) res.status(400).json({error:"error", message:error});
+    	if (medias) res.status(200).json(medias);
+		else res.status(200).json([]);
 	});
 }
 

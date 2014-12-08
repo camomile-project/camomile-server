@@ -22,49 +22,15 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
+var mongoose = require('mongoose');
+var Schema = mongoose.Schema;
 
-// check out https://github.com/visionmedia/node-pwd
+exports.UserSchema = UserSchema = new Schema({
+    username: {type:String, lowercase: true, trim: true, required: true},
+    description: {type : Schema.Types.Mixed, 'default' : ''},   	
+    role: String,
+    salt: String,
+    hash: String
+}, { versionKey: false });
 
-/**
- * Module dependencies.
- */
-
-var crypto = require('crypto');
-
-/**
- * Bytesize.
- */
-
-var len = 128;
-
-/**
- * Iterations. ~300ms
- */
-
-var iterations = 12000;
-
-/**
- * Hashes a password with optional `salt`, otherwise
- * generate a salt for `pass` and invoke `fn(err, salt, hash)`.
- *
- * @param {String} password to hash
- * @param {String} optional salt
- * @param {Function} callback
- * @api public
- */
-
-exports.hash = function (pwd, salt, fn) {
-  if (3 == arguments.length) {
-    crypto.pbkdf2(pwd, salt, iterations, len, fn);
-  } else {
-    fn = salt;
-    crypto.randomBytes(len, function(err, salt){
-      if (err) return fn(err);
-      salt = salt.toString('base64');
-      crypto.pbkdf2(pwd, salt, iterations, len, function(err, hash){
-        if (err) return fn(err);
-        fn(null, salt, hash);
-      });
-    });
-  }
-};
+exports.User = User = mongoose.model('users', UserSchema);

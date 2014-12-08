@@ -22,166 +22,190 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-/* The API controller for user's methods
-   
-*/
+var async = require('async');
 
-var Corpus = require('../models/Corpus').Corpus;
-
-var Media = require('../models/Media').Media; //get the media model
-
-var Layer = require('../models/Layer').Layer; //get the layer model
-
-var Annotation = require('../models/Annotation').Annotation; //get the annotation model
-
-var ACL = require('../models/ACL').ACL;
-
-var User = require('../models/user').User;
-
-var Group = require('../models/Group').Group;
-
-
-var ACLAPI = require('../controllers/ACLAPI');
-
-// retrieve all users
-exports.listUsers = function (req, res) {
-	var connectedUser = req.session.user;	
-	if(connectedUser.role == "admin") {				
-		User.find({}, 'username role affiliation', function (err, users) {
-        	if(err) throw err;
-        	if (users) {
- 				res.send(users);
-        	} else {
-            	return res.send([]);
-        	}
-    	});
-	}
-    else {
-    	User.findOne({username: connectedUser.username}, 'username role affiliation', function (err, users) {
-        	if(err) throw err;
-        	if (users) {
- 				res.send(users);
-        	} else {
-            	return res.send([]);
-        	}
-    	});
-    }
+//check if the role of the user logged is admin
+exports.currentUserIsAdmin = function(req, res, next) {
+	if (req.session.user.role === "admin") next();
+	else res.status(400).json({message:"Acces denied, you are not an admin user"});
 }
 
-//retrieve a particular user (with id)
-exports.listWithId = function(req, res){
-	if(req.params.id == undefined)
-		return res.send(404, "the given ID is not correct");
-		
-	var connectedUser = req.session.user;	
+//check if the user logged is root
+exports.currentUserIsroot = function(req, res, next) {
+	if (req.session.user.username === "root") next();
+	else res.status(400).json({message:"Acces denied, you are not an admin user"});
+}
 
-	User.findById(req.params.id, 'username affiliation role', function(error, data){
-		if(error){
-			res.json(error);
-		}
-		else if(data == null){
-			res.json('no such user!')
-		}
-		else
-			if(connectedUser.role == "admin") {	
-				res.json(data);
-			}
-			else {
-				
-				if(data.username == connectedUser.username)
-					res.json(data);
-				else res.send(401, "You dont have enough right to access this resource");
-			}
+//check if the id_user exists in the db
+exports.exist = function(req, res, next) {
+	User.findById(req.params.id_user, function(error, user){
+		if (error) res.status(400).json(error);
+		else if (!user) res.status(400).json({message:"id_user don't exists"});
+		else next();
 	});
 }
 
-//retrieve a particular user (with id)
-exports.listGroupsOfUserId = function(req, res){
-	if(req.params.id == undefined)
-		return res.send(404, "the given ID is not correct");
-		
-	var connectedUser = req.session.user;	
+// print _id, username, role and description
+printResUser = function(user, res) {
+	res.status(200).json({
+		"_id":user._id,
+		"username":user.username,
+		"role":user.role,
+		"description":user.description
+	});
+}
 
-	User.findById(req.params.id, 'username affiliation role', function(error, data){
-		if(error){
-			res.json(error);
+// create a new user
+exports.create = function (req, res) {
+	var error=null;
+	async.waterfall([
+		function(callback) {											// check the different field
+			if (req.body.username == undefined) 						error="the username is not define";
+			if (req.body.username == "") 								error="empty string for username is not allow";
+			if (req.body.password == undefined)							error="the password is not define";
+			if (req.body.password == "") 								error="empty password for username is not allow";
+			if (req.body.role == undefined) 							error="the role is not define";
+			if (req.body.role != 'admin' && req.body.role != 'user')	error="the role must be 'user' or 'admin'";	
+			callback(error);
+		},
+		function(callback) {											// check if the username is not already used (username must be unique)
+			User.count({username: req.body.username}, function (error, count) {	
+				if ((!error) && (count != 0)) error = "the username is already used, choose another name";
+		        callback(error);
+		    });
+		},
+		function(callback) {											// compute the hash for the password
+			hash(req.body.password, function (error, salt, hash) {
+				callback(error, salt, hash);
+			});			
+		},
+		function(salt, hash, callback) {								// create a new user
+			var user = new User({username: req.body.username,
+								 description: req.body.description,
+								 role: req.body.role,
+								 salt: salt,
+								 hash: hash,
+				}).save(function (error, newUser) {						// save it into the db
+					if (newUser) printResUser(newUser, res);
+					callback(error);
+			});			
 		}
-		else if(data == null){
-			res.json('no such user!')
-		}
-		else {
-			
-			Group.find({'usersList' : {$regex : new RegExp('^'+ data.username + '$', "i")}}, function(error, dataGroup) {
-				if(error) res.send(error);
-				else {
-					if(connectedUser.role == "admin") {	
-						
-						res.json(dataGroup);
+		], function (error) {
+			if (error) res.status(400).json({message:error});			// print error
+	});
+}
+
+// retrieve all users and print _id, username, role and description
+exports.getAll = function (req, res) {	
+	User.find({}, 'username role description', function (error, users) {
+    	if (error) res.status(400).json({error:"error", message:error});
+    	if (users) res.status(200).json(users);
+		else res.status(200).json([]);
+	});
+}
+
+// retrieve a particular user with his _id and print _id, username, role and description
+exports.getInfo = function(req, res){
+	User.findById(req.params.id_user, function(error, user){
+		printResUser(user,res);
+	});
+}
+
+// update password and role of a user
+exports.update = function(req, res){
+	var error;
+	async.waterfall([		
+		function(callback) {											// check field
+			if (req.body.password == "") 												error="empty password for username is not allow";
+			if (req.body.role && req.body.role != 'admin' && req.body.role != 'user')	error="the role must be 'user' or 'admin'";	
+			callback(error);
+		},
+		function(callback) {
+			User.findById(req.params.id_user, function(error, user){	// find the user
+				if (req.body.role && user.username == "root") 	error = "change the role of this id_user is not allowed"
+				else if (req.body.role) 						user.role = req.body.role
+				callback(error, user);
+			});
+		},
+		function(user, callback) {
+			if (req.body.password) {									// compute hash
+				hash(req.body.password, function (error, salt, hash) {
+					if (req.body.password) {
+						user.salt = salt;
+						user.hash = hash;	
 					}
-					else {
-				
-						if(data.username == connectedUser.username)
-							res.json(dataGroup);
-						else res.send(401, "You dont have enough right to access this resource");
+					callback(error, user);				
+				});
+			}
+			else callback(error, user);
+		},
+		function(user, callback) {
+			if (req.body.description) user.description = req.body.description;
+			user.save(function (error, user) {							// save the user
+				if (!error) printResUser(user, res);
+				callback(error)
+			});			
+		}
+	], function (error) {
+		if (error) res.status(400).json({message:error});
+	});
+}
+
+// delete a user
+exports.remove  = function(req, res){
+	var error;
+	async.waterfall([	
+		function(callback) {
+			User.findById(req.params.id_user, function(error, user){	// find the user
+				if (user.username == "root") 	error = "can't delete root user"
+				callback(error);
+			});
+		},		
+		function(callback) {											// remove id_user from ACL of all corpus
+			Corpus.find(function(error, l_corpus){
+				for(var i = 0; i < l_corpus.length; i++) {
+					if (l_corpus[i].users_ACL) {
+						if (l_corpus[i].users_ACL[req.params.id_user]) {
+							var update = {users_ACL : l_corpus[i].users_ACL};	
+							delete update.users_ACL[req.params.id_user];
+							if (Object.getOwnPropertyNames(update.users_ACL).length === 0) update.users_ACL = undefined;
+							Corpus.findByIdAndUpdate(l_corpus[i]._id, update, function (error, corpus) {});	
+						}
 					}
 				}
+				callback(error);				
 			});
-		}
+		},
+		function(callback) {											// remove id_user from ACL of all layer
+			Layer.find(function(error, l_layer){
+				for(var i = 0; i < l_layer.length; i++) {
+					if (l_layer[i].users_ACL) {
+						if (l_layer[i].users_ACL[req.params.id_user]) {
+							var update = {users_ACL : l_layer[i].users_ACL};	
+							delete update.users_ACL[req.params.id_user];
+							if (Object.getOwnPropertyNames(update.users_ACL).length === 0) update.users_ACL = undefined;
+							Layer.findByIdAndUpdate(l_layer[i]._id, update, function (error, layer) {});	
+						}
+					}
+				}
+				callback(error);				
+			});
+		},		
+		function(callback) {											// delete the user from the db
+			User.remove({_id : req.params.id_user}, function (error, user) {
+				if (!error && user == 1) res.status(200).json({message:"The user as been delete"});
+				callback(error);
+			});
+		},		
+	], function (error) {
+		if (error) res.status(400).json({message:error});
 	});
 }
 
-// update information of a group: put /user/:id
-exports.update = function(req, res){
-	if(req.params.id == undefined)
-		return res.send(404, "one or more data fields are not filled out properly");
-	var connectedUser = req.session.user;
-	
-	var update = {};
-	if(connectedUser.role == "admin" && req.body.username != undefined)
-		update.username = req.body.username;
-	if(req.body.affiliation)
-		update.affiliation = req.body.affiliation;
-	
-	if(req.body.password == undefined) {
-		User.findByIdAndUpdate(req.params.id, update, function (error, data) {
-			if(error){
-				res.json(error);
-			}
-			else {
-				res.json(data);
-			}
-		});
-	} 
-	else { //update pass
-		hash(req.body.password, function (err, salt, hash) {
-			if (err) throw err;
-			else {
-				update.salt = salt;
-				update.hash = hash;
-				User.findByIdAndUpdate(req.params.id, update, function (error, data) {
-					if(error){
-						res.json(error);
-					}
-					else {
-						res.json(data);
-					}
-				});
-			} // else
-		});
-	}
-}
-
-// remove a user
-exports.remove  = function(req, res){
-	if(req.params.id == undefined)
-		return res.send(404, "one or more data fields are not filled out properly");
-	User.remove({_id : req.params.id}, function (error, data) {
-		if(error) {
-			res.json(error);
-		}
-		else {
-			ACLAPI.removeAUserFromALC(data.username);
-			res.json(data);
-		}
+// retrieve the list of group of a user
+exports.getAllGroupOfAUser = function(req, res){
+	Group.find({'users_list' : {$regex : new RegExp('^'+ req.params.id_user + '$', "i")}}, function(error2, groups) {
+		if (error2) res.status(400).json({error:"error", message:error2});
+		else res.status(200).json(groups);
 	});
 }

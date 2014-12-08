@@ -22,22 +22,13 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-/*
-Module Dependencies 
-*/
-var mongoose = require('mongoose')
-   , Schema = mongoose.Schema;
-
-/*
-Database and Models
-*/
-//mongoose.connect("mongodb://localhost/myapp");
-
+var mongoose = require('mongoose');
+var Schema = mongoose.Schema;
 
 exports.GroupSchema = GroupSchema = new Schema({
-    groupname: {type:String, lowercase: true, trim: true, required: true},
-   	description: {type:String, default: ""},
-    usersList: [{ type:String, lowercase: true, trim:true}]
+    name: {type:String, lowercase: true, trim: true, required: true},
+    description: {type : Schema.Types.Mixed, 'default' : ''},   	
+    users_list: [{ type:String, lowercase: true, trim:true}]
 }, { versionKey: false });
 
 exports.Group = Group = mongoose.model('groups', GroupSchema);
