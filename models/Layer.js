@@ -28,7 +28,7 @@ var ObjectId = Schema.ObjectId;
 var HistorySchema = require('./History').HistorySchema;
 var CorpusSchema = require('./Corpus').CorpusSchema;
  
-exports.LayerSchema = LayerSchema = new Schema({
+var Layer = new Schema({
 	id_corpus : {type : ObjectId, ref : 'CorpusSchema'},
 	name: {type:String, lowercase: true, trim: true, required: true},
 	description: {type : Schema.Types.Mixed, 'default' : ''},   	
@@ -38,4 +38,4 @@ exports.LayerSchema = LayerSchema = new Schema({
     ACL: {type : Schema.Types.Mixed, 'default' : null},
 }, { versionKey: false });
 
-exports.Layer = Layer = mongoose.model('Layer', LayerSchema);
+module.exports = mongoose.model('Layer', Layer);

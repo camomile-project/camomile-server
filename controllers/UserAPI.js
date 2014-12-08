@@ -24,6 +24,14 @@ SOFTWARE.
 
 var async = require('async');
 
+var User = require('../models/User');
+var	Group = require('../models/Group');
+var Corpus = require('../models/Corpus');
+var	Media = require('../models/Media');
+var	Layer = require('../models/Layer');
+var	Annotation = require('../models/Annotation');
+var	Queue = require('../models/Queue');
+
 //check if the role of the user logged is admin
 exports.currentUserIsAdmin = function(req, res, next) {
 	if (req.session.user.role === "admin") next();

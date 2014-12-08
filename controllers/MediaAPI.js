@@ -25,7 +25,15 @@ SOFTWARE.
 var fileSystem = require('fs'); //working with video streaming
 var async = require('async');
 var path = require('path');
-var commonFuncs = require('../lib/commonFuncs');
+var commonFuncs = require('../controllers/commonFuncs');
+
+var User = require('../models/User');
+var	Group = require('../models/Group');
+var Corpus = require('../models/Corpus');
+var	Media = require('../models/Media');
+var	Layer = require('../models/Layer');
+var	Annotation = require('../models/Annotation');
+var	Queue = require('../models/Queue');
 
 // check if the id_media exists in the db
 exports.exist = function(req, res, next) {

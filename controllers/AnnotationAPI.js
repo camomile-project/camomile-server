@@ -23,7 +23,15 @@ SOFTWARE.
 */
 
 var async = require('async');
-var commonFuncs = require('../lib/commonFuncs');
+var commonFuncs = require('../controllers/commonFuncs');
+
+var User = require('../models/User');
+var	Group = require('../models/Group');
+var Corpus = require('../models/Corpus');
+var	Media = require('../models/Media');
+var	Layer = require('../models/Layer');
+var	Annotation = require('../models/Annotation');
+var	Queue = require('../models/Queue');
 
 // check if the id_annotation exists in the db
 exports.exist = function(req, res, next) {
