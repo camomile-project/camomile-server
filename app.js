@@ -78,20 +78,19 @@ var session_options = {
     store: sessionStore
 };
 
-// configure all environments
-app.configure(function () {
-  app.set('port', port);
-  app.set('media', media);
-  app.use(express.logger('dev'));
-  app.use(express.bodyParser());
-  app.use(express.methodOverride());
-  app.use(cors(cors_options));
-  app.use(express.cookieParser('your secret here'));
-  app.use(express.session(session_options));
-  app.use(app.router);
-});
+app.set('port', port);
+app.set('media', media);
+app.use(express.logger('dev'));
+app.use(express.bodyParser());
+app.use(express.methodOverride());
+app.use(cors(cors_options));
+app.use(express.cookieParser('your secret here'));
+app.use(express.session(session_options));
+app.use(app.router);
 
-app.options('*', cors(cors_options)); // include before other routes
+// handle CORS pre-flight requests
+// (must be added before any other route)
+app.options('*', cors(cors_options));
 
 //start routes:
 routes.initialize(app);
