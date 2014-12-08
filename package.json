@@ -27,6 +27,6 @@
     "forever": "0.13.x"
   },
   "scripts": {
-    "start": "node app.js"
+    "start": "forever app.js"
   }
 }
