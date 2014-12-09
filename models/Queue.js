@@ -26,11 +26,11 @@ var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
 var ObjectId = Schema.ObjectId;
 
-exports.QueueSchema = QueueSchema = new Schema({
+var Queue = new Schema({
 	name: {type: String, required: true, trim: true},
 	description: {type : Schema.Types.Mixed, 'default' : ''},   	
 	list: [Schema.Types.Mixed]
 }, { versionKey: false });
 
-exports.Queue = Queue = mongoose.model('Queue', QueueSchema);
+module.exports = mongoose.model('Queue', Queue);
 

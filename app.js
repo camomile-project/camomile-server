@@ -27,7 +27,7 @@ var http = require('http');
 var cors = require('cors');
 var app = express();
 
-var bcrypt = require('bcrypt');
+//var bcrypt = require('bcrypt');
 
 var program = require('commander');
 
@@ -35,8 +35,9 @@ var mongoose = require('mongoose');
 var MongoStore = require('connect-mongo')(express);
 
 var userAPI = require('./controllers/UserAPI');
+var User = require('./models/User');
 var routes = require('./routes/routes');
-var authenticate = require('./middleware/authenticate');
+var hash = require('./controllers/Session').hash;
 
 
 program

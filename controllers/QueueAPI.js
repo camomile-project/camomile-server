@@ -22,12 +22,13 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-/* The API controller for queue's methods
-   For instance: 
-   	- getnext to pick up the first element in the queue and remove it from the queue
-   	- put: fill up the queue
-   	- putnext: intert a list of id into the queue			
-*/
+var User = require('../models/User');
+var	Group = require('../models/Group');
+var Corpus = require('../models/Corpus');
+var	Media = require('../models/Media');
+var	Layer = require('../models/Layer');
+var	Annotation = require('../models/Annotation');
+var	Queue = require('../models/Queue');
 
 // check if the id_queue exists in the db
 exports.exist = function(req, res, next) {
