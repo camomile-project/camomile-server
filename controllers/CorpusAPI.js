@@ -24,6 +24,7 @@ SOFTWARE.
 
 var async = require('async');
 var commonFuncs = require('../controllers/commonFuncs');
+var	layerAPI = require('../controllers/LayerAPI');
 
 var User = require('../models/User');
 var	Group = require('../models/Group');
