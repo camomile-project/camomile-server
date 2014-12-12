@@ -37,7 +37,7 @@ var MongoStore = require('connect-mongo')(express);
 var userAPI = require('./controllers/UserAPI');
 var User = require('./models/User');
 var routes = require('./routes/routes');
-var hash = require('./controllers/Session').hash;
+var Session = require('./controllers/Session');
 
 
 program
@@ -120,7 +120,7 @@ User.findOne({username: "root"}, function (error, user) {
     // }
 
     if (root_password) {
-      hash(root_password, function (error, salt, hash) {
+      Session.hash(root_password, function (error, salt, hash) {
         user.salt = salt;
         user.hash = hash;
         user.save(function (error, user) {
