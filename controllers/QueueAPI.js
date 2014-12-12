@@ -34,15 +34,15 @@ var	Queue = require('../models/Queue');
 exports.exist = function(req, res, next) {
 	Queue.findById(req.params.id_queue, function(error, queue){
 		if (error) res.status(400).json(error);
-		else if (!queue) res.status(400).json({message:"id_queue don't exists"});
+		else if (!queue) res.status(400).json({message:"The queue doesn't exists"});
 		else next();
 	});
 }
 
 // create a queue
 exports.create = function (req, res) {
-	if (req.body.name == undefined) res.status(400).json({message:"the name is not define"}); 
-	if (req.body.name == "") 		res.status(400).json({message:"empty string for name is not allow"});
+	if (req.body.name == undefined) res.status(400).json({message:"the name is not defined"}); 
+	if (req.body.name == "") 		res.status(400).json({message:"empty string for name is not allowed"});
 	var queue = new Queue({
 		name: req.body.name,
 		description: req.body.description,
@@ -83,7 +83,7 @@ exports.update = function(req, res){
 
 //push element at the end of the queue
 exports.push = function(req, res){
-	if (req.body.list == undefined) res.status(400).json({message:"list field is empty"});
+	if (req.body.list == undefined) res.status(400).json({message:"list of field is empty"});
 	Queue.findById(req.params.id_queue, function (error, queue) {
 		for(var i = 0; i < req.body.list.length; i++) queue.list.push(req.body.list[i]);
 		queue.save(function(error, newQueue) {
@@ -108,7 +108,7 @@ exports.pop = function(req, res){
 // remove a given queue
 exports.remove = function (req, res) {
 	Queue.remove({_id : req.params.id_queue}, function (error, queue) {
-		if (!error && queue == 1) res.status(200).json({message:"The queue as been delete"});
+		if (!error && queue == 1) res.status(200).json({message:"The queue has been deleted"});
 		else res.status(400).json({message:error});
 	});
 }

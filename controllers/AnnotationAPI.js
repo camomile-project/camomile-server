@@ -37,7 +37,7 @@ var	Queue = require('../models/Queue');
 exports.exist = function(req, res, next) {
 	Annotation.findById(req.params.id_annotation, function(error, annotation){
 		if (error) res.status(400).json(error);
-		else if (!annotation) res.status(400).json({message:"id_annotation don't exists"});
+		else if (!annotation) res.status(404).json({message:"The annotation does not exists"});
 		else next();
 	});
 }
@@ -95,7 +95,7 @@ exports.getAll = function (req, res) {
 // remove a given annotation
 exports.remove = function (req, res) {
 	Annotation.remove({_id : req.params.id_annotation}, function (error, annotation) {
-		if (!error && annotation == 1) res.status(200).json({message:"The annotation as been delete"});
+		if (!error && annotation == 1) res.status(200).json({message:"The annotation has been deleted"});
 		else res.status(400).json({message:error});
 	});
 }

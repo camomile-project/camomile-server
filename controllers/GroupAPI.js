@@ -36,7 +36,7 @@ var	Queue = require('../models/Queue');
 exports.exist = function(req, res, next) {
 	Group.findById(req.params.id_group, function(error, group){
 		if (error) res.status(400).json(error);
-		else if (!group) res.status(400).json({message:"id_group don't exists"});
+		else if (!group) res.status(400).json({message:"The group doesn't exists"});
 		else next();
 	});
 }
@@ -63,8 +63,8 @@ exports.create = function(req, res){
 	var error=null;
 	async.waterfall([
 		function(callback) {											// check field
-			if (req.body.name == undefined) error="the name is not define";
-			if (req.body.name == "") 		error="empty string for name is not allow";
+			if (req.body.name == undefined) error="the name is not defined";
+			if (req.body.name == "") 		error="empty string for name is not allowed";
 			callback(error);
 		},
 		function(callback) {											// check is name not already used
@@ -135,7 +135,7 @@ exports.remove = function (req, res) {
 		},		
 		function(callback) {											// delete the group from the db
 			Group.remove({_id : req.params.id_group}, function (error, group) {
-				if (!error && group == 1) res.status(200).json({message:"The group as been delete"});
+				if (!error && group == 1) res.status(200).json({message:"The group has been deleted"});
 				callback(error);
 			});
 		},		
