@@ -27,11 +27,11 @@ var Schema = mongoose.Schema;
 var ObjectId = Schema.ObjectId;
 var HistorySchema = require('./History').HistorySchema;
 
-exports.CorpusSchema = CorpusSchema = new Schema({
+var Corpus = new Schema({
 	name: {type: String, required: true, trim: true},
 	description : {type : Schema.Types.Mixed, 'default' : ''},
 	history : [HistorySchema],
     ACL: {type : Schema.Types.Mixed, 'default' : null},
 }, { versionKey: false });
 
-exports.Corpus = Corpus = mongoose.model('Corpus', CorpusSchema);
+module.exports = mongoose.model('Corpus', Corpus);

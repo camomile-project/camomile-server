@@ -25,10 +25,10 @@ SOFTWARE.
 var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
 
-exports.GroupSchema = GroupSchema = new Schema({
+var Group = new Schema({
     name: {type:String, lowercase: true, trim: true, required: true},
     description: {type : Schema.Types.Mixed, 'default' : ''},   	
     users_list: [{ type:String, lowercase: true, trim:true}]
 }, { versionKey: false });
 
-exports.Group = Group = mongoose.model('groups', GroupSchema);
+module.exports = mongoose.model('groups', Group);

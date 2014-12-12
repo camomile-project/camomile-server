@@ -29,7 +29,7 @@ var LayerSchema = require('./Layer').LayerSchema;
 var MediaSchema = require('./Media').MediaSchema;
 var HistorySchema = require('./History').HistorySchema;
  
-exports.AnnotationSchema = AnnotationSchema = new Schema({
+var Annotation = new Schema({
 	id_layer : {type : ObjectId, ref : 'LayerSchema'},
 	id_media : {type : ObjectId, ref : 'MediaSchema'},
 	fragment : {type : Schema.Types.Mixed, index : true, 'default' : ''},
@@ -37,4 +37,4 @@ exports.AnnotationSchema = AnnotationSchema = new Schema({
 	history : [HistorySchema]	
 }, { versionKey: false });
 
-exports.Annotation = Annotation = mongoose.model('Annotation', AnnotationSchema);
+module.exports = mongoose.model('Annotation', Annotation);

@@ -27,14 +27,14 @@ var http = require('http');
 var cors = require('cors');
 var app = express();
 
-var bcrypt = require('bcrypt');
 var program = require('commander');
 var mongoose = require('mongoose');
 var MongoStore = require('connect-mongo')(express);
 
 var userAPI = require('./controllers/UserAPI');
+var User = require('./models/User');
 var routes = require('./routes/routes');
-var authenticate = require('./middleware/authenticate');
+var Session = require('./controllers/Session');
 
 program
     .option('--port <port>', 'Local port to listen to (default: 3000)', parseInt)
@@ -115,9 +115,9 @@ User.findOne({username: "root"}, function (error, user) {
     // }
 
     if (root_password) {
-      hash(root_password, function (error, salt, hash) {
-        user.salt = salt;
-        user.hash = hash;
+      hash(root_password, function (error, new_salt, new_hash) {
+        user.salt = new_salt;
+        user.hash = new_hash;
         user.save(function (error, user) {
 
         });

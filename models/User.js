@@ -25,7 +25,7 @@ SOFTWARE.
 var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
 
-exports.UserSchema = UserSchema = new Schema({
+var User = new Schema({
     username: {type:String, lowercase: true, trim: true, required: true},
     description: {type : Schema.Types.Mixed, 'default' : ''},   	
     role: String,
@@ -33,4 +33,4 @@ exports.UserSchema = UserSchema = new Schema({
     hash: String
 }, { versionKey: false });
 
-exports.User = User = mongoose.model('users', UserSchema);
+module.exports = mongoose.model('users', User);

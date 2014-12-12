@@ -24,6 +24,14 @@ SOFTWARE.
 
 var async = require('async');
 
+var User = require('../models/User');
+var	Group = require('../models/Group');
+var Corpus = require('../models/Corpus');
+var	Media = require('../models/Media');
+var	Layer = require('../models/Layer');
+var	Annotation = require('../models/Annotation');
+var	Queue = require('../models/Queue');
+
 // check if the id_group exists in the db
 exports.exist = function(req, res, next) {
 	Group.findById(req.params.id_group, function(error, group){
