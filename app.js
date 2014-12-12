@@ -120,9 +120,9 @@ User.findOne({username: "root"}, function (error, user) {
     // }
 
     if (root_password) {
-      Session.hash(root_password, function (error, salt, hash) {
-        user.salt = salt;
-        user.hash = hash;
+      hash(root_password, function (error, new_salt, new_hash) {
+        user.salt = new_salt;
+        user.hash = new_hash;
         user.save(function (error, user) {
 
         });
