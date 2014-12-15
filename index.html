@@ -198,7 +198,7 @@
 <tr>
 <td>username</td>
 <td>String</td>
-<td>The user name  (required, unique in the db and can&rsquo;t be update)</td>
+<td>The user name  (required, unique in the db and can&rsquo;t be update, without wight space)</td>
 </tr>
 <tr>
 <td>password</td>
@@ -982,7 +982,10 @@
 
 <h2 id="delete-a-corpus">Delete a corpus</h2>
 
-<p><aside class="warning">Restriction: root user only</aside></p>
+<p><aside class="warning">Restriction: admin user only</aside>
+<aside class="notice">Restriction: user/group rights is &lsquo;O&rsquo; for this corpus</aside></p>
+
+<p><aside class="warning">This request also delete media, layers and annotations inside the corpus</aside></p>
 <pre class="highlight shell">curl -i -X DELETE http://example.com/corpus/&lt;id_corpus&gt; -H <span class="s2">"Content-Type: application/json"</span> --cookie <span class="s2">"cookies.txt"</span>
 
 </pre>
@@ -1018,13 +1021,17 @@
 </tr>
 </tbody></table>
 
-<h2 id="add-a-media-into-a-corpus">Add a media into a corpus</h2>
+<h2 id="add-media-into-a-corpus">Add media into a corpus</h2>
 
 <p><aside class="notice">Restriction: user/group rights is &lsquo;O&rsquo; or &lsquo;W&rsquo; for this corpus</aside></p>
+
+<p>For a medium {&hellip;} or a list of media [{&hellip;}, {&hellip;}]</p>
 <pre class="highlight shell">curl -i -X POST http://example.com/corpus/&lt;id_corpus&gt;/media --data <span class="s1">'{"name":&lt;name&gt;, "url":&lt;url&gt;, "description":&lt;description&gt;}'</span> -H <span class="s2">"Content-Type: application/json"</span> --cookie <span class="s2">"cookies.txt"</span> 
+curl -i -X POST http://example.com/corpus/&lt;id_corpus&gt;/media --data <span class="s1">'[{"name":&lt;name&gt;, "url":&lt;url&gt;, "description":&lt;description&gt;}, {...}]'</span> -H <span class="s2">"Content-Type: application/json"</span> --cookie <span class="s2">"cookies.txt"</span> 
 </pre>
 <pre class="highlight javascript"></pre>
-<pre class="highlight python"><span class="n">user_client</span><span class="o">.</span><span class="n">add_media</span><span class="p">(</span><span class="o">&lt;</span><span class="n">id_corpus</span><span class="o">&gt;</span><span class="p">,</span> <span class="p">{</span><span class="s">"name"</span><span class="p">:</span><span class="o">&lt;</span><span class="n">name</span><span class="o">&gt;</span><span class="p">,</span> <span class="s">"url"</span><span class="p">:</span><span class="o">&lt;</span><span class="n">url</span><span class="o">&gt;</span><span class="p">,</span> <span class="s">"description"</span><span class="p">:</span><span class="o">&lt;</span><span class="n">description</span><span class="o">&gt;</span><span class="p">}})</span>
+<pre class="highlight python"><span class="n">user_client</span><span class="o">.</span><span class="n">add_media</span><span class="p">(</span><span class="o">&lt;</span><span class="n">id_corpus</span><span class="o">&gt;</span><span class="p">,</span> <span class="p">{</span><span class="s">"name"</span><span class="p">:</span><span class="o">&lt;</span><span class="n">name</span><span class="o">&gt;</span><span class="p">,</span> <span class="s">"url"</span><span class="p">:</span><span class="o">&lt;</span><span class="n">url</span><span class="o">&gt;</span><span class="p">,</span> <span class="s">"description"</span><span class="p">:</span><span class="o">&lt;</span><span class="n">description</span><span class="o">&gt;</span><span class="p">})</span>
+<span class="n">user_client</span><span class="o">.</span><span class="n">add_media</span><span class="p">(</span><span class="o">&lt;</span><span class="n">id_corpus</span><span class="o">&gt;</span><span class="p">,</span> <span class="p">[{</span><span class="s">"name"</span><span class="p">:</span><span class="o">&lt;</span><span class="n">name</span><span class="o">&gt;</span><span class="p">,</span> <span class="s">"url"</span><span class="p">:</span><span class="o">&lt;</span><span class="n">url</span><span class="o">&gt;</span><span class="p">,</span> <span class="s">"description"</span><span class="p">:</span><span class="o">&lt;</span><span class="n">description</span><span class="o">&gt;</span><span class="p">},</span> <span class="p">{</span><span class="o">...</span><span class="p">}])</span>
 </pre>
 
 <blockquote>
@@ -1065,78 +1072,6 @@
 <td>id_corpus</td>
 <td>String</td>
 <td>The corpus identifier  (required)</td>
-</tr>
-<tr>
-<td>name</td>
-<td>String</td>
-<td>The media name (required, unique in the corpus)</td>
-</tr>
-<tr>
-<td>url</td>
-<td>String</td>
-<td>Media url</td>
-</tr>
-<tr>
-<td>description</td>
-<td>free</td>
-<td>A description of the media</td>
-</tr>
-</tbody></table>
-
-<h2 id="add-multiple-medias-into-a-corpus">Add multiple medias into a corpus</h2>
-
-<p><aside class="notice">Restriction: user/group rights is &lsquo;O&rsquo; or &lsquo;W&rsquo; for this corpus</aside></p>
-<pre class="highlight shell">curl -i -X POST http://example.com/corpus/&lt;id_corpus&gt;/medias --data <span class="s1">'{"media_list":[{"name":&lt;name&gt;, "url":&lt;url&gt;, "description":&lt;description&gt;}, ...]}'</span> -H <span class="s2">"Content-Type: application/json"</span> --cookie <span class="s2">"cookies.txt"</span> 
-</pre>
-<pre class="highlight javascript"></pre>
-<pre class="highlight python"><span class="n">user_client</span><span class="o">.</span><span class="n">add_medias</span><span class="p">(</span><span class="o">&lt;</span><span class="n">id_corpus</span><span class="o">&gt;</span><span class="p">,</span> <span class="p">{</span><span class="s">"media_list"</span><span class="p">:[{</span><span class="s">"name"</span><span class="p">:</span><span class="o">&lt;</span><span class="n">name</span><span class="o">&gt;</span><span class="p">,</span> <span class="s">"url"</span><span class="p">:</span><span class="o">&lt;</span><span class="n">url</span><span class="o">&gt;</span><span class="p">,</span> <span class="s">"description"</span><span class="p">:</span><span class="o">&lt;</span><span class="n">description</span><span class="o">&gt;</span><span class="p">},</span> <span class="o">...</span><span class="p">]})</span>
-</pre>
-
-<blockquote>
-<p>The above command returns JSON structured like this:</p>
-</blockquote>
-<pre class="highlight json"><span class="p">[{</span><span class="w">
-  </span><span class="s2">"_id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"5453874c777a800000766bf1"</span><span class="p">,</span><span class="w">
-  </span><span class="s2">"history"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w">
-    </span><span class="p">{</span><span class="w">
-      </span><span class="s2">"date"</span><span class="p">:</span><span class="w"> </span><span class="s2">"2014-10-31T12:57:48.539Z"</span><span class="p">,</span><span class="w">
-      </span><span class="s2">"id_user"</span><span class="p">:</span><span class="w"> </span><span class="s2">"5305d1a044dc07e805000003"</span><span class="p">,</span><span class="w">
-      </span><span class="s2">"modification"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
-        </span><span class="s2">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"media1"</span><span class="p">,</span><span class="w">
-        </span><span class="s2">"url"</span><span class="p">:</span><span class="w"> </span><span class="s2">"url_media1"</span><span class="w">
-      </span><span class="p">}</span><span class="w">
-    </span><span class="p">}</span><span class="w">
-  </span><span class="p">],</span><span class="w">
-  </span><span class="s2">"id_corpus"</span><span class="p">:</span><span class="w"> </span><span class="s2">"5453874c777a800000766bf0"</span><span class="p">,</span><span class="w">
-  </span><span class="s2">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"media1"</span><span class="p">,</span><span class="w">
-  </span><span class="s2">"url"</span><span class="p">:</span><span class="w"> </span><span class="s2">"url_media1"</span><span class="w">
-</span><span class="p">},</span><span class="w">
-</span><span class="err">...</span><span class="w">
-</span><span class="p">]</span><span class="w">
-</span></pre>
-
-<h4 id="http-request">HTTP request</h4>
-
-<p><code class="prettyprint">POST http://example.com/corpus/&lt;id_corpus&gt;/medias</code></p>
-
-<h4 id="query-parameters">QUERY PARAMETERS</h4>
-
-<table><thead>
-<tr>
-<th>Parameter</th>
-<th>Type</th>
-<th>Description</th>
-</tr>
-</thead><tbody>
-<tr>
-<td>id_corpus</td>
-<td>String</td>
-<td>The corpus identifier  (required)</td>
-</tr>
-<tr>
-<td>media_list</td>
-<td>list</td>
-<td>list of media to add</td>
 </tr>
 <tr>
 <td>name</td>
@@ -1407,7 +1342,7 @@
 <p><aside class="notice">Restriction: user/group rights is &lsquo;O&rsquo; for this corpus</aside></p>
 
 <p><aside class="warning">User rights exceeds group rights</aside></p>
-<pre class="highlight shell">curl -i -X PUT http://example.com/corpus/&lt;id_corpus&gt;/user/&lt;id_user&gt; --data <span class="s1">'{"Right":&lt;right&gt;}'</span> -H <span class="s2">"Content-Type: application/json"</span> --cookie <span class="s2">"cookies.txt"</span>
+<pre class="highlight shell">curl -i -X PUT http://example.com/corpus/&lt;id_corpus&gt;/user/&lt;id_user&gt; --data <span class="s1">'{"right":&lt;right&gt;}'</span> -H <span class="s2">"Content-Type: application/json"</span> --cookie <span class="s2">"cookies.txt"</span>
 </pre>
 <pre class="highlight javascript"></pre>
 <pre class="highlight python"><span class="n">user_client</span><span class="o">.</span><span class="n">update_user_ACL_of_a_corpus</span><span class="p">(</span><span class="o">&lt;</span><span class="n">id_corpus</span><span class="o">&gt;</span><span class="p">,</span> <span class="o">&lt;</span><span class="n">id_user</span><span class="o">&gt;</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
@@ -1448,7 +1383,7 @@
 <td>The user identifier  (required)</td>
 </tr>
 <tr>
-<td>Right</td>
+<td>right</td>
 <td>String</td>
 <td>&lsquo;O&rsquo; for Owner, &lsquo;W&rsquo; for Writter, &lsquo;R&rsquo; for Reader (required)</td>
 </tr>
@@ -1457,7 +1392,7 @@
 <h2 id="update-group-acl-of-a-corpus">update group ACL of a corpus</h2>
 
 <p><aside class="notice">Restriction: user/group rights is &lsquo;O&rsquo; for this corpus</aside></p>
-<pre class="highlight shell">curl -i -X PUT http://example.com/corpus/&lt;id_corpus&gt;/group/&lt;id_group&gt; --data <span class="s1">'{"Right":&lt;right&gt;}'</span> -H <span class="s2">"Content-Type: application/json"</span> --cookie <span class="s2">"cookies.txt"</span>
+<pre class="highlight shell">curl -i -X PUT http://example.com/corpus/&lt;id_corpus&gt;/group/&lt;id_group&gt; --data <span class="s1">'{"right":&lt;right&gt;}'</span> -H <span class="s2">"Content-Type: application/json"</span> --cookie <span class="s2">"cookies.txt"</span>
 </pre>
 <pre class="highlight javascript"></pre>
 <pre class="highlight python"><span class="n">user_client</span><span class="o">.</span><span class="n">update_group_ACL_of_a_corpus</span><span class="p">(</span><span class="o">&lt;</span><span class="n">id_corpus</span><span class="o">&gt;</span><span class="p">,</span> <span class="o">&lt;</span><span class="n">id_group</span><span class="o">&gt;</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
@@ -1501,7 +1436,7 @@
 <td>The user identifier  (required)</td>
 </tr>
 <tr>
-<td>Right</td>
+<td>right</td>
 <td>String</td>
 <td>&lsquo;O&rsquo; for Owner, &lsquo;W&rsquo; for Writter, &lsquo;R&rsquo; for Reader (required)</td>
 </tr>
@@ -2111,6 +2046,8 @@
 <h2 id="delete-a-layer">Delete a layer</h2>
 
 <p><aside class="notice">Restriction: user/group rights is &lsquo;O&rsquo; for the layer</aside></p>
+
+<p><aside class="warning">This request also delete annotations inside the layer</aside></p>
 <pre class="highlight shell">curl -i -X DELETE http://example.com/layer/&lt;id_layer&gt; -H <span class="s2">"Content-Type: application/json"</span> --cookie <span class="s2">"cookies.txt"</span>
 
 </pre>
@@ -2417,7 +2354,7 @@
 <p><aside class="notice">Restriction: user/group rights is &lsquo;O&rsquo; for the layer</aside></p>
 
 <p><aside class="warning">User rights exceeds group rights</aside></p>
-<pre class="highlight shell">curl -i -X PUT http://example.com/layer/&lt;id_layer&gt;/user/&lt;id_user&gt; --data <span class="s1">'{"Right":&lt;right&gt;}'</span> -H <span class="s2">"Content-Type: application/json"</span> --cookie <span class="s2">"cookies.txt"</span>
+<pre class="highlight shell">curl -i -X PUT http://example.com/layer/&lt;id_layer&gt;/user/&lt;id_user&gt; --data <span class="s1">'{"right":&lt;right&gt;}'</span> -H <span class="s2">"Content-Type: application/json"</span> --cookie <span class="s2">"cookies.txt"</span>
 </pre>
 <pre class="highlight javascript"></pre>
 <pre class="highlight python"><span class="n">user_client</span><span class="o">.</span><span class="n">update_user_ACL_of_a_layer</span><span class="p">(</span><span class="o">&lt;</span><span class="n">id_layer</span><span class="o">&gt;</span><span class="p">,</span> <span class="o">&lt;</span><span class="n">id_user</span><span class="o">&gt;</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
@@ -2458,7 +2395,7 @@
 <td>The user identifier  (required)</td>
 </tr>
 <tr>
-<td>Right</td>
+<td>right</td>
 <td>String</td>
 <td>&lsquo;O&rsquo; for Owner, &lsquo;W&rsquo; for Writter, &lsquo;R&rsquo; for Reader (required)</td>
 </tr>
@@ -2467,7 +2404,7 @@
 <h2 id="update-group-acl-of-a-layer">update group ACL of a layer</h2>
 
 <p><aside class="notice">Restriction: user/group rights is &lsquo;O&rsquo; for the layer</aside></p>
-<pre class="highlight shell">curl -i -X PUT http://example.com/layer/&lt;id_layer&gt;/group/&lt;id_group&gt; --data <span class="s1">'{"Right":&lt;right&gt;}'</span> -H <span class="s2">"Content-Type: application/json"</span> --cookie <span class="s2">"cookies.txt"</span>
+<pre class="highlight shell">curl -i -X PUT http://example.com/layer/&lt;id_layer&gt;/group/&lt;id_group&gt; --data <span class="s1">'{"right":&lt;right&gt;}'</span> -H <span class="s2">"Content-Type: application/json"</span> --cookie <span class="s2">"cookies.txt"</span>
 </pre>
 <pre class="highlight javascript"></pre>
 <pre class="highlight python"><span class="n">user_client</span><span class="o">.</span><span class="n">update_group_ACL_of_a_layer</span><span class="p">(</span><span class="o">&lt;</span><span class="n">id_layer</span><span class="o">&gt;</span><span class="p">,</span> <span class="o">&lt;</span><span class="n">id_group</span><span class="o">&gt;</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
@@ -2511,7 +2448,7 @@
 <td>The user identifier  (required)</td>
 </tr>
 <tr>
-<td>Right</td>
+<td>right</td>
 <td>String</td>
 <td>&lsquo;O&rsquo; for Owner, &lsquo;W&rsquo; for Writter, &lsquo;R&rsquo; for Reader (required)</td>
 </tr>
