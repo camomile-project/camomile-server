@@ -67,13 +67,14 @@ printResUser = function(user, res) {
 exports.create = function (req, res) {
 	var error=null;
 	async.waterfall([
-		function(callback) {											// check the different field
-			if (req.body.username == undefined) 						error="the username is not defined";
-			if (req.body.username == "") 								error="empty string for username is not allowed";
-			if (req.body.password == undefined)							error="the password is not defined";
-			if (req.body.password == "") 								error="empty password for username is not allowed";
-			if (req.body.role == undefined) 							error="the role is not defined";
-			if (req.body.role != 'admin' && req.body.role != 'user')	error="the role must be 'user' or 'admin'";	
+		function(callback) {												// check the different field
+			if (req.body.username == undefined) 							error = "the username is not defined";
+			else if (req.body.username == "") 								error = "empty string for username is not allowed";
+			else if (req.body.username.indexOf(' ') >= 0)					error = "White space are not allowed in user name";
+			else if (req.body.password == undefined)						error = "the password is not defined";
+			else if (req.body.password == "") 								error = "empty password for username is not allowed";
+			else if (req.body.role == undefined) 							error = "the role is not defined";
+			else if (req.body.role != 'admin' && req.body.role != 'user')	error = "the role must be 'user' or 'admin'";
 			callback(error);
 		},
 		function(callback) {											// check if the username is not already used (username must be unique)
@@ -104,7 +105,7 @@ exports.create = function (req, res) {
 }
 
 // retrieve all users and print _id, username, role and description
-exports.getAll = function (req, res) {	
+exports.getAll = function (req, res) {
 	User.find({}, 'username role description', function (error, users) {
     	if (error) res.status(400).json({error:"error", message:error});
     	if (users) res.status(200).json(users);
