@@ -196,40 +196,22 @@ exports.remove = function (req, res) {
 		function(callback) {											// check if there is no layer with annotation into the corpus
 			Layer.find({id_corpus:req.params.id_corpus}, function(error, layers){
 				if (layers.length>0) {
-					if (req.session.user.username === "root"){
-						for (i = 0; i < layers.length; i++) Annotation.remove({id_layer : layers[i]._id}, function (error, annotations) {
-							callback(error);
-						});
-					}
+					for (i = 0; i < layers.length; i++) Annotation.remove({id_layer : layers[i]._id}, function (error, annotations) {
+						callback(error);
+					});
 				}
 				callback(null);		
     		});
 		},
 		function(callback) {											// check if there is no layer into the media
-			if (req.session.user.username === "root") {
-				Layer.remove({id_corpus:req.params.id_corpus}, function (error, layers) {
-					callback(error);
-				});				
-			}
-			else {
-				Layer.find({id_corpus:req.params.id_corpus}, function(error, layers){
-					if (layers.medias>0) callback("The corpus is not empty (one or more layers are remaining)");
-					callback(error);
-				});
-			}
+			Layer.remove({id_corpus:req.params.id_corpus}, function (error, layers) {
+				callback(error);
+			});				
 		},			
 		function(callback) {											// check if there is no layer into the media
-			if (req.session.user.username === "root") {
-				Media.remove({id_corpus:req.params.id_corpus}, function (error, media) {
-					callback(error);
-				});				
-			}
-			else {
-				Media.find({id_corpus:req.params.id_corpus}, function(error, medias){
-					if (medias.length>0) error = "The corpus is not empty (one or more media are remaining)";
-					callback(error);
-				});
-			}
+			Media.remove({id_corpus:req.params.id_corpus}, function (error, media) {
+				callback(error);
+			});				
 		},	
 		function(callback) {											// remove the corpus
 			Corpus.remove({_id : req.params.id_corpus}, function (error, corpus) {

@@ -126,25 +126,14 @@ exports.remove = function (req, res) {
 exports.remove = function (req, res) {
 	async.waterfall([
 		function(callback) {											// check if there is no annotation into the corpus
-			if (req.session.user.username === "root"){
-				Annotation.remove({id_layer : req.params.id_layer}, function (error, annotations) {
-					callback(error);	
-				});
-			}
-			else callback(null);		
+			Annotation.remove({id_layer : req.params.id_layer}, function (error, annotations) {
+				callback(error);	
+			});
 		},
 		function(callback) {											// check if there is no annotation into the media
-			if (req.session.user.username === "root") {
-				Layer.remove({_id : req.params.id_layer}, function (error, layers) {
-					callback(error);	
-				});
-			}
-			else {
-				Annotation.find({id_layer:req.params.id_layer}, function(error, annotations){
-					if (annotations.length>0) error = "layer is not empty (one or more annotations are remaining)";
-					callback(error);
-				});
-			}
+			Layer.remove({_id : req.params.id_layer}, function (error, layers) {
+				callback(error);	
+			});
 		},			
 	], function (error, trueOrFalse) {
 		if (error) res.status(400).json({message:error});
