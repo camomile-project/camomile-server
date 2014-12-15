@@ -1,4 +1,4 @@
-### Version 0.3 (2014-12-12)
+### Version 0.3.1 (2014-12-15)
 
   - bug fix release
 

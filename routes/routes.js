@@ -52,7 +52,7 @@ exports.initialize = function(app){
 	app.get('/me', session.islogin,
 				   session.me);
 
-	// --- tooles routes --- \\
+	// --- tools routes --- \\
 	// GET /date --cookie-jar "cookies.txt"
 	app.get('/date', session.islogin,
 				     commonFuncs.date);

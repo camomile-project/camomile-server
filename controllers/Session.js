@@ -55,7 +55,7 @@ hash = function (pwd, salt, fn) {
 authenticateElem = function(name, pass, fn) {
     User.findOne({username: name}, function (error, user) {							// find the first user with username
        	if (user) {
-           	if (error)  return fn(new Error('could not find user'));
+           	if (error)  return fn(new Error('could not find this user'));
            	hash(pass, user.salt, function (error2, hash) {							// ask the hash for this user
 				if (error2) return fn(error2);
             	if (hash == user.hash) return fn(null, user);						// check if the 2 hash correspond
@@ -68,7 +68,7 @@ authenticateElem = function(name, pass, fn) {
 
 // login
 exports.login = function (req, res) {
-	if (req.body.username == undefined || req.body.password == undefined) res.status(400).json({error:"authentication failed, username or password are not define"});
+	if (req.body.username == undefined || req.body.password == undefined) res.status(400).json({error:"authentication failed, username or password are not defined"});
 	else {
 		authenticateElem(req.body.username, req.body.password, function (error, user) {
 			if (user) {

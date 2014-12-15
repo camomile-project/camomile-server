@@ -37,7 +37,7 @@ var	Queue = require('../models/Queue');
 exports.exist = function(req, res, next) {
 	Layer.findById(req.params.id_layer, function(error, layer){
 		if (error) res.status(400).json(error);
-		else if (!layer) res.status(400).json({message:"id_layer don't exists"});
+		else if (!layer) res.status(400).json({message:"The layer doesn't exists"});
 		else next();
 	});
 }
@@ -117,7 +117,7 @@ exports.getAll = function (req, res) {
 // remove a given layer
 exports.remove = function (req, res) {
 	Layer.remove({_id : req.params.id_layer}, function (error, layer) {
-		if (!error && layer == 1) res.status(200).json({message:"The layer as been delete"});
+		if (!error && layer == 1) res.status(200).json({message:"The layer has been deleted"});
 		else res.status(400).json({message:error});
 	});
 }
@@ -141,14 +141,14 @@ exports.remove = function (req, res) {
 			}
 			else {
 				Annotation.find({id_layer:req.params.id_layer}, function(error, annotations){
-					if (annotations.length>0) error = "layer is not empty (one or more annotations is remaining)";
+					if (annotations.length>0) error = "layer is not empty (one or more annotations are remaining)";
 					callback(error);
 				});
 			}
 		},			
 	], function (error, trueOrFalse) {
 		if (error) res.status(400).json({message:error});
-		else res.status(200).json({message:"The layer as been delete"});
+		else res.status(200).json({message:"The layer has been deleted"});
 	});
 }
 
@@ -220,8 +220,8 @@ exports.removeUserFromACL = function(req, res){
 	Layer.findById(req.params.id_layer, function(error, layer){			// find the layer
 		if (error) res.status(400).json({message:error});
 		var update = {ACL:layer.ACL};	
-		if (!update.ACL.users || update.ACL.users==null) res.status(400).json({message:req.params.id_user+" not in ACL.users"}); 
-		else if (!update.ACL.users[req.params.id_user]) res.status(400).json({message:req.params.id_user+" not in ACL.users"}); 
+		if (!update.ACL.users || update.ACL.users==null) res.status(404).json({message:req.params.id_user+" is not in ACL.users"}); 
+		else if (!update.ACL.users[req.params.id_user]) res.status(404).json({message:req.params.id_user+" is not in ACL.users"}); 
 		else {
 			delete update.ACL.users[req.params.id_user];				// delete the user from ACL
 			if (Object.getOwnPropertyNames(update.ACL.users).length === 0) update.ACL.users = undefined;
@@ -238,8 +238,8 @@ exports.removeGroupFromACL = function(req, res){
 	Layer.findById(req.params.id_layer, function(error, layer){			// find the layer
 		if (error) res.status(400).json({message:error});
 		var update = {ACL:layer.ACL};	
-		if (!update.ACL.groups || update.ACL.groups==null) res.status(400).json({message:req.params.id_group+" not in ACL.groups"}); 
-		else if (!update.ACL.groups[req.params.id_group]) res.status(400).json({message:req.params.id_group+" not in ACL.groups"}); 
+		if (!update.ACL.groups || update.ACL.groups==null) res.status(404).json({message:req.params.id_group+" is not in ACL.groups"}); 
+		else if (!update.ACL.groups[req.params.id_group]) res.status(404).json({message:req.params.id_group+" is not in ACL.groups"}); 
 		else {
 			delete update.ACL.groups[req.params.id_group];				// delete the group from ACL
 			if (Object.getOwnPropertyNames(update.ACL.groups).length === 0) update.ACL.groups = undefined;
@@ -286,7 +286,7 @@ exports.addAnnotation = function(req, res){
 function find_id_media(media_name, callback) {
 	Media.findOne({"name":media_name}, function(error, media){
 		if (media) callback(error, media._id);
-		else callback("media '"+media_name+"' not found in the db", undefined);
+		else callback("media '"+media_name+"' is not found in the db", undefined);
 	});
 };
 
@@ -294,10 +294,10 @@ function find_id_media(media_name, callback) {
 exports.addAnnotations = function(req, res){
 	async.waterfall([
 		function(callback) {											// check field
-			if (req.body.annotation_list == undefined) callback("the list of annotations is not define");
-			if (req.body.annotation_list.length == 0)  callback("the list of annotations is empty");				
+			if (req.body.annotation_list == undefined) callback("The list of annotations is not defined");
+			if (req.body.annotation_list.length == 0)  callback("The list of annotations is empty");				
 			for (var i = 0; i < req.body.annotation_list.length; i++) { 
-				if (!req.body.annotation_list[i].media_name && !req.body.annotation_list[i].id_media )  callback("media_name or id_media is not define for an annotation");
+				if (!req.body.annotation_list[i].media_name && !req.body.annotation_list[i].id_media )  callback("media_name or id_media is not defined for one annotation");
 			}
 			callback(null);
 		},        

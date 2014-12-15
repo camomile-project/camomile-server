@@ -48,7 +48,7 @@ exports.currentUserIsroot = function(req, res, next) {
 exports.exist = function(req, res, next) {
 	User.findById(req.params.id_user, function(error, user){
 		if (error) res.status(400).json(error);
-		else if (!user) res.status(400).json({message:"id_user don't exists"});
+		else if (!user) res.status(400).json({message:"id_user doesn't exists"});
 		else next();
 	});
 }
@@ -68,11 +68,11 @@ exports.create = function (req, res) {
 	var error=null;
 	async.waterfall([
 		function(callback) {											// check the different field
-			if (req.body.username == undefined) 						error="the username is not define";
-			if (req.body.username == "") 								error="empty string for username is not allow";
-			if (req.body.password == undefined)							error="the password is not define";
-			if (req.body.password == "") 								error="empty password for username is not allow";
-			if (req.body.role == undefined) 							error="the role is not define";
+			if (req.body.username == undefined) 						error="the username is not defined";
+			if (req.body.username == "") 								error="empty string for username is not allowed";
+			if (req.body.password == undefined)							error="the password is not defined";
+			if (req.body.password == "") 								error="empty password for username is not allowed";
+			if (req.body.role == undefined) 							error="the role is not defined";
 			if (req.body.role != 'admin' && req.body.role != 'user')	error="the role must be 'user' or 'admin'";	
 			callback(error);
 		},
@@ -124,7 +124,7 @@ exports.update = function(req, res){
 	var error;
 	async.waterfall([		
 		function(callback) {											// check field
-			if (req.body.password == "") 												error="empty password for username is not allow";
+			if (req.body.password == "") 												error="empty password for username is not allowed";
 			if (req.body.role && req.body.role != 'admin' && req.body.role != 'user')	error="the role must be 'user' or 'admin'";	
 			callback(error);
 		},
@@ -165,7 +165,7 @@ exports.remove  = function(req, res){
 	async.waterfall([	
 		function(callback) {
 			User.findById(req.params.id_user, function(error, user){	// find the user
-				if (user.username == "root") 	error = "can't delete root user"
+				if (user.username == "root") 	error = "You can't delete the root user"
 				callback(error);
 			});
 		},		
@@ -201,7 +201,7 @@ exports.remove  = function(req, res){
 		},		
 		function(callback) {											// delete the user from the db
 			User.remove({_id : req.params.id_user}, function (error, user) {
-				if (!error && user == 1) res.status(200).json({message:"The user as been delete"});
+				if (!error && user == 1) res.status(200).json({message:"The user as been deleted"});
 				callback(error);
 			});
 		},		
