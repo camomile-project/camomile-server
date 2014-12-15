@@ -39,7 +39,7 @@ var	Queue = require('../models/Queue');
 exports.exist = function(req, res, next) {
 	Media.findById(req.params.id_media, function(error, media){
 		if (error) res.status(400).json(error);
-		else if (!media) res.status(400).json({message:"id_media don't exists"});
+		else if (!media) res.status(400).json({message:"id_media doesn't exists"});
 		else next();
 	});
 }
@@ -116,7 +116,7 @@ exports.update = function(req, res){
 // remove a given media
 exports.remove = function (req, res) {
 	Media.remove({_id : req.params.id_media}, function (error, media) {
-		if (!error && media == 1) res.status(200).json({message:"The media as been delete"});
+		if (!error && media == 1) res.status(200).json({message:"The media has been deleted"});
 		else res.status(400).json({message:error});
 	});
 }
@@ -126,7 +126,7 @@ function getVideoWithExtension(req, res, extension) {
 		if (error) res.status(400).json({message:error});
 		else if (media == null) res.status(400).json({message: 'no such id_media!'})
 		else {			
-			if (media.url == undefined) return res.status(404).send({message:'not found the video corresponding to this media'});
+			if (media.url == undefined) return res.status(404).send({message:'The URL of the video for this media is defined'});
 			var filePath = media.url + '.' + extension;
 			filePath = path.join(req.app.get('media'), filePath);
 			res.status(200).sendfile(filePath);

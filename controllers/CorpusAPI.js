@@ -24,6 +24,7 @@ SOFTWARE.
 
 var async = require('async');
 var commonFuncs = require('../controllers/commonFuncs');
+var	layerAPI = require('../controllers/LayerAPI');
 
 var User = require('../models/User');
 var	Group = require('../models/Group');
@@ -38,13 +39,13 @@ exports.create = function(req, res){
 	var error=null;
 	async.waterfall([
 		function(callback) {											// check field
-			if (req.body.name == undefined) error="the name is not define";
-			if (req.body.name == "") 		error="empty string for name is not allow";
-			callback(error);
+			if (req.body.name == undefined) callback("the name is not defined");
+			if (req.body.name == "") 		callback("empty string for name is not allowed");
+			callback(null);
 		},		
 		function(callback) {											// check if the name is not already used (name must be unique)
 			Corpus.count({name: req.body.name}, function (error, count) {	
-				if ((!error) && (count != 0)) error = "the corpus name is already used, choose another name";
+				if ((!error) && (count != 0)) callback("the corpus name is already used, choose another name");
 		        callback(error);
 		    });
 		},
@@ -96,7 +97,7 @@ printMultiRes = function(l_corpus, res) {
 exports.exist = function(req, res, next) {
 	Corpus.findById(req.params.id_corpus, function(error, corpus){
 		if (error) res.status(400).json(error);
-		else if (!corpus) res.status(400).json({message:"id_corpus don't exists"});
+		else if (!corpus) res.status(400).json({message:"The corpus does not exists"});
 		else next();
 	});
 }
@@ -170,7 +171,7 @@ exports.update = function(req, res){
 	var newHistory = {};
 	Corpus.findById(req.params.id_corpus, function(error, corpus){
 		if (req.body.name) {											// check field
-			if (req.body.name == "") res.status(400).json({message:"name can't be empty"});
+			if (req.body.name == "") res.status(400).json({message:"The corpus name can't be empty"});
 			else {
 				corpus.name = req.body.name;
 				newHistory.name = req.body.name;
@@ -201,7 +202,7 @@ exports.remove = function (req, res) {
 						});
 					}
 				}
-				else callback(null);		
+				callback(null);		
     		});
 		},
 		function(callback) {											// check if there is no layer into the media
@@ -212,7 +213,7 @@ exports.remove = function (req, res) {
 			}
 			else {
 				Layer.find({id_corpus:req.params.id_corpus}, function(error, layers){
-					if (layers.medias>0) error = "corpus is not empty (one or more layers is remaining)"
+					if (layers.medias>0) callback("The corpus is not empty (one or more layers are remaining)");
 					callback(error);
 				});
 			}
@@ -225,7 +226,7 @@ exports.remove = function (req, res) {
 			}
 			else {
 				Media.find({id_corpus:req.params.id_corpus}, function(error, medias){
-					if (medias.length>0) error = "corpus is not empty (one or more media is remaining)";
+					if (medias.length>0) error = "The corpus is not empty (one or more media are remaining)";
 					callback(error);
 				});
 			}
@@ -237,7 +238,7 @@ exports.remove = function (req, res) {
 		}
 	], function (error, trueOrFalse) {
 		if (error) res.status(400).json({message:error});
-		else res.status(200).json({message:"The corpus as been delete"});
+		else res.status(200).json({message:"The corpus has been deleted"});
 	});
 }
 
@@ -284,8 +285,8 @@ exports.removeUserFromACL = function(req, res){
 	Corpus.findById(req.params.id_corpus, function(error, corpus){		// find the corpus
 		if (error) res.status(400).json({message:error});
 		var update = {ACL:corpus.ACL};	
-		if (!update.ACL.users || update.ACL.users==null) res.status(400).json({message:req.params.id_user+" not in ACL.users"}); 
-		else if (!update.ACL.users[req.params.id_user]) res.status(400).json({message:req.params.id_user+" not in ACL.users"}); 
+		if (!update.ACL.users || update.ACL.users==null) res.status(404).json({message:req.params.id_user+" is not in ACL.users"}); 
+		else if (!update.ACL.users[req.params.id_user]) res.status(404).json({message:req.params.id_user+" is not in ACL.users"}); 
 		else {
 			delete update.ACL.users[req.params.id_user];				// delete the user from ACL
 			if (Object.getOwnPropertyNames(update.ACL.users).length === 0) update.ACL.users = undefined;
@@ -302,8 +303,8 @@ exports.removeGroupFromACL = function(req, res){
 	Corpus.findById(req.params.id_corpus, function(error, corpus){		// find the corpus
 		if (error) res.status(400).json({message:error});
 		var update = {ACL:corpus.ACL};	
-		if (!update.ACL.groups || update.ACL.groups==null) res.status(400).json({message:req.params.id_group+" not in ACL.groups"}); 
-		else if (!update.ACL.groups[req.params.id_group]) res.status(400).json({message:req.params.id_group+" not in ACL.groups"}); 
+		if (!update.ACL.groups || update.ACL.groups==null) res.status(404).json({message:req.params.id_group+" is not in ACL.groups"}); 
+		else if (!update.ACL.groups[req.params.id_group]) res.status(404).json({message:req.params.id_group+" is not in ACL.groups"}); 
 		else {
 			delete update.ACL.groups[req.params.id_group];				// delete the group from ACL
 			if (Object.getOwnPropertyNames(update.ACL.groups).length === 0) update.ACL.groups = undefined;
@@ -320,13 +321,13 @@ exports.addMedia = function(req, res){
 	var error=null;
 	async.waterfall([
 		function(callback) {											// check field
-			if (req.body.name == undefined) error="the name is not define";
-			if (req.body.name == "") 		error="empty string for name is not allow";
+			if (req.body.name == undefined) callback("The media name is not defined");
+			if (req.body.name == "") 		callback("Empty string for name is not allowed");
 			callback(error);
 		},		
 		function(callback) {											// check if the name is not already used (name must be unique)
 			Media.count({name: req.body.name, id_corpus: req.params.id_corpus}, function (error, count) {	
-				if ((!error) && (count != 0)) error = "the media name is already used, choose another name";
+				if ((!error) && (count != 0)) callback("The name is already used, choose another name");
 		        callback(error);
 		    });
 		},
@@ -358,12 +359,12 @@ exports.addMedias = function(req, res){
 	var error=null;
 	async.waterfall([
 		function(callback) {											// check field
-			if (req.body.media_list == undefined) callback("the list of media is not define");
-			if (req.body.media_list.length == 0)  callback("the list of media is empty");
+			if (req.body.media_list == undefined) callback("The list of media is not define");
+			if (req.body.media_list.length == 0)  callback("The list of media is empty");
 			if (req.body.media_list) {
 				for (var i = 0; i < req.body.media_list.length; i++) { 
-					if (req.body.media_list[i].name == undefined) callback("One media name is not define");
-					if (req.body.media_list[i].name == "") 		  callback("One media name is empty (not allowed for media name)");
+					if (req.body.media_list[i].name == undefined) callback("One name is not defined");
+					if (req.body.media_list[i].name == "") 		  callback("One name is empty (not allowed)");
 				}
 			}
 			callback(null);
@@ -414,7 +415,7 @@ exports.addMedias = function(req, res){
 function find_id_media(media_name, callback) {
 	Media.findOne({"name":media_name}, function(error, media){
 		if (media) callback(error, media._id);
-		else callback("media '"+media_name+"' not found in the db", undefined);
+		else callback("media '"+media_name+"' is not found in the db", undefined);
 	});
 };
 
@@ -422,22 +423,22 @@ function find_id_media(media_name, callback) {
 exports.addLayer = function(req, res){
 	async.waterfall([
 		function(callback) {											// check field
-			if (req.body.name == undefined) 			callback("the name is not define");
-			if (req.body.name == "") 					callback("empty string for name is not allow");
-			if (req.body.fragment_type == undefined) 	callback("the fragment_type is not define");
-			if (req.body.data_type == undefined) 		callback("the data_type is not define");
+			if (req.body.name == undefined) 			callback("The name is not defined");
+			if (req.body.name == "") 					callback("Empty string for name is not allowed");
+			if (req.body.fragment_type == undefined) 	callback("The fragment_type is not defined");
+			if (req.body.data_type == undefined) 		callback("The data_type is not defined");
 			if (req.body.annotations) {
 				for (var i = 0; i < req.body.annotations.length; i++) { 
-					if (!req.body.annotations[i].data) 		  callback("data is not define for an annotation");
-					if (!req.body.annotations[i].fragment) 	  callback("fragment is not define for an annotation");
-					if (!req.body.annotations[i].media_name && !req.body.annotations[i].id_media )  callback("media_name or id_media is not define for an annotation");
+					if (!req.body.annotations[i].data) 		  callback("Data is not defined for one annotation");
+					if (!req.body.annotations[i].fragment) 	  callback("Fragment is not defined for one annotation");
+					if (!req.body.annotations[i].media_name && !req.body.annotations[i].id_media )  callback("media_name or id_media is not defined for one annotation");
 				}
 			}
 			callback(null);
 		},		
 		function(callback) {											// check if the name is not already used (name must be unique)
 			Layer.count({name: req.body.name, id_corpus: req.params.id_corpus}, function (error, count) {	
-				if ((!error) && (count != 0)) error = "the layer name is already used, choose another name";
+				if ((!error) && (count != 0)) error = "the name is already used, choose another name";
 		        callback(error);
 		    });
 		},
@@ -509,7 +510,7 @@ exports.addLayer = function(req, res){
 	});
 };
 
-// retrieve all media of a corpus and where the user logged is 'O' or 'W' or 'R' on the corresponding corpus 
+// retrieve all media of a corpus which the user logged is 'O' or 'W' or 'R' for the corresponding corpus 
 // and print _id, name, id_corpus, description, url and history
 exports.getAllMedia = function(req, res){
 	Media.find({}, function(error, medias){								// fin all media
@@ -523,7 +524,7 @@ exports.getAllMedia = function(req, res){
 	});
 }
 
-// retrieve all layer of a corpus and where the user logged is 'O' or 'W' or 'R' for layer 
+// retrieve all layer of a corpus which the user logged is 'O' or 'W' or 'R' for the layer 
 // and print _id, name, description, id_corpus, fragment_type, data_type, history
 exports.getAllLayer = function (req, res) {
 	async.waterfall([
