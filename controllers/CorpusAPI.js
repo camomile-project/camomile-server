@@ -298,62 +298,25 @@ exports.removeGroupFromACL = function(req, res){
 	});
 }
 
-//add a media
-exports.addMedia = function(req, res){
-	var error=null;
-	async.waterfall([
-		function(callback) {											// check field
-			if (req.body.name == undefined) callback("The media name is not defined");
-			if (req.body.name == "") 		callback("Empty string for name is not allowed");
-			callback(error);
-		},		
-		function(callback) {											// check if the name is not already used (name must be unique)
-			Media.count({name: req.body.name, id_corpus: req.params.id_corpus}, function (error, count) {	
-				if ((!error) && (count != 0)) callback("The name is already used, choose another name");
-		        callback(error);
-		    });
-		},
-		function(callback) {											// create the new media
-			var new_media = {};
-			new_media.name = req.body.name;
-			new_media.description = req.body.description;
-			new_media.url = req.body.url;
-			new_media.id_corpus = req.params.id_corpus;
-			new_media.history = []
-			new_media.history.push({date:new Date(), 
-									id_user:req.session.user._id, 
-									modification:{"name":new_media.name, 
-												  "description":new_media.description, 
-												  "url":new_media.url}
-								   });
-			var media = new Media(new_media).save(function (error, newMedia) {	// save the new media
-				if (newMedia) res.status(200).json(newMedia);
-				callback(error);
-			});			
-		}
-	], function (error) {
-		if (error) res.status(400).json({message:error});
-	});
-};
-
 //add a medias
-exports.addMedias = function(req, res){
-	var error=null;
+exports.addMedia = function(req, res){
+	var l_media = req.body;
+	if (l_media.constructor != Array) l_media = [req.body];
 	async.waterfall([
 		function(callback) {											// check field
-			if (req.body.media_list == undefined) callback("The list of media is not define");
-			if (req.body.media_list.length == 0)  callback("The list of media is empty");
-			if (req.body.media_list) {
-				for (var i = 0; i < req.body.media_list.length; i++) { 
-					if (req.body.media_list[i].name == undefined) callback("One name is not defined");
-					if (req.body.media_list[i].name == "") 		  callback("One name is empty (not allowed)");
+			if (l_media == undefined) callback("The data field is not define");
+			if (l_media.length == 0)  callback("The list of media is empty");
+			if (l_media) {
+				for (var i = 0; i < l_media.length; i++) { 
+					if (l_media[i].name == undefined) 	callback("One name is not defined");
+					if (l_media[i].name == "") 		callback("One name is empty (not allowed)");
 				}
 			}
 			callback(null);
 		},		
         function(callback) {
 			var l_media_name = [];
-			for (var i = 0; i < req.body.media_list.length; i++) l_media_name.push(req.body.media_list[i].name) ;
+			for (var i = 0; i < l_media.length; i++) l_media_name.push(l_media[i].name) ;
 			async.map(l_media_name, 
 					  function(media_name, callback) {
 							Media.count({name: media_name, id_corpus: req.params.id_corpus}, function (error, count) {
@@ -366,7 +329,7 @@ exports.addMedias = function(req, res){
         },
 		function(callback) {											// create the new medias
 			var l_medias = []
-			async.map(req.body.media_list, function(media, callback) {
+			async.map(l_media, function(media, callback) {
 			  		var new_media = {};
 					new_media.name = media.name;
 					new_media.description = media.description;
