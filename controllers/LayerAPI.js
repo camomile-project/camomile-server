@@ -240,51 +240,26 @@ exports.removeGroupFromACL = function(req, res){
 	});
 }
 
-//add a annotation
-exports.addAnnotation = function(req, res){
-	var error=null;
-	async.waterfall([
-		function(callback) {											// check field
-			if (req.body.id_media == undefined) error="an annotation must be link to a id_media";
-			callback(error);
-		},
-		function(callback) {											// create the new annotation
-			var new_annotation = {};
-			new_annotation.fragment = req.body.fragment;
-			new_annotation.data = req.body.data;
-			new_annotation.id_layer = req.params.id_layer;
-			new_annotation.id_media = req.body.id_media;
-			new_annotation.history = []
-			new_annotation.history.push({date:new Date(), 
-										 id_user:req.session.user._id, 
-										 modification:{"fragment":new_annotation.fragment, 
-										 			   "data":new_annotation.data
-										 			  }
-										 });
-			var annotation = new Annotation(new_annotation).save(function (error, newAnnotation) {	// save the new annotation
-				if (newAnnotation) res.status(200).json(newAnnotation);
-				callback(error);
-			});			
-		}
-	], function (error) {
-		if (error) res.status(400).json({message:error});
-	});
-};
-
 //add a multi annotation
-exports.addAnnotations = function(req, res){
+exports.addAnnotation = function(req, res){
+	var l_annotation_req = req.body;
+	var add_one_annotation = false;	
+	if (l_annotation_req.constructor != Array) {
+		l_annotation_req = [req.body];
+		add_one_annotation = true;
+	}
 	async.waterfall([
 		function(callback) {											// check field
-			if (req.body.annotation_list == undefined) callback("The list of annotations is not defined");
-			if (req.body.annotation_list.length == 0)  callback("The list of annotations is empty");				
-			for (var i = 0; i < req.body.annotation_list.length; i++) { 
-				if (!req.body.annotation_list[i].id_media )  callback("id_media is not defined for one annotation");
+			if (l_annotation_req == undefined) callback("The list of annotations is not defined");
+			if (l_annotation_req.length == 0)  callback("The list of annotations is empty");				
+			for (var i = 0; i < l_annotation_req.length; i++) { 
+				if (!l_annotation_req[i].id_media )  callback("id_media is not defined for one annotation");
 			}
 			callback(null);
 		}, 
 		function(callback) {								// create the new annotation			
 			var l_annotation = []
-			async.map(req.body.annotation_list, function(annotation, callback) {
+			async.map(l_annotation_req, function(annotation, callback) {
 					var new_annotation = {};
 					new_annotation.fragment = annotation.fragment;
 					new_annotation.data = annotation.data;
@@ -308,6 +283,7 @@ exports.addAnnotations = function(req, res){
 		}
 	], function (error, l_annotation) {
 		if (error) res.status(400).json({message:error});
+		else if (add_one_annotation) res.status(200).json(l_annotation[0]);
 		else res.status(200).json(l_annotation);
 	});
 };

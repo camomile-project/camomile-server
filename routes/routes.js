@@ -299,18 +299,13 @@ exports.initialize = function(app){
 								   layerAPI.exist,
 								   layerAPI.AllowUser(['O']),
 								   layerAPI.remove);
-	// create an annotation
-	// POST /layer/id_layer/annotation --data '{"fragment":{"start":0, "end":15}, "data":"value", "id_media":""}' 
+
+	// create multi annotation
+	// POST /layer/id_layer/annotation --data '{"annotation_list":[{"fragment":{"start":0, "end":15}, "data":"value", "id_media":""}, ...]}' 
 	app.post('/layer/:id_layer/annotation', session.islogin,
 											layerAPI.exist,
 											layerAPI.AllowUser(['O', 'W']),
 											layerAPI.addAnnotation);
-	// create multi annotation
-	// POST /layer/id_layer/annotation --data '{"annotation_list":[{"fragment":{"start":0, "end":15}, "data":"value", "id_media":""}, ...]}' 
-	app.post('/layer/:id_layer/annotations', session.islogin,
-											 layerAPI.exist,
-											 layerAPI.AllowUser(['O', 'W']),
-											 layerAPI.addAnnotations);
 	// list all annotation of a layer
 	// GET /layer/id_layer/annotation
 	app.get('/layer/:id_layer/annotation', session.islogin,
