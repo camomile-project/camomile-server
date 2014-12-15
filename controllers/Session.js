@@ -73,6 +73,7 @@ exports.login = function (req, res) {
 		authenticateElem(req.body.username, req.body.password, function (error, user) {
 			if (user) {
 				req.session.regenerate(function () {
+
 					req.session.user = user;
 					res.status(200).json({message:"You have been successfully logged in as "+req.body.username}); 
 				});
