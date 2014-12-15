@@ -2083,13 +2083,17 @@ curl -i -X POST http://example.com/corpus/&lt;id_corpus&gt;/media --data <span c
 </tr>
 </tbody></table>
 
-<h2 id="add-an-annotation-into-layer">Add an annotation into layer</h2>
+<h2 id="add-annotation-into-layer">Add annotation into layer</h2>
 
 <p><aside class="notice">Restriction: user/group rights is &lsquo;O&rsquo; or &lsquo;W&rsquo; for the layer</aside></p>
+
+<p>For an annotation {&hellip;} or a list of annotations [{&hellip;}, {&hellip;}]</p>
 <pre class="highlight shell">curl -i -X POST http://example.com/layer/&lt;id_layer&gt;/annotation --data <span class="s1">'{"id_media":&lt;id_media&gt;, "fragment":&lt;fragment&gt;, "data":&lt;data&gt;}'</span> -H <span class="s2">"Content-Type: application/json"</span> --cookie <span class="s2">"cookies.txt"</span> 
+curl -i -X POST http://example.com/layer/&lt;id_layer&gt;/annotation --data <span class="s1">'[{"id_media":&lt;id_media&gt;, "fragment":&lt;fragment&gt;, "data":&lt;data&gt;}, {...}]'</span> -H <span class="s2">"Content-Type: application/json"</span> --cookie <span class="s2">"cookies.txt"</span> 
 </pre>
 <pre class="highlight javascript"></pre>
 <pre class="highlight python"><span class="n">user_client</span><span class="o">.</span><span class="n">add_annotation</span><span class="p">(</span><span class="o">&lt;</span><span class="n">id_layer</span><span class="o">&gt;</span><span class="p">,</span> <span class="p">{</span><span class="s">"id_media"</span><span class="p">:</span><span class="o">&lt;</span><span class="n">id_media</span><span class="o">&gt;</span><span class="p">,</span> <span class="s">"fragment"</span><span class="p">:</span><span class="o">&lt;</span><span class="n">fragment</span><span class="o">&gt;</span><span class="p">,</span> <span class="s">"data"</span><span class="p">:</span><span class="o">&lt;</span><span class="n">data</span><span class="o">&gt;</span><span class="p">})</span>
+<span class="n">user_client</span><span class="o">.</span><span class="n">add_annotation</span><span class="p">(</span><span class="o">&lt;</span><span class="n">id_layer</span><span class="o">&gt;</span><span class="p">,</span> <span class="p">[{</span><span class="s">"id_media"</span><span class="p">:</span><span class="o">&lt;</span><span class="n">id_media</span><span class="o">&gt;</span><span class="p">,</span> <span class="s">"fragment"</span><span class="p">:</span><span class="o">&lt;</span><span class="n">fragment</span><span class="o">&gt;</span><span class="p">,</span> <span class="s">"data"</span><span class="p">:</span><span class="o">&lt;</span><span class="n">data</span><span class="o">&gt;</span><span class="p">},</span> <span class="p">{</span><span class="o">...</span><span class="p">}])</span>
 </pre>
 
 <blockquote>
@@ -2128,75 +2132,6 @@ curl -i -X POST http://example.com/corpus/&lt;id_corpus&gt;/media --data <span c
 </tr>
 </thead><tbody>
 <tr>
-<td>id_media</td>
-<td>String</td>
-<td>The media identifier  (required)</td>
-</tr>
-<tr>
-<td>id_layer</td>
-<td>String</td>
-<td>The layer identifier  (required)</td>
-</tr>
-<tr>
-<td>fragment</td>
-<td>Free</td>
-<td>Fragment (required)</td>
-</tr>
-<tr>
-<td>data</td>
-<td>Free</td>
-<td>Data (required)</td>
-</tr>
-</tbody></table>
-
-<h2 id="add-multiple-annotations-into-layer">Add multiple annotations into layer</h2>
-
-<p><aside class="notice">Restriction: user/group rights is &lsquo;O&rsquo; or &lsquo;W&rsquo; for the layer</aside></p>
-<pre class="highlight shell">curl -i -X POST http://example.com/layer/&lt;id_layer&gt;/annotations --data <span class="s1">'{"annotation_list":[{"id_media":&lt;id_media&gt;, "fragment":&lt;fragment&gt;, "data":&lt;data&gt;}, ...]}'</span> -H <span class="s2">"Content-Type: application/json"</span> --cookie <span class="s2">"cookies.txt"</span> 
-</pre>
-<pre class="highlight javascript"></pre>
-<pre class="highlight python"><span class="n">user_client</span><span class="o">.</span><span class="n">add_annotations</span><span class="p">(</span><span class="o">&lt;</span><span class="n">id_layer</span><span class="o">&gt;</span><span class="p">,</span> <span class="p">{</span><span class="s">"annotation_list"</span><span class="p">:[{</span><span class="s">"id_media"</span><span class="p">:</span><span class="o">&lt;</span><span class="n">id_media</span><span class="o">&gt;</span><span class="p">,</span> <span class="s">"media_name"</span><span class="p">:</span><span class="o">&lt;</span><span class="n">media_name</span><span class="o">&gt;</span><span class="p">,</span> <span class="s">"fragment"</span><span class="p">:</span><span class="o">&lt;</span><span class="n">fragment</span><span class="o">&gt;</span><span class="p">,</span> <span class="s">"data"</span><span class="p">:</span><span class="o">&lt;</span><span class="n">data</span><span class="o">&gt;</span><span class="p">},</span> <span class="o">...</span><span class="p">]})</span>
-</pre>
-
-<blockquote>
-<p>The above command returns JSON structured like this:</p>
-</blockquote>
-<pre class="highlight json"><span class="p">[</span><span class="w">
-</span><span class="p">{</span><span class="w">
-  </span><span class="s2">"_id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"5453978db32f8d9106fb0ffb"</span><span class="p">,</span><span class="w">
-  </span><span class="s2">"data"</span><span class="p">:</span><span class="w"> </span><span class="s2">"data"</span><span class="p">,</span><span class="w">
-  </span><span class="s2">"fragment"</span><span class="p">:</span><span class="w"> </span><span class="s2">"fragment"</span><span class="p">,</span><span class="w">
-  </span><span class="s2">"history"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w">
-    </span><span class="p">{</span><span class="w">
-      </span><span class="s2">"date"</span><span class="p">:</span><span class="w"> </span><span class="s2">"2014-10-31T14:07:09.376Z"</span><span class="p">,</span><span class="w">
-      </span><span class="s2">"id_user"</span><span class="p">:</span><span class="w"> </span><span class="s2">"5305d1a044dc07e805000003"</span><span class="p">,</span><span class="w">
-      </span><span class="s2">"modification"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
-        </span><span class="s2">"data"</span><span class="p">:</span><span class="w"> </span><span class="s2">"data1"</span><span class="p">,</span><span class="w">
-        </span><span class="s2">"fragment"</span><span class="p">:</span><span class="w"> </span><span class="s2">"fragment1"</span><span class="w">
-      </span><span class="p">}</span><span class="w">
-    </span><span class="p">}</span><span class="w">
-  </span><span class="p">],</span><span class="w">
-  </span><span class="s2">"id_layer"</span><span class="p">:</span><span class="w"> </span><span class="s2">"5453978db32f8d9106fb0ffa"</span><span class="p">,</span><span class="w">
-  </span><span class="s2">"id_media"</span><span class="p">:</span><span class="w"> </span><span class="s2">"5453978db32f8d9106fb0ff9"</span><span class="w">
-</span><span class="p">},</span><span class="w">
-</span><span class="err">...</span><span class="w">
-</span><span class="p">]</span><span class="w">
-</span></pre>
-
-<h4 id="http-request">HTTP request</h4>
-
-<p><code class="prettyprint">POST http://example.com/layer/&lt;id_layer&gt;/annotations</code></p>
-
-<h4 id="query-parameters">QUERY PARAMETERS</h4>
-
-<table><thead>
-<tr>
-<th>Parameter</th>
-<th>Type</th>
-<th>Description</th>
-</tr>
-</thead><tbody>
-<tr>
 <td>id_layer</td>
 <td>String</td>
 <td>The layer identifier  (required)</td>
@@ -2209,12 +2144,7 @@ curl -i -X POST http://example.com/corpus/&lt;id_corpus&gt;/media --data <span c
 <tr>
 <td>id_media</td>
 <td>String</td>
-<td>The media identifier (required OR media_name)</td>
-</tr>
-<tr>
-<td>media_name</td>
-<td>String</td>
-<td>The media identifier (required OR id_media)</td>
+<td>The media identifier</td>
 </tr>
 <tr>
 <td>fragment</td>
