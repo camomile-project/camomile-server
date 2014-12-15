@@ -301,7 +301,11 @@ exports.removeGroupFromACL = function(req, res){
 //add a medias
 exports.addMedia = function(req, res){
 	var l_media = req.body;
-	if (l_media.constructor != Array) l_media = [req.body];
+	var adding_one_media = false;
+	if (l_media.constructor != Array) {
+		l_media = [req.body];
+		adding_one_media = true;
+	}
 	async.waterfall([
 		function(callback) {											// check field
 			if (l_media == undefined) callback("The data field is not define");
@@ -353,6 +357,7 @@ exports.addMedia = function(req, res){
 		}
 	], function (error, l_medias) {
 		if (error) res.status(400).json({message:error});
+		else if (adding_one_media) res.status(200).json(l_medias[0]);
 		else res.status(200).json(l_medias);
 	});
 };
