@@ -27,10 +27,7 @@ var http = require('http');
 var cors = require('cors');
 var app = express();
 
-//var bcrypt = require('bcrypt');
-
 var program = require('commander');
-
 var mongoose = require('mongoose');
 var MongoStore = require('connect-mongo')(express);
 
@@ -38,7 +35,6 @@ var userAPI = require('./controllers/UserAPI');
 var User = require('./models/User');
 var routes = require('./routes/routes');
 var Session = require('./controllers/Session');
-
 
 program
     .option('--port <port>', 'Local port to listen to (default: 3000)', parseInt)
@@ -57,7 +53,6 @@ var root_password = program.rootPassword || process.env.ROOT_PASSWORD;
 var media = program.media || process.env.MEDIA || '/media';
 
 mongoose.connect('mongodb://' + mongodb_host + ':' + mongodb_port + '/' + mongodb_name);
-
 
 var cors_options = {
   origin: true,
