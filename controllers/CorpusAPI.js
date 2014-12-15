@@ -252,12 +252,12 @@ exports.getACL = function(req, res){
 
 // update ACL of a user
 exports.updateUserACL = function(req, res){
-	if (req.body.Right != 'O' && req.body.Right != 'W' && req.body.Right != 'R') res.status(400).json({message:"Right must be 'O' or 'W' or 'R'"});
+	if (req.body.right != 'O' && req.body.right != 'W' && req.body.right != 'R') res.status(400).json({message:"right must be 'O' or 'W' or 'R'"});
 	Corpus.findById(req.params.id_corpus, function(error, corpus){		// find the corpus
 		var update = {ACL:corpus.ACL};		
 		if (error) res.status(400).json({message:error});
 		if (!update.ACL.users) update.ACL.users = {};
-		update.ACL.users[req.params.id_user]=req.body.Right;			// update acl
+		update.ACL.users[req.params.id_user]=req.body.right;			// update acl
 		Corpus.findByIdAndUpdate(req.params.id_corpus, update, function (error, newCorpus) {	// save the corpus with the new ACL
 			if (error) res.status(400).json({message:error});
 			else res.status(200).json(newCorpus.ACL);
@@ -267,12 +267,12 @@ exports.updateUserACL = function(req, res){
 
 // update ACL of a group
 exports.updateGroupACL = function(req, res){
-	if (req.body.Right != 'O' && req.body.Right != 'W' && req.body.Right != 'R') res.status(400).json({message:"Right must be 'O' or 'W' or 'R'"});
+	if (req.body.right != 'O' && req.body.right != 'W' && req.body.right != 'R') res.status(400).json({message:"right must be 'O' or 'W' or 'R'"});
 	Corpus.findById(req.params.id_corpus, function(error, corpus){		// find the corpus
 		var update = {ACL:corpus.ACL};		
 		if (error) res.status(400).json({message:error});
 		if (!update.ACL.groups) update.ACL.groups = {};
-		update.ACL.groups[req.params.id_group]=req.body.Right;			// update acl
+		update.ACL.groups[req.params.id_group]=req.body.right;			// update acl
 		Corpus.findByIdAndUpdate(req.params.id_corpus, update, function (error, newCorpus) {	// save the corpus with the new ACL
 			if (error) res.status(400).json({message:error});
 			else res.status(200).json(newCorpus.ACL);

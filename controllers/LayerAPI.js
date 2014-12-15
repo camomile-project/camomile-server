@@ -187,12 +187,12 @@ exports.getACL = function(req, res){
 
 // update ACL of a user
 exports.updateUserACL = function(req, res){
-	if (req.body.Right != 'O' && req.body.Right != 'W' && req.body.Right != 'R') res.status(400).json({message:"Right must be 'O' or 'W' or 'R'"});
+	if (req.body.right != 'O' && req.body.right != 'W' && req.body.right != 'R') res.status(400).json({message:"right must be 'O' or 'W' or 'R'"});
 	Layer.findById(req.params.id_layer, function(error, layer){			// find the layer
 		if (error) res.status(400).json({message:error});
 		var update = {ACL:layer.ACL};	
 		if (!update.ACL.users) update.ACL.users = {};
-		update.ACL.users[req.params.id_user]=req.body.Right;			// udpate acl
+		update.ACL.users[req.params.id_user]=req.body.right;			// udpate acl
 		Layer.findByIdAndUpdate(req.params.id_layer, update, function (error, newLayer) {	// save the layer with the new ACL
 			if (error) res.status(400).json({message:error});
 			else res.status(200).json(newLayer.ACL);
@@ -202,12 +202,12 @@ exports.updateUserACL = function(req, res){
 
 // update ACL of a group
 exports.updateGroupACL = function(req, res){
-	if (req.body.Right != 'O' && req.body.Right != 'W' && req.body.Right != 'R') res.status(400).json({message:"Right must be 'O' or 'W' or 'R'"});
+	if (req.body.right != 'O' && req.body.right != 'W' && req.body.right != 'R') res.status(400).json({message:"right must be 'O' or 'W' or 'R'"});
 	Layer.findById(req.params.id_layer, function(error, layer){			// find the layer
 		if (error) res.status(400).json({message:error});
 		var update = {ACL:layer.ACL};	
 		if (!update.ACL.groups) update.ACL.groups = {};
-		update.ACL.groups[req.params.id_group]=req.body.Right;			// udpate acl
+		update.ACL.groups[req.params.id_group]=req.body.right;			// udpate acl
 		Layer.findByIdAndUpdate(req.params.id_layer, update, function (error, newLayer) {	// save the layer with the new ACL
 			if (error) res.status(400).json({message:error});
 			else res.status(200).json(newLayer.ACL);
