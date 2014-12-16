@@ -186,7 +186,7 @@
 
 <p><code class="prettyprint">POST http://example.com/user</code></p>
 
-<h4 id="query-parameters">QUERY PARAMETERS</h4>
+<h4 id="data-parameters">DATA PARAMETERS</h4>
 
 <table><thead>
 <tr>
@@ -327,6 +327,17 @@
 <td>String</td>
 <td>The user identifier to update  (required)</td>
 </tr>
+</tbody></table>
+
+<h4 id="data-parameters">DATA PARAMETERS</h4>
+
+<table><thead>
+<tr>
+<th>Parameter</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead><tbody>
 <tr>
 <td>password</td>
 <td>String</td>
@@ -462,7 +473,7 @@
 
 <p><code class="prettyprint">POST http://example.com/group</code></p>
 
-<h4 id="query-parameters">QUERY PARAMETERS</h4>
+<h4 id="data-parameters">DATA PARAMETERS</h4>
 
 <table><thead>
 <tr>
@@ -559,7 +570,7 @@
 <pre class="highlight shell">curl -i -X PUT http://example.com/group/&lt;id_group&gt; --data <span class="s1">'{"description":&lt;description&gt;}'</span> -H <span class="s2">"Content-Type: application/json"</span> --cookie <span class="s2">"cookies.txt"</span>
 </pre>
 <pre class="highlight javascript"></pre>
-<pre class="highlight python"><span class="n">user_client</span><span class="o">.</span><span class="n">update_group</span><span class="p">(</span><span class="o">&lt;</span><span class="n">id_group</span><span class="o">&gt;</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
+<pre class="highlight python"><span class="n">user_client</span><span class="o">.</span><span class="n">update_group</span><span class="p">(</span><span class="o">&lt;</span><span class="n">id_group</span><span class="o">&gt;</span><span class="p">,</span> <span class="p">{</span><span class="s">"description"</span><span class="p">:</span><span class="o">&lt;</span><span class="n">description</span><span class="o">&gt;</span><span class="p">})</span>
 </pre>
 
 <blockquote>
@@ -593,6 +604,17 @@
 <td>String</td>
 <td>The group identifier to update (required)</td>
 </tr>
+</tbody></table>
+
+<h4 id="data-parameters">DATA PARAMETERS</h4>
+
+<table><thead>
+<tr>
+<th>Parameter</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead><tbody>
 <tr>
 <td>description</td>
 <td>free</td>
@@ -778,7 +800,7 @@
 
 <p><code class="prettyprint">POST http://example.com/corpus</code></p>
 
-<h4 id="query-parameters">QUERY PARAMETERS</h4>
+<h4 id="data-parameters">DATA PARAMETERS</h4>
 
 <table><thead>
 <tr>
@@ -968,6 +990,17 @@
 <td>String</td>
 <td>The corpus identifier  (required)</td>
 </tr>
+</tbody></table>
+
+<h4 id="data-parameters">DATA PARAMETERS</h4>
+
+<table><thead>
+<tr>
+<th>Parameter</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead><tbody>
 <tr>
 <td>name</td>
 <td>String</td>
@@ -1073,6 +1106,17 @@ curl -i -X POST http://example.com/corpus/&lt;id_corpus&gt;/media --data <span c
 <td>String</td>
 <td>The corpus identifier  (required)</td>
 </tr>
+</tbody></table>
+
+<h4 id="data-parameters">DATA PARAMETERS</h4>
+
+<table><thead>
+<tr>
+<th>Parameter</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead><tbody>
 <tr>
 <td>name</td>
 <td>String</td>
@@ -1147,6 +1191,17 @@ curl -i -X POST http://example.com/corpus/&lt;id_corpus&gt;/media --data <span c
 <td>String</td>
 <td>The corpus identifier  (required)</td>
 </tr>
+</tbody></table>
+
+<h4 id="data-parameters">DATA PARAMETERS</h4>
+
+<table><thead>
+<tr>
+<th>Parameter</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead><tbody>
 <tr>
 <td>name</td>
 <td>String</td>
@@ -1345,7 +1400,7 @@ curl -i -X POST http://example.com/corpus/&lt;id_corpus&gt;/media --data <span c
 <pre class="highlight shell">curl -i -X PUT http://example.com/corpus/&lt;id_corpus&gt;/user/&lt;id_user&gt; --data <span class="s1">'{"right":&lt;right&gt;}'</span> -H <span class="s2">"Content-Type: application/json"</span> --cookie <span class="s2">"cookies.txt"</span>
 </pre>
 <pre class="highlight javascript"></pre>
-<pre class="highlight python"><span class="n">user_client</span><span class="o">.</span><span class="n">update_user_ACL_of_a_corpus</span><span class="p">(</span><span class="o">&lt;</span><span class="n">id_corpus</span><span class="o">&gt;</span><span class="p">,</span> <span class="o">&lt;</span><span class="n">id_user</span><span class="o">&gt;</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
+<pre class="highlight python"><span class="n">user_client</span><span class="o">.</span><span class="n">update_user_ACL_of_a_corpus</span><span class="p">(</span><span class="o">&lt;</span><span class="n">id_corpus</span><span class="o">&gt;</span><span class="p">,</span> <span class="o">&lt;</span><span class="n">id_user</span><span class="o">&gt;</span><span class="p">,</span> <span class="p">{</span><span class="s">"right"</span><span class="p">:</span><span class="o">&lt;</span><span class="n">right</span><span class="o">&gt;</span><span class="p">})</span>
 </pre>
 
 <blockquote>
@@ -1382,6 +1437,17 @@ curl -i -X POST http://example.com/corpus/&lt;id_corpus&gt;/media --data <span c
 <td>String</td>
 <td>The user identifier  (required)</td>
 </tr>
+</tbody></table>
+
+<h4 id="data-parameters">DATA PARAMETERS</h4>
+
+<table><thead>
+<tr>
+<th>Parameter</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead><tbody>
 <tr>
 <td>right</td>
 <td>String</td>
@@ -1395,7 +1461,7 @@ curl -i -X POST http://example.com/corpus/&lt;id_corpus&gt;/media --data <span c
 <pre class="highlight shell">curl -i -X PUT http://example.com/corpus/&lt;id_corpus&gt;/group/&lt;id_group&gt; --data <span class="s1">'{"right":&lt;right&gt;}'</span> -H <span class="s2">"Content-Type: application/json"</span> --cookie <span class="s2">"cookies.txt"</span>
 </pre>
 <pre class="highlight javascript"></pre>
-<pre class="highlight python"><span class="n">user_client</span><span class="o">.</span><span class="n">update_group_ACL_of_a_corpus</span><span class="p">(</span><span class="o">&lt;</span><span class="n">id_corpus</span><span class="o">&gt;</span><span class="p">,</span> <span class="o">&lt;</span><span class="n">id_group</span><span class="o">&gt;</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
+<pre class="highlight python"><span class="n">user_client</span><span class="o">.</span><span class="n">update_group_ACL_of_a_corpus</span><span class="p">(</span><span class="o">&lt;</span><span class="n">id_corpus</span><span class="o">&gt;</span><span class="p">,</span> <span class="o">&lt;</span><span class="n">id_group</span><span class="o">&gt;</span><span class="p">,</span> <span class="p">{</span><span class="s">"right"</span><span class="p">:</span><span class="o">&lt;</span><span class="n">right</span><span class="o">&gt;</span><span class="p">})</span>
 </pre>
 
 <blockquote>
@@ -1435,12 +1501,12 @@ curl -i -X POST http://example.com/corpus/&lt;id_corpus&gt;/media --data <span c
 <td>String</td>
 <td>The user identifier  (required)</td>
 </tr>
-<tr>
-<td>right</td>
-<td>String</td>
-<td>&lsquo;O&rsquo; for Owner, &lsquo;W&rsquo; for Writter, &lsquo;R&rsquo; for Reader (required)</td>
-</tr>
 </tbody></table>
+
+<h4 id="data-parameters">DATA PARAMETERS</h4>
+
+<p>Parameter        | Type      | Description
+right            | String    | &lsquo;O&rsquo; for Owner, &lsquo;W&rsquo; for Writter, &lsquo;R&rsquo; for Reader (required)</p>
 
 <h2 id="remove-user-from-acl-of-a-corpus">remove user from ACL of a corpus</h2>
 
@@ -1640,7 +1706,7 @@ curl -i -X POST http://example.com/corpus/&lt;id_corpus&gt;/media --data <span c
 <pre class="highlight shell">curl -i -X PUT http://example.com/media/&lt;id_media&gt; --data <span class="s1">'{"name":&lt;name&gt;, "url":&lt;url&gt;, "description":&lt;description&gt;}'</span> -H <span class="s2">"Content-Type: application/json"</span> --cookie <span class="s2">"cookies.txt"</span>
 </pre>
 <pre class="highlight javascript"></pre>
-<pre class="highlight python"><span class="n">user_client</span><span class="o">.</span><span class="n">update_media</span><span class="p">(</span><span class="o">&lt;</span><span class="n">id_media</span><span class="o">&gt;</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
+<pre class="highlight python"><span class="n">user_client</span><span class="o">.</span><span class="n">update_media</span><span class="p">(</span><span class="o">&lt;</span><span class="n">id_media</span><span class="o">&gt;</span><span class="p">,</span> <span class="p">{</span><span class="s">"name"</span><span class="p">:</span><span class="o">&lt;</span><span class="n">name</span><span class="o">&gt;</span><span class="p">,</span> <span class="s">"url"</span><span class="p">:</span><span class="o">&lt;</span><span class="n">url</span><span class="o">&gt;</span><span class="p">,</span> <span class="s">"description"</span><span class="p">:</span><span class="o">&lt;</span><span class="n">description</span><span class="o">&gt;</span><span class="p">})</span>
 </pre>
 
 <blockquote>
@@ -1695,22 +1761,14 @@ curl -i -X POST http://example.com/corpus/&lt;id_corpus&gt;/media --data <span c
 <td>String</td>
 <td>The media identifier  (required)</td>
 </tr>
-<tr>
-<td>name</td>
-<td>String</td>
-<td>The media name</td>
-</tr>
-<tr>
-<td>url</td>
-<td>String</td>
-<td>Media url</td>
-</tr>
-<tr>
-<td>description</td>
-<td>free</td>
-<td>A description of the media</td>
-</tr>
 </tbody></table>
+
+<h4 id="data-parameters">DATA PARAMETERS</h4>
+
+<p>Parameter        | Type      | Description
+name             | String    | The media name<br>
+url              | String    | Media url
+description      | free      | A description of the media</p>
 
 <h2 id="delete-a-media">Delete a media</h2>
 
@@ -2021,27 +2079,15 @@ curl -i -X POST http://example.com/corpus/&lt;id_corpus&gt;/media --data <span c
 <td>String</td>
 <td>The layer identifier (required)</td>
 </tr>
-<tr>
-<td>name</td>
-<td>String</td>
-<td>Name of the layer</td>
-</tr>
-<tr>
-<td>description</td>
-<td>free</td>
-<td>A description of the layer</td>
-</tr>
-<tr>
-<td>fragment_typ</td>
-<td>String</td>
-<td>The fragment type</td>
-</tr>
-<tr>
-<td>data_typ</td>
-<td>String</td>
-<td>The data type</td>
-</tr>
 </tbody></table>
+
+<h4 id="data-parameters">DATA PARAMETERS</h4>
+
+<p>Parameter        | Type      | Description
+name             | String    | Name of the layer
+description      | free      | A description of the layer
+fragment_typ     | String    | The fragment type
+data_typ         | String    | The data type</p>
 
 <h2 id="delete-a-layer">Delete a layer</h2>
 
@@ -2136,27 +2182,15 @@ curl -i -X POST http://example.com/layer/&lt;id_layer&gt;/annotation --data <spa
 <td>String</td>
 <td>The layer identifier  (required)</td>
 </tr>
-<tr>
-<td>annotation_list</td>
-<td>list</td>
-<td>list of annotation to add</td>
-</tr>
-<tr>
-<td>id_media</td>
-<td>String</td>
-<td>The media identifier</td>
-</tr>
-<tr>
-<td>fragment</td>
-<td>Free</td>
-<td>Fragment (required)</td>
-</tr>
-<tr>
-<td>data</td>
-<td>Free</td>
-<td>Data (required)</td>
-</tr>
 </tbody></table>
+
+<h4 id="data-parameters">DATA PARAMETERS</h4>
+
+<p>Parameter        | Type      | Description
+annotation_list  | list      | list of annotation to add
+id_media         | String    | The media identifier
+fragment         | Free      | Fragment (required)
+data             | Free      | Data (required)</p>
 
 <h2 id="get-list-of-annotations-into-a-layer">Get list of annotations into a layer</h2>
 
@@ -2287,7 +2321,7 @@ curl -i -X POST http://example.com/layer/&lt;id_layer&gt;/annotation --data <spa
 <pre class="highlight shell">curl -i -X PUT http://example.com/layer/&lt;id_layer&gt;/user/&lt;id_user&gt; --data <span class="s1">'{"right":&lt;right&gt;}'</span> -H <span class="s2">"Content-Type: application/json"</span> --cookie <span class="s2">"cookies.txt"</span>
 </pre>
 <pre class="highlight javascript"></pre>
-<pre class="highlight python"><span class="n">user_client</span><span class="o">.</span><span class="n">update_user_ACL_of_a_layer</span><span class="p">(</span><span class="o">&lt;</span><span class="n">id_layer</span><span class="o">&gt;</span><span class="p">,</span> <span class="o">&lt;</span><span class="n">id_user</span><span class="o">&gt;</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
+<pre class="highlight python"><span class="n">user_client</span><span class="o">.</span><span class="n">update_user_ACL_of_a_layer</span><span class="p">(</span><span class="o">&lt;</span><span class="n">id_layer</span><span class="o">&gt;</span><span class="p">,</span> <span class="o">&lt;</span><span class="n">id_user</span><span class="o">&gt;</span><span class="p">,</span> <span class="p">{</span><span class="s">"right"</span><span class="p">:</span><span class="o">&lt;</span><span class="n">right</span><span class="o">&gt;</span><span class="p">})</span>
 </pre>
 
 <blockquote>
@@ -2324,12 +2358,12 @@ curl -i -X POST http://example.com/layer/&lt;id_layer&gt;/annotation --data <spa
 <td>String</td>
 <td>The user identifier  (required)</td>
 </tr>
-<tr>
-<td>right</td>
-<td>String</td>
-<td>&lsquo;O&rsquo; for Owner, &lsquo;W&rsquo; for Writter, &lsquo;R&rsquo; for Reader (required)</td>
-</tr>
 </tbody></table>
+
+<h4 id="data-parameters">DATA PARAMETERS</h4>
+
+<p>Parameter        | Type      | Description
+right            | String    | &lsquo;O&rsquo; for Owner, &lsquo;W&rsquo; for Writter, &lsquo;R&rsquo; for Reader (required)</p>
 
 <h2 id="update-group-acl-of-a-layer">update group ACL of a layer</h2>
 
@@ -2337,7 +2371,7 @@ curl -i -X POST http://example.com/layer/&lt;id_layer&gt;/annotation --data <spa
 <pre class="highlight shell">curl -i -X PUT http://example.com/layer/&lt;id_layer&gt;/group/&lt;id_group&gt; --data <span class="s1">'{"right":&lt;right&gt;}'</span> -H <span class="s2">"Content-Type: application/json"</span> --cookie <span class="s2">"cookies.txt"</span>
 </pre>
 <pre class="highlight javascript"></pre>
-<pre class="highlight python"><span class="n">user_client</span><span class="o">.</span><span class="n">update_group_ACL_of_a_layer</span><span class="p">(</span><span class="o">&lt;</span><span class="n">id_layer</span><span class="o">&gt;</span><span class="p">,</span> <span class="o">&lt;</span><span class="n">id_group</span><span class="o">&gt;</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
+<pre class="highlight python"><span class="n">user_client</span><span class="o">.</span><span class="n">update_group_ACL_of_a_layer</span><span class="p">(</span><span class="o">&lt;</span><span class="n">id_layer</span><span class="o">&gt;</span><span class="p">,</span> <span class="o">&lt;</span><span class="n">id_group</span><span class="o">&gt;</span><span class="p">,</span> <span class="p">{</span><span class="s">"right"</span><span class="p">:</span><span class="o">&lt;</span><span class="n">right</span><span class="o">&gt;</span><span class="p">})</span>
 </pre>
 
 <blockquote>
@@ -2377,12 +2411,12 @@ curl -i -X POST http://example.com/layer/&lt;id_layer&gt;/annotation --data <spa
 <td>String</td>
 <td>The user identifier  (required)</td>
 </tr>
-<tr>
-<td>right</td>
-<td>String</td>
-<td>&lsquo;O&rsquo; for Owner, &lsquo;W&rsquo; for Writter, &lsquo;R&rsquo; for Reader (required)</td>
-</tr>
 </tbody></table>
+
+<h4 id="data-parameters">DATA PARAMETERS</h4>
+
+<p>Parameter        | Type      | Description
+right            | String    | &lsquo;O&rsquo; for Owner, &lsquo;W&rsquo; for Writter, &lsquo;R&rsquo; for Reader (required)</p>
 
 <h2 id="remove-user-from-acl-of-a-layer">remove user from ACL of a layer</h2>
 
@@ -2639,17 +2673,13 @@ curl -i -X POST http://example.com/layer/&lt;id_layer&gt;/annotation --data <spa
 <td>String</td>
 <td>The media identifier  (required)</td>
 </tr>
-<tr>
-<td>fragment</td>
-<td>Free</td>
-<td>Fragment</td>
-</tr>
-<tr>
-<td>data</td>
-<td>Free</td>
-<td>Data</td>
-</tr>
 </tbody></table>
+
+<h4 id="data-parameters">DATA PARAMETERS</h4>
+
+<p>Parameter        | Type      | Description
+fragment         | Free      | Fragment
+data             | Free      | Data</p>
 
 <h2 id="delete-an-annotation">Delete an annotation</h2>
 
@@ -2716,7 +2746,7 @@ curl -i -X POST http://example.com/layer/&lt;id_layer&gt;/annotation --data <spa
 
 <p><code class="prettyprint">POST http://example.com/queue</code></p>
 
-<h4 id="query-parameters">QUERY PARAMETERS</h4>
+<h4 id="data-parameters">DATA PARAMETERS</h4>
 
 <table><thead>
 <tr>
@@ -2859,22 +2889,14 @@ curl -i -X POST http://example.com/layer/&lt;id_layer&gt;/annotation --data <spa
 <td>String</td>
 <td>The queue identifier (required)</td>
 </tr>
-<tr>
-<td>name</td>
-<td>String</td>
-<td>The queue name</td>
-</tr>
-<tr>
-<td>description</td>
-<td>free</td>
-<td>A description of the media</td>
-</tr>
-<tr>
-<td>list</td>
-<td>list</td>
-<td>queue contain</td>
-</tr>
 </tbody></table>
+
+<h4 id="data-parameters">DATA PARAMETERS</h4>
+
+<p>Parameter        | Type      | Description
+name               | String     | The queue name
+description        | free       | A description of the media
+list               | list       | queue contain</p>
 
 <h2 id="push-into-a-queue">Push into a queue</h2>
 
@@ -2923,12 +2945,12 @@ curl -i -X POST http://example.com/layer/&lt;id_layer&gt;/annotation --data <spa
 <td>String</td>
 <td>The queue identifier (required)</td>
 </tr>
-<tr>
-<td>list</td>
-<td>list</td>
-<td>queue contain (required)</td>
-</tr>
 </tbody></table>
+
+<h4 id="data-parameters">DATA PARAMETERS</h4>
+
+<p>Parameter        | Type      | Description
+list               | list       | queue contain (required)</p>
 
 <h2 id="pop-a-queue">Pop a queue</h2>
 
