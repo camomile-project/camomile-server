@@ -81,14 +81,16 @@ printResCorpus = function(corpus, res) {
 }
 
 // for the list of corpus print _id, name, description and history
-printMultiRes = function(l_corpus, res) {
+printMultiRes = function(l_corpus, res, history) {
 	var p = [];
 	for (i = 0; i < l_corpus.length; i++) { 
-		p.push({"_id":l_corpus[i]._id,
+		var corpus = {"_id":l_corpus[i]._id,
 				"name":l_corpus[i].name,
 				"description":l_corpus[i].description,
-				"history":l_corpus[i].history
-		  	   })
+				
+		  	   }
+		if (history== 'ON') corpus["history"] = l_corpus[i].history
+		p.push(corpus)
 	} 
 	res.status(200).json(p);
 }
@@ -148,7 +150,7 @@ exports.getAll = function (req, res) {
     			        	 function(corpus, callback) {
     			          		callback (commonFuncs.checkRightACL(corpus, user, groups, ['O', 'W', 'R']));
     			        	 },
-    			        	 function(results) { printMultiRes(results, res); } 
+    			        	 function(results) { printMultiRes(results, res, req.query.history); } 
     			);	
     			callback(error);		
     		});
@@ -160,7 +162,9 @@ exports.getAll = function (req, res) {
 
 // retrieve a particular corpus with his _id and print _id, name, description and history
 exports.getInfo = function(req, res){
-	Corpus.findById(req.params.id_corpus, '_id name description history', function(error, corpus){
+	var field = '_id name description';
+	if (req.query.history == 'ON') field = '_id name description history';
+	Corpus.findById(req.params.id_corpus, field, function(error, corpus){
 		if (error) res.status(400).json({message:error});
     	else res.status(200).json(corpus);
 	});
@@ -463,7 +467,9 @@ exports.addLayer = function(req, res){
 // retrieve all media of a corpus which the user logged is 'O' or 'W' or 'R' for the corresponding corpus 
 // and print _id, name, id_corpus, description, url and history
 exports.getAllMedia = function(req, res){
-	Media.find({}, function(error, medias){								// fin all media
+	var field = '_id id_corpus name url description';
+	if (req.query.history == 'ON') field = '_id id_corpus name url description history';
+	Media.find({}, field, function(error, medias){								// fin all media
 		async.filter(medias, 											// filter the list with media belong to the corpus
 		        	 function(media, callback) { 
 		        	 	if (media.id_corpus == req.params.id_corpus) callback(true);
@@ -495,7 +501,7 @@ exports.getAllLayer = function (req, res) {
 		        	 			if (layer.id_corpus == req.params.id_corpus && commonFuncs.checkRightACL(layer, user, groups, ['O', 'W', 'R'])) callback(true);
 		        	 			else callback(false);    			        	 	
     			        	 },
-    			        	 function(results) { layerAPI.printMultiRes(results, res); } 
+    			        	 function(results) { layerAPI.printMultiRes(results, res, req.query.history); } 
     			);	
     			callback(error);		
     		});
