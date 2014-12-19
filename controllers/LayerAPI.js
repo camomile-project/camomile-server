@@ -50,7 +50,6 @@ printResLayer = function(layer, res) {
 						  "description":layer.description,
 						  "fragment_type":layer.fragment_type,
 						  "data_type":layer.data_type,
-						  "history":layer.history
 						});
 }
 
@@ -100,8 +99,8 @@ exports.AllowUser = function (list_right){
 
 // retrieve a particular layer with his _id, name, description, fragment_type, data_type and history 
 exports.getInfo = function(req, res){
-	var field = 'name description fragment_type data_type';
-	if (req.query.history == 'ON') field = 'name description history fragment_type data_type';	
+	var field = '_id id_corpus name description fragment_type data_type';
+	if (req.query.history == 'ON') field = '_id id_corpus name description fragment_type data_type history';	
 	Layer.findById(req.params.id_layer, 'name description history fragment_type data_type', function(error, layer){
 		if (error) res.status(400).json({message:error});
     	else res.status(200).json(layer);
@@ -110,9 +109,14 @@ exports.getInfo = function(req, res){
 
 // retrieve all layer
 exports.getAll = function (req, res) {
-	var field = 'name description fragment_type data_type';
-	if (req.query.history == 'ON') field = 'name description history fragment_type data_type';		
-	Layer.find({}, field, function (error, layers) {
+	var field = '_id id_corpus name description fragment_type data_type';
+	if (req.query.history == 'ON') field = '_id id_corpus name description fragment_type data_type history';		
+	var filter = {};
+	if (req.query.id_corpus) 	 filter['id_corpus'] 	 = req.query.id_corpus;	
+	if (req.query.name) 	     filter['name'] 	 	 = req.query.name;	
+	if (req.query.fragment_type) filter['fragment_type'] = req.query.fragment_type;	
+	if (req.query.data_type) 	 filter['data_type'] 	 = req.query.data_type;		
+	Layer.find(filter, field, function (error, layers) {
     	if (error) res.status(400).json({error:"error", message:error});
     	if (layers) res.status(200).json(layers);
 		else res.status(200).json([]);
@@ -296,10 +300,12 @@ exports.addAnnotation = function(req, res){
 // retrieve all annotation of a layer and where the user logged is 'O' or 'W' or 'R' on the corresponding layer
 // and print _id, id_layer, fragment and data
 exports.getAllAnnotation = function(req, res){
-	var field = 'id_layer id_media fragment data';
-	if (req.query.history == 'ON') field = 'id_layer id_media fragment data history';	
+	var field = '_id id_layer id_media fragment data';
+	if (req.query.history == 'ON') field = '_id id_layer id_media fragment data history';	
 	var filter = {'id_layer': req.params.id_layer};
-	if (req.query.media) filter['id_media'] = req.query.media;
+	if (req.query.id_media) filter['id_media'] = req.query.id_media;
+	if (req.query.fragment) filter['fragment'] = req.query.fragment;
+	if (req.query.data) 	filter['data'] 	   = req.query.data;
 	Annotation.find(filter, field, function(error, annotations){
 		if (error) res.status(400).json(error);
 		else res.status(200).json(annotations);

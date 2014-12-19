@@ -76,7 +76,6 @@ printResCorpus = function(corpus, res) {
 	res.status(200).json({"_id":corpus._id,
 			 			  "name":corpus.name,
 						  "description":corpus.description,
-						  "history":corpus.history
 						 });
 }
 
@@ -85,10 +84,9 @@ printMultiRes = function(l_corpus, res, history) {
 	var p = [];
 	for (i = 0; i < l_corpus.length; i++) { 
 		var corpus = {"_id":l_corpus[i]._id,
-				"name":l_corpus[i].name,
-				"description":l_corpus[i].description,
-				
-		  	   }
+					  "name":l_corpus[i].name,
+					  "description":l_corpus[i].description,
+		  	   		 }
 		if (history== 'ON') corpus["history"] = l_corpus[i].history
 		p.push(corpus)
 	} 
@@ -133,6 +131,8 @@ exports.AllowUser = function (list_right){
 
 // retrieve all corpus where the user logged is 'O' or 'W' or 'R' and print _id, name, description and history
 exports.getAll = function (req, res) {
+	var filter = {};
+	if (req.query.name) filter['name'] = req.query.name;
 	async.waterfall([
 		function(callback) {											// find the user
 			User.findById(req.session.user._id, function(error, user){
@@ -145,7 +145,7 @@ exports.getAll = function (req, res) {
 			});
 		},
 		function(user, groups, callback) {
-			Corpus.find({}, function(error, l_corpus){					// print all corpus where the user have the good right
+			Corpus.find(filter, function(error, l_corpus){					// print all corpus where the user have the good right
     			async.filter(l_corpus, 
     			        	 function(corpus, callback) {
     			          		callback (commonFuncs.checkRightACL(corpus, user, groups, ['O', 'W', 'R']));
@@ -451,7 +451,9 @@ exports.addLayer = function(req, res){
 exports.getAllMedia = function(req, res){
 	var field = '_id id_corpus name url description';
 	if (req.query.history == 'ON') field = '_id id_corpus name url description history';
-	Media.find({}, field, function(error, medias){								// fin all media
+	var filter = {};
+	if (req.query.name) filter['name'] = req.query.name;
+	Media.find(filter, field, function(error, medias){								// fin all media
 		async.filter(medias, 											// filter the list with media belong to the corpus
 		        	 function(media, callback) { 
 		        	 	if (media.id_corpus == req.params.id_corpus) callback(true);
@@ -465,6 +467,10 @@ exports.getAllMedia = function(req, res){
 // retrieve all layer of a corpus which the user logged is 'O' or 'W' or 'R' for the layer 
 // and print _id, name, description, id_corpus, fragment_type, data_type, history
 exports.getAllLayer = function (req, res) {
+	var filter = {};
+	if (req.query.name) 		 filter['name'] 		 = req.query.name;	
+	if (req.query.fragment_type) filter['fragment_type'] = req.query.fragment_type;	
+	if (req.query.data_type) 	 filter['data_type'] 	 = req.query.data_type;	
 	async.waterfall([
 		function(callback) {
 			User.findById(req.session.user._id, function(error, user){	// find the user logged
@@ -477,7 +483,7 @@ exports.getAllLayer = function (req, res) {
 			});
 		},
 		function(user, groups, callback) {								// find all layer
-			Layer.find({}, function(error, layers){
+			Layer.find(filter, function(error, layers){
     			async.filter(layers, 									// filter the list with layer belong the corpus and where the user have the good right
     			        	 function(layer, callback) {
 		        	 			if (layer.id_corpus == req.params.id_corpus && commonFuncs.checkRightACL(layer, user, groups, ['O', 'W', 'R'])) callback(true);

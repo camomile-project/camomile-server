@@ -77,8 +77,8 @@ exports.AllowUser = function (list_right){
 
 // retrieve a particular annotation with his _id  print _id, id_layer, fragment and data
 exports.getInfo = function(req, res){
-	var field = 'id_layer id_media fragment data';
-	if (req.query.history == 'ON') field = 'id_layer id_media fragment data history';	
+	var field = '_id id_layer id_media fragment data';
+	if (req.query.history == 'ON') field = '_id id_layer id_media fragment data history';	
 	Annotation.findById(req.params.id_annotation, field, function(error, annotation){
 		if (error) res.status(400).json({message:error});
     	else res.status(200).json(annotation);
@@ -87,12 +87,13 @@ exports.getInfo = function(req, res){
 
 // get all annotation
 exports.getAll = function (req, res) {	
-	var field = 'id_layer id_media fragment data';
-	if (req.query.history == 'ON') field = 'id_layer id_media fragment data history';		
+	var field = '_id id_layer id_media fragment data';
+	if (req.query.history == 'ON') field = '_id id_layer id_media fragment data history';		
 	var filter = {};
-	if (req.query.media) filter['id_media'] = req.query.media;
-	if (req.query.media) filter['id_layer'] = req.query.layer;
-	if (req.query.media) filter['data'] = req.query.data;
+	if (req.query.id_media) filter['id_media'] = req.query.id_media;
+	if (req.query.id_layer) filter['id_layer'] = req.query.layer;
+	if (req.query.fragment) filter['fragment'] = req.query.fragment;
+	if (req.query.data) 	filter['data'] 	   = req.query.data;
 	Annotation.find(filter, field, function(error, annotations) {
     	if (error) res.status(400).json({error:"error", message:error});
     	if (annotations) res.status(200).json(annotations);
