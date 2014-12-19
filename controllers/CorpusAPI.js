@@ -383,9 +383,9 @@ exports.addLayer = function(req, res){
 			if (req.body.data_type == undefined) 		callback("The data_type is not defined");
 			if (req.body.annotations) {
 				for (var i = 0; i < req.body.annotations.length; i++) { 
-					if (!req.body.annotations[i].data) 		  callback("Data is not defined for one annotation");
-					if (!req.body.annotations[i].fragment) 	  callback("Fragment is not defined for one annotation");
-					if (!req.body.annotations[i].media_name && !req.body.annotations[i].id_media )  callback("media_name or id_media is not defined for one annotation");
+					if (!req.body.annotations[i].data) 		 callback("Data is not defined for one annotation");
+					if (!req.body.annotations[i].fragment) 	 callback("Fragment is not defined for one annotation");
+					if (!req.body.annotations[i].id_media )  callback("id_media is not defined for one annotation");
 				}
 			}
 			callback(null);
@@ -396,28 +396,13 @@ exports.addLayer = function(req, res){
 		        callback(error);
 		    });
 		},
-        function(callback) {
-			if (req.body.annotations) {
-				var media_id_name = {};
-				for (var i = 0; i < req.body.annotations.length; i++) {
-					if (req.body.annotations[i].media_name) media_id_name[req.body.annotations[i].media_name] = '';
-				}
-				var l_media = Object.keys(media_id_name);
-				async.map(l_media, find_id_media, function(error, id_media) {
-						for (var i = 0; i < l_media.length; i++) media_id_name[l_media[i]] = id_media[i];
-			            callback(error, media_id_name);
-				    }
-				);
-	        }
-	        else callback(null, {})
-        },
-		function(media_id_name, callback) {											// create the new layer
+		function(callback) {											// create the new layer
 			var new_layer = {};
 			new_layer.name = req.body.name;
 			new_layer.description = req.body.description;
 			new_layer.id_corpus = req.params.id_corpus;
-			new_layer.fragment_type = req.params.id_fragment_typecorpus;
-			new_layer.data_type = req.params.data_type;
+			new_layer.fragment_type = req.body.fragment_type;
+			new_layer.data_type = req.body.data_type;
 			new_layer.history = [];
 			new_layer.history.push({date:new Date(), 
 									id_user:req.session.user._id, 
@@ -428,20 +413,18 @@ exports.addLayer = function(req, res){
 									});
 			new_layer.ACL = {users:{}, groups:{}};
 			new_layer.ACL.users[req.session.user._id]='O';				// set 'O' right to the user logged
-			var layer = new Layer(new_layer).save(function (error, newLayer) {	// save the new layer
-				if (newLayer) res.status(200).json(newLayer);
-				callback(error, media_id_name, newLayer);
+			var layer = new Layer(new_layer).save(function (error, newLayer_res) {	// save the new layer
+				callback(error, newLayer_res);
 			});			
 		},
-		function(media_id_name, newLayer, callback) {
+		function(newLayer, callback) {
 			if (req.body.annotations) {
 				for (i = 0; i < req.body.annotations.length; i++) { 
 					var new_annotation = {};
 					new_annotation.fragment = req.body.annotations[i].fragment;
 					new_annotation.data 	= req.body.annotations[i].data;
 					new_annotation.id_layer = newLayer._id;
-					if (req.body.annotations[i].media_name) new_annotation.id_media = media_id_name[req.body.annotations[i].media_name];
-					else new_annotation.id_media = req.body.annotations[i].id_media;
+					new_annotation.id_media = req.body.annotations[i].id_media;
 					new_annotation.history 	= [];
 					new_annotation.history.push({date:new Date(), 
 												 id_user:req.session.user._id, 
@@ -453,14 +436,13 @@ exports.addLayer = function(req, res){
 						if (error) callback(error);
 					});
 				}
-				callback(null);
+				callback(null, newLayer);
 			}
-			else callback(null);
-
+			else callback(null, newLayer);
 		}
-
-	], function (error) {
-		if (error) res.status(400).json({message:error});
+	], function (error, newLayer) {
+		if (error) 	res.status(400).json({message:error});
+		else res.status(200).json(newLayer);
 	});
 };
 
