@@ -76,19 +76,19 @@ printResCorpus = function(corpus, res) {
 	res.status(200).json({"_id":corpus._id,
 			 			  "name":corpus.name,
 						  "description":corpus.description,
-						  "history":corpus.history
 						 });
 }
 
 // for the list of corpus print _id, name, description and history
-printMultiRes = function(l_corpus, res) {
+printMultiRes = function(l_corpus, res, history) {
 	var p = [];
 	for (i = 0; i < l_corpus.length; i++) { 
-		p.push({"_id":l_corpus[i]._id,
-				"name":l_corpus[i].name,
-				"description":l_corpus[i].description,
-				"history":l_corpus[i].history
-		  	   })
+		var corpus = {"_id":l_corpus[i]._id,
+					  "name":l_corpus[i].name,
+					  "description":l_corpus[i].description,
+		  	   		 }
+		if (history== 'ON') corpus["history"] = l_corpus[i].history
+		p.push(corpus)
 	} 
 	res.status(200).json(p);
 }
@@ -131,6 +131,8 @@ exports.AllowUser = function (list_right){
 
 // retrieve all corpus where the user logged is 'O' or 'W' or 'R' and print _id, name, description and history
 exports.getAll = function (req, res) {
+	var filter = {};
+	if (req.query.name) filter['name'] = req.query.name;
 	async.waterfall([
 		function(callback) {											// find the user
 			User.findById(req.session.user._id, function(error, user){
@@ -143,12 +145,12 @@ exports.getAll = function (req, res) {
 			});
 		},
 		function(user, groups, callback) {
-			Corpus.find({}, function(error, l_corpus){					// print all corpus where the user have the good right
+			Corpus.find(filter, function(error, l_corpus){					// print all corpus where the user have the good right
     			async.filter(l_corpus, 
     			        	 function(corpus, callback) {
     			          		callback (commonFuncs.checkRightACL(corpus, user, groups, ['O', 'W', 'R']));
     			        	 },
-    			        	 function(results) { printMultiRes(results, res); } 
+    			        	 function(results) { printMultiRes(results, res, req.query.history); } 
     			);	
     			callback(error);		
     		});
@@ -160,7 +162,9 @@ exports.getAll = function (req, res) {
 
 // retrieve a particular corpus with his _id and print _id, name, description and history
 exports.getInfo = function(req, res){
-	Corpus.findById(req.params.id_corpus, '_id name description history', function(error, corpus){
+	var field = '_id name description';
+	if (req.query.history == 'ON') field = '_id name description history';
+	Corpus.findById(req.params.id_corpus, field, function(error, corpus){
 		if (error) res.status(400).json({message:error});
     	else res.status(200).json(corpus);
 	});
@@ -196,40 +200,22 @@ exports.remove = function (req, res) {
 		function(callback) {											// check if there is no layer with annotation into the corpus
 			Layer.find({id_corpus:req.params.id_corpus}, function(error, layers){
 				if (layers.length>0) {
-					if (req.session.user.username === "root"){
-						for (i = 0; i < layers.length; i++) Annotation.remove({id_layer : layers[i]._id}, function (error, annotations) {
-							callback(error);
-						});
-					}
+					for (i = 0; i < layers.length; i++) Annotation.remove({id_layer : layers[i]._id}, function (error, annotations) {
+						callback(error);
+					});
 				}
 				callback(null);		
     		});
 		},
 		function(callback) {											// check if there is no layer into the media
-			if (req.session.user.username === "root") {
-				Layer.remove({id_corpus:req.params.id_corpus}, function (error, layers) {
-					callback(error);
-				});				
-			}
-			else {
-				Layer.find({id_corpus:req.params.id_corpus}, function(error, layers){
-					if (layers.medias>0) callback("The corpus is not empty (one or more layers are remaining)");
-					callback(error);
-				});
-			}
+			Layer.remove({id_corpus:req.params.id_corpus}, function (error, layers) {
+				callback(error);
+			});				
 		},			
 		function(callback) {											// check if there is no layer into the media
-			if (req.session.user.username === "root") {
-				Media.remove({id_corpus:req.params.id_corpus}, function (error, media) {
-					callback(error);
-				});				
-			}
-			else {
-				Media.find({id_corpus:req.params.id_corpus}, function(error, medias){
-					if (medias.length>0) error = "The corpus is not empty (one or more media are remaining)";
-					callback(error);
-				});
-			}
+			Media.remove({id_corpus:req.params.id_corpus}, function (error, media) {
+				callback(error);
+			});				
 		},	
 		function(callback) {											// remove the corpus
 			Corpus.remove({_id : req.params.id_corpus}, function (error, corpus) {
@@ -252,12 +238,12 @@ exports.getACL = function(req, res){
 
 // update ACL of a user
 exports.updateUserACL = function(req, res){
-	if (req.body.Right != 'O' && req.body.Right != 'W' && req.body.Right != 'R') res.status(400).json({message:"Right must be 'O' or 'W' or 'R'"});
+	if (req.body.right != 'O' && req.body.right != 'W' && req.body.right != 'R') res.status(400).json({message:"right must be 'O' or 'W' or 'R'"});
 	Corpus.findById(req.params.id_corpus, function(error, corpus){		// find the corpus
 		var update = {ACL:corpus.ACL};		
 		if (error) res.status(400).json({message:error});
 		if (!update.ACL.users) update.ACL.users = {};
-		update.ACL.users[req.params.id_user]=req.body.Right;			// update acl
+		update.ACL.users[req.params.id_user]=req.body.right;			// update acl
 		Corpus.findByIdAndUpdate(req.params.id_corpus, update, function (error, newCorpus) {	// save the corpus with the new ACL
 			if (error) res.status(400).json({message:error});
 			else res.status(200).json(newCorpus.ACL);
@@ -267,12 +253,12 @@ exports.updateUserACL = function(req, res){
 
 // update ACL of a group
 exports.updateGroupACL = function(req, res){
-	if (req.body.Right != 'O' && req.body.Right != 'W' && req.body.Right != 'R') res.status(400).json({message:"Right must be 'O' or 'W' or 'R'"});
+	if (req.body.right != 'O' && req.body.right != 'W' && req.body.right != 'R') res.status(400).json({message:"right must be 'O' or 'W' or 'R'"});
 	Corpus.findById(req.params.id_corpus, function(error, corpus){		// find the corpus
 		var update = {ACL:corpus.ACL};		
 		if (error) res.status(400).json({message:error});
 		if (!update.ACL.groups) update.ACL.groups = {};
-		update.ACL.groups[req.params.id_group]=req.body.Right;			// update acl
+		update.ACL.groups[req.params.id_group]=req.body.right;			// update acl
 		Corpus.findByIdAndUpdate(req.params.id_corpus, update, function (error, newCorpus) {	// save the corpus with the new ACL
 			if (error) res.status(400).json({message:error});
 			else res.status(200).json(newCorpus.ACL);
@@ -316,62 +302,29 @@ exports.removeGroupFromACL = function(req, res){
 	});
 }
 
-//add a media
-exports.addMedia = function(req, res){
-	var error=null;
-	async.waterfall([
-		function(callback) {											// check field
-			if (req.body.name == undefined) callback("The media name is not defined");
-			if (req.body.name == "") 		callback("Empty string for name is not allowed");
-			callback(error);
-		},		
-		function(callback) {											// check if the name is not already used (name must be unique)
-			Media.count({name: req.body.name, id_corpus: req.params.id_corpus}, function (error, count) {	
-				if ((!error) && (count != 0)) callback("The name is already used, choose another name");
-		        callback(error);
-		    });
-		},
-		function(callback) {											// create the new media
-			var new_media = {};
-			new_media.name = req.body.name;
-			new_media.description = req.body.description;
-			new_media.url = req.body.url;
-			new_media.id_corpus = req.params.id_corpus;
-			new_media.history = []
-			new_media.history.push({date:new Date(), 
-									id_user:req.session.user._id, 
-									modification:{"name":new_media.name, 
-												  "description":new_media.description, 
-												  "url":new_media.url}
-								   });
-			var media = new Media(new_media).save(function (error, newMedia) {	// save the new media
-				if (newMedia) res.status(200).json(newMedia);
-				callback(error);
-			});			
-		}
-	], function (error) {
-		if (error) res.status(400).json({message:error});
-	});
-};
-
 //add a medias
-exports.addMedias = function(req, res){
-	var error=null;
+exports.addMedia = function(req, res){
+	var l_media = req.body;
+	var adding_one_media = false;
+	if (l_media.constructor != Array) {
+		l_media = [req.body];
+		adding_one_media = true;
+	}
 	async.waterfall([
 		function(callback) {											// check field
-			if (req.body.media_list == undefined) callback("The list of media is not define");
-			if (req.body.media_list.length == 0)  callback("The list of media is empty");
-			if (req.body.media_list) {
-				for (var i = 0; i < req.body.media_list.length; i++) { 
-					if (req.body.media_list[i].name == undefined) callback("One name is not defined");
-					if (req.body.media_list[i].name == "") 		  callback("One name is empty (not allowed)");
+			if (l_media == undefined) callback("The data field is not define");
+			if (l_media.length == 0)  callback("The list of media is empty");
+			if (l_media) {
+				for (var i = 0; i < l_media.length; i++) { 
+					if (l_media[i].name == undefined) 	callback("One name is not defined");
+					if (l_media[i].name == "") 		callback("One name is empty (not allowed)");
 				}
 			}
 			callback(null);
 		},		
         function(callback) {
 			var l_media_name = [];
-			for (var i = 0; i < req.body.media_list.length; i++) l_media_name.push(req.body.media_list[i].name) ;
+			for (var i = 0; i < l_media.length; i++) l_media_name.push(l_media[i].name) ;
 			async.map(l_media_name, 
 					  function(media_name, callback) {
 							Media.count({name: media_name, id_corpus: req.params.id_corpus}, function (error, count) {
@@ -384,7 +337,7 @@ exports.addMedias = function(req, res){
         },
 		function(callback) {											// create the new medias
 			var l_medias = []
-			async.map(req.body.media_list, function(media, callback) {
+			async.map(l_media, function(media, callback) {
 			  		var new_media = {};
 					new_media.name = media.name;
 					new_media.description = media.description;
@@ -408,6 +361,7 @@ exports.addMedias = function(req, res){
 		}
 	], function (error, l_medias) {
 		if (error) res.status(400).json({message:error});
+		else if (adding_one_media) res.status(200).json(l_medias[0]);
 		else res.status(200).json(l_medias);
 	});
 };
@@ -429,9 +383,9 @@ exports.addLayer = function(req, res){
 			if (req.body.data_type == undefined) 		callback("The data_type is not defined");
 			if (req.body.annotations) {
 				for (var i = 0; i < req.body.annotations.length; i++) { 
-					if (!req.body.annotations[i].data) 		  callback("Data is not defined for one annotation");
-					if (!req.body.annotations[i].fragment) 	  callback("Fragment is not defined for one annotation");
-					if (!req.body.annotations[i].media_name && !req.body.annotations[i].id_media )  callback("media_name or id_media is not defined for one annotation");
+					if (!req.body.annotations[i].data) 		 callback("Data is not defined for one annotation");
+					if (!req.body.annotations[i].fragment) 	 callback("Fragment is not defined for one annotation");
+					if (!req.body.annotations[i].id_media )  callback("id_media is not defined for one annotation");
 				}
 			}
 			callback(null);
@@ -442,28 +396,13 @@ exports.addLayer = function(req, res){
 		        callback(error);
 		    });
 		},
-        function(callback) {
-			if (req.body.annotations) {
-				var media_id_name = {};
-				for (var i = 0; i < req.body.annotations.length; i++) {
-					if (req.body.annotations[i].media_name) media_id_name[req.body.annotations[i].media_name] = '';
-				}
-				var l_media = Object.keys(media_id_name);
-				async.map(l_media, find_id_media, function(error, id_media) {
-						for (var i = 0; i < l_media.length; i++) media_id_name[l_media[i]] = id_media[i];
-			            callback(error, media_id_name);
-				    }
-				);
-	        }
-	        else callback(null, {})
-        },
-		function(media_id_name, callback) {											// create the new layer
+		function(callback) {											// create the new layer
 			var new_layer = {};
 			new_layer.name = req.body.name;
 			new_layer.description = req.body.description;
 			new_layer.id_corpus = req.params.id_corpus;
-			new_layer.fragment_type = req.params.id_fragment_typecorpus;
-			new_layer.data_type = req.params.data_type;
+			new_layer.fragment_type = req.body.fragment_type;
+			new_layer.data_type = req.body.data_type;
 			new_layer.history = [];
 			new_layer.history.push({date:new Date(), 
 									id_user:req.session.user._id, 
@@ -474,20 +413,18 @@ exports.addLayer = function(req, res){
 									});
 			new_layer.ACL = {users:{}, groups:{}};
 			new_layer.ACL.users[req.session.user._id]='O';				// set 'O' right to the user logged
-			var layer = new Layer(new_layer).save(function (error, newLayer) {	// save the new layer
-				if (newLayer) res.status(200).json(newLayer);
-				callback(error, media_id_name, newLayer);
+			var layer = new Layer(new_layer).save(function (error, newLayer_res) {	// save the new layer
+				callback(error, newLayer_res);
 			});			
 		},
-		function(media_id_name, newLayer, callback) {
+		function(newLayer, callback) {
 			if (req.body.annotations) {
 				for (i = 0; i < req.body.annotations.length; i++) { 
 					var new_annotation = {};
 					new_annotation.fragment = req.body.annotations[i].fragment;
 					new_annotation.data 	= req.body.annotations[i].data;
 					new_annotation.id_layer = newLayer._id;
-					if (req.body.annotations[i].media_name) new_annotation.id_media = media_id_name[req.body.annotations[i].media_name];
-					else new_annotation.id_media = req.body.annotations[i].id_media;
+					new_annotation.id_media = req.body.annotations[i].id_media;
 					new_annotation.history 	= [];
 					new_annotation.history.push({date:new Date(), 
 												 id_user:req.session.user._id, 
@@ -499,21 +436,24 @@ exports.addLayer = function(req, res){
 						if (error) callback(error);
 					});
 				}
-				callback(null);
+				callback(null, newLayer);
 			}
-			else callback(null);
-
+			else callback(null, newLayer);
 		}
-
-	], function (error) {
-		if (error) res.status(400).json({message:error});
+	], function (error, newLayer) {
+		if (error) 	res.status(400).json({message:error});
+		else res.status(200).json(newLayer);
 	});
 };
 
 // retrieve all media of a corpus which the user logged is 'O' or 'W' or 'R' for the corresponding corpus 
 // and print _id, name, id_corpus, description, url and history
 exports.getAllMedia = function(req, res){
-	Media.find({}, function(error, medias){								// fin all media
+	var field = '_id id_corpus name url description';
+	if (req.query.history == 'ON') field = '_id id_corpus name url description history';
+	var filter = {};
+	if (req.query.name) filter['name'] = req.query.name;
+	Media.find(filter, field, function(error, medias){								// fin all media
 		async.filter(medias, 											// filter the list with media belong to the corpus
 		        	 function(media, callback) { 
 		        	 	if (media.id_corpus == req.params.id_corpus) callback(true);
@@ -527,6 +467,10 @@ exports.getAllMedia = function(req, res){
 // retrieve all layer of a corpus which the user logged is 'O' or 'W' or 'R' for the layer 
 // and print _id, name, description, id_corpus, fragment_type, data_type, history
 exports.getAllLayer = function (req, res) {
+	var filter = {};
+	if (req.query.name) 		 filter['name'] 		 = req.query.name;	
+	if (req.query.fragment_type) filter['fragment_type'] = req.query.fragment_type;	
+	if (req.query.data_type) 	 filter['data_type'] 	 = req.query.data_type;	
 	async.waterfall([
 		function(callback) {
 			User.findById(req.session.user._id, function(error, user){	// find the user logged
@@ -539,13 +483,13 @@ exports.getAllLayer = function (req, res) {
 			});
 		},
 		function(user, groups, callback) {								// find all layer
-			Layer.find({}, function(error, layers){
+			Layer.find(filter, function(error, layers){
     			async.filter(layers, 									// filter the list with layer belong the corpus and where the user have the good right
     			        	 function(layer, callback) {
 		        	 			if (layer.id_corpus == req.params.id_corpus && commonFuncs.checkRightACL(layer, user, groups, ['O', 'W', 'R'])) callback(true);
 		        	 			else callback(false);    			        	 	
     			        	 },
-    			        	 function(results) { layerAPI.printMultiRes(results, res); } 
+    			        	 function(results) { layerAPI.printMultiRes(results, res, req.query.history); } 
     			);	
     			callback(error);		
     		});

@@ -80,7 +80,9 @@ exports.AllowUser = function (list_right){
 
 // retrieve a particular media with his _id and print _id, name, description, url and history
 exports.getInfo = function(req, res){
-	Media.findById(req.params.id_media, 'name description id_corpus url history', function(error, media){
+	var field = '_id name description id_corpus url';
+	if (req.query.history == 'ON') field = '_id name description id_corpus url history';	
+	Media.findById(req.params.id_media, field, function(error, media){
 		if (error) res.status(400).json({message:error});
     	else res.status(200).json(media);
 	});
@@ -136,7 +138,11 @@ function getVideoWithExtension(req, res, extension) {
 
 // retrieve all media
 exports.getAll = function (req, res) {	
-	Media.find({}, function (error, medias) {
+	var field = '_id id_corpus name description url';
+	if (req.query.history == 'ON') field = '_id id_corpus name description url history';
+	var filter = {};
+	if (req.query.name) filter['name'] = req.query.name;			
+	Media.find(filter, field, function (error, medias) {
     	if (error) res.status(400).json({error:"error", message:error});
     	if (medias) res.status(200).json(medias);
 		else res.status(200).json([]);

@@ -164,20 +164,16 @@ exports.initialize = function(app){
 	// DELETE /corpus/id_corpus
 	app.delete('/corpus/:id_corpus', session.islogin,
 									 corpusAPI.exist, 
-									 userAPI.currentUserIsroot,
+									 userAPI.currentUserIsAdmin, 
+									 corpusAPI.AllowUser(['O']),
 									 corpusAPI.remove);
-	// create a media for a corpus
-	// POST /corpus/id_corpus/media --data '{"name":"...", "url":"...", "description":{"...":"..."}}' 
+
+	// create multi media for a corpus
+	// POST /corpus/id_corpus/medias --data '[{"name":"...", "url":"...", "description":{"...":"..."}}, ...]' 
 	app.post('/corpus/:id_corpus/media', session.islogin,
 										 corpusAPI.exist, 
 										 corpusAPI.AllowUser(['O', 'W']),
-										 corpusAPI.addMedia);
-	// create multi media for a corpus
-	// POST /corpus/id_corpus/medias --data '{"media_list":[{"name":"...", "url":"...", "description":{"...":"..."}}, ...]}' 
-	app.post('/corpus/:id_corpus/medias', session.islogin,
-										  corpusAPI.exist, 
-										  corpusAPI.AllowUser(['O', 'W']),
-										  corpusAPI.addMedias);	
+										 corpusAPI.addMedia);	
 	// create a layer
 	// POST /corpus/id_corpus/layer --data '{"name":"new layer", "description":{"...":"..."}, "fragment_type":{"...":"..."}, "data_type":{"...":"..."}}' 
 	app.post('/corpus/:id_corpus/layer', session.islogin,
@@ -303,18 +299,13 @@ exports.initialize = function(app){
 								   layerAPI.exist,
 								   layerAPI.AllowUser(['O']),
 								   layerAPI.remove);
-	// create an annotation
-	// POST /layer/id_layer/annotation --data '{"fragment":{"start":0, "end":15}, "data":"value", "id_media":""}' 
+
+	// create multi annotation
+	// POST /layer/id_layer/annotation --data '{"annotation_list":[{"fragment":{"start":0, "end":15}, "data":"value", "id_media":""}, ...]}' 
 	app.post('/layer/:id_layer/annotation', session.islogin,
 											layerAPI.exist,
 											layerAPI.AllowUser(['O', 'W']),
 											layerAPI.addAnnotation);
-	// create multi annotation
-	// POST /layer/id_layer/annotation --data '{"annotation_list":[{"fragment":{"start":0, "end":15}, "data":"value", "id_media":""}, ...]}' 
-	app.post('/layer/:id_layer/annotations', session.islogin,
-											 layerAPI.exist,
-											 layerAPI.AllowUser(['O', 'W']),
-											 layerAPI.addAnnotations);
 	// list all annotation of a layer
 	// GET /layer/id_layer/annotation
 	app.get('/layer/:id_layer/annotation', session.islogin,
