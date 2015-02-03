@@ -1,4 +1,4 @@
-### Version 0.4 (2015-02-03)
+### Version 0.4.1 (2015-02-03)
 
   - various code improvement
   - remove route /corpus/:corpus/medias
