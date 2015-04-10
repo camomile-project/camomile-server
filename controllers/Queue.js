@@ -24,15 +24,6 @@ SOFTWARE.
 
 var	Queue = require('../models/Queue');
 
-// check if the id_queue exists in the db
-exports.exists = function (req, res, next) {
-	Queue.findById(req.params.id_queue, function (error, queue) {
-		if (error) res.status(400).json(error);
-		else if (!queue) res.status(400).json({message:"The queue doesn't exists"});
-		else next();
-	});
-}
-
 // create a queue
 exports.create = function (req, res) {
 	if (req.body.name == undefined) res.status(400).json({message:"the name is not defined"});

@@ -30,14 +30,6 @@ var Group = require('../models/Group');
 var Layer = require('../models/Layer');
 var Annotation = require('../models/Annotation');
 
-// check if the id_annotation exists in the db
-exports.exists = function (req, res, next) {
-  Annotation.findById(req.params.id_annotation, function (error, annotation) {
-    if (error) res.status(400).json(error);
-    else if (!annotation) res.status(404).json({message: "Annotation does not exist."});
-    else next();
-  });
-}
 
 // check if req.session.user._id have the good right to see this annotation.id_layer
 exports.hasRights = function (list_right) {

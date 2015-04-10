@@ -30,15 +30,6 @@ var	Group = require('../models/Group');
 var	Layer = require('../models/Layer');
 var	Annotation = require('../models/Annotation');
 
-//check if the id_layer exists in the db
-exports.exists = function (req, res, next) {
-	Layer.findById(req.params.id_layer, function (error, layer) {
-		if (error) res.status(400).json(error);
-		else if (!layer) res.status(400).json({message:"The layer doesn't exists"});
-		else next();
-	});
-}
-
 // print _id, name, description, fragment_type, data_type and history 
 printResLayer = function (layer, res) {
 	res.status(200).json({"_id":layer._id,

@@ -32,16 +32,6 @@ var	Group = require('../models/Group');
 var Corpus = require('../models/Corpus');
 var	Medium = require('../models/Medium');
 
-// check if the id_medium exists in the db
-exports.exists = function (req, res, next) {
-	Medium.findById(req.params.id_medium, function (error, media) {
-		if (error) res.status(400).json(error);
-		else if (!media) res.status(400).json({message:"id_medium doesn't exists"});
-		else next();
-	});
-}
-
-
 // check if req.session.user._id have the good right to see this media.id_corpus
 exports.hasRights = function (list_right) {
 	return function (req, res, next) {

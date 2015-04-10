@@ -28,15 +28,6 @@ var	Group = require('../models/Group');
 var Corpus = require('../models/Corpus');
 var	Layer = require('../models/Layer');
 
-// check if the id_group exists in the db
-exports.exists = function (req, res, next) {
-	Group.findById(req.params.id_group, function (error, group) {
-		if (error) res.status(400).json(error);
-		else if (!group) res.status(400).json({message:"The group doesn't exists"});
-		else next();
-	});
-}
-
 // retrieve all group and print _id, name, description and the list of user belong the group
 exports.getAll = function (req, res) {
 	Group.find({}, function (error, groups) {

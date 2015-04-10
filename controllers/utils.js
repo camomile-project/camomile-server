@@ -30,6 +30,29 @@ var	Layer = require('../models/Layer');
 var	Annotation = require('../models/Annotation');
 var	Queue = require('../models/Queue');
 
+// ----------------------------------------------------------------------------
+// MIDDLEWARES
+// ----------------------------------------------------------------------------
+
+// exists(Corpus) === exists(Corpus, 'id_corpus') !== exists(Corpus, 'id')
+// exists(Medium) === exists(Medium, 'id_medium') !== exists(Medium, 'id')
+
+exports.exists = function(model, paramName) {
+	return function(req, res, next) {
+
+		if (paramName === undefined) { 
+			// model = Corpus ==> modelName = Corpus ==> paramName = id_corpus
+			paramName = 'id_' + model.modelName.toLowerCase(); 
+		}
+		model.findById(req.params[paramName], function(error, resource) {
+			if (error || !resource) {
+				res.status(400)
+				   .json({message: model.modelName + ' does not exist.'});
+			}
+		})
+	};
+};
+
 // check if user have the good right for the ressource (corpus or layer)
 exports.checkRightACL = function (ressource, user, groups, list_right) {
 	var userInAcl = false;

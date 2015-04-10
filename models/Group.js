@@ -31,4 +31,4 @@ var Group = new Schema({
     users_list: [{ type:String, lowercase: true, trim:true}]
 }, { versionKey: false });
 
-module.exports = mongoose.model('groups', Group);
+module.exports = mongoose.model('Group', Group);

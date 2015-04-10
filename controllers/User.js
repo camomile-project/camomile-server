@@ -44,21 +44,6 @@ var sendUser = function (user, res) {
 };
 
 // ----------------------------------------------------------------------------
-// MIDDLEWARES
-// ----------------------------------------------------------------------------
-
-//check if the id_user exists in the db
-exports.exists = function (req, res, next) {
-  User.findById(req.params.id_user, function (error, user) {
-    if (error || !user) {
-      res.status(400)
-         .json({message: 'User does not exist.'});
-    }
-    next();
-  });
-};
-
-// ----------------------------------------------------------------------------
 // ROUTES
 // ----------------------------------------------------------------------------
 
@@ -116,7 +101,7 @@ exports.getAll = function (req, res) {
 // retrieve a particular user with his _id and print _id, username, role and description
 exports.getOne = function (req, res) {
   User.findById(req.params.id_user, function (error, user) {
-    sendUser(user,res);
+    sendUser(user, res);
   });
 }
 

@@ -92,14 +92,9 @@ printMultiRes = function (l_corpus, res, history) {
 	res.status(200).json(p);
 }
 
-// check if the id_corpus exists in the db
-exports.exists = function (req, res, next) {
-	Corpus.findById(req.params.id_corpus, function (error, corpus) {
-		if (error) res.status(400).json(error);
-		else if (!corpus) res.status(400).json({message:"The corpus does not exists"});
-		else next();
-	});
-}
+// ----------------------------------------------------------------------------
+// MIDDLEWARES
+// ----------------------------------------------------------------------------
 
 // check if req.session.user._id have the good right to see this req.params.id_corpus
 exports.hasRights = function (list_right) {
