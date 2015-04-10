@@ -78,8 +78,9 @@ exports.isLoggedIn = function (req, res, next) {
   if (!req.session.user) {
     res.status(401)
        .json({message: "Access denied."});
+  } else {
+    next();
   }
-  next();
 };
 
 // user has admin privileged?
@@ -87,8 +88,9 @@ exports.isAdmin = function (req, res, next) {
   if (req.session.user.role !== "admin") {
     res.status(401)
        .json({message: "Access denied (admin only)."});
+  } else {
+    next();
   }
-  next();
 };
 
 // user is root?
@@ -96,10 +98,10 @@ exports.isRoot = function (req, res, next) {
   if (req.session.user.username !== "root") {
     res.status(401)
        .json({message: "Access denied (root only)."});
+  } else {
+    next();
   }
-  next();
 };
-
 
 // ----------------------------------------------------------------------------
 // ROUTES
