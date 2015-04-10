@@ -31,7 +31,7 @@ var crypto = require('crypto');
 
 var KEYLEN = 128;
 var ITERATIONS = 12000;
-var DIGEST = 'sha512';
+// var DIGEST = 'sha1'; 
 
 // Get password hash using provided salt
 var getHash = function(password, salt, callback) {
@@ -40,7 +40,8 @@ var getHash = function(password, salt, callback) {
   // callback: function(error, hash)
 
   try {
-    crypto.pbkdf2(password, salt, ITERATIONS, KEYLEN, DIGEST, function (error, buffer) {
+
+    crypto.pbkdf2(password, salt, ITERATIONS, KEYLEN, function (error, buffer) {
       var hash = buffer.toString('base64');
       callback(error, hash);
     });
