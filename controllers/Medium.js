@@ -22,50 +22,47 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-var fileSystem = require('fs'); //working with video streaming
+var fileSystem = require('fs');//working with video streaming
 var async = require('async');
 var path = require('path');
-var commonFuncs = require('../controllers/commonFuncs');
+var commonFuncs = require('../controllers/utils');
 
 var User = require('../models/User');
 var	Group = require('../models/Group');
 var Corpus = require('../models/Corpus');
-var	Media = require('../models/Media');
-var	Layer = require('../models/Layer');
-var	Annotation = require('../models/Annotation');
-var	Queue = require('../models/Queue');
+var	Medium = require('../models/Medium');
 
-// check if the id_media exists in the db
-exports.exist = function(req, res, next) {
-	Media.findById(req.params.id_media, function(error, media){
+// check if the id_medium exists in the db
+exports.exists = function (req, res, next) {
+	Medium.findById(req.params.id_medium, function (error, media) {
 		if (error) res.status(400).json(error);
-		else if (!media) res.status(400).json({message:"id_media doesn't exists"});
+		else if (!media) res.status(400).json({message:"id_medium doesn't exists"});
 		else next();
 	});
 }
 
 
 // check if req.session.user._id have the good right to see this media.id_corpus
-exports.AllowUser = function (list_right){
-	return function(req, res, next) {
+exports.hasRights = function (list_right) {
+	return function (req, res, next) {
 		async.waterfall([
-			function(callback) {										// find the user
-				User.findById(req.session.user._id, function(error, user){
+			function (callback) {										// find the user
+				User.findById(req.session.user._id, function (error, user) {
 					callback(error, user);
 				});
 			},
-			function(user, callback) {									// find the list of group belong the user
-				Group.find({'users_list' : {$regex : new RegExp('^'+ req.session.user._id + '$', "i")}}, function(error, groups) {
+			function (user, callback) {									// find the list of group belong the user
+				Group.find({'users_list' : {$regex : new RegExp('^'+ req.session.user._id + '$', "i")}}, function (error, groups) {
 					callback(error, user, groups);
 				});
 			},
-			function(user, groups, callback) {							// find the media
-				Media.findById(req.params.id_media, function(error, media){
+			function (user, groups, callback) {							// find the media
+				Medium.findById(req.params.id_medium, function (error, media) {
 					callback(error, user, groups, media);
 	    		});
 			},
-			function(user, groups, media, callback) {					// find the corpus belong the media anc check if the user have the right to access this corpus
-				Corpus.findById(media.id_corpus, function(error, corpus){
+			function (user, groups, media, callback) {					// find the corpus belong the media anc check if the user have the right to access this corpus
+				Corpus.findById(media.id_corpus, function (error, corpus) {
 					if (commonFuncs.checkRightACL(corpus, user, groups, list_right)) next();
 					else error = "Acces denied";
 					callback(error);
@@ -79,19 +76,19 @@ exports.AllowUser = function (list_right){
 }
 
 // retrieve a particular media with his _id and print _id, name, description, url and history
-exports.getInfo = function(req, res){
+exports.getOne = function (req, res) {
 	var field = '_id name description id_corpus url';
-	if (req.query.history == 'ON') field = '_id name description id_corpus url history';	
-	Media.findById(req.params.id_media, field, function(error, media){
+	if (req.query.history == 'on') field = '_id name description id_corpus url history';	
+	Medium.findById(req.params.id_medium, field, function (error, media) {
 		if (error) res.status(400).json({message:error});
     	else res.status(200).json(media);
 	});
 }
 
 //update information of a media
-exports.update = function(req, res){
+exports.update = function (req, res) {
 	var newHistory = {};
-	Media.findById(req.params.id_media, function(error, media){
+	Medium.findById(req.params.id_medium, function (error, media) {
 		if (req.body.name) {											// check field
 			if (req.body.name == "") res.status(400).json({message:"name can't be empty"});
 			else {
@@ -108,7 +105,7 @@ exports.update = function(req, res){
 			newHistory.url = req.body.url;
 		}
 		media.history.push({date:new Date(), id_user:req.session.user._id, modification:newHistory})	// update history with the modification
-		media.save(function(error, newMedia) {							// save the media in the db
+		media.save(function (error, newMedia) {							// save the media in the db
 			if (error) res.status(400).json({message:error});
 			if (!error) res.status(200).json(newMedia);
 		});
@@ -117,16 +114,16 @@ exports.update = function(req, res){
 
 // remove a given media
 exports.remove = function (req, res) {
-	Media.remove({_id : req.params.id_media}, function (error, media) {
+	Medium.remove({_id : req.params.id_medium}, function (error, media) {
 		if (!error && media == 1) res.status(200).json({message:"The media has been deleted"});
 		else res.status(400).json({message:error});
 	});
 }
 
 function getVideoWithExtension(req, res, extension) {
-	Media.findById(req.params.id_media, function(error, media){
+	Medium.findById(req.params.id_medium, function (error, media) {
 		if (error) res.status(400).json({message:error});
-		else if (media == null) res.status(400).json({message: 'no such id_media!'})
+		else if (media == null) res.status(400).json({message: 'no such id_medium!'})
 		else {			
 			if (media.url == undefined) return res.status(404).send({message:'The URL of the video for this media is defined'});
 			var filePath = media.url + '.' + extension;
@@ -139,28 +136,28 @@ function getVideoWithExtension(req, res, extension) {
 // retrieve all media
 exports.getAll = function (req, res) {	
 	var field = '_id id_corpus name description url';
-	if (req.query.history == 'ON') field = '_id id_corpus name description url history';
+	if (req.query.history == 'on') field = '_id id_corpus name description url history';
 	var filter = {};
 	if (req.query.name) filter['name'] = req.query.name;			
-	Media.find(filter, field, function (error, medias) {
+	Medium.find(filter, field, function (error, medias) {
     	if (error) res.status(400).json({error:"error", message:error});
     	if (medias) res.status(200).json(medias);
 		else res.status(200).json([]);
 	});
 }
 
-exports.getVideo = function(req, res) {
+exports.getVideo = function (req, res) {
 	getVideoWithExtension(req, res, 'webm');
 }
 
-exports.getVideoWEBM = function(req, res) {
+exports.getVideoWEBM = function (req, res) {
 	getVideoWithExtension(req, res, 'webm');
 }
 
-exports.getVideoMP4 = function(req, res) {
+exports.getVideoMP4 = function (req, res) {
 	getVideoWithExtension(req, res, 'mp4');
 }
 
-exports.getVideoOGV = function(req, res) {
+exports.getVideoOGV = function (req, res) {
 	getVideoWithExtension(req, res, 'ogv');
 }

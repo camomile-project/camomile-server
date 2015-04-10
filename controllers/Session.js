@@ -23,85 +23,138 @@ SOFTWARE.
 */
 
 var User = require('../models/User');
-var Group = require('../models/Group');
-var Corpus = require('../models/Corpus');
-var Media = require('../models/Media');
-var Layer = require('../models/Layer');
-var Annotation = require('../models/Annotation');
-var Queue = require('../models/Queue');
-
 var crypto = require('crypto');
 
-var len = 128;				//Bytesize
-var iterations = 12000;
+// ----------------------------------------------------------------------------
+// CRYPTOGRAPHY
+// ----------------------------------------------------------------------------
 
-// to hash password
-hash = function (pwd, salt, fn) {
-	if (arguments.length == 3) crypto.pbkdf2(pwd, salt, iterations, len, fn);		// if salt is known
-  	else {																			// else generate a new salt
-    	fn = salt;
-    	crypto.randomBytes(len, function(error, salt){
-			if (error) return fn(error);
-			salt = salt.toString('base64');
-			crypto.pbkdf2(pwd, salt, iterations, len, function(error2, hash){
-				if (error2) return fn(error);
-				fn(null, salt, hash);
-			});
-		});
-	}
+var KEYLEN = 128;
+var ITERATIONS = 12000;
+var DIGEST = 'sha512';
+
+// Get password hash using provided salt
+var getHash = function(password, salt, callback) {
+  // password: user password
+  // salt: user salt
+  // callback: function(error, hash)
+
+  try {
+    crypto.pbkdf2(password, salt, ITERATIONS, KEYLEN, DIGEST, function (error, buffer) {
+      var hash = buffer.toString('base64');
+      callback(error, hash);
+    });
+  }
+  catch(error) {
+    callback(error);
+  }
+
 };
 
-// check if login and pasword correspond
-authenticateElem = function(name, pass, fn) {
-    User.findOne({username: name}, function (error, user) {							// find the first user with username
-       	if (user) {
-           	if (error)  return fn(new Error('could not find this user'));
-           	hash(pass, user.salt, function (error2, hash) {							// ask the hash for this user
-				if (error2) return fn(error2);
-            	if (hash == user.hash) return fn(null, user);						// check if the 2 hash correspond
-				fn(new Error('invalid password'));
-           	});
-       	} 
-       	else return fn(new Error('could not find this user'));
-    }); 
-}
+// Get password hash using random salt
+exports.generateSaltAndHash = function (password, callback) {
+  // password: user password
+  // callback: function(error, salt, hash)
 
-// login
+  crypto.randomBytes(KEYLEN, function (error, buffer) {
+    if (error) {
+      callback(error); 
+    } else {
+      var salt = buffer.toString('base64');
+      getHash(password, salt, function(error, hash) {
+        callback(error, salt, hash);
+      });
+    }
+  });
+};
+
+// ----------------------------------------------------------------------------
+// MIDDLEWARES
+// ----------------------------------------------------------------------------
+
+// user is logged in?
+exports.isLoggedIn = function (req, res, next) {
+  if (!req.session.user) {
+    res.status(401)
+       .json({message: "Access denied."});
+  }
+  next();
+};
+
+// user has admin privileged?
+exports.isAdmin = function (req, res, next) {
+  if (req.session.user.role !== "admin") {
+    res.status(401)
+       .json({message: "Access denied (admin only)."});
+  }
+  next();
+};
+
+// user is root?
+exports.isRoot = function (req, res, next) {
+  if (req.session.user.username !== "root") {
+    res.status(401)
+       .json({message: "Access denied (root only)."});
+  }
+  next();
+};
+
+
+// ----------------------------------------------------------------------------
+// ROUTES
+// ----------------------------------------------------------------------------
+
+// Login
 exports.login = function (req, res) {
-	if (req.body.username == undefined || req.body.password == undefined) res.status(400).json({error:"authentication failed, username or password are not defined"});
-	else {
-		authenticateElem(req.body.username, req.body.password, function (error, user) {
-			if (user) {
-				req.session.regenerate(function () {
+  
+  var failure = {message: 'Authentication failed (check your username and password).'}
 
-					req.session.user = user;
-					res.status(200).json({message:"You have been successfully logged in as "+req.body.username}); 
-				});
-			} 			
-			else res.status(400).json({message:"authentication failed, check your username or password"});
-		});
-	}
-}
+  // check that both username and password are defined
+  if (req.body.username === undefined || 
+      req.body.password === undefined)
+  {
+    res.status(400).json(failure); 
+  } else {
+
+    // find user by its name
+    User.findOne({username: req.body.username}, function (error, user) {
+      
+      // if error or user does not exist, report authentication failure
+      if (error || !user) { res.status(400).json(failure); } 
+      else {
+
+        // generate hash from password and salt and compare it to stored hash
+        getHash(req.body.password, user.salt, function(error, hash) {
+          if (error || user.hash !== hash) {
+            res.status(400).json(failure);
+          } else {
+            // if hash is correct, success!
+            req.session.regenerate(function() {
+              req.session.user = user;
+              res.status(200)
+                 .json({message: 'Authentication succeeded.'});            
+            });
+          }
+        });
+      }
+    });
+  }
+};
 
 // logout
 exports.logout = function (req, res) {
-	var username = req.session.user.username;
-	req.session.destroy(function () {
-		res.status(200).json({message:username +" is logged out"});
-	});
-}
+  req.session.destroy(function () {
+    res.status(200)
+       .json({message: 'Logout succeeded.'});
+  });
+};
 
 // to now who is logged in
 exports.me = function (req, res) {
-    res.status(200).json({_id:req.session.user._id, 
-    					  username:req.session.user.username,
-    					  role:req.session.user.role,
-    					  description:req.session.user.description
-    					});
-}
+  res.status(200)
+     .json({_id: req.session.user._id,
+            username: req.session.user.username,
+            role: req.session.user.role,
+            description: req.session.user.description});
+};
 
-// check if a user is logged in
-exports.islogin = function (req, res, next) {
-    if (req.session.user) next();
-    else res.status(400).json( {message:"Acces denied, you are not logged in"});
-}

@@ -30,5 +30,5 @@ exports.History = HistorySchema = new Schema({
 	date : {type: Date, 'default': Date.now},
 	id_user: {type: String, required: true, trim: true, index : true},
 	modification: {type: Schema.Types.Mixed, 'default' : '', index : true} 	
-}, { versionKey: false }); 
+}, { versionKey: false });
 

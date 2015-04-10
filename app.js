@@ -31,10 +31,10 @@ var program = require('commander');
 var mongoose = require('mongoose');
 var MongoStore = require('connect-mongo')(express);
 
-var userAPI = require('./controllers/UserAPI');
 var User = require('./models/User');
 var routes = require('./routes/routes');
 var Session = require('./controllers/Session');
+
 
 program
     .option('--port <port>', 'Local port to listen to (default: 3000)', parseInt)
@@ -91,37 +91,23 @@ app.options('*', cors(cors_options));
 //start routes:
 routes.initialize(app);
 
-User.findOne({username: "root"}, function (error, user) {
-  if (user || root_password) {
+User.findOne({username: "root"}, function (error, root) {
+  if (root || root_password) {
 
-    if (!user) {
-      user = new User({username: "root", role: "admin"});
+    if (!root) {
+      root = new User({username: "root", role: "admin"});
     }
 
-    // if (root_password) {
-    //   bcrypt.genSalt(10, function(err, salt) {
-    //       bcrypt.hash(root_password, salt, function(err, hash) {
-    //           user.salt = salt;
-    //           user.hash = hash;
-    //           user.save(function (err, user) {
-    //             if (err) {
-    //               console.log('error when setting root password')
-    //             } else {
-    //               console.log('successfully set root password');
-    //             }
-    //           });
-    //       });
-    //   });
-    // }
-
     if (root_password) {
-      hash(root_password, function (error, new_salt, new_hash) {
-        user.salt = new_salt;
-        user.hash = new_hash;
-        user.save(function (error, user) {
 
+      Session.generateSaltAndHash(root_password, function(error, salt, hash) {
+        root.salt = salt;
+        root.hash = hash;
+        root.save(function (error, root) {
+          console.log('Root password successfully updated.');
         });
       });
+
     }
 
     http.createServer(app).listen(app.get('port'), process.env.IP, function () {

@@ -28,7 +28,7 @@ var ObjectId = Schema.ObjectId;
 var CorpusSchema = require('./Corpus').CorpusSchema;
 var HistorySchema = require('./History').HistorySchema;
 
-var Media = new Schema({
+var Medium = new Schema({
 	id_corpus : {type : ObjectId, ref : 'CorpusSchema'},
 	name: {type: String, required: true, trim: true},
 	description: {type : Schema.Types.Mixed, 'default' : ''},   	
@@ -36,4 +36,4 @@ var Media = new Schema({
     history : [HistorySchema]	
 }, { versionKey: false });
 
-module.exports = mongoose.model('Media', Media);
+module.exports = mongoose.model('Medium', Medium);

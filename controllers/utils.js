@@ -25,7 +25,7 @@ SOFTWARE.
 var User = require('../models/User');
 var	Group = require('../models/Group');
 var Corpus = require('../models/Corpus');
-var	Media = require('../models/Media');
+var	Medium = require('../models/Medium');
 var	Layer = require('../models/Layer');
 var	Annotation = require('../models/Annotation');
 var	Queue = require('../models/Queue');
@@ -52,7 +52,7 @@ exports.checkRightACL = function (ressource, user, groups, list_right) {
 	return false;
 }
 
-exports.date = function(req, res){
+exports.date = function (req, res) {
 	var date = new Date();
 	res.status(200).json({date:date});
 }
@@ -107,7 +107,7 @@ var mimeTypes = {
 	".ogg": "video/ogg"
 };
 
-exports.getMineType = function(filePath){
+exports.getMineType = function (filePath) {
 	var mineOfFile = filePath.split('.').pop();
     var tmpMine = "." + mineOfFile;
     mineOfFile = mimeTypes[tmpMine];

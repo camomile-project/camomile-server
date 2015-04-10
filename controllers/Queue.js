@@ -22,17 +22,11 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-var User = require('../models/User');
-var	Group = require('../models/Group');
-var Corpus = require('../models/Corpus');
-var	Media = require('../models/Media');
-var	Layer = require('../models/Layer');
-var	Annotation = require('../models/Annotation');
 var	Queue = require('../models/Queue');
 
 // check if the id_queue exists in the db
-exports.exist = function(req, res, next) {
-	Queue.findById(req.params.id_queue, function(error, queue){
+exports.exists = function (req, res, next) {
+	Queue.findById(req.params.id_queue, function (error, queue) {
 		if (error) res.status(400).json(error);
 		else if (!queue) res.status(400).json({message:"The queue doesn't exists"});
 		else next();
@@ -41,7 +35,7 @@ exports.exist = function(req, res, next) {
 
 // create a queue
 exports.create = function (req, res) {
-	if (req.body.name == undefined) res.status(400).json({message:"the name is not defined"}); 
+	if (req.body.name == undefined) res.status(400).json({message:"the name is not defined"});
 	if (req.body.name == "") 		res.status(400).json({message:"empty string for name is not allowed"});
 	var queue = new Queue({
 		name: req.body.name,
@@ -63,14 +57,14 @@ exports.getAll = function (req, res) {
 }
 
 // retrieve a particular queue with his _id
-exports.getInfo = function(req, res){
-	Queue.findById(req.params.id_queue, function(error, queue){
+exports.getOne = function (req, res) {
+	Queue.findById(req.params.id_queue, function (error, queue) {
 		res.status(200).json(queue);
 	});
 }
 
 //update information of a queue
-exports.update = function(req, res){
+exports.update = function (req, res) {
 	var error=null;
 	var update = {};
 	if (req.body.name) update.name = req.body.name;
@@ -82,23 +76,23 @@ exports.update = function(req, res){
 }
 
 //push element at the end of the queue
-exports.push = function(req, res){
+exports.push = function (req, res) {
 	if (req.body.list == undefined) res.status(400).json({message:"list of field is empty"});
 	Queue.findById(req.params.id_queue, function (error, queue) {
 		for(var i = 0; i < req.body.list.length; i++) queue.list.push(req.body.list[i]);
-		queue.save(function(error, newQueue) {
+		queue.save(function (error, newQueue) {
 			if (!error) res.status(200).json(newQueue);
 		});		
 	});	
 }
 
 //pop element at the end of the queue
-exports.pop = function(req, res){
+exports.pop = function (req, res) {
 	Queue.findById(req.params.id_queue, function (error, queue) {
 		if (queue.list.length <0) res.status(400).json({message:"list is empty"});
 		ret = queue.list.slice(0,1);
 		queue.list.splice(0,1);
-		queue.save(function(error2, newQueue) {
+		queue.save(function (error2, newQueue) {
 			if (error2) res.status(400).json({message:error2});
 			else res.status(200).json(ret[0]);
 		});		

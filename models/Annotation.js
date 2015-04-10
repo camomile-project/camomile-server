@@ -26,12 +26,12 @@ var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
 var ObjectId = Schema.ObjectId;
 var LayerSchema = require('./Layer').LayerSchema;
-var MediaSchema = require('./Media').MediaSchema;
+var MediumSchema = require('./Medium').MediumSchema;
 var HistorySchema = require('./History').HistorySchema;
  
 var Annotation = new Schema({
 	id_layer : {type : ObjectId, ref : 'LayerSchema'},
-	id_media : {type : ObjectId, ref : 'MediaSchema'},
+	id_medium : {type : ObjectId, ref : 'MediumSchema'},
 	fragment : {type : Schema.Types.Mixed, index : true, 'default' : ''},
 	data : {type : Schema.Types.Mixed, 'default' : ''},
 	history : [HistorySchema]	
