@@ -33,7 +33,7 @@ var Corpus = require('../models/Corpus');
 var	Medium = require('../models/Medium');
 
 // check if req.session.user._id have the good right to see this media.id_corpus
-exports.hasRights = function (list_right) {
+exports.hasRights = function (minRight) {
 	return function (req, res, next) {
 		async.waterfall([
 			function (callback) {										// find the user
@@ -53,7 +53,7 @@ exports.hasRights = function (list_right) {
 			},
 			function (user, groups, media, callback) {					// find the corpus belong the media anc check if the user have the right to access this corpus
 				Corpus.findById(media.id_corpus, function (error, corpus) {
-					if (commonFuncs.checkRightACL(corpus, user, groups, list_right)) next();
+					if (commonFuncs.checkRights(corpus, user, groups, minRight)) next();
 					else error = "Acces denied";
 					callback(error);
 	    		});

@@ -32,7 +32,7 @@ var Annotation = require('../models/Annotation');
 
 
 // check if req.session.user._id have the good right to see this annotation.id_layer
-exports.hasRights = function (list_right) {
+exports.hasRights = function (minRight) {
   return function (req, res, next) {
     async.waterfall([
             function (callback) {                                        // find the user
@@ -52,7 +52,7 @@ exports.hasRights = function (list_right) {
             },
             function (user, groups, annotation, callback) {                  // find the layer belong the annotation anc check if the user have the right to access this layer
               Layer.findById(annotation.id_layer, function (error, layer) {
-                if (commonFuncs.checkRightACL(layer, user, groups, list_right)) next();
+                if (commonFuncs.checkRights(layer, user, groups, minRight)) next();
                 else error = "Acces denied";
                 callback(error);
               });

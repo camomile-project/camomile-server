@@ -183,14 +183,14 @@ exports.initialize = function (app) {
   app.get('/corpus/:id_corpus',
     Session.isLoggedIn,
     Utils.exists(mCorpus),
-    Corpus.hasRights(['O', 'W', 'R']),
+    Corpus.hasRights(Utils.READ),
     Corpus.getOne);
   // update info of a corpus
   // PUT /corpus/id_corpus --data '{"name":"new corpus", "description":{"...":"..."}}'
   app.put('/corpus/:id_corpus',
     Session.isLoggedIn,
     Utils.exists(mCorpus),
-    Corpus.hasRights(['O']),
+    Corpus.hasRights(Utils.ADMIN),
     Corpus.update);
   // delete a corpus
   // DELETE /corpus/id_corpus
@@ -198,7 +198,7 @@ exports.initialize = function (app) {
     Session.isLoggedIn,
     Session.isAdmin,
     Utils.exists(mCorpus),
-    Corpus.hasRights(['O']),
+    Corpus.hasRights(Utils.ADMIN),
     Corpus.remove);
 
   // create multi media for a corpus
@@ -206,21 +206,21 @@ exports.initialize = function (app) {
   app.post('/corpus/:id_corpus/medium',
     Session.isLoggedIn,
     Utils.exists(mCorpus),
-    Corpus.hasRights(['O', 'W']),
+    Corpus.hasRights(Utils.WRITE),
     Corpus.addMedia);
   // create a layer
   // POST /corpus/id_corpus/layer --data '{"name":"new layer", "description":{"...":"..."}, "fragment_type":{"...":"..."}, "data_type":{"...":"..."}}' 
   app.post('/corpus/:id_corpus/layer',
     Session.isLoggedIn,
     Utils.exists(mCorpus),
-    Corpus.hasRights(['O', 'W']),
+    Corpus.hasRights(Utils.WRITE),
     Corpus.addLayer);
   // list all media of a corpus
   // GET /corpus/id_corpus/medium
   app.get('/corpus/:id_corpus/medium',
     Session.isLoggedIn,
     Utils.exists(mCorpus),
-    Corpus.hasRights(['O', 'W', 'R']),
+    Corpus.hasRights(Utils.READ),
     Corpus.getAllMedia);
   // list all layer of a corpus 
   // GET /corpus/id_corpus/layer
@@ -233,7 +233,7 @@ exports.initialize = function (app) {
   app.get('/corpus/:id_corpus/ACL',
     Session.isLoggedIn,
     Utils.exists(mCorpus),
-    Corpus.hasRights(['O']),
+    Corpus.hasRights(Utils.ADMIN),
     Corpus.getRights);
   // update user ACL for a corpus
     // PUT /corpus/id_corpus/user/id_user --data '{"Right":"O"}'
@@ -241,7 +241,7 @@ exports.initialize = function (app) {
     Session.isLoggedIn,
     Utils.exists(mCorpus),
     Utils.exists(mUser),
-    Corpus.hasRights(['O']),
+    Corpus.hasRights(Utils.ADMIN),
     Corpus.updateUserRights);
     // update group ACL for a corpus
     // PUT /corpus/id_corpus/group/id_group --data '{"Right":"O"}'
@@ -249,7 +249,7 @@ exports.initialize = function (app) {
     Session.isLoggedIn,
     Utils.exists(mCorpus),
     Utils.exists(mGroup),
-    Corpus.hasRights(['O']),
+    Corpus.hasRights(Utils.ADMIN),
     Corpus.updateGroupRights);
 
     // DELETE /corpus/id_corpus/user/id_user 
@@ -257,7 +257,7 @@ exports.initialize = function (app) {
     Session.isLoggedIn,
     Utils.exists(mCorpus),
     Utils.exists(mUser),
-    Corpus.hasRights(['O']),
+    Corpus.hasRights(Utils.ADMIN),
     Corpus.removeUserRights);
     // delete a group right for a corpus
     // DELETE /corpus/id_corpus/group/id_group 
@@ -265,7 +265,7 @@ exports.initialize = function (app) {
     Session.isLoggedIn,
     Utils.exists(mCorpus),
     Utils.exists(mGroup),
-    Corpus.hasRights(['O']),
+    Corpus.hasRights(Utils.ADMIN),
     Corpus.removeGroupRights);
 
   // media
@@ -280,49 +280,49 @@ exports.initialize = function (app) {
   app.get('/medium/:id_medium',
     Session.isLoggedIn,
     Utils.exists(mMedium),
-    Medium.hasRights(['O', 'W', 'R']),
+    Medium.hasRights(Utils.READ),
     Medium.getOne);
   // update info of a media
   // PUT /medium/id_medium --data '{"name":"...", "url":"...", "description":{"...":"..."}}'
   app.put('/medium/:id_medium',
     Session.isLoggedIn,
     Utils.exists(mMedium),
-    Medium.hasRights(['O']),
+    Medium.hasRights(Utils.ADMIN),
     Medium.update);
   // delete a media
   // DELETE /medium/id_medium
   app.delete('/medium/:id_medium',
     Session.isLoggedIn,
     Utils.exists(mMedium),
-    Medium.hasRights(['O']),
+    Medium.hasRights(Utils.ADMIN),
     Medium.remove);
   // get video stream
   // GET /medium/id_medium/video
   app.get('/medium/:id_medium/video',
     Session.isLoggedIn,
     Utils.exists(mMedium),
-    Medium.hasRights(['O', 'W', 'R']),
+    Medium.hasRights(Utils.READ),
     Medium.getVideo);
   // get webm stream
   // GET /medium/id_medium/webm
   app.get('/medium/:id_medium/webm',
     Session.isLoggedIn,
     Utils.exists(mMedium),
-    Medium.hasRights(['O', 'W', 'R']),
+    Medium.hasRights(Utils.READ),
     Medium.getVideoWEBM);
   // get mp4 stream
   // GET /medium/id_medium/mp4
   app.get('/medium/:id_medium/mp4',
     Session.isLoggedIn,
     Utils.exists(mMedium),
-    Medium.hasRights(['O', 'W', 'R']),
+    Medium.hasRights(Utils.READ),
     Medium.getVideoMP4);
   // get ogv stream
   // GET /medium/id_medium/ogv
   app.get('/medium/:id_medium/ogv',
     Session.isLoggedIn,
     Utils.exists(mMedium),
-    Medium.hasRights(['O', 'W', 'R']),
+    Medium.hasRights(Utils.READ),
     Medium.getVideoOGV);
 
   // layer
@@ -337,21 +337,21 @@ exports.initialize = function (app) {
   app.get('/layer/:id_layer',
     Session.isLoggedIn,
     Utils.exists(mLayer),
-    Layer.hasRights(['O', 'W', 'R']),
+    Layer.hasRights(Utils.READ),
     Layer.getOne);
   // update info of a layer
   // PUT /layer/id_layer --data '{"name":"speaker", "description":{"...":"..."}}'
   app.put('/layer/:id_layer',
     Session.isLoggedIn,
     Utils.exists(mLayer),
-    Layer.hasRights(['O']),
+    Layer.hasRights(Utils.ADMIN),
     Layer.update);
   // delete a layer
   // DELETE /layer/id_layer
   app.delete('/layer/:id_layer',
     Session.isLoggedIn,
     Utils.exists(mLayer),
-    Layer.hasRights(['O']),
+    Layer.hasRights(Utils.ADMIN),
     Layer.remove);
 
   // create multi annotation
@@ -359,21 +359,21 @@ exports.initialize = function (app) {
   app.post('/layer/:id_layer/annotation',
     Session.isLoggedIn,
     Utils.exists(mLayer),
-    Layer.hasRights(['O', 'W']),
+    Layer.hasRights(Utils.WRITE),
     Layer.addAnnotation);
   // list all annotation of a layer
   // GET /layer/id_layer/annotation
   app.get('/layer/:id_layer/annotation',
     Session.isLoggedIn,
     Utils.exists(mLayer),
-    Layer.hasRights(['O', 'W', 'R']),
+    Layer.hasRights(Utils.READ),
     Layer.getAnnotations);
   // ACL of a particular layer
   // GET /corpus/id_layer/acl
   app.get('/layer/:id_layer/ACL',
     Session.isLoggedIn,
     Utils.exists(mLayer),
-    Layer.hasRights(['O']),
+    Layer.hasRights(Utils.ADMIN),
     Layer.getRights);
   // update user ACL for a layer
   // PUT /corpus/id_layer/user/id_user --data '{"Right":"O"}'
@@ -381,7 +381,7 @@ exports.initialize = function (app) {
     Session.isLoggedIn,
     Utils.exists(mLayer),
     Utils.exists(mUser),
-    Layer.hasRights(['O']),
+    Layer.hasRights(Utils.ADMIN),
     Layer.updateUserRights);
   // update group ACL for a layer
   // PUT /corpus/id_layer/group/id_group --data '{"Right":"O"}'
@@ -389,7 +389,7 @@ exports.initialize = function (app) {
     Session.isLoggedIn,
     Utils.exists(mLayer),
     Utils.exists(mGroup),
-    Layer.hasRights(['O']),
+    Layer.hasRights(Utils.ADMIN),
     Layer.updateGroupRights);
   // delete a user right for a layer
   // DELETE /corpus/id_layer/user/id_user 
@@ -397,7 +397,7 @@ exports.initialize = function (app) {
     Session.isLoggedIn,
     Utils.exists(mLayer),
     Utils.exists(mUser),
-    Layer.hasRights(['O']),
+    Layer.hasRights(Utils.ADMIN),
     Layer.removeUserRights);
     // delete a group right for a layer
   // DELETE /corpus/id_layer/group/id_group
@@ -405,7 +405,7 @@ exports.initialize = function (app) {
     Session.isLoggedIn,
     Utils.exists(mLayer),
     Utils.exists(mGroup),
-    Layer.hasRights(['O']),
+    Layer.hasRights(Utils.ADMIN),
     Layer.removeGroupRights);
 
   // annotation
@@ -420,21 +420,21 @@ exports.initialize = function (app) {
   app.get('/annotation/:id_annotation',
     Session.isLoggedIn,
     Utils.exists(mAnnotation),
-    Annotation.hasRights(['O', 'W', 'R']),
+    Annotation.hasRights(Utils.READ),
     Annotation.getOne);
   // update info of an annotation
   // PUT /annotation/id_annotation --data '{"user":"id_user", fragment":{"start":0, "end":15}, "data":"value", "id_medium":""}'
   app.put('/annotation/:id_annotation',
     Session.isLoggedIn,
     Utils.exists(mAnnotation),
-    Annotation.hasRights(['O', 'W']),
+    Annotation.hasRights(Utils.WRITE),
     Annotation.update);
   // delete annotation
   // DELETE /annotation/id_annotation
   app.delete('/annotation/:id_annotation',
     Session.isLoggedIn,
     Utils.exists(mAnnotation),
-    Annotation.hasRights(['O']),
+    Annotation.hasRights(Utils.ADMIN),
     Annotation.remove);
 
   // --- queue routes --- \\

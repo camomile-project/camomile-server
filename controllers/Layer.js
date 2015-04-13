@@ -23,7 +23,7 @@ SOFTWARE.
 */
 
 var async = require('async');
-var commonFuncs = require('../controllers/utils');
+var Utils = require('../controllers/utils');
 
 var User = require('../models/User');
 var	Group = require('../models/Group');
@@ -59,7 +59,7 @@ exports.printMultiRes = function (l_layer, res, history) {
 }
 
 // check if req.session.user._id have the good right to see this req.params.id_layer
-exports.hasRights = function (list_right) {
+exports.hasRights = function (minRight) {
 	return function (req, res, next) {
 		async.waterfall([
 			function (callback) {										// find the user
@@ -74,7 +74,7 @@ exports.hasRights = function (list_right) {
 			},
 			function (user, groups, callback) {							// find if the user have the right to access this layer
 				Layer.findById(req.params.id_layer, function (error, layer) {
-					if (commonFuncs.checkRightACL(layer, user, groups, list_right)) next();
+					if (Utils.checkRights(layer, user, groups, minRight)) next();
 					else error = "Acces denied";
 					callback(error);
 	    		});
@@ -173,7 +173,7 @@ exports.getRights = function (req, res) {
 
 // update ACL of a user
 exports.updateUserRights = function (req, res) {
-	if (req.body.right != 'O' && req.body.right != 'W' && req.body.right != 'R') res.status(400).json({message:"right must be 'O' or 'W' or 'R'"});
+	if (req.body.right != Utils.ADMIN && req.body.right != Utils.WRITE && req.body.right != Utils.READ) res.status(400).json({message:"Right must be 1 (READ), 2 (WRITE) or 3 (ADMIN)."});
 	Layer.findById(req.params.id_layer, function (error, layer) {			// find the layer
 		if (error) res.status(400).json({message:error});
 		var update = {ACL:layer.ACL};	
@@ -188,7 +188,7 @@ exports.updateUserRights = function (req, res) {
 
 // update ACL of a group
 exports.updateGroupRights = function (req, res) {
-	if (req.body.right != 'O' && req.body.right != 'W' && req.body.right != 'R') res.status(400).json({message:"right must be 'O' or 'W' or 'R'"});
+	if (req.body.right != Utils.ADMIN && req.body.right != Utils.WRITE && req.body.right != Utils.READ) res.status(400).json({message:"Right must be 1 (READ), 2 (WRITE) or 3 (ADMIN)."});
 	Layer.findById(req.params.id_layer, function (error, layer) {			// find the layer
 		if (error) res.status(400).json({message:error});
 		var update = {ACL:layer.ACL};	
@@ -285,7 +285,7 @@ exports.addAnnotation = function (req, res) {
 	});
 };
 
-// retrieve all annotation of a layer and where the user logged is 'O' or 'W' or 'R' on the corresponding layer
+// retrieve all annotation of a layer and where the user logged has READ access on the corresponding layer
 // and print _id, id_layer, fragment and data
 exports.getAnnotations = function (req, res) {
 	var field = '_id id_layer id_medium fragment data';

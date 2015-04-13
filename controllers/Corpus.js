@@ -23,7 +23,7 @@ SOFTWARE.
 */
 
 var async = require('async');
-var commonFuncs = require('../controllers/utils');
+var Utils = require('../controllers/utils');
 var	layerAPI = require('../controllers/Layer');
 
 var User = require('../models/User');
@@ -59,7 +59,7 @@ exports.create = function (req, res) {
 									 			   "description":new_corpus.description}
 									});
 			new_corpus.ACL = {users:{}, groups:{}};
-			new_corpus.ACL.users[req.session.user._id]='O';				// set 'O' right to the user logged
+			new_corpus.ACL.users[req.session.user._id] = Utils.ADMIN;
 			var corpus = new Corpus(new_corpus).save(function (error, newCorpus) {		// save it into the db
 				if (newCorpus) res.status(200).json(newCorpus);
 				callback(error);
@@ -97,7 +97,7 @@ printMultiRes = function (l_corpus, res, history) {
 // ----------------------------------------------------------------------------
 
 // check if req.session.user._id have the good right to see this req.params.id_corpus
-exports.hasRights = function (list_right) {
+exports.hasRights = function (minRight) {
 	return function (req, res, next) {
 		async.waterfall([
 			function (callback) {										// find the user
@@ -112,7 +112,7 @@ exports.hasRights = function (list_right) {
 			},
 			function (user, groups, callback) {							// find if the user have the right to access this corpus
 				Corpus.findById(req.params.id_corpus, function (error, corpus) {
-					if (commonFuncs.checkRightACL(corpus, user, groups, list_right)) next();
+					if (Utils.checkRights(corpus, user, groups, minRight)) next();
 					else error = "Acces denied";
 					callback(error);
 	    		});
@@ -123,7 +123,7 @@ exports.hasRights = function (list_right) {
 	}
 }
 
-// retrieve all corpus where the user logged is 'O' or 'W' or 'R' and print _id, name, description and history
+// retrieve all corpus where the user logged has read access and print _id, name, description and history
 exports.getAll = function (req, res) {
 	var filter = {};
 	if (req.query.name) filter['name'] = req.query.name;
@@ -142,7 +142,7 @@ exports.getAll = function (req, res) {
 			Corpus.find(filter, function (error, l_corpus) {					// print all corpus where the user have the good right
     			async.filter(l_corpus, 
     			        	 function (corpus, callback) {
-    			          		callback (commonFuncs.checkRightACL(corpus, user, groups, ['O', 'W', 'R']));
+    			          		callback (Utils.checkRights(corpus, user, groups, Utils.READ));
     			        	 },
     			        	 function (results) { printMultiRes(results, res, req.query.history);} 
     			);	
@@ -232,7 +232,7 @@ exports.getRights = function (req, res) {
 
 // update ACL of a user
 exports.updateUserRights = function (req, res) {
-	if (req.body.right != 'O' && req.body.right != 'W' && req.body.right != 'R') res.status(400).json({message:"right must be 'O' or 'W' or 'R'"});
+	if (req.body.right != Utils.ADMIN && req.body.right != Utils.WRITE && req.body.right != Utils.READ) res.status(400).json({message:"Right must be 1 (READ), 2 (WRITE) or 3 (ADMIN)."});
 	Corpus.findById(req.params.id_corpus, function (error, corpus) {		// find the corpus
 		var update = {ACL:corpus.ACL};		
 		if (error) res.status(400).json({message:error});
@@ -247,7 +247,7 @@ exports.updateUserRights = function (req, res) {
 
 // update ACL of a group
 exports.updateGroupRights = function (req, res) {
-	if (req.body.right != 'O' && req.body.right != 'W' && req.body.right != 'R') res.status(400).json({message:"right must be 'O' or 'W' or 'R'"});
+	if (req.body.right != Utils.ADMIN && req.body.right != Utils.WRITE && req.body.right != Utils.READ) res.status(400).json({message:"Right must be 1 (READ), 2 (WRITE) or 3 (ADMIN)."});
 	Corpus.findById(req.params.id_corpus, function (error, corpus) {		// find the corpus
 		var update = {ACL:corpus.ACL};		
 		if (error) res.status(400).json({message:error});
@@ -406,7 +406,7 @@ exports.addLayer = function (req, res) {
 												  "data_type":new_layer.data_type}
 									});
 			new_layer.ACL = {users:{}, groups:{}};
-			new_layer.ACL.users[req.session.user._id]='O';				// set 'O' right to the user logged
+			new_layer.ACL.users[req.session.user._id] = Utils.ADMIN;
 			var layer = new Layer(new_layer).save(function (error, newLayer_res) {	// save the new layer
 				callback(error, newLayer_res);
 			});			
@@ -440,7 +440,7 @@ exports.addLayer = function (req, res) {
 	});
 };
 
-// retrieve all media of a corpus which the user logged is 'O' or 'W' or 'R' for the corresponding corpus 
+// retrieve all media of a corpus which the user logged has READ access for the corresponding corpus 
 // and print _id, name, id_corpus, description, url and history
 exports.getAllMedia = function (req, res) {
 	var field = '_id id_corpus name url description';
@@ -458,7 +458,7 @@ exports.getAllMedia = function (req, res) {
 	});
 }
 
-// retrieve all layer of a corpus which the user logged is 'O' or 'W' or 'R' for the layer 
+// retrieve all layer of a corpus which the user logged has READ access for the layer 
 // and print _id, name, description, id_corpus, fragment_type, data_type, history
 exports.getAllLayer = function (req, res) {
 	var filter = {};
@@ -480,7 +480,7 @@ exports.getAllLayer = function (req, res) {
 			Layer.find(filter, function (error, layers) {
     			async.filter(layers, 									// filter the list with layer belong the corpus and where the user have the good right
     			        	 function (layer, callback) {
-		        	 			if (layer.id_corpus == req.params.id_corpus && commonFuncs.checkRightACL(layer, user, groups, ['O', 'W', 'R'])) callback(true);
+		        	 			if (layer.id_corpus == req.params.id_corpus && Utils.checkRights(layer, user, groups, Utils.READ)) callback(true);
 		        	 			else callback(false);   			        	 	
     			        	 },
     			        	 function (results) { layerAPI.printMultiRes(results, res, req.query.history);} 
