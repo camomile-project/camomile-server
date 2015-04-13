@@ -37,20 +37,23 @@ var Queue = require('../models/Queue');
 // exists(Corpus) === exists(Corpus, 'id_corpus') !== exists(Corpus, 'id')
 // exists(Medium) === exists(Medium, 'id_medium') !== exists(Medium, 'id')
 
-exports.exists = function(model, paramName) {
-    return function(req, res, next) {
+exports.exists = function (model, paramName) {
+  return function (req, res, next) {
 
-        if (paramName === undefined) { 
-            // model = Corpus ==> modelName = Corpus ==> paramName = id_corpus
-            paramName = 'id_' + model.modelName.toLowerCase(); 
-        }
-        model.findById(req.params[paramName], function(error, resource) {
-            if (error || !resource) {
-                res.status(400)
-                   .json({message: model.modelName + ' does not exist.'});
-            }
-        })
-    };
+    if (paramName === undefined) {
+      // model = Corpus ==> modelName = Corpus ==> paramName = id_corpus
+      paramName = 'id_' + model.modelName.toLowerCase();
+    }
+
+    model.findById(req.params[paramName], function (error, resource) {
+      if (error || !resource) {
+        res.status(400)
+           .json({message: model.modelName + ' does not exist.'});
+      } else {
+        next();
+      }
+    });
+  };
 };
 
 exports.READ = 1;
