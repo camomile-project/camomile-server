@@ -106,11 +106,11 @@ exports.remove = function (req, res) {
 		function(callback) {											// remove id_group from ACL of all corpus
 			Corpus.find(function(error, l_corpus){
 				for(var i = 0; i < l_corpus.length; i++) {
-					if (l_corpus[i].groups_ACL) {
-						if (l_corpus[i].groups_ACL[req.params.id_group]) {
-							var update = {groups_ACL : l_corpus[i].groups_ACL};	
-							delete update.groups_ACL[req.params.id_group];
-							if (Object.getOwnPropertyNames(update.groups_ACL).length === 0) update.groups_ACL = undefined;
+					if (l_corpus[i].ACL.groups) {
+						if (l_corpus[i].ACL.groups[req.params.id_group]) {
+							var update = {ACL.groups : l_corpus[i].ACL.groups};	
+							delete update.ACL.groups[req.params.id_group];
+							if (Object.getOwnPropertyNames(update.ACL.groups).length === 0) update.ACL.groups = undefined;
 							Corpus.findByIdAndUpdate(l_corpus[i]._id, update, function (error, corpus) {});	
 						}
 					}
@@ -121,11 +121,11 @@ exports.remove = function (req, res) {
 		function(callback) {											// remove id_group from ACL of all layer
 			Layer.find(function(error, l_layer){
 				for(var i = 0; i < l_layer.length; i++) {
-					if (l_layer[i].groups_ACL) {
-						if (l_layer[i].groups_ACL[req.params.id_group]) {
-							var update = {groups_ACL : l_layer[i].groups_ACL};	
-							delete update.groups_ACL[req.params.id_group];
-							if (Object.getOwnPropertyNames(update.groups_ACL).length === 0) update.groups_ACL = undefined;
+					if (l_layer[i].ACL.groups) {
+						if (l_layer[i].ACL.groups[req.params.id_group]) {
+							var update = {ACL.groups : l_layer[i].ACL.groups};	
+							delete update.ACL.groups[req.params.id_group];
+							if (Object.getOwnPropertyNames(update.ACL.groups).length === 0) update.ACL.groups = undefined;
 							Layer.findByIdAndUpdate(l_layer[i]._id, update, function (error, layer) {});	
 						}
 					}
