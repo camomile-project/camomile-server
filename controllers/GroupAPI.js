@@ -108,7 +108,7 @@ exports.remove = function (req, res) {
 				for(var i = 0; i < l_corpus.length; i++) {
 					if (l_corpus[i].ACL.groups) {
 						if (l_corpus[i].ACL.groups[req.params.id_group]) {
-							var update = {ACL:corpus.ACL};	
+							var update = {ACL:l_corpus[i].ACL};	
 							delete update.ACL.groups[req.params.id_group];				// delete the group from ACL
 							if (Object.getOwnPropertyNames(update.ACL.groups).length === 0) update.ACL.groups = undefined;
 							Corpus.findByIdAndUpdate(req.params.id_corpus, update, function (error, newCorpus) {});	
@@ -123,7 +123,7 @@ exports.remove = function (req, res) {
 				for(var i = 0; i < l_layer.length; i++) {
 					if (l_layer[i].ACL.groups) {
 						if (l_layer[i].ACL.groups[req.params.id_group]) {
-							var update = {ACL:layer.ACL};	
+							var update = {ACL:l_layer[i].ACL};	
 							delete update.ACL.groups[req.params.id_group];
 							if (Object.getOwnPropertyNames(update.ACL.groups).length === 0) update.ACL.groups = undefined;
 							Layer.findByIdAndUpdate(l_layer[i]._id, update, function (error, layer) {});	
