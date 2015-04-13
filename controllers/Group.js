@@ -64,7 +64,7 @@ exports.create = function (req, res) {
 			var group = new Group({
 				name: req.body.name,
 				description: req.body.description,
-				users_list: []
+				users: []
 			}).save(function (error, newGroup) {						// save it into the db
 				if (newGroup) res.status(200).json(newGroup);
 				callback(error);
@@ -135,9 +135,9 @@ exports.remove = function (req, res) {
 exports.addUser = function (req, res) {
 	Group.findById(req.params.id_group, function (error, group) {		// find the group
 		if (error) res.status(400).json(error);
-		else if (group.users_list.indexOf(req.params.id_user) != -1) res.status(400).json({error:"This user is already in the group"})
+		else if (group.users.indexOf(req.params.id_user) != -1) res.status(400).json({error:"This user is already in the group"})
 		else {
-			group.users_list.push(req.params.id_user);					// add the user to the list
+			group.users.push(req.params.id_user);					// add the user to the list
 			group.save(function (error3, dat) {							// save the group
 				if (error3) res.status(400).json(error);
 				else res.status(200).json(dat);
@@ -151,9 +151,9 @@ exports.removeUser  = function (req, res) {
 	Group.findById(req.params.id_group, function (error, group) {		// find the group
 		if (error) res.status(400).json(error);
 		else {
-			var index = group.users_list.indexOf(req.params.id_user);	// check if id_user is in the group
+			var index = group.users.indexOf(req.params.id_user);	// check if id_user is in the group
 			if (index > -1) {
-				group.users_list.splice(index, 1);
+				group.users.splice(index, 1);
 				group.save(function (error2, NewGroup) {					// save the group
 					if (error) res.status(400).json(error);
 					else res.json(NewGroup);

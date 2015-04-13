@@ -28,7 +28,7 @@ var Schema = mongoose.Schema;
 var Group = new Schema({
     name: {type:String, lowercase: true, trim: true, required: true},
     description: {type : Schema.Types.Mixed, 'default' : ''},   	
-    users_list: [{ type:String, lowercase: true, trim:true}]
+    users: [{ type:String, lowercase: true, trim:true}]
 }, { versionKey: false });
 
 module.exports = mongoose.model('Group', Group);

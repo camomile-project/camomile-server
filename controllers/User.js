@@ -198,7 +198,7 @@ exports.remove  = function (req, res) {
 
 // retrieve the list of group of a user
 exports.getGroups = function (req, res) {
-  Group.find({'users_list' : {$regex : new RegExp('^'+ req.params.id_user + '$', "i")}}, function (error2, groups) {
+  Group.find({'users' : {$regex : new RegExp('^'+ req.params.id_user + '$', "i")}}, function (error2, groups) {
     if (error2) res.status(400).json({error:"error", message:error2});
     else res.status(200).json(groups);
   });

@@ -106,7 +106,7 @@ exports.hasRights = function (list_right) {
 				});
 			},
 			function (user, callback) {									// find the list of group belong the user
-				Group.find({'users_list' : {$regex : new RegExp('^'+ req.session.user._id + '$', "i")}}, function (error, groups) {
+				Group.find({'users' : {$regex : new RegExp('^'+ req.session.user._id + '$', "i")}}, function (error, groups) {
 					callback(error, user, groups);
 				});
 			},
@@ -134,7 +134,7 @@ exports.getAll = function (req, res) {
 			});
 		},
 		function (user, callback) {										// find the list of group belong the user
-			Group.find({'users_list' : {$regex : new RegExp('^'+ req.session.user._id + '$', "i")}}, function (error, groups) {
+			Group.find({'users' : {$regex : new RegExp('^'+ req.session.user._id + '$', "i")}}, function (error, groups) {
 				callback(error, user, groups);
 			});
 		},
@@ -472,7 +472,7 @@ exports.getAllLayer = function (req, res) {
 			});
 		},
 		function (user, callback) {										// find the group belong to the user logged
-			Group.find({'users_list' : {$regex : new RegExp('^'+ req.session.user._id + '$', "i")}}, function (error, groups) {
+			Group.find({'users' : {$regex : new RegExp('^'+ req.session.user._id + '$', "i")}}, function (error, groups) {
 				callback(error, user, groups);
 			});
 		},

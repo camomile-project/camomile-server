@@ -41,7 +41,7 @@ exports.hasRights = function (list_right) {
               });
             },
             function (user, callback) {                                  // find the list of group belong the user
-              Group.find({'users_list' : {$regex : new RegExp('^'+ req.session.user._id + '$', "i")}}, function (error, groups) {
+              Group.find({'users' : {$regex : new RegExp('^'+ req.session.user._id + '$', "i")}}, function (error, groups) {
                 callback(error, user, groups);
               });
             },
