@@ -158,11 +158,11 @@ exports.remove  = function (req, res) {
         function (callback) {                                           // remove id_user from ACL of all corpus
           Corpus.find(function (error, l_corpus) {
             for(var i = 0; i < l_corpus.length; i++) {
-              if (l_corpus[i].users_ACL) {
-                if (l_corpus[i].users_ACL[req.params.id_user]) {
-                  var update = {users_ACL : l_corpus[i].users_ACL};   
-                  delete update.users_ACL[req.params.id_user];
-                  if (Object.getOwnPropertyNames(update.users_ACL).length === 0) update.users_ACL = undefined;
+              if (l_corpus[i].ACL.users) {
+                if (l_corpus[i].ACL.users[req.params.id_user]) {
+                  var update = {ACL.users : l_corpus[i].ACL.users};   
+                  delete update.ACL.users[req.params.id_user];
+                  if (Object.getOwnPropertyNames(update.ACL.users).length === 0) update.ACL.users = undefined;
                   Corpus.findByIdAndUpdate(l_corpus[i]._id, update, function (error, corpus) {}); 
                 }
               }
@@ -173,11 +173,11 @@ exports.remove  = function (req, res) {
         function (callback) {                                           // remove id_user from ACL of all layer
           Layer.find(function (error, l_layer) {
             for(var i = 0; i < l_layer.length; i++) {
-              if (l_layer[i].users_ACL) {
-                if (l_layer[i].users_ACL[req.params.id_user]) {
-                  var update = {users_ACL : l_layer[i].users_ACL};    
-                  delete update.users_ACL[req.params.id_user];
-                  if (Object.getOwnPropertyNames(update.users_ACL).length === 0) update.users_ACL = undefined;
+              if (l_layer[i].ACL.users) {
+                if (l_layer[i].ACL.users[req.params.id_user]) {
+                  var update = {ACL.users : l_layer[i].ACL.users};    
+                  delete update.ACL.users[req.params.id_user];
+                  if (Object.getOwnPropertyNames(update.ACL.users).length === 0) update.ACL.users = undefined;
                   Layer.findByIdAndUpdate(l_layer[i]._id, update, function (error, layer) {});    
                 }
               }
