@@ -1,4 +1,5 @@
-from . import CLIENT, ROOT_USERNAME, ROOT_PASSWORD
+from . import CLIENT, USER_USERNAME, USER_PASSWORD, USER_DESCRIPTION
+from . import error_message, success_message
 
 
 class TestAuthentication:
@@ -6,15 +7,31 @@ class TestAuthentication:
     def setup(self):
         pass
 
-    def testLogin(self):
-        message = {'message': 'Authentication succeeded.'}
-        assert CLIENT.login(ROOT_USERNAME, ROOT_PASSWORD) == message
+    def teardown(self):
+        try:
+            CLIENT.logout()
+        except:
+            pass
 
-    def testLogout(self):
-        CLIENT.login(ROOT_USERNAME, ROOT_PASSWORD)
-        message = {'message': 'Logout succeeded.'}
-        assert CLIENT.logout() == message
+    @success_message('Authentication succeeded.')
+    def testLogin(self):
+        return CLIENT.login(USER_USERNAME, USER_PASSWORD)
+
+    @error_message('Authentication failed (check your username and password).')
+    def testLoginWrongPassword(self):
+        CLIENT.login(USER_USERNAME, USER_PASSWORD[::-1])
+
+    @error_message('Authentication failed (check your username and password).')
+    def testLoginWrongUsername(self):
+        CLIENT.login(USER_USERNAME[::-1], USER_PASSWORD)
 
     def testMe(self):
-        CLIENT.login(ROOT_USERNAME, ROOT_PASSWORD)
-        assert CLIENT.me().username == ROOT_USERNAME
+        CLIENT.login(USER_USERNAME, USER_PASSWORD)
+        user = CLIENT.me()
+        assert ((user.username == USER_USERNAME) and
+                (user.description == USER_DESCRIPTION))
+
+    @success_message('Logout succeeded.')
+    def testLogout(self):
+        CLIENT.login(USER_USERNAME, USER_PASSWORD)
+        return CLIENT.logout()
