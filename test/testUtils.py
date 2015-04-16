@@ -1,13 +1,15 @@
+from __future__ import unicode_literals
 from . import CLIENT, USER_USERNAME, USER_PASSWORD
 from datetime import datetime
+from unittest import TestCase
 
 
-class TestUtils:
+class TestUtils(TestCase):
 
-    def setup(self):
+    def setUp(self):
         CLIENT.login(USER_USERNAME, USER_PASSWORD)
 
-    def teardown(self):
+    def tearDown(self):
         try:
             CLIENT.logout()
         except:

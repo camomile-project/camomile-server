@@ -1,13 +1,15 @@
+from __future__ import unicode_literals
 from . import CLIENT, USER_USERNAME, USER_PASSWORD, USER_DESCRIPTION
 from . import error_message, success_message
+from unittest import TestCase
 
 
-class TestAuthentication:
+class TestAuthentication(TestCase):
 
-    def setup(self):
+    def setUp(self):
         pass
 
-    def teardown(self):
+    def tearDown(self):
         try:
             CLIENT.logout()
         except:

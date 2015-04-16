@@ -1,3 +1,4 @@
+from __future__ import unicode_literals
 from . import CLIENT
 from . import ROOT_USERNAME, ROOT_PASSWORD
 from . import ADMIN_USERNAME, ADMIN_PASSWORD
@@ -5,12 +6,13 @@ from . import USER_USERNAME, USER_PASSWORD
 from . import error_message, success_message
 import string
 import random
+from unittest import TestCase
 
 
 def createRandomUser(role='user'):
 
     username = ''.join(random.choice(string.ascii_lowercase)
-                       for _ in range(random.randint(5, 15)))
+                       for _ in range(random.randint(10, 15)))
 
     password = ''.join(random.choice(string.ascii_lowercase +
                                      string.ascii_uppercase +
@@ -26,12 +28,12 @@ def createRandomUser(role='user'):
             'description': description, 'role': role}
 
 
-class TestUserAsRoot:
+class TestUserAsRoot(TestCase):
 
-    def setup(self):
+    def setUp(self):
         CLIENT.login(ROOT_USERNAME, ROOT_PASSWORD)
 
-    def teardown(self):
+    def tearDown(self):
         try:
             CLIENT.logout()
         except:
@@ -43,12 +45,12 @@ class TestUserAsRoot:
     #     CLIENT.deleteUser(user._id)
 
 
-class TestUserAsAdmin:
+class TestUserAsAdmin(TestCase):
 
-    def setup(self):
+    def setUp(self):
         CLIENT.login(ADMIN_USERNAME, ADMIN_PASSWORD)
 
-    def teardown(self):
+    def tearDown(self):
         try:
             CLIENT.logout()
         except:
@@ -87,9 +89,17 @@ class TestUserAsAdmin:
                           description=randomUser['description'],
                           role='god')
 
-    # @error_message('Username already in use.')
-    # def testCreateUserExistingName(self):
-    #     pass
+    @error_message('Username already in use.')
+    def testCreateUserExistingName(self):
+        randomUser = createRandomUser()
+        CLIENT.createUser(randomUser['username'],
+                          randomUser['password'],
+                          description=randomUser['description'],
+                          role=randomUser['role'])
+        CLIENT.createUser(randomUser['username'],
+                          randomUser['password'],
+                          description=randomUser['description'],
+                          role=randomUser['role'])
 
     def testGetUsers(self):
         assert isinstance(CLIENT.getUsers(), list)
@@ -104,12 +114,12 @@ class TestUserAsAdmin:
         CLIENT.getUser(user._id[::-1])
 
 
-class TestUserAsRegularUser:
+class TestUserAsRegularUser(TestCase):
 
-    def setup(self):
+    def setUp(self):
         CLIENT.login(USER_USERNAME, USER_PASSWORD)
 
-    def teardown(self):
+    def tearDown(self):
         try:
             CLIENT.logout()
         except:
