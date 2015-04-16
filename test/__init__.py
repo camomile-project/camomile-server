@@ -22,7 +22,7 @@ def success_message(message):
 
 
 def error_message(message):
-    response = {'message': message}
+    expected = {'message': message}
 
     def error_message_decorator(f):
         @wraps(f)
@@ -30,7 +30,8 @@ def error_message(message):
             try:
                 f(self)
             except HTTPError, e:
-                assert e.response.json() == response
+                actual = e.response.json()
+                assert actual == expected
             else:
                 raise AssertionError()
         return wrapper
@@ -42,14 +43,14 @@ URL = 'http://localhost:3000'
 CLIENT = Camomile(URL)
 
 ROOT_USERNAME = 'root'
-ROOT_PASSWORD = 'C4m0m1l3'
+ROOT_PASSWORD = 'C4m0m1l3C4m0m1l3C4m0m1l3'
 
-ADMIN_USERNAME = 'admin'
-ADMIN_PASSWORD = 'p4s5w0rD'
+ADMIN_USERNAME = 'administrator'
+ADMIN_PASSWORD = 'p4s5w0rDp4s5w0rDp4s5w0rD'
 ADMIN_DESCRIPTION = 'admin user'
 
-USER_USERNAME = 'user'
-USER_PASSWORD = '123456'
+USER_USERNAME = 'hellokitty'
+USER_PASSWORD = '123456789123456789123456789'
 USER_DESCRIPTION = 'regular user'
 
 
@@ -90,6 +91,8 @@ def setup():
         client.createUser(ADMIN_USERNAME, ADMIN_PASSWORD,
                           description=ADMIN_DESCRIPTION,
                           role='admin')
+
+    time.sleep(2)
 
 
 def teardown():
