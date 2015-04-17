@@ -39,10 +39,14 @@ class TestUserAsRoot(TestCase):
         except:
             pass
 
-    # @success_message('Successfully deleted.')
-    # def testDeleteUser(self):
-    #     user = createRandomUser()
-    #     CLIENT.deleteUser(user._id)
+    @success_message('Successfully deleted.')
+    def testDeleteUser(self):
+        randomUser = createRandomUser()
+        user = CLIENT.createUser(randomUser['username'],
+                                 randomUser['password'],
+                                 description=randomUser['description'],
+                                 role=randomUser['role'])
+        CLIENT.deleteUser(user._id)
 
 
 class TestUserAsAdmin(TestCase):
