@@ -26,11 +26,22 @@ var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
 
 var User = new Schema({
-    username: {type:String, lowercase: true, trim: true, required: true},
-    description: {type : Schema.Types.Mixed, 'default' : ''},   	
-    role: String,
-    salt: String,
-    hash: String
-}, { versionKey: false });
+  username: {
+    type: String,
+    required: true,
+    trim: true,
+    unique: true,
+    lowercase: true
+  },
+  description: {
+    type: Schema.Types.Mixed,
+    'default': ''
+  },
+  role: String,
+  salt: String,
+  hash: String
+}, {
+  versionKey: false
+});
 
 module.exports = mongoose.model('User', User);

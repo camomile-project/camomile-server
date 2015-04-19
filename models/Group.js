@@ -24,11 +24,27 @@ SOFTWARE.
 
 var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
+var ObjectId = Schema.ObjectId;
+var UserSchema = require('./User').UserSchema;
 
 var Group = new Schema({
-    name: {type:String, lowercase: true, trim: true, required: true},
-    description: {type : Schema.Types.Mixed, 'default' : ''},   	
-    users: [{ type:String, lowercase: true, trim:true}]
-}, { versionKey: false });
+  name: {
+    type: String,
+    required: true,
+    trim: true,
+    unique: true,
+    lowercase: true,
+  },
+  description: {
+    type: Schema.Types.Mixed,
+    'default': ''
+  },
+  users: [{
+    type: ObjectId,
+    ref: 'UserSchema'
+  }]
+}, {
+  versionKey: false
+});
 
 module.exports = mongoose.model('Group', Group);

@@ -27,15 +27,37 @@ var Schema = mongoose.Schema;
 var ObjectId = Schema.ObjectId;
 var HistorySchema = require('./History').HistorySchema;
 var CorpusSchema = require('./Corpus').CorpusSchema;
- 
+
 var Layer = new Schema({
-	id_corpus : {type : ObjectId, ref : 'CorpusSchema'},
-	name: {type:String, lowercase: true, trim: true, required: true},
-	description: {type : Schema.Types.Mixed, 'default' : ''},   	
-	fragment_type : {type : Schema.Types.Mixed, 'default' : ''}, 
-	data_type : {type : Schema.Types.Mixed, 'default' : ''}, 
-	history : [HistorySchema],
-    ACL: {type : Schema.Types.Mixed, 'default' : null},
-}, { versionKey: false });
+  id_corpus: {
+    type: ObjectId,
+    ref: 'CorpusSchema'
+  },
+  name: {
+    type: String,
+    lowercase: true,
+    trim: true,
+    required: true
+  },
+  description: {
+    type: Schema.Types.Mixed,
+    'default': ''
+  },
+  fragment_type: {
+    type: Schema.Types.Mixed,
+    'default': ''
+  },
+  data_type: {
+    type: Schema.Types.Mixed,
+    'default': ''
+  },
+  history: [HistorySchema],
+  ACL: {
+    type: Schema.Types.Mixed,
+    'default': null
+  },
+}, {
+  versionKey: false
+});
 
 module.exports = mongoose.model('Layer', Layer);
