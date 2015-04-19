@@ -125,8 +125,9 @@ exports.update = function(req, res){
 	var error;
 	async.waterfall([		
 		function(callback) {											// check field
-			if (req.body.password == "") 												error="empty password for username is not allowed";
-			if (req.body.role && req.body.role != 'admin' && req.body.role != 'user')	error="the role must be 'user' or 'admin'";	
+			if (req.body.password == "") 																error="empty password for username is not allowed";
+			if (req.body.role && req.body.role != 'admin' && req.body.role != 'user')					error="the role must be 'user' or 'admin'";	
+			if (req.body.password && user.username == "root" && req.session.user.username != "root" )   error="change the password of this user is not allowed"; 
 			callback(error);
 		},
 		function(callback) {
