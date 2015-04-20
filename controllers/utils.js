@@ -217,12 +217,6 @@ exports.middleware.fExistsWithRights = function (model, min_right) {
 
   return function (req, res, next) {
 
-    // root is omnipotent
-    if (req.session.user.username === "root") {
-      next();
-      return;
-    }
-
     // ------------
     // get resource (or its parent if needed)
     // ------------
@@ -270,6 +264,12 @@ exports.middleware.fExistsWithRights = function (model, min_right) {
 
         if (!result.resource) {
           sendError(res, model.modelName + ' does not exist.');
+          return;
+        }
+
+        // root is omnipotent
+        if (req.session.user.username === "root") {
+          next();
           return;
         }
 
