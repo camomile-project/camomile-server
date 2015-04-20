@@ -1,7 +1,7 @@
 /*
 The MIT License (MIT)
 
-Copyright (c) 2013-2014 CNRS
+Copyright (c) 2013-2015 CNRS
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -23,15 +23,40 @@ SOFTWARE.
 */
 
 var async = require('async');
+var _ = require('./utils');
 var User = require('../models/User');
 var Group = require('../models/Group');
 var Corpus = require('../models/Corpus');
 var Layer = require('../models/Layer');
-var Session = require('../controllers/Session');
+var Session = require('./Session');
 
 // ----------------------------------------------------------------------------
-// UTILITIES
+// HELPER
 // ----------------------------------------------------------------------------
+
+exports.helper = {};
+
+var fGetGroups = exports.helper.fGetGroups = function (id_user) {
+
+  return function (callback) {
+    Group.find({
+        users: id_user
+      }, '_id',
+      function (error, groups) {
+
+        var group_ids = [];
+
+        if (groups) {
+          for (var i = groups.length - 1; i >= 0; i--) {
+            group_ids.push(groups[i]._id);
+          };
+        }
+
+        callback(error, group_ids);
+
+      });
+  };
+};
 
 // print _id, username, role and description
 var sendUser = function (user, res) {
@@ -47,159 +72,242 @@ var sendUser = function (user, res) {
 // ROUTES
 // ----------------------------------------------------------------------------
 
-// create a new user
-exports.create = function (req, res) {
-  var error = null;
-  async.waterfall([
-    function (callback) {                                               // check the different field
-      if (req.body.username == undefined)                             error = "the username is not defined";
-      else if (req.body.username == "")                               error = "empty string for username is not allowed";
-      else if (req.body.username.indexOf(' ') >= 0)                   error = "White space are not allowed in user name";
-      else if (req.body.password == undefined)                        error = "the password is not defined";
-      else if (req.body.password == "")                               error = "empty password for username is not allowed";
-      else if (req.body.role == undefined)                            error = "the role is not defined";
-      else if (req.body.role != 'admin' && req.body.role != 'user')   error = "the role must be 'user' or 'admin'";
-      callback(error);
-    },
-    function (callback) {                                           // check if the username is not already used (username must be unique)
-      User.count({username: req.body.username}, function (error, count) { 
-        if ((!error) && (count != 0)) error = "the username is already used, choose another name";
-        callback(error);
-      });
-    },
-    function (callback) {                                           // compute the hash for the password
-
-      Session.generateSaltAndHash(req.body.password, function(error, salt, hash) {
-        callback(error, salt, hash);
-      });
-    },
-    function (salt, hash, callback) {                               // create a new user
-      var user = new User({username: req.body.username,
-       description: req.body.description,
-       role: req.body.role,
-       salt: salt,
-       hash: hash,
-            }).save(function (error, newUser) {                     // save it into the db
-              if (newUser) sendUser(newUser, res);
-              callback(error);
-            });         
-          }
-              ], function (error) {
-            if (error) res.status(400).json({message:error});           // print error
-          });
-}
-
 // retrieve all users and print _id, username, role and description
 exports.getAll = function (req, res) {
-  User.find({}, 'username role description', function (error, users) {
-    if (error) res.status(400).json({error:"error", message:error});
-    if (users) res.status(200).json(users);
-    else res.status(200).json([]);
-  });
-}
+
+  var filter = {};
+  if (req.query.username) {
+    filter.username = req.query.username;
+  }
+  if (req.query.role) {
+    filter.role = req.query.role;
+  }
+
+  _.request.fGetResources(req, User, filter)(
+    _.response.fSendResources(res, User));
+};
 
 // retrieve a particular user with his _id and print _id, username, role and description
 exports.getOne = function (req, res) {
-  User.findById(req.params.id_user, function (error, user) {
-    sendUser(user, res);
-  });
-}
+  _.request.fGetResource(req, User)(
+    _.response.fSendResource(res, User));
+};
 
-// update password and role of a user
+// create a new user
+exports.create = function (req, res) {
+
+  // check username validity
+  if (
+    req.body.username === undefined ||
+    req.body.username.length < 8 ||
+    req.body.username.indexOf(' ') > -1) {
+    _.response.sendError(res, 'Invalid username', 400);
+    return;
+  }
+
+  // check role validity
+  if (
+    req.body.role === undefined ||
+    (req.body.role != 'user' && req.body.role != 'admin')
+  ) {
+    _.response.sendError(res, 'Invalid role', 400);
+    return;
+  }
+
+  // check password validity
+  if (
+    req.body.password === undefined ||
+    req.body.password.length < 8) {
+    _.response.sendError(res, 'Invalid password', 400);
+    return;
+  }
+
+  // generate salt and hash
+  Session.helper.generateSaltAndHash(
+    req.body.password,
+    function (error, salt, hash) {
+
+      // error happened when generating salt and hash
+      if (error) {
+        _.response.sendError(res, error, 500);
+        return;
+      }
+
+      // create new user
+      var user = new User({
+        username: req.body.username,
+        description: req.body.description,
+        role: req.body.role,
+        salt: salt,
+        hash: hash,
+      });
+
+      // save it
+      user.save(function (error, user) {
+        if (error && error.code === 11000) {
+          error = 'Invalid username (duplicate).';
+        }
+
+        // send new user (or error, if any)
+        _.response.fSendResource(res, User)(error, user)
+      });
+    }
+  );
+
+};
+
+// update user
 exports.update = function (req, res) {
-  var error;
-  async.waterfall([       
-        function (callback) {                                           // check field
-          if (req.body.password == "")                                                error="empty password for username is not allowed";
-          if (req.body.role && req.body.role != 'admin' && req.body.role != 'user')   error="the role must be 'user' or 'admin'"; 
-          callback(error);
-        },
-        function (callback) {
-            User.findById(req.params.id_user, function (error, user) {  // find the user
-              if (req.body.role && user.username == "root")   error = "change the role of this id_user is not allowed"
-                else if (req.body.role)                         user.role = req.body.role
-                  callback(error, user);
-              });
-          },
-          function (user, callback) {
-            if (req.body.password) {                                    // compute hash
 
-              Session.generateSaltAndHash(req.body.password, function(error, salt, hash) {
-                user.salt = salt;
-                user.hash = hash;
-                callback(error, user);
-              });
-            } else {
-              callback(error, user);
-            }
-          },
-          function (user, callback) {
-            if (req.body.description) user.description = req.body.description;
-            user.save(function (error, user) {                          // save the user
-              if (!error) sendUser(user, res);
-              callback(error)
-            });         
+  // check password validity
+  if (
+    req.body.password !== undefined &&
+    req.body.password.length < 8) {
+    _.response.sendError(res, 'Invalid password', 400);
+    return;
+  }
+
+  // check role validity
+  if (
+    req.body.role !== undefined &&
+    (req.body.role !== 'user' && req.body.role !== 'admin')
+  ) {
+    _.response.sendError(res, 'Invalid role', 400);
+    return;
+  }
+
+  async.waterfall([
+
+      // make sure we are not updating root
+      function (callback) {
+        User.findById(req.params.id_user, function (error, user) {
+          if (user.username === "root" &&
+            req.session.user.username !== "root") {
+            callback('Access denied.', user);
+          } else {
+            callback(error, user);
           }
-          ], function (error) {
-            if (error) res.status(400).json({message:error});
-          });
-}
+        });
+      },
+
+      // update user
+      function (user, callback) {
+
+        if (req.body.description) {
+          user.description = req.body.description;
+        }
+
+        if (req.body.role) {
+          user.role = req.body.role;
+        }
+
+        if (req.body.password) {
+
+          Session.helper.generateSaltAndHash(
+            req.body.password,
+            function (error, salt, hash) {
+              user.salt = salt;
+              user.hash = hash;
+              callback(error, user);
+            });
+
+        } else {
+          callback(null, user);
+        }
+      },
+
+      // save user
+      function (user, callback) {
+        user.save(callback);
+      }
+    ],
+
+    // send to client 
+    _.response.fSendResource(res, User));
+};
 
 // delete a user
-exports.remove  = function (req, res) {
-  var error;
-  async.waterfall([   
-    function (callback) {
-            User.findById(req.params.id_user, function (error, user) {  // find the user
-              if (user.username == "root")    error = "You can't delete the root user"
-                callback(error);
-            });
-          },      
-        function (callback) {                                           // remove id_user from ACL of all corpus
-          Corpus.find(function (error, l_corpus) {
-            for(var i = 0; i < l_corpus.length; i++) {
-              if (l_corpus[i].ACL.users) {
-                if (l_corpus[i].ACL.users[req.params.id_user]) {
-                  var update = {ACL.users : l_corpus[i].ACL.users};   
-                  delete update.ACL.users[req.params.id_user];
-                  if (Object.getOwnPropertyNames(update.ACL.users).length === 0) update.ACL.users = undefined;
-                  Corpus.findByIdAndUpdate(l_corpus[i]._id, update, function (error, corpus) {}); 
-                }
-              }
-            }
-            callback(error);                
-          });
-        },
-        function (callback) {                                           // remove id_user from ACL of all layer
-          Layer.find(function (error, l_layer) {
-            for(var i = 0; i < l_layer.length; i++) {
-              if (l_layer[i].ACL.users) {
-                if (l_layer[i].ACL.users[req.params.id_user]) {
-                  var update = {ACL.users : l_layer[i].ACL.users};    
-                  delete update.ACL.users[req.params.id_user];
-                  if (Object.getOwnPropertyNames(update.ACL.users).length === 0) update.ACL.users = undefined;
-                  Layer.findByIdAndUpdate(l_layer[i]._id, update, function (error, layer) {});    
-                }
-              }
-            }
-            callback(error);                
-          });
-        },      
-        function (callback) {                                           // delete the user from the db
-          User.remove({_id : req.params.id_user}, function (error, user) {
-            if (!error && user == 1) res.status(200).json({message:"The user as been deleted"});
+exports.remove = function (req, res) {
+
+  var id_user = req.params.id_user;
+
+  async.waterfall([
+
+      // make sure we are not removing root
+      function (callback) {
+        User.findById(id_user, function (error, user) {
+          if (user.username === "root") {
+            callback('Access denied.');
+          } else {
+            callback(error);
+          }
+        });
+      },
+
+      // remove user in all layers ACL
+      function (callback) {
+        var path = 'ACL.users.' + id_user;
+
+        var filter = {};
+        filter[path] = {
+          $exists: true
+        };
+
+        var update = {
+          $unset: {}
+        };
+        update.$unset[path] = '';
+
+        Corpus.update(filter, update,
+          function (error, number) {
             callback(error);
           });
-        },      
-        ], function (error) {
-          if (error) res.status(400).json({message:error});
-        });
-}
+      },
+
+      // remove user in all layers ACL
+      function (callback) {
+        var path = 'ACL.users.' + id_user;
+
+        var filter = {};
+        filter[path] = {
+          $exists: true
+        };
+
+        var update = {
+          $unset: {}
+        };
+        update.$unset[path] = '';
+
+        Layer.update(filter, update,
+          function (error, number) {
+            callback(error);
+          });
+      },
+
+      // remove user from groups
+      function (callback) {
+        Group.update({}, {
+            $pull: {
+              'users': id_user
+            }
+          },
+          function (error, number) {
+            callback(error);
+          }
+        );
+      },
+
+      // remove user
+      function (callback) {
+        User.findByIdAndRemove(id_user, callback);
+      },
+    ],
+
+    _.response.fSendSuccess(res, 'Successfully deleted.'));
+};
 
 // retrieve the list of group of a user
 exports.getGroups = function (req, res) {
-  Group.find({'users' : {$regex : new RegExp('^'+ req.params.id_user + '$', "i")}}, function (error2, groups) {
-    if (error2) res.status(400).json({error:"error", message:error2});
-    else res.status(200).json(groups);
-  });
-}
+  fGetGroups(req.params.id_user)(
+    _.response.fSendData(res));
+};
