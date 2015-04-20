@@ -24,6 +24,7 @@ SOFTWARE.
 
 var async = require('async');
 var User = require('../models/User');
+var cUser = require('../controllers/User');
 var Group = require('../models/Group');
 var Corpus = require('../models/Corpus');
 var Medium = require('../models/Medium');
@@ -142,7 +143,7 @@ exports.request.fFilterResources = function (req, min_right) {
 
     async.waterfall([
         // get user groups
-        User.helper.fGetGroups(id_user),
+        cUser.helper.fGetGroups(id_user),
         // filter according to rights
         function (groups, callback) {
           async.filter(
@@ -250,7 +251,7 @@ exports.middleware.fExistsWithRights = function (model, min_right) {
     async.parallel(
       // find groups and resource in parallel    
       {
-        groups: getUserGroups,
+        groups: cUser.helper.fGetGroups(req.session.user._id),
         resource: getResource,
       },
       // then combine them 
@@ -313,7 +314,6 @@ exports.route.date = function (req, res) {
 exports.response = {};
 
 var sendError = exports.response.sendError = function (res, error, code) {
-  console.log('Sending error');
 
   if (code === undefined) {
     code = 400;
@@ -345,8 +345,6 @@ var fSendData = exports.response.fSendData = function (res) {
 
   return function (error, data) {
 
-    console.log('Sending data');
-
     if (error) {
       sendError(res, error);
       return;
@@ -374,7 +372,7 @@ exports.response.fSendResource = function (res, model) {
       resource.salt = resource.hash = undefined;
     }
 
-    res.status(200).json(data);
+    res.status(200).json(resource);
 
   };
 };
