@@ -62,7 +62,7 @@ var fGetGroups = exports.helper.fGetGroups = function (id_user) {
 // ROUTES
 // ----------------------------------------------------------------------------
 
-// retrieve all users and print _id, username, role and description
+// retrieve all users
 exports.getAll = function (req, res) {
 
   var filter = {};
@@ -77,7 +77,7 @@ exports.getAll = function (req, res) {
     _.response.fSendResources(res, User));
 };
 
-// retrieve a particular user with his _id and print _id, username, role and description
+// retrieve a specific user
 exports.getOne = function (req, res) {
   _.request.fGetResource(req, User)(
     _.response.fSendResource(res, User));
