@@ -32,7 +32,6 @@ var Layer = require('../models/Layer');
 var Annotation = require('../models/Annotation');
 var Queue = require('../models/Queue');
 
-
 // ----------------------------------------------------------------------------
 // VARIABLES
 // ----------------------------------------------------------------------------
@@ -79,6 +78,10 @@ var getFields = function (model, history) {
     return fields
   }
 
+  if (model.modelName === 'Queue') {
+    return fields + ' name description list';
+  }
+
   return fields;
 
 };
@@ -104,7 +107,6 @@ var checkRights = function (acl, user, groups, min_right) {
   return false;
 
 };
-
 
 // ----------------------------------------------------------------------------
 // REQUEST
@@ -292,7 +294,6 @@ exports.middleware.fExistsWithRights = function (model, min_right) {
   };
 };
 
-
 // ----------------------------------------------------------------------------
 // ROUTES
 // ----------------------------------------------------------------------------
@@ -305,7 +306,6 @@ exports.route.date = function (req, res) {
     date: date
   });
 }
-
 
 // ----------------------------------------------------------------------------
 // RESPONSE
@@ -376,7 +376,6 @@ exports.response.fSendResource = function (res, model) {
 
   };
 };
-
 
 exports.response.fSendResources = function (res, model) {
 
