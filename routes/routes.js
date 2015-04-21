@@ -242,13 +242,13 @@ exports.initialize = function (app) {
   app.get('/corpus/:id_corpus/medium',
     Session.middleware.isLoggedIn,
     _.middleware.fExistsWithRights(mCorpus, _.READ),
-    Corpus.getMedia);
+    Medium.getCorpusMedia);
 
   // create new medium(a) in one corpus
   app.post('/corpus/:id_corpus/medium',
     Session.middleware.isLoggedIn,
     _.middleware.fExistsWithRights(mCorpus, _.WRITE),
-    Corpus.addMedia);
+    Medium.create);
 
   // update one medium
   app.put('/medium/:id_medium',
@@ -266,25 +266,25 @@ exports.initialize = function (app) {
   app.get('/medium/:id_medium/video',
     Session.middleware.isLoggedIn,
     _.middleware.fExistsWithRights(mMedium, _.READ),
-    Medium.getVideo);
+    Medium.stream);
 
   // stream one medium in WebM
   app.get('/medium/:id_medium/webm',
     Session.middleware.isLoggedIn,
     _.middleware.fExistsWithRights(mMedium, _.READ),
-    Medium.getVideoWEBM);
+    Medium.streamWebM);
 
   // stream one medium in MP4
   app.get('/medium/:id_medium/mp4',
     Session.middleware.isLoggedIn,
     _.middleware.fExistsWithRights(mMedium, _.READ),
-    Medium.getVideoMP4);
+    Medium.streamMp4);
 
   // stream one medium in OGV
   app.get('/medium/:id_medium/ogv',
     Session.middleware.isLoggedIn,
     _.middleware.fExistsWithRights(mMedium, _.READ),
-    Medium.getVideoOGV);
+    Medium.streamOgv);
 
   // LAYER
 
@@ -304,13 +304,13 @@ exports.initialize = function (app) {
   app.get('/corpus/:id_corpus/layer',
     Session.middleware.isLoggedIn,
     _.middleware.fExists(mCorpus),
-    Corpus.getLayers);
+    Layer.getCorpusLayers);
 
   // create new layer(s) in one corpus
   app.post('/corpus/:id_corpus/layer',
     Session.middleware.isLoggedIn,
     _.middleware.fExistsWithRights(mCorpus, _.WRITE),
-    Corpus.addLayer);
+    Layer.create);
 
   // update one layer
   app.put('/layer/:id_layer',
@@ -376,13 +376,13 @@ exports.initialize = function (app) {
   app.get('/layer/:id_layer/annotation',
     Session.middleware.isLoggedIn,
     _.middleware.fExistsWithRights(mLayer, _.READ),
-    Layer.getAnnotations);
+    Annotation.getLayerAnnotations);
 
   // create new annotation(s) in one layer
   app.post('/layer/:id_layer/annotation',
     Session.middleware.isLoggedIn,
     _.middleware.fExistsWithRights(mLayer, _.WRITE),
-    Layer.addAnnotation);
+    Annotation.create);
 
   // update one annotation
   app.put('/annotation/:id_annotation',
