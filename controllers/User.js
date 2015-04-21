@@ -58,16 +58,6 @@ var fGetGroups = exports.helper.fGetGroups = function (id_user) {
   };
 };
 
-// print _id, username, role and description
-var sendUser = function (user, res) {
-  res.status(200).json({
-    _id: user._id,
-    username: user.username,
-    role: user.role,
-    description: user.description
-  });
-};
-
 // ----------------------------------------------------------------------------
 // ROUTES
 // ----------------------------------------------------------------------------
