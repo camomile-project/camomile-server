@@ -1,7 +1,7 @@
 /*
 The MIT License (MIT)
 
-Copyright (c) 2013-2014 CNRS
+Copyright (c) 2013-2015 CNRS
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -22,78 +22,113 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-var	Queue = require('../models/Queue');
+var Queue = require('../models/Queue');
+var _ = require('./utils');
 
 // create a queue
 exports.create = function (req, res) {
-	if (req.body.name == undefined) res.status(400).json({message:"the name is not defined"});
-	if (req.body.name == "") 		res.status(400).json({message:"empty string for name is not allowed"});
-	var queue = new Queue({
-		name: req.body.name,
-		description: req.body.description,
-		list: [],
-	}).save(function (error, newQueue) {
-		if (error) res.status(400).json({message:error});
-		if (newQueue) res.status(200).json(newQueue);
-	});
-}
 
-// retrieve all queues
-exports.getAll = function (req, res) {	
-	Queue.find({}, 'name description list', function (error, queues) {
-    	if (error) res.status(400).json({error:"error", message:error});
-    	if (queues) res.status(200).json(queues);
-		else res.status(200).json([]);
-	});
-}
+  if (
+    req.body.name === undefined ||
+    req.body.name === '') {
+    _.sendError(res, 'Invalid name', 400);
+    return;
+  }
+
+  var queue = new Queue({
+    name: req.body.name,
+    description: req.body.description,
+    list: [],
+  });
+
+  queue.save(_.response.fSendResource(res, Queue));
+};
+
+// get all queues (root only)
+exports.getAll = function (req, res) {
+
+  var field = 'name description list';
+
+  var filter = {};
+  if (req.query.name) {
+    filter['name'] = req.query.name;
+  }
+
+  Queue.find(filter, field, _.response.fSendResources(res, Queue));
+};
 
 // retrieve a particular queue with his _id
 exports.getOne = function (req, res) {
-	Queue.findById(req.params.id_queue, function (error, queue) {
-		res.status(200).json(queue);
-	});
-}
+  Queue.findById(req.params.id_queue, _.response.fSendResource(res, Queue));
+};
 
-//update information of a queue
+// update information of a queue
 exports.update = function (req, res) {
-	var error=null;
-	var update = {};
-	if (req.body.name) update.name = req.body.name;
-	if (req.body.description) update.description = req.body.description;
-	if (req.body.list) update.list = req.body.list;
-	Queue.findByIdAndUpdate(req.params.id_queue, update, function (error, queue) {
-		if (!error) res.status(200).json(queue);
-	});
-}
+  var error = null;
 
-//push element at the end of the queue
+  var update = {};
+  if (req.body.name) {
+    update.name = req.body.name;
+  }
+  if (req.body.description) {
+    update.description = req.body.description;
+  }
+  if (req.body.list) {
+    update.list = req.body.list;
+  }
+
+  Queue.findByIdAndUpdate(
+    req.params.id_queue, update,
+    _.response.fSendData(res));
+};
+
+// push element into the queue
 exports.push = function (req, res) {
-	if (req.body.list == undefined) res.status(400).json({message:"list of field is empty"});
-	Queue.findById(req.params.id_queue, function (error, queue) {
-		for(var i = 0; i < req.body.list.length; i++) queue.list.push(req.body.list[i]);
-		queue.save(function (error, newQueue) {
-			if (!error) res.status(200).json(newQueue);
-		});		
-	});	
-}
 
-//pop element at the end of the queue
+  var data;
+  if (req.body.constructor !== Array) {
+    data = [req.body];
+  } else {
+    data = req.body;
+  }
+
+  Queue.findByIdAndUpdate(
+    req.params.id_queue, {
+      $push: {
+        list: {
+          $each: data
+        }
+      }
+    }, {
+      new: true
+    }, _.response.fSendData(res));
+};
+
+// pop element from the queue
 exports.pop = function (req, res) {
-	Queue.findById(req.params.id_queue, function (error, queue) {
-		if (queue.list.length <0) res.status(400).json({message:"list is empty"});
-		ret = queue.list.slice(0,1);
-		queue.list.splice(0,1);
-		queue.save(function (error2, newQueue) {
-			if (error2) res.status(400).json({message:error2});
-			else res.status(200).json(ret[0]);
-		});		
-	});
-}
+
+  Queue.findByIdAndUpdate(
+    req.params.id_queue, {
+      $pop: {
+        list: -1
+      }
+    }, {
+      new: false
+    },
+    function (error, queue) {
+      if (error || queue.list.length > 0) {
+        _.response.fSendData(res)(error, queue.list[0]);
+      } else {
+        _.response.sendError(res, 'Empty queue.', 400);
+      }
+    }
+  )
+};
 
 // remove a given queue
 exports.remove = function (req, res) {
-	Queue.remove({_id : req.params.id_queue}, function (error, queue) {
-		if (!error && queue == 1) res.status(200).json({message:"The queue has been deleted"});
-		else res.status(400).json({message:error});
-	});
-}
+  Queue.findByIdAndRemove(
+    req.params.id_queue,
+    _.response.fSendSuccess(res, 'Successfully deleted.')
+  );
+};
