@@ -109,11 +109,8 @@ exports.middleware.isRoot = function (req, res, next) {
 // ROUTES
 // ----------------------------------------------------------------------------
 
-exports.route = {};
-
 // Login
-exports.route.login = function (req, res) {
-
+exports.login = function (req, res) {
 
   var failure = 'Authentication failed (check your username and password).';
 
@@ -156,13 +153,13 @@ exports.route.login = function (req, res) {
 };
 
 // logout
-exports.route.logout = function (req, res) {
+exports.logout = function (req, res) {
   req.session.destroy(
     _.response.fSendSuccess(res, 'Logout succeeded.'));
 };
 
 // whoami
-exports.route.me = function (req, res) {
+exports.me = function (req, res) {
   var user = req.session.user;
   res.status(200)
     .json({
