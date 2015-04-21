@@ -22,7 +22,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-var Utils = require('../controllers/utils');
+var _ = require('../controllers/utils');
 var User = require('../controllers/User');
 var Group = require('../controllers/Group');
 var Corpus = require('../controllers/Corpus');
@@ -43,441 +43,401 @@ var mQueue = require('../models/Queue');
 
 exports.initialize = function (app) {
 
+  // UTILS
+
+  app.get('/date',
+    Session.middleware.isLoggedIn,
+    _.route.date);
+
   // AUTHENTICATION
 
-  // -- LOG IN
-  // POST login --data '{"username":"...", "password":"..."}' --cookie-jar "cookies.txt"
-  // Data 
+  // login
   app.post('/login',
     Session.login);
 
-  // -- LOG OUT
-  // POST /logout --cookie-jar "cookies.txt"
+  // logout
   app.post('/logout',
-    Session.isLoggedIn,
+    Session.middleware.isLoggedIn,
     Session.logout);
 
-  // -- GET CURRENT USER
-  // GET /me --cookie-jar "cookies.txt"
+  // get logged in user
   app.get('/me',
-    Session.isLoggedIn,
+    Session.middleware.isLoggedIn,
     Session.me);
 
-  // --- tools routes --- \\
-  // GET /date --cookie-jar "cookies.txt"
-  app.get('/date',
-    Session.isLoggedIn,
-    Utils.date);
+  // USERS
 
-  // --- user routes --- \\
-  // create user
-  // POST /user --data '{"username":"...", "password":"...", "role":"admin", "description":{"...":"..."}}'
+  // create new user
   app.post('/user',
-    Session.isLoggedIn,
-    Session.isAdmin,
+    Session.middleware.isLoggedIn,
+    Session.middleware.isAdmin,
     User.create);
-  // get list of all users
-  // GET /user
-  app.get('/user',
-    Session.isLoggedIn,
-    Session.isAdmin,
-    User.getAll);
-  // info on a specific user
-  // GET /user/id_user
-  app.get('/user/:id_user',
-    Session.isLoggedIn,
-    Session.isAdmin,
-    Utils.exists(mUser),
-    User.getOne);
-  // update information on a specific user
-  // PUT /user/id_user --data '{"password":"...", "role":"admin", "description":{"...":"..."}}'
-  app.put('/user/:id_user',
-    Session.isLoggedIn,
-    Session.isAdmin,
-    Utils.exists(mUser),
-    User.update);
 
-  // delete a specific user
-  // DELETE /user/id_user
-  // TODO: make sure ACL entries are removed for this user
+  // delete one user
   app.delete('/user/:id_user',
-    Session.isLoggedIn,
-    Session.isRoot,
-    Utils.exists(mUser),
+    Session.middleware.isLoggedIn,
+    Session.middleware.isRoot,
+    _.middleware.fExists(mUser),
     User.remove);
 
-  // get all group of a user
-  // GET /user/id_user/group
+  // get all users
+  app.get('/user',
+    Session.middleware.isLoggedIn,
+    Session.middleware.isAdmin,
+    User.getAll);
+
+  // get one user
+  app.get('/user/:id_user',
+    Session.middleware.isLoggedIn,
+    Session.middleware.isAdmin,
+    _.middleware.fExists(mUser),
+    User.getOne);
+
+  // update one user
+  app.put('/user/:id_user',
+    Session.middleware.isLoggedIn,
+    Session.middleware.isAdmin,
+    _.middleware.fExists(mUser),
+    User.update);
+
+  // get one user's groups
   app.get('/user/:id_user/group',
-    Session.isLoggedIn,
-    Session.isAdmin,
-    Utils.exists(mUser),
+    Session.middleware.isLoggedIn,
+    Session.middleware.isAdmin,
+    _.middleware.fExists(mUser),
     User.getGroups);
 
-  // --- group routes --- \\
-  // create a group
-  // POST /group --data '{"name":"...", "description":{"...":"..."}}'
-  app.post("/group",
-    Session.isLoggedIn,
-    Session.isAdmin,
-    Group.create);
-  // get list of all groups
-  // GET /group
+  // GROUPS
+
+  // get all groups
   app.get('/group',
-    Session.isLoggedIn,
-    Session.isAdmin,
+    Session.middleware.isLoggedIn,
+    Session.middleware.isAdmin,
     Group.getAll);
-  // info on a specific group
-  // GET /group/id_group
+
+  // get one group
   app.get('/group/:id_group',
-    Session.isLoggedIn,
-    Session.isAdmin,
-    Utils.exists(mGroup),
+    Session.middleware.isLoggedIn,
+    Session.middleware.isAdmin,
+    _.middleware.fExists(mGroup),
     Group.getOne);
-  // update information of a group
-  // PUT /group/id_group --data '{"description":"desc"}'
+
+  // create new group
+  app.post("/group",
+    Session.middleware.isLoggedIn,
+    Session.middleware.isAdmin,
+    Group.create);
+
+  // update one group
   app.put('/group/:id_group',
-    Session.isLoggedIn,
-    Session.isAdmin,
-    Utils.exists(mGroup),
+    Session.middleware.isLoggedIn,
+    Session.middleware.isAdmin,
+    _.middleware.fExists(mGroup),
     Group.update);
-  // delete a group
-  // DELETE /group/id_group
+
+  // delete one group
   app.delete('/group/:id_group',
-    Session.isLoggedIn,
-    Session.isRoot,
-    Utils.exists(mGroup),
-    Group.remove);      // rajouter la suppression dans les acl
-  // add user to a group
-  // PUT /group/id_group/user/id_user
+    Session.middleware.isLoggedIn,
+    Session.middleware.isRoot,
+    _.middleware.fExists(mGroup),
+    Group.remove);
+
+  // add one user to one group
   app.put("/group/:id_group/user/:id_user",
-    Session.isLoggedIn,
-    Session.isAdmin,
-    Utils.exists(mGroup),
-    Utils.exists(mUser),
+    Session.middleware.isLoggedIn,
+    Session.middleware.isAdmin,
+    _.middleware.fExists(mGroup),
+    _.middleware.fExists(mUser),
     Group.addUser);
-  // remove a user from a group
-  // DELETE /group/id_group/user/id_user
+
+  // remove one user from one group
   app.delete('/group/:id_group/user/:id_user',
-    Session.isLoggedIn,
-    Session.isAdmin,
-    Utils.exists(mGroup),
-    Utils.exists(mUser),
+    Session.middleware.isLoggedIn,
+    Session.middleware.isAdmin,
+    _.middleware.fExists(mGroup),
+    _.middleware.fExists(mUser),
     Group.removeUser);
 
-  // --- resources routes --- \\
-  // corpus
+  // CORPUS
+
+  // get all READable corpora
+  app.get('/corpus',
+    Session.middleware.isLoggedIn,
+    Corpus.getAll);
+
+  // get one corpus
+  app.get('/corpus/:id_corpus',
+    Session.middleware.isLoggedIn,
+    _.middleware.fExistsWithRights(mCorpus, _.READ),
+    Corpus.getOne);
+
   // create new corpus
-  // POST /corpus --data '{"name":"new corpus", "description":{"...":"..."}' 
   app.post('/corpus',
-    Session.isLoggedIn,
-    Session.isAdmin,
+    Session.middleware.isLoggedIn,
+    Session.middleware.isAdmin,
     Corpus.create);
 
-  // GET /corpus
-  app.get('/corpus',
-    Session.isLoggedIn,
-    Corpus.getAll);
-  // info on a particular corpus
-  // GET /corpus/id_corpus
-  app.get('/corpus/:id_corpus',
-    Session.isLoggedIn,
-    Utils.exists(mCorpus),
-    Corpus.hasRights(Utils.READ),
-    Corpus.getOne);
-  // update info of a corpus
-  // PUT /corpus/id_corpus --data '{"name":"new corpus", "description":{"...":"..."}}'
+  // update one corpus
   app.put('/corpus/:id_corpus',
-    Session.isLoggedIn,
-    Utils.exists(mCorpus),
-    Corpus.hasRights(Utils.ADMIN),
+    Session.middleware.isLoggedIn,
+    _.middleware.fExistsWithRights(mCorpus, _.ADMIN),
     Corpus.update);
-  // delete a corpus
-  // DELETE /corpus/id_corpus
+
+  // delete one corpus
   app.delete('/corpus/:id_corpus',
-    Session.isLoggedIn,
-    Session.isAdmin,
-    Utils.exists(mCorpus),
-    Corpus.hasRights(Utils.ADMIN),
+    Session.middleware.isLoggedIn,
+    Session.middleware.isAdmin,
+    _.middleware.fExistsWithRights(mCorpus, _.ADMIN),
     Corpus.remove);
 
-  // create multi media for a corpus
-  // POST /corpus/id_corpus/medium --data '[{"name":"...", "url":"...", "description":{"...":"..."}}, ...]' 
-  app.post('/corpus/:id_corpus/medium',
-    Session.isLoggedIn,
-    Utils.exists(mCorpus),
-    Corpus.hasRights(Utils.WRITE),
-    Corpus.addMedia);
-  // create a layer
-  // POST /corpus/id_corpus/layer --data '{"name":"new layer", "description":{"...":"..."}, "fragment_type":{"...":"..."}, "data_type":{"...":"..."}}' 
-  app.post('/corpus/:id_corpus/layer',
-    Session.isLoggedIn,
-    Utils.exists(mCorpus),
-    Corpus.hasRights(Utils.WRITE),
-    Corpus.addLayer);
-  // list all media of a corpus
-  // GET /corpus/id_corpus/medium
-  app.get('/corpus/:id_corpus/medium',
-    Session.isLoggedIn,
-    Utils.exists(mCorpus),
-    Corpus.hasRights(Utils.READ),
-    Corpus.getAllMedia);
-  // list all layer of a corpus 
-  // GET /corpus/id_corpus/layer
-  app.get('/corpus/:id_corpus/layer',
-    Session.isLoggedIn,
-    Utils.exists(mCorpus),
-    Corpus.getAllLayer);
-  // ACL of a particular corpus
-  // GET /corpus/id_corpus/acl
+  // get one corpus' rights
   app.get('/corpus/:id_corpus/ACL',
-    Session.isLoggedIn,
-    Utils.exists(mCorpus),
-    Corpus.hasRights(Utils.ADMIN),
+    Session.middleware.isLoggedIn,
+    _.middleware.fExistsWithRights(mCorpus, _.ADMIN),
     Corpus.getRights);
-  // update user ACL for a corpus
-    // PUT /corpus/id_corpus/user/id_user --data '{"Right":"O"}'
+
+  // give one user rights to one corpus
   app.put('/corpus/:id_corpus/user/:id_user',
-    Session.isLoggedIn,
-    Utils.exists(mCorpus),
-    Utils.exists(mUser),
-    Corpus.hasRights(Utils.ADMIN),
+    Session.middleware.isLoggedIn,
+    _.middleware.fExists(mUser),
+    _.middleware.fExistsWithRights(mCorpus, _.ADMIN),
     Corpus.updateUserRights);
-    // update group ACL for a corpus
-    // PUT /corpus/id_corpus/group/id_group --data '{"Right":"O"}'
+
+  // remove one user's rights to one corpus
+  app.delete('/corpus/:id_corpus/user/:id_user',
+    Session.middleware.isLoggedIn,
+    _.middleware.fExists(mUser),
+    _.middleware.fExistsWithRights(mCorpus, _.ADMIN),
+    Corpus.removeUserRights);
+
+  // give one group rights to one corpus
   app.put('/corpus/:id_corpus/group/:id_group',
-    Session.isLoggedIn,
-    Utils.exists(mCorpus),
-    Utils.exists(mGroup),
-    Corpus.hasRights(Utils.ADMIN),
+    Session.middleware.isLoggedIn,
+    _.middleware.fExists(mGroup),
+    _.middleware.fExistsWithRights(mCorpus, _.ADMIN),
     Corpus.updateGroupRights);
 
-    // DELETE /corpus/id_corpus/user/id_user 
-  app.delete('/corpus/:id_corpus/user/:id_user',
-    Session.isLoggedIn,
-    Utils.exists(mCorpus),
-    Utils.exists(mUser),
-    Corpus.hasRights(Utils.ADMIN),
-    Corpus.removeUserRights);
-    // delete a group right for a corpus
-    // DELETE /corpus/id_corpus/group/id_group 
+  // remove one group's rights to one corpus
   app.delete('/corpus/:id_corpus/group/:id_group',
-    Session.isLoggedIn,
-    Utils.exists(mCorpus),
-    Utils.exists(mGroup),
-    Corpus.hasRights(Utils.ADMIN),
+    Session.middleware.isLoggedIn,
+    _.middleware.fExists(mGroup),
+    _.middleware.fExistsWithRights(mCorpus, _.ADMIN),
     Corpus.removeGroupRights);
 
-  // media
+  // MEDIUM
+
   // get all media
-  // GET /medium
   app.get('/medium',
-    Session.isLoggedIn,
-    Session.isRoot,
+    Session.middleware.isLoggedIn,
+    Session.middleware.isRoot,
     Medium.getAll);
-  // info on a particular media
-  // GET /medium/id_medium
+
+  // get one medium
   app.get('/medium/:id_medium',
-    Session.isLoggedIn,
-    Utils.exists(mMedium),
-    Medium.hasRights(Utils.READ),
+    Session.middleware.isLoggedIn,
+    _.middleware.fExistsWithRights(mMedium, _.READ),
     Medium.getOne);
-  // update info of a media
-  // PUT /medium/id_medium --data '{"name":"...", "url":"...", "description":{"...":"..."}}'
+
+  // get one corpus' media
+  app.get('/corpus/:id_corpus/medium',
+    Session.middleware.isLoggedIn,
+    _.middleware.fExistsWithRights(mCorpus, _.READ),
+    Corpus.getMedia);
+
+  // create new medium(a) in one corpus
+  app.post('/corpus/:id_corpus/medium',
+    Session.middleware.isLoggedIn,
+    _.middleware.fExistsWithRights(mCorpus, _.WRITE),
+    Corpus.addMedia);
+
+  // update one medium
   app.put('/medium/:id_medium',
-    Session.isLoggedIn,
-    Utils.exists(mMedium),
-    Medium.hasRights(Utils.ADMIN),
+    Session.middleware.isLoggedIn,
+    _.middleware.fExistsWithRights(mMedium, _.ADMIN),
     Medium.update);
-  // delete a media
-  // DELETE /medium/id_medium
+
+  // delete one medium
   app.delete('/medium/:id_medium',
-    Session.isLoggedIn,
-    Utils.exists(mMedium),
-    Medium.hasRights(Utils.ADMIN),
+    Session.middleware.isLoggedIn,
+    _.middleware.fExistsWithRights(mMedium, _.ADMIN),
     Medium.remove);
-  // get video stream
-  // GET /medium/id_medium/video
+
+  // stream one medium in default format
   app.get('/medium/:id_medium/video',
-    Session.isLoggedIn,
-    Utils.exists(mMedium),
-    Medium.hasRights(Utils.READ),
+    Session.middleware.isLoggedIn,
+    _.middleware.fExistsWithRights(mMedium, _.READ),
     Medium.getVideo);
-  // get webm stream
-  // GET /medium/id_medium/webm
+
+  // stream one medium in WebM
   app.get('/medium/:id_medium/webm',
-    Session.isLoggedIn,
-    Utils.exists(mMedium),
-    Medium.hasRights(Utils.READ),
+    Session.middleware.isLoggedIn,
+    _.middleware.fExistsWithRights(mMedium, _.READ),
     Medium.getVideoWEBM);
-  // get mp4 stream
-  // GET /medium/id_medium/mp4
+
+  // stream one medium in MP4
   app.get('/medium/:id_medium/mp4',
-    Session.isLoggedIn,
-    Utils.exists(mMedium),
-    Medium.hasRights(Utils.READ),
+    Session.middleware.isLoggedIn,
+    _.middleware.fExistsWithRights(mMedium, _.READ),
     Medium.getVideoMP4);
-  // get ogv stream
-  // GET /medium/id_medium/ogv
+
+  // stream one medium in OGV
   app.get('/medium/:id_medium/ogv',
-    Session.isLoggedIn,
-    Utils.exists(mMedium),
-    Medium.hasRights(Utils.READ),
+    Session.middleware.isLoggedIn,
+    _.middleware.fExistsWithRights(mMedium, _.READ),
     Medium.getVideoOGV);
 
-  // layer
-  // get all layer
-  // GET /layer
+  // LAYER
+
+  // get all layers
   app.get('/layer',
-    Session.isLoggedIn,
-    Session.isRoot,
+    Session.middleware.isLoggedIn,
+    Session.middleware.isRoot,
     Layer.getAll);
-  // info on a particular layer
-  // GET /layer/id_layer
+
+  // get one layer
   app.get('/layer/:id_layer',
-    Session.isLoggedIn,
-    Utils.exists(mLayer),
-    Layer.hasRights(Utils.READ),
+    Session.middleware.isLoggedIn,
+    _.middleware.fExistsWithRights(mLayer, _.READ),
     Layer.getOne);
-  // update info of a layer
-  // PUT /layer/id_layer --data '{"name":"speaker", "description":{"...":"..."}}'
+
+  // get one corpus' layers
+  app.get('/corpus/:id_corpus/layer',
+    Session.middleware.isLoggedIn,
+    _.middleware.fExists(mCorpus),
+    Corpus.getLayers);
+
+  // create new layer(s) in one corpus
+  app.post('/corpus/:id_corpus/layer',
+    Session.middleware.isLoggedIn,
+    _.middleware.fExistsWithRights(mCorpus, _.WRITE),
+    Corpus.addLayer);
+
+  // update one layer
   app.put('/layer/:id_layer',
-    Session.isLoggedIn,
-    Utils.exists(mLayer),
-    Layer.hasRights(Utils.ADMIN),
+    Session.middleware.isLoggedIn,
+    _.middleware.fExistsWithRights(mLayer, _.ADMIN),
     Layer.update);
-  // delete a layer
-  // DELETE /layer/id_layer
+
+  // delete one layer
   app.delete('/layer/:id_layer',
-    Session.isLoggedIn,
-    Utils.exists(mLayer),
-    Layer.hasRights(Utils.ADMIN),
+    Session.middleware.isLoggedIn,
+    _.middleware.fExistsWithRights(mLayer, _.ADMIN),
     Layer.remove);
 
-  // create multi annotation
-  // POST /layer/id_layer/annotation --data '{"annotation_list":[{"fragment":{"start":0, "end":15}, "data":"value", "id_medium":""}, ...]}' 
-  app.post('/layer/:id_layer/annotation',
-    Session.isLoggedIn,
-    Utils.exists(mLayer),
-    Layer.hasRights(Utils.WRITE),
-    Layer.addAnnotation);
-  // list all annotation of a layer
-  // GET /layer/id_layer/annotation
-  app.get('/layer/:id_layer/annotation',
-    Session.isLoggedIn,
-    Utils.exists(mLayer),
-    Layer.hasRights(Utils.READ),
-    Layer.getAnnotations);
-  // ACL of a particular layer
-  // GET /corpus/id_layer/acl
+  // get one layer's rights
   app.get('/layer/:id_layer/ACL',
-    Session.isLoggedIn,
-    Utils.exists(mLayer),
-    Layer.hasRights(Utils.ADMIN),
+    Session.middleware.isLoggedIn,
+    _.middleware.fExistsWithRights(mLayer, _.ADMIN),
     Layer.getRights);
-  // update user ACL for a layer
-  // PUT /corpus/id_layer/user/id_user --data '{"Right":"O"}'
+
+  // give one user rights to one layer
   app.put('/layer/:id_layer/user/:id_user',
-    Session.isLoggedIn,
-    Utils.exists(mLayer),
-    Utils.exists(mUser),
-    Layer.hasRights(Utils.ADMIN),
+    Session.middleware.isLoggedIn,
+    _.middleware.fExists(mUser),
+    _.middleware.fExistsWithRights(mLayer, _.ADMIN),
     Layer.updateUserRights);
-  // update group ACL for a layer
-  // PUT /corpus/id_layer/group/id_group --data '{"Right":"O"}'
-  app.put('/layer/:id_layer/group/:id_group',
-    Session.isLoggedIn,
-    Utils.exists(mLayer),
-    Utils.exists(mGroup),
-    Layer.hasRights(Utils.ADMIN),
-    Layer.updateGroupRights);
-  // delete a user right for a layer
-  // DELETE /corpus/id_layer/user/id_user 
+
+  // remove one user's rights to one layer
   app.delete('/layer/:id_layer/user/:id_user',
-    Session.isLoggedIn,
-    Utils.exists(mLayer),
-    Utils.exists(mUser),
-    Layer.hasRights(Utils.ADMIN),
+    Session.middleware.isLoggedIn,
+    _.middleware.fExists(mUser),
+    _.middleware.fExistsWithRights(mLayer, _.ADMIN),
     Layer.removeUserRights);
-    // delete a group right for a layer
-  // DELETE /corpus/id_layer/group/id_group
+
+  // give one group rights to one layer
+  app.put('/layer/:id_layer/group/:id_group',
+    Session.middleware.isLoggedIn,
+    _.middleware.fExists(mGroup),
+    _.middleware.fExistsWithRights(mLayer, _.ADMIN),
+    Layer.updateGroupRights);
+
+  // remove on group's rights to one layer
   app.delete('/layer/:id_layer/group/:id_group',
-    Session.isLoggedIn,
-    Utils.exists(mLayer),
-    Utils.exists(mGroup),
-    Layer.hasRights(Utils.ADMIN),
+    Session.middleware.isLoggedIn,
+    _.middleware.fExists(mGroup),
+    _.middleware.fExistsWithRights(mLayer, _.ADMIN),
     Layer.removeGroupRights);
 
-  // annotation
-  // get all annotation
-  // GET /annotation
+  // ANNOTATION
+
+  // get all annotations
   app.get('/annotation',
-    Session.isLoggedIn,
-    Session.isRoot,
+    Session.middleware.isLoggedIn,
+    Session.middleware.isRoot,
     Annotation.getAll);
-  // info on a particular annotation
-  // GET /annotation/id_annotation
+
+  // get one annotation
   app.get('/annotation/:id_annotation',
-    Session.isLoggedIn,
-    Utils.exists(mAnnotation),
-    Annotation.hasRights(Utils.READ),
+    Session.middleware.isLoggedIn,
+    _.middleware.fExistsWithRights(mAnnotation, _.READ),
     Annotation.getOne);
-  // update info of an annotation
-  // PUT /annotation/id_annotation --data '{"user":"id_user", fragment":{"start":0, "end":15}, "data":"value", "id_medium":""}'
+
+  // get one layer's annotations
+  app.get('/layer/:id_layer/annotation',
+    Session.middleware.isLoggedIn,
+    _.middleware.fExistsWithRights(mLayer, _.READ),
+    Layer.getAnnotations);
+
+  // create new annotation(s) in one layer
+  app.post('/layer/:id_layer/annotation',
+    Session.middleware.isLoggedIn,
+    _.middleware.fExistsWithRights(mLayer, _.WRITE),
+    Layer.addAnnotation);
+
+  // update one annotation
   app.put('/annotation/:id_annotation',
-    Session.isLoggedIn,
-    Utils.exists(mAnnotation),
-    Annotation.hasRights(Utils.WRITE),
+    Session.middleware.isLoggedIn,
+    _.middleware.fExistsWithRights(mAnnotation, _.WRITE),
     Annotation.update);
-  // delete annotation
-  // DELETE /annotation/id_annotation
+
+  // delete one annotation
   app.delete('/annotation/:id_annotation',
-    Session.isLoggedIn,
-    Utils.exists(mAnnotation),
-    Annotation.hasRights(Utils.ADMIN),
+    Session.middleware.isLoggedIn,
+    _.middleware.fExistsWithRights(mAnnotation, _.ADMIN),
     Annotation.remove);
 
-  // --- queue routes --- \\
-  // create a queue
-  // POST /queue --data '{"name":"...", "description":{"...":"..."}, "list": [{}, {}, ...]}'
-  app.post('/queue',
-    Session.isLoggedIn,
-    Queue.create);
-  // list all ids in a queue
-  // GET /queue
+  // QUEUE
+
+  // get all queues
   app.get('/queue',
-    Session.isLoggedIn,
-    Session.isRoot,
+    Session.middleware.isLoggedIn,
+    Session.middleware.isRoot,
     Queue.getAll);
-  // info on a queue
-  // GET /queue/id_queue
+
+  // get one queue
   app.get('/queue/:id_queue',
-    Session.isLoggedIn,
-    Utils.exists(mQueue),
+    Session.middleware.isLoggedIn,
+    _.middleware.fExists(mQueue),
     Queue.getOne);
-  // create or replace a list of ids
-  // PUT /queue/id_queue --data '{"name":"...", "description":{"...":"..."}, "list": [{}, {}, ...]}'
+
+  // create new queue
+  app.post('/queue',
+    Session.middleware.isLoggedIn,
+    Queue.create);
+
+  // update one queue
   app.put('/queue/:id_queue',
-    Session.isLoggedIn,
-    Utils.exists(mQueue),
+    Session.middleware.isLoggedIn,
+    _.middleware.fExists(mQueue),
     Queue.update);
-  // add new annotation in a queue
-  // PUT /queue/id_queue/next --data '{}'
+
+  // append items to one queue
   app.put('/queue/:id_queue/next',
-    Session.isLoggedIn,
-    Utils.exists(mQueue),
+    Session.middleware.isLoggedIn,
+    _.middleware.fExists(mQueue),
     Queue.push);
-  // get next annotation of a queue
-  // GET /queue/id_queue/nex@t
+
+  // pop one item from one queue
   app.get('/queue/:id_queue/next',
-    Session.isLoggedIn,
-    Utils.exists(mQueue),
+    Session.middleware.isLoggedIn,
+    _.middleware.fExists(mQueue),
     Queue.pop);
-  // delete a queue
-  // DELETE /queue/id_queue
+
+  // remove one queue
   app.delete('/queue/:id_queue',
-    Session.isLoggedIn,
-    Session.isAdmin,
-    Utils.exists(mQueue),
+    Session.middleware.isLoggedIn,
+    Session.middleware.isAdmin,
+    _.middleware.fExists(mQueue),
     Queue.remove);
+
 };
