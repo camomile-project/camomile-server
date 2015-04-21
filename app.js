@@ -37,41 +37,50 @@ var Session = require('./controllers/Session');
 
 
 program
-    .option('--port <port>', 'Local port to listen to (default: 3000)', parseInt)
-    .option('--mongodb-host <host>', 'MongoDB host (default: localhost)')
-    .option('--mongodb-port <port>', 'MongoDB port (default: 27017)', parseInt)
-    .option('--mongodb-name <dbname>', 'MongoDB database name (default: camomile)')
-    .option('--root-password <dbname>', 'Change/set root password')
-    .option('--media <dir>', 'Path to media root directory')
-    .parse(process.argv);
+  .option('--port <port>', 'Local port to listen to (default: 3000)', parseInt)
+  .option('--mongodb-host <host>', 'MongoDB host (default: localhost)')
+  .option('--mongodb-port <port>', 'MongoDB port (default: 27017)', parseInt)
+  .option('--mongodb-name <dbname>',
+    'MongoDB database name (default: camomile)')
+  .option('--root-password <dbname>', 'Change/set root password')
+  .option('--media <dir>', 'Path to media root directory')
+  .parse(process.argv);
 
 var port = program.port || process.env.PORT || 3000;
-var mongodb_host = program.mongodbHost || process.env.MONGO_HOST || process.env.MONGODB_PORT_27017_TCP_ADDR || 'localhost';
-var mongodb_port = program.mongodbPort || process.env.MONGO_PORT || process.env.MONGODB_PORT_27017_TCP_PORT || 27017;
+var mongodb_host = program.mongodbHost || process.env.MONGO_HOST || process.env
+  .MONGODB_PORT_27017_TCP_ADDR || 'localhost';
+var mongodb_port = program.mongodbPort || process.env.MONGO_PORT || process.env
+  .MONGODB_PORT_27017_TCP_PORT || 27017;
 var mongodb_name = program.mongodbName || process.env.MONGO_NAME || 'camomile';
 var root_password = program.rootPassword || process.env.ROOT_PASSWORD;
 var media = program.media || process.env.MEDIA || '/media';
 
-mongoose.connect('mongodb://' + mongodb_host + ':' + mongodb_port + '/' + mongodb_name);
+mongoose.connect('mongodb://' + mongodb_host + ':' + mongodb_port + '/' +
+  mongodb_name);
 
 var cors_options = {
   origin: true,
   methods: ['GET', 'PUT', 'POST', 'DELETE'],
-  allowedHeaders: ['X-CSRF-Token', 'X-Requested-With', 'Accept', 'Accept-Version', 'Content-Length', 'Content-MD5', 'Content-Type', 'Date', 'X-Api-Version'],
+  allowedHeaders: ['X-CSRF-Token', 'X-Requested-With', 'Accept',
+    'Accept-Version', 'Content-Length', 'Content-MD5', 'Content-Type', 'Date',
+    'X-Api-Version'
+  ],
   credentials: true,
 };
 
 var sessionStore = new MongoStore({
-    mongoose_connection: mongoose.connection,
-    db: mongoose.connections[0].db,
-    clear_interval: 60
-  });
+  mongoose_connection: mongoose.connection,
+  db: mongoose.connections[0].db,
+  clear_interval: 60
+});
 
 var session_options = {
-    key : "camomile.sid",
-    secret: "123camomile",
-    cookie: {maxAge: 24 * 60 * 60 * 1000},  // sessions expire every day
-    store: sessionStore
+  key: "camomile.sid",
+  secret: "123camomile",
+  cookie: {
+    maxAge: 24 * 60 * 60 * 1000
+  }, // sessions expire every day
+  store: sessionStore
 };
 
 app.set('port', port);
@@ -91,31 +100,40 @@ app.options('*', cors(cors_options));
 //start routes:
 routes.initialize(app);
 
-User.findOne({username: "root"}, function (error, root) {
-  if (root || root_password) {
+User.findOne({
+  username: "root"
+}, function (error, root) {
 
-    if (!root) {
-      root = new User({username: "root", role: "admin"});
+  if (!root) {
+
+    if (!root_password) {
+      console.log('Please set root password. Exiting.');
+      process.exit(-1);
     }
 
-    if (root_password) {
-
-      Session.generateSaltAndHash(root_password, function(error, salt, hash) {
-        root.salt = salt;
-        root.hash = hash;
-        root.save(function (error, root) {
-          console.log('Root password successfully updated.');
-        });
-      });
-
-    }
-
-    http.createServer(app).listen(app.get('port'), process.env.IP, function () {
-      console.log('Express server listening on port ' + app.get('port'));
+    root = new User({
+      username: 'root',
+      role: 'admin'
     });
 
-  } else {
-    console.log("root user does not exist and root password is not defined to create root user (add '--root-password' option)");
+  }
+
+  if (root_password) {
+    Session.helper.generateSaltAndHash(root_password, function (error, salt,
+      hash) {
+      root.salt = salt;
+      root.hash = hash;
+      root.save(function (error) {
+        if (error) {
+          console.log('Could not set root password. Exiting.');
+          process.exit(-1);
+        }
+        console.log('Root password successfully set.');
+      });
+    });
   }
 });
 
+http.createServer(app).listen(app.get('port'), process.env.IP, function () {
+  console.log('Server listening on port ' + app.get('port'));
+});

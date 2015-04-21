@@ -1,7 +1,7 @@
 /*
 The MIT License (MIT)
 
-Copyright (c) 2013-2014 CNRS
+Copyright (c) 2013-2015 CNRS
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -22,47 +22,50 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
+var _ = require('./utils');
 var User = require('../models/User');
 var crypto = require('crypto');
 
 // ----------------------------------------------------------------------------
-// CRYPTOGRAPHY
+// HELPER
 // ----------------------------------------------------------------------------
+
+exports.helper = {};
 
 var KEYLEN = 128;
 var ITERATIONS = 12000;
 // var DIGEST = 'sha1'; 
 
 // Get password hash using provided salt
-var getHash = function(password, salt, callback) {
+var getHash = function (password, salt, callback) {
   // password: user password
   // salt: user salt
-  // callback: function(error, hash)
+  // callback: function (error, hash)
 
   try {
-
     crypto.pbkdf2(password, salt, ITERATIONS, KEYLEN, function (error, buffer) {
       var hash = buffer.toString('base64');
       callback(error, hash);
     });
-  }
-  catch(error) {
+  } catch (error) {
     callback(error);
   }
 
 };
 
+
+
 // Get password hash using random salt
-exports.generateSaltAndHash = function (password, callback) {
+exports.helper.generateSaltAndHash = function (password, callback) {
   // password: user password
-  // callback: function(error, salt, hash)
+  // callback: function (error, salt, hash)
 
   crypto.randomBytes(KEYLEN, function (error, buffer) {
     if (error) {
-      callback(error); 
+      callback(error);
     } else {
       var salt = buffer.toString('base64');
-      getHash(password, salt, function(error, hash) {
+      getHash(password, salt, function (error, hash) {
         callback(error, salt, hash);
       });
     }
@@ -73,91 +76,99 @@ exports.generateSaltAndHash = function (password, callback) {
 // MIDDLEWARES
 // ----------------------------------------------------------------------------
 
+exports.middleware = {};
+
 // user is logged in?
-exports.isLoggedIn = function (req, res, next) {
+exports.middleware.isLoggedIn = function (req, res, next) {
   if (!req.session.user) {
-    res.status(401)
-       .json({message: "Access denied."});
-  } else {
-    next();
+    _.response.sendError(res, 'Access denied.', 401);
+    return;
   }
+  next();
 };
 
 // user has admin privileged?
-exports.isAdmin = function (req, res, next) {
+exports.middleware.isAdmin = function (req, res, next) {
   if (req.session.user.role !== "admin") {
-    res.status(401)
-       .json({message: "Access denied (admin only)."});
-  } else {
-    next();
+    _.response.sendError(res, 'Access denied (admin only).', 401);
+    return;
   }
+  next();
 };
 
 // user is root?
-exports.isRoot = function (req, res, next) {
+exports.middleware.isRoot = function (req, res, next) {
   if (req.session.user.username !== "root") {
-    res.status(401)
-       .json({message: "Access denied (root only)."});
-  } else {
-    next();
+    _.response.sendError(res, 'Access denied (root only).', 401);
+    return;
   }
+  next();
 };
 
 // ----------------------------------------------------------------------------
 // ROUTES
 // ----------------------------------------------------------------------------
 
+exports.route = {};
+
 // Login
-exports.login = function (req, res) {
-  
-  var failure = {message: 'Authentication failed (check your username and password).'}
+exports.route.login = function (req, res) {
+
+
+  var failure = 'Authentication failed (check your username and password).';
 
   // check that both username and password are defined
-  if (req.body.username === undefined || 
-      req.body.password === undefined)
-  {
-    res.status(400).json(failure); 
-  } else {
-
-    // find user by its name
-    User.findOne({username: req.body.username}, function (error, user) {
-      
-      // if error or user does not exist, report authentication failure
-      if (error || !user) { res.status(400).json(failure); } 
-      else {
-
-        // generate hash from password and salt and compare it to stored hash
-        getHash(req.body.password, user.salt, function(error, hash) {
-          if (error || user.hash !== hash) {
-            res.status(400).json(failure);
-          } else {
-            // if hash is correct, success!
-            req.session.regenerate(function() {
-              req.session.user = user;
-              res.status(200)
-                 .json({message: 'Authentication succeeded.'});            
-            });
-          }
-        });
-      }
-    });
+  if (req.body.username === undefined ||
+    req.body.password === undefined) {
+    _.response.sendError(res, failure, 400);
+    return;
   }
-};
 
-// logout
-exports.logout = function (req, res) {
-  req.session.destroy(function () {
-    res.status(200)
-       .json({message: 'Logout succeeded.'});
+  // find user by its name
+  User.findOne({
+    username: req.body.username
+  }, function (error, user) {
+
+    // if error or user does not exist, report authentication failure
+    if (error || !user) {
+      _.response.sendError(res, failure, 400);
+      return;
+    }
+
+    // generate hash from password and salt and compare it to stored hash
+    getHash(req.body.password, user.salt, function (error, hash) {
+
+      if (error || user.hash !== hash) {
+        _.response.sendError(res, failure, 400);
+        return;
+      }
+
+      // if hash is correct, success!
+      req.session.regenerate(function () {
+        req.session.user = user;
+        _.response.sendSuccess(res, 'Authentication succeeded.');
+        return;
+      });
+
+    });
+
   });
 };
 
-// to now who is logged in
-exports.me = function (req, res) {
-  res.status(200)
-     .json({_id: req.session.user._id,
-            username: req.session.user.username,
-            role: req.session.user.role,
-            description: req.session.user.description});
+// logout
+exports.route.logout = function (req, res) {
+  req.session.destroy(
+    _.response.fSendSuccess(res, 'Logout succeeded.'));
 };
 
+// whoami
+exports.route.me = function (req, res) {
+  var user = req.session.user;
+  res.status(200)
+    .json({
+      _id: user._id,
+      username: user.username,
+      role: user.role,
+      description: user.description
+    });
+};
