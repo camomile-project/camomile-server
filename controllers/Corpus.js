@@ -1,7 +1,7 @@
 /*
 The MIT License (MIT)
 
-Copyright (c) 2013-2014 CNRS
+Copyright (c) 2013-2015 CNRS
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -23,473 +23,250 @@ SOFTWARE.
 */
 
 var async = require('async');
-var Utils = require('../controllers/utils');
-var	layerAPI = require('../controllers/Layer');
+var _ = require('../controllers/utils');
 
-var User = require('../models/User');
-var	Group = require('../models/Group');
 var Corpus = require('../models/Corpus');
-var	Medium = require('../models/Medium');
-var	Layer = require('../models/Layer');
-var	Annotation = require('../models/Annotation');
+var Medium = require('../models/Medium');
+var Layer = require('../models/Layer');
+var Annotation = require('../models/Annotation');
 
-//create a corpus
+// create a corpus
 exports.create = function (req, res) {
-	var error=null;
-	async.waterfall([
-		function (callback) {											// check field
-			if (req.body.name == undefined) callback("the name is not defined");
-			if (req.body.name == "") 		callback("empty string for name is not allowed");
-			callback(null);
-		},		
-		function (callback) {											// check if the name is not already used (name must be unique)
-			Corpus.count({name: req.body.name}, function (error, count) {	
-				if ((!error) && (count != 0)) callback("the corpus name is already used, choose another name");
-		        callback(error);
-		    });
-		},
-		function (callback) {											// create the group
-			var new_corpus = {};
-			new_corpus.name = req.body.name;
-			new_corpus.description = req.body.description;
-			new_corpus.history = []
-			new_corpus.history.push({date:new Date(), 
-									 id_user:req.session.user._id, 
-									 modification:{"name":new_corpus.name, 
-									 			   "description":new_corpus.description}
-									});
-			new_corpus.ACL = {users:{}, groups:{}};
-			new_corpus.ACL.users[req.session.user._id] = Utils.ADMIN;
-			var corpus = new Corpus(new_corpus).save(function (error, newCorpus) {		// save it into the db
-				if (newCorpus) res.status(200).json(newCorpus);
-				callback(error);
-			});			
-		}
-	], function (error) {
-		if (error) res.status(400).json({message:error});
-	});
+
+  var id_user = req.session.user._id;
+  Corpus.create(id_user, req.body, _.response.fSendResource(res, Corpus));
+
 };
 
-// print _id, name, description and history
-printResCorpus = function (corpus, res) {
-	res.status(200).json({"_id":corpus._id,
-			 			  "name":corpus.name,
-						  "description":corpus.description,
-						 });
-}
-
-// for the list of corpus print _id, name, description and history
-printMultiRes = function (l_corpus, res, history) {
-	var p = [];
-	for (i = 0; i < l_corpus.length; i++) { 
-		var corpus = {"_id":l_corpus[i]._id,
-					  "name":l_corpus[i].name,
-					  "description":l_corpus[i].description,
-		  	   		 }
-		if (history== 'on') corpus["history"] = l_corpus[i].history
-		p.push(corpus)
-	} 
-	res.status(200).json(p);
-}
-
-// ----------------------------------------------------------------------------
-// MIDDLEWARES
-// ----------------------------------------------------------------------------
-
-// check if req.session.user._id have the good right to see this req.params.id_corpus
-exports.hasRights = function (minRight) {
-	return function (req, res, next) {
-		async.waterfall([
-			function (callback) {										// find the user
-				User.findById(req.session.user._id, function (error, user) {
-					callback(error, user);
-				});
-			},
-			function (user, callback) {									// find the list of group belong the user
-				Group.find({'users' : {$regex : new RegExp('^'+ req.session.user._id + '$', "i")}}, function (error, groups) {
-					callback(error, user, groups);
-				});
-			},
-			function (user, groups, callback) {							// find if the user have the right to access this corpus
-				Corpus.findById(req.params.id_corpus, function (error, corpus) {
-					if (Utils.checkRights(corpus, user, groups, minRight)) next();
-					else error = "Acces denied";
-					callback(error);
-	    		});
-			},
-		], function (error, trueOrFalse) {
-			if (error) res.status(400).json({message:error});
-		});
-	}
-}
-
-// retrieve all corpus where the user logged has read access and print _id, name, description and history
-exports.getAll = function (req, res) {
-	var filter = {};
-	if (req.query.name) filter['name'] = req.query.name;
-	async.waterfall([
-		function (callback) {											// find the user
-			User.findById(req.session.user._id, function (error, user) {
-				callback(error, user);
-			});
-		},
-		function (user, callback) {										// find the list of group belong the user
-			Group.find({'users' : {$regex : new RegExp('^'+ req.session.user._id + '$', "i")}}, function (error, groups) {
-				callback(error, user, groups);
-			});
-		},
-		function (user, groups, callback) {
-			Corpus.find(filter, function (error, l_corpus) {					// print all corpus where the user have the good right
-    			async.filter(l_corpus, 
-    			        	 function (corpus, callback) {
-    			          		callback (Utils.checkRights(corpus, user, groups, Utils.READ));
-    			        	 },
-    			        	 function (results) { printMultiRes(results, res, req.query.history);} 
-    			);	
-    			callback(error);		
-    		});
-		},
-	], function (error, trueOrFalse) {
-		if (error) res.status(400).json({message:error});
-	});
-}
-
-// retrieve a particular corpus with his _id and print _id, name, description and history
-exports.getOne = function (req, res) {
-	var field = '_id name description';
-	if (req.query.history == 'on') field = '_id name description history';
-	Corpus.findById(req.params.id_corpus, field, function (error, corpus) {
-		if (error) res.status(400).json({message:error});
-    	else res.status(200).json(corpus);
-	});
-}
-
-// update information of a corpus
+// update a corpus
 exports.update = function (req, res) {
-	var newHistory = {};
-	Corpus.findById(req.params.id_corpus, function (error, corpus) {
-		if (req.body.name) {											// check field
-			if (req.body.name == "") res.status(400).json({message:"The corpus name can't be empty"});
-			else {
-				corpus.name = req.body.name;
-				newHistory.name = req.body.name;
-			}
-		}				
-		if (req.body.description) {
-			corpus.description = req.body.description;
-			newHistory.description = req.body.description;
-		}
-		corpus.history.push({date:new Date(), id_user:req.session.user._id, modification:newHistory})	// update history with the modification
-		corpus.save(function (error, newCorpus) {						// save the corpus in the db
-			if (error) res.status(400).json({message:error});
-			else printResCorpus(newCorpus, res);
-		});
-	});
-}
+
+  if (
+    req.body.name &&
+    req.body.name === '') {
+    _.response.sendError(res, 'Invalid name.', 400);
+    return;
+  }
+
+  Corpus.findById(req.params.id_corpus, function (error, corpus) {
+
+    var changes = {};
+
+    if (req.body.name) {
+      corpus.name = changes.name = req.body.name;
+    }
+
+    if (req.body.description) {
+      corpus.description = changes.description = req.body.description;
+    }
+
+    // update history
+    corpus.history.push({
+      date: new Date(),
+      id_user: req.session.user._id,
+      changes: changes
+    });
+
+    corpus.save(_.response.fSendResource(res, Corpus));
+  });
+};
+
+// get all READable corpora
+exports.getAll = function (req, res) {
+
+  var filter = {};
+  if (req.query.name) {
+    filter['name'] = req.query.name;
+  }
+
+  async.waterfall([
+      _.request.fGetResources(req, Corpus, filter),
+      _.request.fFilterResources(req, _.READ)
+    ],
+    _.response.fSendResources(res, Corpus));
+
+};
+
+// get one specific corpus
+exports.getOne = function (req, res) {
+  _.request.fGetResource(req, Corpus)(
+    _.response.fSendResource(res, Corpus));
+};
 
 // remove a given corpus
 exports.remove = function (req, res) {
-	var error;
-	async.waterfall([
-		function (callback) {											// check if there is no layer with annotation into the corpus
-			Layer.find({id_corpus:req.params.id_corpus}, function (error, layers) {
-				if (layers.length>0) {
-					for (i = 0; i < layers.length; i++) Annotation.remove({id_layer : layers[i]._id}, function (error, annotations) {
-						callback(error);
-					});
-				}
-				callback(null);		
-    		});
-		},
-		function (callback) {											// check if there is no layer into the media
-			Layer.remove({id_corpus:req.params.id_corpus}, function (error, layers) {
-				callback(error);
-			});				
-		},			
-		function (callback) {											// check if there is no layer into the media
-			Medium.remove({id_corpus:req.params.id_corpus}, function (error, media) {
-				callback(error);
-			});				
-		},	
-		function (callback) {											// remove the corpus
-			Corpus.remove({_id : req.params.id_corpus}, function (error, corpus) {
-				callback(error);
-			});
-		}
-	], function (error, trueOrFalse) {
-		if (error) res.status(400).json({message:error});
-		else res.status(200).json({message:"The corpus has been deleted"});
-	});
-}
 
-// get ACL of the corpus
-exports.getRights = function (req, res) {
-	Corpus.findById(req.params.id_corpus, 'ACL', function (error, corpus) {   //
-		if (error) res.status(400).json({message:error});
-    	else res.status(200).json(corpus);
-	});
-}
+  var corpus = req.params.id_corpus;
 
-// update ACL of a user
-exports.updateUserRights = function (req, res) {
-	if (req.body.right != Utils.ADMIN && req.body.right != Utils.WRITE && req.body.right != Utils.READ) res.status(400).json({message:"Right must be 1 (READ), 2 (WRITE) or 3 (ADMIN)."});
-	Corpus.findById(req.params.id_corpus, function (error, corpus) {		// find the corpus
-		var update = {ACL:corpus.ACL};		
-		if (error) res.status(400).json({message:error});
-		if (!update.ACL.users) update.ACL.users = {};
-		update.ACL.users[req.params.id_user]=req.body.right;			// update acl
-		Corpus.findByIdAndUpdate(req.params.id_corpus, update, function (error, newCorpus) {	// save the corpus with the new ACL
-			if (error) res.status(400).json({message:error});
-			else res.status(200).json(newCorpus.ACL);
-		});	
-	});
-}
+  // remove layers and media in parallel
+  async.parallel([
 
-// update ACL of a group
-exports.updateGroupRights = function (req, res) {
-	if (req.body.right != Utils.ADMIN && req.body.right != Utils.WRITE && req.body.right != Utils.READ) res.status(400).json({message:"Right must be 1 (READ), 2 (WRITE) or 3 (ADMIN)."});
-	Corpus.findById(req.params.id_corpus, function (error, corpus) {		// find the corpus
-		var update = {ACL:corpus.ACL};		
-		if (error) res.status(400).json({message:error});
-		if (!update.ACL.groups) update.ACL.groups = {};
-		update.ACL.groups[req.params.id_group]=req.body.right;			// update acl
-		Corpus.findByIdAndUpdate(req.params.id_corpus, update, function (error, newCorpus) {	// save the corpus with the new ACL
-			if (error) res.status(400).json({message:error});
-			else res.status(200).json(newCorpus.ACL);
-		});	
-	});
-}
-
-// remove a user from ACL
-exports.removeUserRights = function (req, res) {	
-	Corpus.findById(req.params.id_corpus, function (error, corpus) {		// find the corpus
-		if (error) res.status(400).json({message:error});
-		var update = {ACL:corpus.ACL};	
-		if (!update.ACL.users || update.ACL.users==null) res.status(404).json({message:req.params.id_user+" is not in ACL.users"});
-		else if (!update.ACL.users[req.params.id_user]) res.status(404).json({message:req.params.id_user+" is not in ACL.users"});
-		else {
-			delete update.ACL.users[req.params.id_user];				// delete the user from ACL
-			if (Object.getOwnPropertyNames(update.ACL.users).length === 0) update.ACL.users = undefined;
-			Corpus.findByIdAndUpdate(req.params.id_corpus, update, function (error, newCorpus) {	// save the corpus with the new ACL
-				if (error) res.status(400).json({message:error});
-				else res.status(200).json(newCorpus.ACL);
-			});	
-		}				
-	});
-}
-
-// remove a group from ACL
-exports.removeGroupRights = function (req, res) {
-	Corpus.findById(req.params.id_corpus, function (error, corpus) {		// find the corpus
-		if (error) res.status(400).json({message:error});
-		var update = {ACL:corpus.ACL};	
-		if (!update.ACL.groups || update.ACL.groups==null) res.status(404).json({message:req.params.id_group+" is not in ACL.groups"});
-		else if (!update.ACL.groups[req.params.id_group]) res.status(404).json({message:req.params.id_group+" is not in ACL.groups"});
-		else {
-			delete update.ACL.groups[req.params.id_group];				// delete the group from ACL
-			if (Object.getOwnPropertyNames(update.ACL.groups).length === 0) update.ACL.groups = undefined;
-			Corpus.findByIdAndUpdate(req.params.id_corpus, update, function (error, newCorpus) {	// save the corpus with the new ACL
-				if (error) res.status(400).json({message:error});
-				else res.status(200).json(newCorpus.ACL);
-			});	
-		}				
-	});
-}
-
-//add a medias
-exports.addMedia = function (req, res) {
-	var l_media = req.body;
-	var adding_one_media = false;
-	if (l_media.constructor != Array) {
-		l_media = [req.body];
-		adding_one_media = true;
-	}
-	async.waterfall([
-		function (callback) {											// check field
-			if (l_media == undefined) callback("The data field is not define");
-			if (l_media.length == 0)  callback("The list of media is empty");
-			if (l_media) {
-				for (var i = 0; i < l_media.length; i++) { 
-					if (l_media[i].name == undefined) 	callback("One name is not defined");
-					if (l_media[i].name == "") 		callback("One name is empty (not allowed)");
-				}
-			}
-			callback(null);
-		},		
-        function (callback) {
-			var l_media_name = [];
-			for (var i = 0; i < l_media.length; i++) l_media_name.push(l_media[i].name) ;
-			async.map(l_media_name, 
-					  function (media_name, callback) {
-							Medium.count({name: media_name, id_corpus: req.params.id_corpus}, function (error, count) {
-								if (count != 0) callback("the name '"+media_name+"' is already used in this corpus, choose another name");
-								else callback(error);
-						    });
-					  }, 
-					  function (error) {callback(error);}
-			);
+    // remove layers
+    function (callback) {
+      Layer.find({
+          id_corpus: corpus
         },
-		function (callback) {											// create the new medias
-			var l_medias = []
-			async.map(l_media, function (media, callback) {
-			  		var new_media = {};
-					new_media.name = media.name;
-					new_media.description = media.description;
-					new_media.url = media.url;
-					new_media.id_corpus = req.params.id_corpus;
-					new_media.history = []
-					new_media.history.push({date:new Date(), 
-											id_user:req.session.user._id, 
-											modification:{"name":new_media.name, 
-														  "description":new_media.description, 
-														  "url":new_media.url}
-										   });
-					var c_media = new Medium(new_media).save(function (error, newMedia) {	// save the new media
-						l_medias.push(newMedia)
-						callback(error);
-					});
-				}, function (error) {
-					callback(error, l_medias);
-				}
-			);
-		}
-	], function (error, l_medias) {
-		if (error) res.status(400).json({message:error});
-		else if (adding_one_media) res.status(200).json(l_medias[0]);
-		else res.status(200).json(l_medias);
-	});
+        function (error, layers) {
+
+          // create list of ids 
+          var ids_layers = [];
+          for (var i = layers.length - 1; i >= 0; i--) {
+            ids_layers.push(layers[i]._id);
+          };
+
+          // remove layers and annotations in parallel
+          async.parallel([
+
+              // remove annotations
+              function (callback) {
+                Annotation.remove({
+                    id_layer: {
+                      $in: ids_layers
+                    }
+                  },
+                  callback);
+              },
+
+              // remove layers
+              function (callback) {
+                Layer.remove({
+                    _id: {
+                      $in: ids_layers
+                    }
+                  },
+                  callback);
+              }
+            ],
+            callback);
+        });
+    },
+
+    // remove media
+    function (callback) {
+      Medium.remove({
+        id_corpus: corpus
+      }, callback);
+    }
+
+  ], _.response.fSendSuccess(res, 'Successfully deleted.'));
 };
 
-function find_id_medium(media_name, callback) {
-	Medium.findOne({"name":media_name}, function (error, media) {
-		if (media) callback(error, media._id);
-		else callback("media '"+media_name+"' is not found in the db", undefined);
-	});
+// get corpus rights
+exports.getRights = function (req, res) {
+  Corpus.findById(
+    req.params.id_corpus,
+    'ACL',
+    function (error, corpus) {
+      _.response.fSendData(res)(error, corpus.ACL);
+    });
 };
 
-//create a layer
-exports.addLayer = function (req, res) {
-	async.waterfall([
-		function (callback) {											// check field
-			if (req.body.name == undefined) 			callback("The name is not defined");
-			if (req.body.name == "") 					callback("Empty string for name is not allowed");
-			if (req.body.fragment_type == undefined) 	callback("The fragment_type is not defined");
-			if (req.body.data_type == undefined) 		callback("The data_type is not defined");
-			if (req.body.annotations) {
-				for (var i = 0; i < req.body.annotations.length; i++) { 
-					if (!req.body.annotations[i].data) 		 callback("Data is not defined for one annotation");
-					if (!req.body.annotations[i].fragment) 	 callback("Fragment is not defined for one annotation");
-					if (!req.body.annotations[i].id_medium )  callback("id_medium is not defined for one annotation");
-				}
-			}
-			callback(null);
-		},		
-		function (callback) {											// check if the name is not already used (name must be unique)
-			Layer.count({name: req.body.name, id_corpus: req.params.id_corpus}, function (error, count) {	
-				if ((!error) && (count != 0)) error = "the name is already used, choose another name";
-		        callback(error);
-		    });
-		},
-		function (callback) {											// create the new layer
-			var new_layer = {};
-			new_layer.name = req.body.name;
-			new_layer.description = req.body.description;
-			new_layer.id_corpus = req.params.id_corpus;
-			new_layer.fragment_type = req.body.fragment_type;
-			new_layer.data_type = req.body.data_type;
-			new_layer.history = [];
-			new_layer.history.push({date:new Date(), 
-									id_user:req.session.user._id, 
-									modification:{"name":new_layer.name, 
-												  "description":new_layer.description,
-												  "fragment_type":new_layer.fragment_type,
-												  "data_type":new_layer.data_type}
-									});
-			new_layer.ACL = {users:{}, groups:{}};
-			new_layer.ACL.users[req.session.user._id] = Utils.ADMIN;
-			var layer = new Layer(new_layer).save(function (error, newLayer_res) {	// save the new layer
-				callback(error, newLayer_res);
-			});			
-		},
-		function (newLayer, callback) {
-			if (req.body.annotations) {
-				for (i = 0; i < req.body.annotations.length; i++) { 
-					var new_annotation = {};
-					new_annotation.fragment = req.body.annotations[i].fragment;
-					new_annotation.data 	= req.body.annotations[i].data;
-					new_annotation.id_layer = newLayer._id;
-					new_annotation.id_medium = req.body.annotations[i].id_medium;
-					new_annotation.history 	= [];
-					new_annotation.history.push({date:new Date(), 
-												 id_user:req.session.user._id, 
-												 modification:{"fragment":new_annotation.fragment, 
-												 			   "data":new_annotation.data
-												 			  }
-												 });
-					var annotation = new Annotation(new_annotation).save(function (error, newAnnotation) {
-						if (error) callback(error);
-					});
-				}
-				callback(null, newLayer);
-			}
-			else callback(null, newLayer);
-		}
-	], function (error, newLayer) {
-		if (error) 	res.status(400).json({message:error});
-		else res.status(200).json(newLayer);
-	});
+// update user rights
+exports.updateUserRights = function (req, res) {
+
+  if (
+    req.body.right != _.ADMIN &&
+    req.body.right != _.WRITE &&
+    req.body.right != _.READ) {
+    _.response.sendError(
+      res,
+      "Right must be 1 (READ), 2 (WRITE) or 3 (ADMIN).",
+      400);
+    return;
+  }
+
+  var path = 'ACL.users.' + req.params.id_user;
+  var update = {
+    $set: {
+      path: req.body.right
+    }
+  };
+
+  Corpus.findByIdAndUpdate(
+    req.params.id_corpus,
+    update, {
+      new: true
+    },
+    function (error, corpus) {
+      _response.fSendData(res)(error, corpus.ACL);
+    }
+  );
+
 };
 
-// retrieve all media of a corpus which the user logged has READ access for the corresponding corpus 
-// and print _id, name, id_corpus, description, url and history
-exports.getAllMedia = function (req, res) {
-	var field = '_id id_corpus name url description';
-	if (req.query.history == 'on') field = '_id id_corpus name url description history';
-	var filter = {};
-	if (req.query.name) filter['name'] = req.query.name;
-	Medium.find(filter, field, function (error, medias) {								// fin all media
-		async.filter(medias, 											// filter the list with media belong to the corpus
-		        	 function (media, callback) { 
-		        	 	if (media.id_corpus == req.params.id_corpus) callback(true);
-		        	 	else callback(false);
-		        	 },
-		        	 function (results) { res.status(200).json(results);} 
-		);	
-	});
-}
+// update group rights
+exports.updateGroupRights = function (req, res) {
 
-// retrieve all layer of a corpus which the user logged has READ access for the layer 
-// and print _id, name, description, id_corpus, fragment_type, data_type, history
-exports.getAllLayer = function (req, res) {
-	var filter = {};
-	if (req.query.name) 		 filter['name'] 		 = req.query.name;	
-	if (req.query.fragment_type) filter['fragment_type'] = req.query.fragment_type;	
-	if (req.query.data_type) 	 filter['data_type'] 	 = req.query.data_type;	
-	async.waterfall([
-		function (callback) {
-			User.findById(req.session.user._id, function (error, user) {	// find the user logged
-				callback(error, user);
-			});
-		},
-		function (user, callback) {										// find the group belong to the user logged
-			Group.find({'users' : {$regex : new RegExp('^'+ req.session.user._id + '$', "i")}}, function (error, groups) {
-				callback(error, user, groups);
-			});
-		},
-		function (user, groups, callback) {								// find all layer
-			Layer.find(filter, function (error, layers) {
-    			async.filter(layers, 									// filter the list with layer belong the corpus and where the user have the good right
-    			        	 function (layer, callback) {
-		        	 			if (layer.id_corpus == req.params.id_corpus && Utils.checkRights(layer, user, groups, Utils.READ)) callback(true);
-		        	 			else callback(false);   			        	 	
-    			        	 },
-    			        	 function (results) { layerAPI.printMultiRes(results, res, req.query.history);} 
-    			);	
-    			callback(error);		
-    		});
-		},
-	], function (error, trueOrFalse) {
-		if (error) res.status(400).json({message:error});
-	});
-}
+  if (
+    req.body.right != _.ADMIN &&
+    req.body.right != _.WRITE &&
+    req.body.right != _.READ) {
+    _.response.sendError(
+      res,
+      "Right must be 1 (READ), 2 (WRITE) or 3 (ADMIN).",
+      400);
+    return;
+  }
 
+  var path = 'ACL.groups.' + req.params.id_group;
+  var update = {
+    $set: {
+      path: req.body.right
+    }
+  };
+
+  Corpus.findByIdAndUpdate(
+    req.params.id_corpus,
+    update, {
+      new: true
+    },
+    function (error, corpus) {
+      _response.fSendData(res)(error, corpus.ACL);
+    }
+  );
+
+};
+
+// remove user rights
+exports.removeUserRights = function (req, res) {
+
+  var path = 'ACL.users.' + req.params.id_user;
+  var update = {
+    $unset: {
+      path: ''
+    }
+  };
+
+  Corpus.findByIdAndUpdate(
+    req.params.id_corpus,
+    update, {
+      new: true
+    },
+    function (error, corpus) {
+      _response.fSendData(res)(error, corpus.ACL);
+    }
+  );
+
+};
+
+// remove group rights
+exports.removeGroupRights = function (req, res) {
+
+  var path = 'ACL.groups.' + req.params.id_group;
+  var update = {
+    $unset: {
+      path: ''
+    }
+  };
+
+  Corpus.findByIdAndUpdate(
+    req.params.id_corpus,
+    update, {
+      new: true
+    },
+    function (error, corpus) {
+      _response.fSendData(res)(error, corpus.ACL);
+    }
+  );
+
+};

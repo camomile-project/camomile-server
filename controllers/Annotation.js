@@ -23,97 +23,138 @@ SOFTWARE.
 */
 
 var async = require('async');
-var commonFuncs = require('../controllers/utils');
+var _ = require('../controllers/utils');
 
 var User = require('../models/User');
 var Group = require('../models/Group');
 var Layer = require('../models/Layer');
 var Annotation = require('../models/Annotation');
 
+// ----------------------------------------------------------------------------
+// ROUTES
+// ----------------------------------------------------------------------------
 
-// check if req.session.user._id have the good right to see this annotation.id_layer
-exports.hasRights = function (minRight) {
-  return function (req, res, next) {
-    async.waterfall([
-            function (callback) {                                        // find the user
-              User.findById(req.session.user._id, function (error, user) {
-                callback(error, user);
-              });
-            },
-            function (user, callback) {                                  // find the list of group belong the user
-              Group.find({'users' : {$regex : new RegExp('^'+ req.session.user._id + '$', "i")}}, function (error, groups) {
-                callback(error, user, groups);
-              });
-            },
-            function (user, groups, callback) {                          // find the annotation
-              Annotation.findById(req.params.id_annotation, function (error, annotation) {
-                callback(error, user, groups, annotation);
-              });
-            },
-            function (user, groups, annotation, callback) {                  // find the layer belong the annotation anc check if the user have the right to access this layer
-              Layer.findById(annotation.id_layer, function (error, layer) {
-                if (commonFuncs.checkRights(layer, user, groups, minRight)) next();
-                else error = "Acces denied";
-                callback(error);
-              });
-            },
+// add annotation(s)
+exports.create = function (req, res) {
 
-            ], function (error, trueOrFalse) {
-              if (error) res.status(400).json({message: error});
-            });
-}
-}
+  var id_user = req.session.user._id;
+  var id_layer = req.params.id_layer;
 
-// retrieve a particular annotation with his _id  print _id, id_layer, fragment and data
-exports.getOne = function (req, res) {
-  var field = '_id id_layer id_medium fragment data';
-  if (req.query.history == 'on') field = '_id id_layer id_medium fragment data history';  
-  Annotation.findById(req.params.id_annotation, field, function (error, annotation) {
-    if (error) res.status(400).json({message:error});
-    else res.status(200).json(annotation);
-  });
-}
+  var data, only_one;
+  if (req.body.constructor !== Array) {
+    data = [req.body];
+    only_one = true;
+  } else {
+    data = req.body;
+    only_one = false;
+  }
 
-// get all annotation
-exports.getAll = function (req, res) {  
-  var field = '_id id_layer id_medium fragment data';
-  if (req.query.history == 'on') field = '_id id_layer id_medium fragment data history';      
+  async.map(
+    data,
+    function (datum, callback) {
+      Annotation.create(
+        id_user, id_layer, datum, callback);
+    },
+    function (error, annotations) {
+      if (only_one) {
+        _.response.fSendResource(res, Annotation)(error, annotations[0]);
+      } else {
+        _.response.fSendResources(res, Annotation)(error, annotations);
+      }
+    }
+  );
+
+};
+
+// update annotation
+exports.update = function (req, res) {
+  var changes = {};
+  Annotation.findById(
+
+    req.params.id_annotation,
+
+    function (error, annotation) {
+
+      if (req.body.fragment) {
+        annotation.fragment = req.body.fragment;
+        changes.fragment = req.body.fragment;
+      }
+
+      if (req.body.data) {
+        annotation.data = req.body.data;
+        changes.data = req.body.data;
+      }
+
+      annotation.history.push({
+        date: new Date(),
+        id_user: req.session.user._id,
+        changes: changes
+      })
+
+      annotation.save(
+        _.response.fSendResources(res, Annotation));
+    });
+};
+
+// get all annotations (root only)
+exports.getAll = function (req, res) {
+
   var filter = {};
-  if (req.query.id_medium) filter['id_medium'] = req.query.id_medium;
-  if (req.query.id_layer) filter['id_layer'] = req.query.layer;
-  if (req.query.fragment) filter['fragment'] = req.query.fragment;
-  if (req.query.data)     filter['data']     = req.query.data;
-  Annotation.find(filter, field, function (error, annotations) {
-    if (error) res.status(400).json({error:"error", message:error});
-    if (annotations) res.status(200).json(annotations);
-    else res.status(200).json([]);
-  });
-}
+  if (req.query.id_medium) {
+    filter.id_medium = req.query.id_medium;
+  }
+  if (req.query.id_layer) {
+    filter.id_layer = req.query.id_layer;
+  }
+  if (req.query.fragment) {
+    filter.fragment = req.query.fragment;
+  }
+  if (req.query.data) {
+    filter.data = req.query.data;
+  }
+
+  _.request.fGetResources(req, Annotation, filter)(
+    _.response.fSendResources(res, Annotation));
+
+};
+
+// get one specific medium
+exports.getOne = function (req, res) {
+  _.request.fGetResource(req, Annotation)(
+    _.response.fSendResource(res, Annotation));
+};
+
+// retrieve all annotations of a layer
+exports.getLayerAnnotations = function (req, res) {
+
+  var filter = {};
+
+  filter.id_layer = req.params.id_layer;
+
+  // filter by medium
+  if (req.query.id_medium) {
+    filter.id_medium = req.query.id_medium;
+  }
+
+  // filter by fragment
+  if (req.query.fragment) {
+    filter.fragment = req.query.fragment;
+  }
+
+  // filter by data
+  if (req.query.data) {
+    filter.data = req.query.data;
+  }
+
+  _.request.fGetResources(req, Annotation, filter)(
+    _.response.fSendResources(res, Annotation));
+
+};
 
 // remove a given annotation
 exports.remove = function (req, res) {
-  Annotation.remove({_id : req.params.id_annotation}, function (error, annotation) {
-    if (!error && annotation == 1) res.status(200).json({message:"The annotation has been deleted"});
-    else res.status(400).json({message:error});
-  });
-}
-//update information of a annotation
-exports.update = function (req, res) {
-  var newHistory = {};
-  Annotation.findById(req.params.id_annotation, function (error, annotation) {
-        if (req.body.fragment) {                                            // check field
-          annotation.fragment = req.body.fragment;
-          newHistory.fragment = req.body.fragment;
-        }
-        if (req.body.data) {
-          annotation.data = req.body.data;
-          newHistory.data = req.body.data;
-        }   
-        annotation.history.push({date:new Date(), id_user:req.session.user._id, modification:newHistory})
-        annotation.save(function (error, newAnnotation) {                            // save the media in the db
-          if (error) res.status(400).json({message:error});
-          if (!error) res.status(200).json(newAnnotation);
-        });
-      });
-}
-
+  Annotation.remove({
+      _id: req.params.id_annotation
+    },
+    _.response.fSendSuccess(res, 'Successfully deleted.'));
+};

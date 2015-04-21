@@ -1,7 +1,7 @@
 /*
 The MIT License (MIT)
 
-Copyright (c) 2013-2014 CNRS
+Copyright (c) 2013-2015 CNRS
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -22,132 +22,155 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-var fileSystem = require('fs');//working with video streaming
-var async = require('async');
 var path = require('path');
-var commonFuncs = require('../controllers/utils');
+var async = require('async');
+var _ = require('./utils');
 
-var User = require('../models/User');
-var	Group = require('../models/Group');
-var Corpus = require('../models/Corpus');
-var	Medium = require('../models/Medium');
+var Medium = require('../models/Medium');
 
-// check if req.session.user._id have the good right to see this media.id_corpus
-exports.hasRights = function (minRight) {
-	return function (req, res, next) {
-		async.waterfall([
-			function (callback) {										// find the user
-				User.findById(req.session.user._id, function (error, user) {
-					callback(error, user);
-				});
-			},
-			function (user, callback) {									// find the list of group belong the user
-				Group.find({'users' : {$regex : new RegExp('^'+ req.session.user._id + '$', "i")}}, function (error, groups) {
-					callback(error, user, groups);
-				});
-			},
-			function (user, groups, callback) {							// find the media
-				Medium.findById(req.params.id_medium, function (error, media) {
-					callback(error, user, groups, media);
-	    		});
-			},
-			function (user, groups, media, callback) {					// find the corpus belong the media anc check if the user have the right to access this corpus
-				Corpus.findById(media.id_corpus, function (error, corpus) {
-					if (commonFuncs.checkRights(corpus, user, groups, minRight)) next();
-					else error = "Acces denied";
-					callback(error);
-	    		});
-			},
+// create medium(a)
+exports.create = function (req, res) {
 
-		], function (error, trueOrFalse) {
-			if (error) res.status(400).json({message:error});
-		});
-	}
-}
+  var id_user = req.session.user._id;
+  var id_corpus = req.params.id_corpus;
 
-// retrieve a particular media with his _id and print _id, name, description, url and history
-exports.getOne = function (req, res) {
-	var field = '_id name description id_corpus url';
-	if (req.query.history == 'on') field = '_id name description id_corpus url history';	
-	Medium.findById(req.params.id_medium, field, function (error, media) {
-		if (error) res.status(400).json({message:error});
-    	else res.status(200).json(media);
-	});
-}
+  var data, only_one;
+  if (req.body.constructor !== Array) {
+    data = [req.body];
+    only_one = true;
+  } else {
+    data = req.body;
+    only_one = false;
+  }
 
-//update information of a media
+  async.map(
+    data,
+    function (datum, callback) {
+      Medium.create(id_user, id_corpus, datum, callback);
+    },
+    function (error, media) {
+      if (only_one) {
+        _.response.fSendResource(res, Medium)(error, media[0]);
+      } else {
+        _.response.fSendResources(res, Medium)(error, media);
+      }
+    }
+  );
+};
+
+// update a medium
 exports.update = function (req, res) {
-	var newHistory = {};
-	Medium.findById(req.params.id_medium, function (error, media) {
-		if (req.body.name) {											// check field
-			if (req.body.name == "") res.status(400).json({message:"name can't be empty"});
-			else {
-				media.name = req.body.name;
-				newHistory.name = req.body.name;
-			}
-		}				
-		if (req.body.description) {
-			media.description = req.body.description;
-			newHistory.description = req.body.description;
-		}
-		if (req.body.url) {
-			media.url = req.body.url;
-			newHistory.url = req.body.url;
-		}
-		media.history.push({date:new Date(), id_user:req.session.user._id, modification:newHistory})	// update history with the modification
-		media.save(function (error, newMedia) {							// save the media in the db
-			if (error) res.status(400).json({message:error});
-			if (!error) res.status(200).json(newMedia);
-		});
-	});
-}
 
-// remove a given media
+  if (req.body.name && req.body.name === '') {
+    _.response.sendError(res, 'Invalid name.', 400);
+    return;
+  }
+
+  Medium.findById(req.params.id_medium, function (error, medium) {
+
+    var changes = {};
+
+    if (req.body.name) {
+      medium.name = changes.name = req.body.name;
+    }
+
+    if (req.body.description) {
+      medium.description = changes.description = req.body.description;
+    }
+
+    if (req.body.url) {
+      medium.url = changes.url = req.body.url;
+    }
+
+    medium.history.push({
+      date: new Date(),
+      id_user: req.session.user._id,
+      changes: changes
+    });
+
+    medium.save(_.response.fSendResource(res, Medium));
+  });
+};
+
+// get all READable media
+exports.getAll = function (req, res) {
+
+  var filter = {};
+  if (req.query.name) {
+    filter.name = req.query.name;
+  }
+
+  async.waterfall(
+    [
+      _.request.fGetResources(req, Medium, filter),
+      _.request.fFilterResources(req, _.READ)
+    ],
+    _.response.fSendResources(res, Medium)
+  );
+
+};
+
+// get one specific medium
+exports.getOne = function (req, res) {
+  _.request.fGetResource(req, Medium)(
+    _.response.fSendResource(res, Medium)
+  );
+};
+
+// get all media of a specific corpus
+exports.getCorpusMedia = function (req, res) {
+
+  var filter = {};
+
+  // only this corpus
+  filter.id_corpus = req.params.id_corpus;
+
+  // filter by name
+  if (req.query.name) {
+    filter.name = req.query.name;
+  }
+
+  _.request.fGetResources(req, Medium, filter)(
+    _.response.fSendResources(res, Medium)
+  );
+
+};
+
+// remove one medium
 exports.remove = function (req, res) {
-	Medium.remove({_id : req.params.id_medium}, function (error, media) {
-		if (!error && media == 1) res.status(200).json({message:"The media has been deleted"});
-		else res.status(400).json({message:error});
-	});
-}
+  Medium.remove({
+      _id: req.params.id_medium
+    },
+    _.response.fSendSuccess(res, 'Successfully deleted.')
+  );
+};
 
-function getVideoWithExtension(req, res, extension) {
-	Medium.findById(req.params.id_medium, function (error, media) {
-		if (error) res.status(400).json({message:error});
-		else if (media == null) res.status(400).json({message: 'no such id_medium!'})
-		else {			
-			if (media.url == undefined) return res.status(404).send({message:'The URL of the video for this media is defined'});
-			var filePath = media.url + '.' + extension;
-			filePath = path.join(req.app.get('media'), filePath);
-			res.status(200).sendfile(filePath);
-		}
-	});
-}
+var streamFormat = function (req, res, extension) {
+  Medium.findById(req.params.id_medium, function (error, medium) {
 
-// retrieve all media
-exports.getAll = function (req, res) {	
-	var field = '_id id_corpus name description url';
-	if (req.query.history == 'on') field = '_id id_corpus name description url history';
-	var filter = {};
-	if (req.query.name) filter['name'] = req.query.name;			
-	Medium.find(filter, field, function (error, medias) {
-    	if (error) res.status(400).json({error:"error", message:error});
-    	if (medias) res.status(200).json(medias);
-		else res.status(200).json([]);
-	});
-}
+    if (error || medium.url === undefined) {
+      _.response.sendError(res, 'Failed stream.');
+      return;
+    }
 
-exports.getVideo = function (req, res) {
-	getVideoWithExtension(req, res, 'webm');
-}
+    var pathToFile = medium.url + '.' + extension;
+    pathToFile = path.join(req.app.get('media'), pathToFile);
+    res.status(200).sendfile(pathToFile);
+  });
+};
 
-exports.getVideoWEBM = function (req, res) {
-	getVideoWithExtension(req, res, 'webm');
-}
+exports.stream = function (req, res) {
+  streamFormat(req, res, 'webm');
+};
 
-exports.getVideoMP4 = function (req, res) {
-	getVideoWithExtension(req, res, 'mp4');
-}
+exports.streamWebM = function (req, res) {
+  streamFormat(req, res, 'webm');
+};
 
-exports.getVideoOGV = function (req, res) {
-	getVideoWithExtension(req, res, 'ogv');
-}
+exports.streamMp4 = function (req, res) {
+  streamFormat(req, res, 'mp4');
+};
+
+exports.streamOgv = function (req, res) {
+  streamFormat(req, res, 'ogv');
+};
