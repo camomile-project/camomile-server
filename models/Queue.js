@@ -24,13 +24,20 @@ SOFTWARE.
 
 var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
-var ObjectId = Schema.ObjectId;
 
 var Queue = new Schema({
-	name: {type: String, required: true, trim: true},
-	description: {type : Schema.Types.Mixed, 'default' : ''},   	
-	list: [Schema.Types.Mixed]
-}, { versionKey: false });
+  name: {
+    type: String,
+    required: true,
+    trim: true
+  },
+  description: {
+    type: Schema.Types.Mixed,
+    'default': ''
+  },
+  list: [Schema.Types.Mixed]
+}, {
+  versionKey: false
+});
 
 module.exports = mongoose.model('Queue', Queue);
-

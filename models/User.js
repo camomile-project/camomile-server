@@ -24,6 +24,8 @@ SOFTWARE.
 
 var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
+var Group = require('./Group');
+
 
 var User = new Schema({
   username: {
@@ -43,5 +45,24 @@ var User = new Schema({
 }, {
   versionKey: false
 });
+
+// User.methods.getGroups = function (callback) {
+//   Group.find({
+//       users: this._id
+//     }, '_id',
+//     function (error, groups) {
+
+//       var group_ids = [];
+
+//       if (groups) {
+//         for (var i = groups.length - 1; i >= 0; i--) {
+//           group_ids.push(groups[i]._id);
+//         };
+//       }
+
+//       callback(error, group_ids);
+
+//     });
+// };
 
 module.exports = mongoose.model('User', User);

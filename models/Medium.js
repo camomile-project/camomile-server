@@ -24,16 +24,29 @@ SOFTWARE.
 
 var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
-var ObjectId = Schema.ObjectId;
-var CorpusSchema = require('./Corpus').CorpusSchema;
 var HistorySchema = require('./History').HistorySchema;
 
 var Medium = new Schema({
-	id_corpus : {type : ObjectId, ref : 'CorpusSchema'},
-	name: {type: String, required: true, trim: true},
-	description: {type : Schema.Types.Mixed, 'default' : ''},   	
-	url : {type: String, default:""} ,
-    history : [HistorySchema]	
-}, { versionKey: false });
+  id_corpus: {
+    type: Schema.Types.ObjectId,
+    ref: 'Corpus'
+  },
+  name: {
+    type: String,
+    required: true,
+    trim: true
+  },
+  description: {
+    type: Schema.Types.Mixed,
+    'default': ''
+  },
+  url: {
+    type: String,
+    default: ""
+  },
+  history: [HistorySchema]
+}, {
+  versionKey: false
+});
 
 module.exports = mongoose.model('Medium', Medium);

@@ -24,13 +24,11 @@ SOFTWARE.
 
 var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
-var ObjectId = Schema.ObjectId;
 var HistorySchema = require('./History').HistorySchema;
-var CorpusSchema = require('./Corpus').CorpusSchema;
 
 var Layer = new Schema({
   id_corpus: {
-    type: ObjectId,
+    type: Schema.Types.ObjectId,
     ref: 'CorpusSchema'
   },
   name: {

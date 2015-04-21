@@ -24,8 +24,6 @@ SOFTWARE.
 
 var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
-var ObjectId = Schema.ObjectId;
-var UserSchema = require('./User').UserSchema;
 
 var Group = new Schema({
   name: {
@@ -40,8 +38,8 @@ var Group = new Schema({
     'default': ''
   },
   users: [{
-    type: ObjectId,
-    ref: 'UserSchema'
+    type: Schema.Types.ObjectId,
+    ref: 'User'
   }]
 }, {
   versionKey: false

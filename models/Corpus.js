@@ -24,7 +24,6 @@ SOFTWARE.
 
 var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
-var ObjectId = Schema.ObjectId;
 var HistorySchema = require('./History').HistorySchema;
 
 var Corpus = new Schema({

@@ -24,17 +24,29 @@ SOFTWARE.
 
 var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
-var ObjectId = Schema.ObjectId;
-var LayerSchema = require('./Layer').LayerSchema;
-var MediumSchema = require('./Medium').MediumSchema;
 var HistorySchema = require('./History').HistorySchema;
- 
+
 var Annotation = new Schema({
-	id_layer : {type : ObjectId, ref : 'LayerSchema'},
-	id_medium : {type : ObjectId, ref : 'MediumSchema'},
-	fragment : {type : Schema.Types.Mixed, index : true, 'default' : ''},
-	data : {type : Schema.Types.Mixed, 'default' : ''},
-	history : [HistorySchema]	
-}, { versionKey: false });
+  id_layer: {
+    type: Schema.Types.ObjectId,
+    ref: 'Layer'
+  },
+  id_medium: {
+    type: Schema.Types.ObjectId,
+    ref: 'Medium'
+  },
+  fragment: {
+    type: Schema.Types.Mixed,
+    index: true,
+    'default': ''
+  },
+  data: {
+    type: Schema.Types.Mixed,
+    'default': ''
+  },
+  history: [HistorySchema]
+}, {
+  versionKey: false
+});
 
 module.exports = mongoose.model('Annotation', Annotation);
