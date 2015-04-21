@@ -1,7 +1,7 @@
 /*
 The MIT License (MIT)
 
-Copyright (c) 2013-2014 CNRS
+Copyright (c) 2013-2015 CNRS
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -54,8 +54,6 @@ var Layer = new Schema({
     type: Schema.Types.Mixed,
     'default': null
   },
-}, {
-  versionKey: false
 });
 
 module.exports = mongoose.model('Layer', Layer);

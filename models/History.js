@@ -41,6 +41,4 @@ exports.HistorySchema = new Schema({
     'default': '',
     index: true
   }
-}, {
-  versionKey: false
 });
