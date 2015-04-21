@@ -47,4 +47,29 @@ var Annotation = new Schema({
   history: [HistorySchema]
 });
 
+
+Annotation.statics.create = function (id_user, id_layer, data,
+  callback) {
+
+  // TODO: check validity
+
+  var annotation = new this({
+    fragment: data.fragment,
+    data: data.data,
+    id_layer: id_layer,
+    id_medium: data.id_medium,
+    history: [{
+      date: new Date(),
+      id_user: id_user,
+      changes: {
+        fragment: data.fragment,
+        data: data.data
+      }
+    }]
+  });
+
+  annotation.save(callback);
+
+};
+
 module.exports = mongoose.model('Annotation', Annotation);

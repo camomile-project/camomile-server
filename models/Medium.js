@@ -47,4 +47,35 @@ var Medium = new Schema({
   history: [HistorySchema]
 });
 
+
+Medium.statics.create = function (id_user, id_corpus, data, callback) {
+
+  if (
+    data.name === undefined ||
+    data.name === '') {
+    callback('Invalid name.', null);
+    return;
+  }
+
+  var medium = new this({
+    id_corpus: id_corpus,
+    name: data.name,
+    description: data.description,
+    url: data.url,
+    history: [{
+      data: new Date(),
+      id_user: id_user,
+      changes: {
+        name: data.name,
+        description: data.description,
+        url: data.url
+      }
+    }]
+  });
+
+  medium.save(callback);
+
+};
+
+
 module.exports = mongoose.model('Medium', Medium);

@@ -36,7 +36,7 @@ exports.HistorySchema = new Schema({
     trim: true,
     index: true
   },
-  modification: {
+  changes: {
     type: Schema.Types.Mixed,
     'default': '',
     index: true

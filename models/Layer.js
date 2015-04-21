@@ -56,4 +56,52 @@ var Layer = new Schema({
   },
 });
 
+Layer.statics.create = function (id_user, id_corpus, data, callback) {
+
+  if (
+    data.name === undefined ||
+    data.name === '') {
+    callback('Invalid name.', null);
+    return;
+  }
+
+  if (data.fragment_type === undefined) {
+    callback('Invalid fragment type.', null);
+    return;
+  }
+
+  if (data.data_type === undefined) {
+    callback('Invalid data type.', null);
+    return;
+  }
+
+
+  var layer = new this({
+    id_corpus: id_corpus,
+    name: data.name,
+    description: data.description,
+    fragment_type: data.fragment_type,
+    data_type: data.data_type,
+    history: [{
+      date: new Date(),
+      id_user: id_user,
+      changes: {
+        name: data.name,
+        description: data.description
+      }
+    }],
+    ACL: {
+      users: {},
+      groups: {}
+    }
+  });
+
+  layer.ACL.users[id_user] = _.ADMIN;
+
+  layer.save(callback);
+
+};
+
+
+
 module.exports = mongoose.model('Layer', Layer);
