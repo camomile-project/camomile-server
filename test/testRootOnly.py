@@ -1,14 +1,15 @@
 from __future__ import unicode_literals
-from . import CLIENT
-from . import ROOT_USERNAME, ROOT_PASSWORD
-from . import ADMIN_USERNAME, ADMIN_PASSWORD
-from . import error_message, success_message
+from . import CLIENT, ROOT_USERNAME, ROOT_PASSWORD
+from helper import ADMIN_USERNAME, ADMIN_PASSWORD
+from helper import initDatabase, emptyDatabase
+from helper import error_message, success_message
 from unittest import TestCase
 
 
 class TestAsRoot(TestCase):
 
     def setUp(self):
+        initDatabase()
         CLIENT.login(ROOT_USERNAME, ROOT_PASSWORD)
 
     def tearDown(self):
@@ -16,16 +17,17 @@ class TestAsRoot(TestCase):
             CLIENT.logout()
         except Exception:
             pass
+        emptyDatabase()
 
     @success_message('Successfully deleted.')
     def testDeleteUser(self):
         user = CLIENT.createUser('whatever', 'whatever', returns_id=True)
-        CLIENT.deleteUser(user)
+        return CLIENT.deleteUser(user)
 
     @success_message('Successfully deleted.')
     def testDeleteGroup(self):
         group = CLIENT.createGroup('whatever', returns_id=True)
-        CLIENT.deleteGroup(group)
+        return CLIENT.deleteGroup(group)
 
     def testGetAllMedia(self):
         self.assertIsInstance(CLIENT.getMedia(), list)
@@ -43,6 +45,7 @@ class TestAsRoot(TestCase):
 class TestAsAdmin(TestCase):
 
     def setUp(self):
+        initDatabase()
         CLIENT.login(ADMIN_USERNAME, ADMIN_PASSWORD)
 
     def tearDown(self):
@@ -50,6 +53,7 @@ class TestAsAdmin(TestCase):
             CLIENT.logout()
         except Exception:
             pass
+        emptyDatabase()
 
     @error_message('Access denied (root only).')
     def testDeleteUser(self):

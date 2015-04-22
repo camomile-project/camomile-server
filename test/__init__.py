@@ -6,56 +6,19 @@ import shutil
 import time
 import sys
 
-from requests.exceptions import HTTPError
-from functools import wraps
-
-
-def success_message(message):
-    expected = {'message': message}
-
-    def success_message_decorator(f):
-
-        @wraps(f)
-        def wrapper(self):
-            actual = f(self)
-            self.assertDictEqual(expected, actual)
-
-        return wrapper
-
-    return success_message_decorator
-
-
-def error_message(message):
-    expected = {'message': message}
-
-    def error_message_decorator(f):
-        @wraps(f)
-        def wrapper(self):
-            try:
-                f(self)
-            except HTTPError, e:
-                actual = e.response.json()
-                self.assertDictEqual(expected, actual)
-            else:
-                raise AssertionError()
-        return wrapper
-    return error_message_decorator
 
 from camomile import Camomile
 
 URL = 'http://localhost:3000'
 CLIENT = Camomile(URL, debug=False)
 
+
+MONGO_DIR = None
+MONGO_PROCESS = None
+NODE_PROCESS = None
+
 ROOT_USERNAME = 'root'
-ROOT_PASSWORD = 'C4m0m1l3C4m0m1l3C4m0m1l3'
-
-ADMIN_USERNAME = 'administrator'
-ADMIN_PASSWORD = 'p4s5w0rDp4s5w0rDp4s5w0rD'
-ADMIN_DESCRIPTION = 'admin user'
-
-USER_USERNAME = 'hellokitty'
-USER_PASSWORD = '123456789123456789123456789'
-USER_DESCRIPTION = 'regular user'
+ROOT_PASSWORD = 'password'
 
 
 def setup():
@@ -79,7 +42,7 @@ def setup():
     try:
         # will block until MongoDB is ready
         client.database_names()
-    except Exception, e:
+    except Exception:
         MONGO_PROCESS.kill()
         assert False, 'Cannot connect to the MongoDB instance.'
 
@@ -108,27 +71,6 @@ def setup():
     sys.stdout.write('DONE\n')
     sys.stdout.flush()
 
-    sys.stdout.write('Creating users... ')
-    sys.stdout.flush()
-
-    with Camomile(URL,
-                  username=ROOT_USERNAME,
-                  password=ROOT_PASSWORD,
-                  debug=False) as client:
-
-        # create regular user
-        client.createUser(USER_USERNAME, USER_PASSWORD,
-                          description=USER_DESCRIPTION,
-                          role='user')
-
-        # create admin user
-        client.createUser(ADMIN_USERNAME, ADMIN_PASSWORD,
-                          description=ADMIN_DESCRIPTION,
-                          role='admin')
-
-    sys.stdout.write('DONE\n')
-    sys.stdout.flush()
-
 
 def teardown():
 
@@ -152,3 +94,5 @@ def teardown():
 
     # delete MONGO_DIR
     shutil.rmtree(MONGO_DIR)
+
+

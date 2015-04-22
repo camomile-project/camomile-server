@@ -1,12 +1,14 @@
 from __future__ import unicode_literals
-from . import CLIENT
-from . import ROOT_USERNAME, ROOT_PASSWORD
-from . import ADMIN_USERNAME, ADMIN_PASSWORD
-from . import USER_USERNAME, USER_PASSWORD
-from . import error_message, success_message
 import string
 import random
 from unittest import TestCase
+
+
+from . import CLIENT, ROOT_USERNAME, ROOT_PASSWORD
+from helper import ADMIN_USERNAME, ADMIN_PASSWORD
+from helper import USER1_USERNAME, USER1_PASSWORD
+from helper import initDatabase, emptyDatabase
+from helper import success_message, error_message
 
 
 def createRandomUser(role='user'):
@@ -31,6 +33,7 @@ def createRandomUser(role='user'):
 class TestUserAsRoot(TestCase):
 
     def setUp(self):
+        initDatabase()
         CLIENT.login(ROOT_USERNAME, ROOT_PASSWORD)
 
     def tearDown(self):
@@ -38,6 +41,7 @@ class TestUserAsRoot(TestCase):
             CLIENT.logout()
         except:
             pass
+        emptyDatabase()
 
     @success_message('Successfully deleted.')
     def testDeleteUser(self):
@@ -46,12 +50,13 @@ class TestUserAsRoot(TestCase):
                                  randomUser['password'],
                                  description=randomUser['description'],
                                  role=randomUser['role'])
-        CLIENT.deleteUser(user._id)
+        return CLIENT.deleteUser(user._id)
 
 
 class TestUserAsAdmin(TestCase):
 
     def setUp(self):
+        initDatabase()
         CLIENT.login(ADMIN_USERNAME, ADMIN_PASSWORD)
 
     def tearDown(self):
@@ -59,6 +64,7 @@ class TestUserAsAdmin(TestCase):
             CLIENT.logout()
         except:
             pass
+        emptyDatabase()
 
     def testCreateUser(self):
         randomUser = createRandomUser()
@@ -67,7 +73,7 @@ class TestUserAsAdmin(TestCase):
                                  description=randomUser['description'],
                                  role=randomUser['role'])
         CLIENT.login(randomUser['username'], randomUser['password'])
-        assert CLIENT.me() == user
+        self.assertDictEqual(CLIENT.me(), user)
 
     @error_message('Invalid username.')
     def testInvalidUsername(self):
@@ -93,7 +99,7 @@ class TestUserAsAdmin(TestCase):
                           description=randomUser['description'],
                           role='god')
 
-    @error_message('Username already in use.')
+    @error_message('Invalid username (duplicate).')
     def testCreateUserExistingName(self):
         randomUser = createRandomUser()
         CLIENT.createUser(randomUser['username'],
@@ -121,13 +127,15 @@ class TestUserAsAdmin(TestCase):
 class TestUserAsRegularUser(TestCase):
 
     def setUp(self):
-        CLIENT.login(USER_USERNAME, USER_PASSWORD)
+        initDatabase()
+        CLIENT.login(USER1_USERNAME, USER1_PASSWORD)
 
     def tearDown(self):
         try:
             CLIENT.logout()
         except:
             pass
+        emptyDatabase()
 
     @error_message('Access denied (admin only).')
     def testCreateUser(self):
@@ -144,4 +152,4 @@ class TestUserAsRegularUser(TestCase):
     @error_message('Access denied (admin only).')
     def testGetUserByID(self):
         user = CLIENT.me()
-        assert CLIENT.getUser(user._id).username == USER_USERNAME
+        assert CLIENT.getUser(user._id).username == USER1_USERNAME
