@@ -28,7 +28,7 @@ var User = require('../models/User');
 var Group = require('../models/Group');
 var Corpus = require('../models/Corpus');
 var Layer = require('../models/Layer');
-var Session = require('./Session');
+var Authentication = require('./Authentication');
 
 // ----------------------------------------------------------------------------
 // ROUTES
@@ -85,7 +85,7 @@ exports.create = function (req, res) {
   }
 
   // generate salt and hash
-  Session.helper.generateSaltAndHash(
+  Authentication.helper.generateSaltAndHash(
     req.body.password,
     function (error, salt, hash) {
 
@@ -165,7 +165,7 @@ exports.update = function (req, res) {
 
         if (req.body.password) {
 
-          Session.helper.generateSaltAndHash(
+          Authentication.helper.generateSaltAndHash(
             req.body.password,
             function (error, salt, hash) {
               user.salt = salt;

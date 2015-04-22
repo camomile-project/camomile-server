@@ -36,6 +36,10 @@ var KEYLEN = 128;
 var ITERATIONS = 12000;
 // var DIGEST = 'sha1'; 
 
+exports.helper.cookieSecret = function () {
+  return crypto.randomBytes(64).toString();
+};
+
 // Get password hash using provided salt
 var getHash = function (password, salt, callback) {
   // password: user password
@@ -52,8 +56,6 @@ var getHash = function (password, salt, callback) {
   }
 
 };
-
-
 
 // Get password hash using random salt
 exports.helper.generateSaltAndHash = function (password, callback) {
