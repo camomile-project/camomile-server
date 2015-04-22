@@ -63,7 +63,7 @@ exports.create = function (req, res) {
     req.body.username === undefined ||
     req.body.username.length < 8 ||
     req.body.username.indexOf(' ') > -1) {
-    _.response.sendError(res, 'Invalid username', 400);
+    _.response.sendError(res, 'Invalid username.', 400);
     return;
   }
 
@@ -72,7 +72,7 @@ exports.create = function (req, res) {
     req.body.role === undefined ||
     (req.body.role != 'user' && req.body.role != 'admin')
   ) {
-    _.response.sendError(res, 'Invalid role', 400);
+    _.response.sendError(res, 'Invalid role.', 400);
     return;
   }
 
@@ -80,7 +80,7 @@ exports.create = function (req, res) {
   if (
     req.body.password === undefined ||
     req.body.password.length < 8) {
-    _.response.sendError(res, 'Invalid password', 400);
+    _.response.sendError(res, 'Invalid password.', 400);
     return;
   }
 
@@ -125,7 +125,7 @@ exports.update = function (req, res) {
   if (
     req.body.password !== undefined &&
     req.body.password.length < 8) {
-    _.response.sendError(res, 'Invalid password', 400);
+    _.response.sendError(res, 'Invalid password.', 400);
     return;
   }
 
@@ -134,7 +134,7 @@ exports.update = function (req, res) {
     req.body.role !== undefined &&
     (req.body.role !== 'user' && req.body.role !== 'admin')
   ) {
-    _.response.sendError(res, 'Invalid role', 400);
+    _.response.sendError(res, 'Invalid role.', 400);
     return;
   }
 
