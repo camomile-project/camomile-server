@@ -22,88 +22,87 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-var _ = require('../controllers/utils');
-var User = require('../controllers/User');
-var Group = require('../controllers/Group');
-var Corpus = require('../controllers/Corpus');
-var Medium = require('../controllers/Medium');
-var Layer = require('../controllers/Layer');
-var Annotation = require('../controllers/Annotation');
-var Queue = require('../controllers/Queue');
-var Session = require('../controllers/Session');
+var _ = require('./controllers/utils');
+var User = require('./controllers/User');
+var Group = require('./controllers/Group');
+var Corpus = require('./controllers/Corpus');
+var Medium = require('./controllers/Medium');
+var Layer = require('./controllers/Layer');
+var Annotation = require('./controllers/Annotation');
+var Queue = require('./controllers/Queue');
+var Authentication = require('./controllers/Authentication');
 
-var mUser = require('../models/User');
-var mGroup = require('../models/Group');
-var mCorpus = require('../models/Corpus');
-var mMedium = require('../models/Medium');
-var mLayer = require('../models/Layer');
-var mAnnotation = require('../models/Annotation');
-var mQueue = require('../models/Queue');
-
+var mUser = require('./models/User');
+var mGroup = require('./models/Group');
+var mCorpus = require('./models/Corpus');
+var mMedium = require('./models/Medium');
+var mLayer = require('./models/Layer');
+var mAnnotation = require('./models/Annotation');
+var mQueue = require('./models/Queue');
 
 exports.initialize = function (app) {
 
   // UTILS
 
   app.get('/date',
-    Session.middleware.isLoggedIn,
+    Authentication.middleware.isLoggedIn,
     _.route.date);
 
   // AUTHENTICATION
 
   // login
   app.post('/login',
-    Session.login);
+    Authentication.login);
 
   // logout
   app.post('/logout',
-    Session.middleware.isLoggedIn,
-    Session.logout);
+    Authentication.middleware.isLoggedIn,
+    Authentication.logout);
 
   // get logged in user
   app.get('/me',
-    Session.middleware.isLoggedIn,
-    Session.me);
+    Authentication.middleware.isLoggedIn,
+    Authentication.me);
 
   // USERS
 
   // create new user
   app.post('/user',
-    Session.middleware.isLoggedIn,
-    Session.middleware.isAdmin,
+    Authentication.middleware.isLoggedIn,
+    Authentication.middleware.isAdmin,
     User.create);
 
   // delete one user
   app.delete('/user/:id_user',
-    Session.middleware.isLoggedIn,
-    Session.middleware.isRoot,
+    Authentication.middleware.isLoggedIn,
+    Authentication.middleware.isRoot,
     _.middleware.fExists(mUser),
     User.remove);
 
   // get all users
   app.get('/user',
-    Session.middleware.isLoggedIn,
-    Session.middleware.isAdmin,
+    Authentication.middleware.isLoggedIn,
+    Authentication.middleware.isAdmin,
     User.getAll);
 
   // get one user
   app.get('/user/:id_user',
-    Session.middleware.isLoggedIn,
-    Session.middleware.isAdmin,
+    Authentication.middleware.isLoggedIn,
+    Authentication.middleware.isAdmin,
     _.middleware.fExists(mUser),
     User.getOne);
 
   // update one user
   app.put('/user/:id_user',
-    Session.middleware.isLoggedIn,
-    Session.middleware.isAdmin,
+    Authentication.middleware.isLoggedIn,
+    Authentication.middleware.isAdmin,
     _.middleware.fExists(mUser),
     User.update);
 
   // get one user's groups
   app.get('/user/:id_user/group',
-    Session.middleware.isLoggedIn,
-    Session.middleware.isAdmin,
+    Authentication.middleware.isLoggedIn,
+    Authentication.middleware.isAdmin,
     _.middleware.fExists(mUser),
     User.getGroups);
 
@@ -111,49 +110,49 @@ exports.initialize = function (app) {
 
   // get all groups
   app.get('/group',
-    Session.middleware.isLoggedIn,
-    Session.middleware.isAdmin,
+    Authentication.middleware.isLoggedIn,
+    Authentication.middleware.isAdmin,
     Group.getAll);
 
   // get one group
   app.get('/group/:id_group',
-    Session.middleware.isLoggedIn,
-    Session.middleware.isAdmin,
+    Authentication.middleware.isLoggedIn,
+    Authentication.middleware.isAdmin,
     _.middleware.fExists(mGroup),
     Group.getOne);
 
   // create new group
   app.post("/group",
-    Session.middleware.isLoggedIn,
-    Session.middleware.isAdmin,
+    Authentication.middleware.isLoggedIn,
+    Authentication.middleware.isAdmin,
     Group.create);
 
   // update one group
   app.put('/group/:id_group',
-    Session.middleware.isLoggedIn,
-    Session.middleware.isAdmin,
+    Authentication.middleware.isLoggedIn,
+    Authentication.middleware.isAdmin,
     _.middleware.fExists(mGroup),
     Group.update);
 
   // delete one group
   app.delete('/group/:id_group',
-    Session.middleware.isLoggedIn,
-    Session.middleware.isRoot,
+    Authentication.middleware.isLoggedIn,
+    Authentication.middleware.isRoot,
     _.middleware.fExists(mGroup),
     Group.remove);
 
   // add one user to one group
   app.put("/group/:id_group/user/:id_user",
-    Session.middleware.isLoggedIn,
-    Session.middleware.isAdmin,
+    Authentication.middleware.isLoggedIn,
+    Authentication.middleware.isAdmin,
     _.middleware.fExists(mGroup),
     _.middleware.fExists(mUser),
     Group.addUser);
 
   // remove one user from one group
   app.delete('/group/:id_group/user/:id_user',
-    Session.middleware.isLoggedIn,
-    Session.middleware.isAdmin,
+    Authentication.middleware.isLoggedIn,
+    Authentication.middleware.isAdmin,
     _.middleware.fExists(mGroup),
     _.middleware.fExists(mUser),
     Group.removeUser);
@@ -162,64 +161,64 @@ exports.initialize = function (app) {
 
   // get all READable corpora
   app.get('/corpus',
-    Session.middleware.isLoggedIn,
+    Authentication.middleware.isLoggedIn,
     Corpus.getAll);
 
   // get one corpus
   app.get('/corpus/:id_corpus',
-    Session.middleware.isLoggedIn,
+    Authentication.middleware.isLoggedIn,
     _.middleware.fExistsWithRights(mCorpus, _.READ),
     Corpus.getOne);
 
   // create new corpus
   app.post('/corpus',
-    Session.middleware.isLoggedIn,
-    Session.middleware.isAdmin,
+    Authentication.middleware.isLoggedIn,
+    Authentication.middleware.isAdmin,
     Corpus.create);
 
   // update one corpus
   app.put('/corpus/:id_corpus',
-    Session.middleware.isLoggedIn,
+    Authentication.middleware.isLoggedIn,
     _.middleware.fExistsWithRights(mCorpus, _.ADMIN),
     Corpus.update);
 
   // delete one corpus
   app.delete('/corpus/:id_corpus',
-    Session.middleware.isLoggedIn,
-    Session.middleware.isAdmin,
+    Authentication.middleware.isLoggedIn,
+    Authentication.middleware.isAdmin,
     _.middleware.fExistsWithRights(mCorpus, _.ADMIN),
     Corpus.remove);
 
   // get one corpus' rights
   app.get('/corpus/:id_corpus/ACL',
-    Session.middleware.isLoggedIn,
+    Authentication.middleware.isLoggedIn,
     _.middleware.fExistsWithRights(mCorpus, _.ADMIN),
     Corpus.getRights);
 
   // give one user rights to one corpus
   app.put('/corpus/:id_corpus/user/:id_user',
-    Session.middleware.isLoggedIn,
+    Authentication.middleware.isLoggedIn,
     _.middleware.fExists(mUser),
     _.middleware.fExistsWithRights(mCorpus, _.ADMIN),
     Corpus.updateUserRights);
 
   // remove one user's rights to one corpus
   app.delete('/corpus/:id_corpus/user/:id_user',
-    Session.middleware.isLoggedIn,
+    Authentication.middleware.isLoggedIn,
     _.middleware.fExists(mUser),
     _.middleware.fExistsWithRights(mCorpus, _.ADMIN),
     Corpus.removeUserRights);
 
   // give one group rights to one corpus
   app.put('/corpus/:id_corpus/group/:id_group',
-    Session.middleware.isLoggedIn,
+    Authentication.middleware.isLoggedIn,
     _.middleware.fExists(mGroup),
     _.middleware.fExistsWithRights(mCorpus, _.ADMIN),
     Corpus.updateGroupRights);
 
   // remove one group's rights to one corpus
   app.delete('/corpus/:id_corpus/group/:id_group',
-    Session.middleware.isLoggedIn,
+    Authentication.middleware.isLoggedIn,
     _.middleware.fExists(mGroup),
     _.middleware.fExistsWithRights(mCorpus, _.ADMIN),
     Corpus.removeGroupRights);
@@ -228,61 +227,61 @@ exports.initialize = function (app) {
 
   // get all media
   app.get('/medium',
-    Session.middleware.isLoggedIn,
-    Session.middleware.isRoot,
+    Authentication.middleware.isLoggedIn,
+    Authentication.middleware.isRoot,
     Medium.getAll);
 
   // get one medium
   app.get('/medium/:id_medium',
-    Session.middleware.isLoggedIn,
+    Authentication.middleware.isLoggedIn,
     _.middleware.fExistsWithRights(mMedium, _.READ),
     Medium.getOne);
 
   // get one corpus' media
   app.get('/corpus/:id_corpus/medium',
-    Session.middleware.isLoggedIn,
+    Authentication.middleware.isLoggedIn,
     _.middleware.fExistsWithRights(mCorpus, _.READ),
     Medium.getCorpusMedia);
 
   // create new medium(a) in one corpus
   app.post('/corpus/:id_corpus/medium',
-    Session.middleware.isLoggedIn,
+    Authentication.middleware.isLoggedIn,
     _.middleware.fExistsWithRights(mCorpus, _.WRITE),
     Medium.create);
 
   // update one medium
   app.put('/medium/:id_medium',
-    Session.middleware.isLoggedIn,
+    Authentication.middleware.isLoggedIn,
     _.middleware.fExistsWithRights(mMedium, _.ADMIN),
     Medium.update);
 
   // delete one medium
   app.delete('/medium/:id_medium',
-    Session.middleware.isLoggedIn,
+    Authentication.middleware.isLoggedIn,
     _.middleware.fExistsWithRights(mMedium, _.ADMIN),
     Medium.remove);
 
   // stream one medium in default format
   app.get('/medium/:id_medium/video',
-    Session.middleware.isLoggedIn,
+    Authentication.middleware.isLoggedIn,
     _.middleware.fExistsWithRights(mMedium, _.READ),
     Medium.stream);
 
   // stream one medium in WebM
   app.get('/medium/:id_medium/webm',
-    Session.middleware.isLoggedIn,
+    Authentication.middleware.isLoggedIn,
     _.middleware.fExistsWithRights(mMedium, _.READ),
     Medium.streamWebM);
 
   // stream one medium in MP4
   app.get('/medium/:id_medium/mp4',
-    Session.middleware.isLoggedIn,
+    Authentication.middleware.isLoggedIn,
     _.middleware.fExistsWithRights(mMedium, _.READ),
     Medium.streamMp4);
 
   // stream one medium in OGV
   app.get('/medium/:id_medium/ogv',
-    Session.middleware.isLoggedIn,
+    Authentication.middleware.isLoggedIn,
     _.middleware.fExistsWithRights(mMedium, _.READ),
     Medium.streamOgv);
 
@@ -290,70 +289,70 @@ exports.initialize = function (app) {
 
   // get all layers
   app.get('/layer',
-    Session.middleware.isLoggedIn,
-    Session.middleware.isRoot,
+    Authentication.middleware.isLoggedIn,
+    Authentication.middleware.isRoot,
     Layer.getAll);
 
   // get one layer
   app.get('/layer/:id_layer',
-    Session.middleware.isLoggedIn,
+    Authentication.middleware.isLoggedIn,
     _.middleware.fExistsWithRights(mLayer, _.READ),
     Layer.getOne);
 
   // get one corpus' layers
   app.get('/corpus/:id_corpus/layer',
-    Session.middleware.isLoggedIn,
+    Authentication.middleware.isLoggedIn,
     _.middleware.fExists(mCorpus),
     Layer.getCorpusLayers);
 
   // create new layer(s) in one corpus
   app.post('/corpus/:id_corpus/layer',
-    Session.middleware.isLoggedIn,
+    Authentication.middleware.isLoggedIn,
     _.middleware.fExistsWithRights(mCorpus, _.WRITE),
     Layer.create);
 
   // update one layer
   app.put('/layer/:id_layer',
-    Session.middleware.isLoggedIn,
+    Authentication.middleware.isLoggedIn,
     _.middleware.fExistsWithRights(mLayer, _.ADMIN),
     Layer.update);
 
   // delete one layer
   app.delete('/layer/:id_layer',
-    Session.middleware.isLoggedIn,
+    Authentication.middleware.isLoggedIn,
     _.middleware.fExistsWithRights(mLayer, _.ADMIN),
     Layer.remove);
 
   // get one layer's rights
   app.get('/layer/:id_layer/ACL',
-    Session.middleware.isLoggedIn,
+    Authentication.middleware.isLoggedIn,
     _.middleware.fExistsWithRights(mLayer, _.ADMIN),
     Layer.getRights);
 
   // give one user rights to one layer
   app.put('/layer/:id_layer/user/:id_user',
-    Session.middleware.isLoggedIn,
+    Authentication.middleware.isLoggedIn,
     _.middleware.fExists(mUser),
     _.middleware.fExistsWithRights(mLayer, _.ADMIN),
     Layer.updateUserRights);
 
   // remove one user's rights to one layer
   app.delete('/layer/:id_layer/user/:id_user',
-    Session.middleware.isLoggedIn,
+    Authentication.middleware.isLoggedIn,
     _.middleware.fExists(mUser),
     _.middleware.fExistsWithRights(mLayer, _.ADMIN),
     Layer.removeUserRights);
 
   // give one group rights to one layer
   app.put('/layer/:id_layer/group/:id_group',
-    Session.middleware.isLoggedIn,
+    Authentication.middleware.isLoggedIn,
     _.middleware.fExists(mGroup),
     _.middleware.fExistsWithRights(mLayer, _.ADMIN),
     Layer.updateGroupRights);
 
   // remove on group's rights to one layer
   app.delete('/layer/:id_layer/group/:id_group',
-    Session.middleware.isLoggedIn,
+    Authentication.middleware.isLoggedIn,
     _.middleware.fExists(mGroup),
     _.middleware.fExistsWithRights(mLayer, _.ADMIN),
     Layer.removeGroupRights);
@@ -362,37 +361,37 @@ exports.initialize = function (app) {
 
   // get all annotations
   app.get('/annotation',
-    Session.middleware.isLoggedIn,
-    Session.middleware.isRoot,
+    Authentication.middleware.isLoggedIn,
+    Authentication.middleware.isRoot,
     Annotation.getAll);
 
   // get one annotation
   app.get('/annotation/:id_annotation',
-    Session.middleware.isLoggedIn,
+    Authentication.middleware.isLoggedIn,
     _.middleware.fExistsWithRights(mAnnotation, _.READ),
     Annotation.getOne);
 
   // get one layer's annotations
   app.get('/layer/:id_layer/annotation',
-    Session.middleware.isLoggedIn,
+    Authentication.middleware.isLoggedIn,
     _.middleware.fExistsWithRights(mLayer, _.READ),
     Annotation.getLayerAnnotations);
 
   // create new annotation(s) in one layer
   app.post('/layer/:id_layer/annotation',
-    Session.middleware.isLoggedIn,
+    Authentication.middleware.isLoggedIn,
     _.middleware.fExistsWithRights(mLayer, _.WRITE),
     Annotation.create);
 
   // update one annotation
   app.put('/annotation/:id_annotation',
-    Session.middleware.isLoggedIn,
+    Authentication.middleware.isLoggedIn,
     _.middleware.fExistsWithRights(mAnnotation, _.WRITE),
     Annotation.update);
 
   // delete one annotation
   app.delete('/annotation/:id_annotation',
-    Session.middleware.isLoggedIn,
+    Authentication.middleware.isLoggedIn,
     _.middleware.fExistsWithRights(mAnnotation, _.ADMIN),
     Annotation.remove);
 
@@ -400,43 +399,43 @@ exports.initialize = function (app) {
 
   // get all queues
   app.get('/queue',
-    Session.middleware.isLoggedIn,
-    Session.middleware.isRoot,
+    Authentication.middleware.isLoggedIn,
+    Authentication.middleware.isRoot,
     Queue.getAll);
 
   // get one queue
   app.get('/queue/:id_queue',
-    Session.middleware.isLoggedIn,
+    Authentication.middleware.isLoggedIn,
     _.middleware.fExists(mQueue),
     Queue.getOne);
 
   // create new queue
   app.post('/queue',
-    Session.middleware.isLoggedIn,
+    Authentication.middleware.isLoggedIn,
     Queue.create);
 
   // update one queue
   app.put('/queue/:id_queue',
-    Session.middleware.isLoggedIn,
+    Authentication.middleware.isLoggedIn,
     _.middleware.fExists(mQueue),
     Queue.update);
 
   // append items to one queue
   app.put('/queue/:id_queue/next',
-    Session.middleware.isLoggedIn,
+    Authentication.middleware.isLoggedIn,
     _.middleware.fExists(mQueue),
     Queue.push);
 
   // pop one item from one queue
   app.get('/queue/:id_queue/next',
-    Session.middleware.isLoggedIn,
+    Authentication.middleware.isLoggedIn,
     _.middleware.fExists(mQueue),
     Queue.pop);
 
   // remove one queue
   app.delete('/queue/:id_queue',
-    Session.middleware.isLoggedIn,
-    Session.middleware.isAdmin,
+    Authentication.middleware.isLoggedIn,
+    Authentication.middleware.isAdmin,
     _.middleware.fExists(mQueue),
     Queue.remove);
 
