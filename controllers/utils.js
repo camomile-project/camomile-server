@@ -319,7 +319,7 @@ var sendError = exports.response.sendError = function (res, error, code) {
   }
 
   res.status(code).json({
-    message: error
+    error: error
   });
 
 };
