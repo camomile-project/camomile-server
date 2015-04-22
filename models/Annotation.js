@@ -23,10 +23,11 @@ SOFTWARE.
 */
 
 var mongoose = require('mongoose');
-var Schema = mongoose.Schema;
-var HistorySchema = require('./History').HistorySchema;
 
-var Annotation = new Schema({
+var Schema = mongoose.Schema;
+var historySchema = require('./History');
+
+var annotationSchema = new Schema({
   id_layer: {
     type: Schema.Types.ObjectId,
     ref: 'Layer'
@@ -44,11 +45,10 @@ var Annotation = new Schema({
     type: Schema.Types.Mixed,
     'default': ''
   },
-  history: [HistorySchema]
+  history: [historySchema]
 });
 
-
-Annotation.statics.create = function (id_user, id_layer, data,
+annotationSchema.statics.create = function (id_user, id_layer, data,
   callback) {
 
   // TODO: check validity
@@ -68,8 +68,14 @@ Annotation.statics.create = function (id_user, id_layer, data,
     }]
   });
 
-  annotation.save(callback);
+  annotation.save(function (error, annotation) {
+    if (!error) {
+      annotation.history = undefined;
+      annotation.__v = undefined;
+    }
+    callback(error, annotation);
+  });
 
 };
 
-module.exports = mongoose.model('Annotation', Annotation);
+module.exports = mongoose.model('Annotation', annotationSchema);

@@ -23,10 +23,12 @@ SOFTWARE.
 */
 
 var mongoose = require('mongoose');
-var Schema = mongoose.Schema;
-var HistorySchema = require('./History').HistorySchema;
+var _ = require('../controllers/utils');
 
-var Layer = new Schema({
+var Schema = mongoose.Schema;
+var historySchema = require('./History');
+
+var layerSchema = new Schema({
   id_corpus: {
     type: Schema.Types.ObjectId,
     ref: 'CorpusSchema'
@@ -49,14 +51,14 @@ var Layer = new Schema({
     type: Schema.Types.Mixed,
     'default': ''
   },
-  history: [HistorySchema],
+  history: [historySchema],
   ACL: {
     type: Schema.Types.Mixed,
     'default': null
   },
 });
 
-Layer.statics.create = function (id_user, id_corpus, data, callback) {
+layerSchema.statics.create = function (id_user, id_corpus, data, callback) {
 
   if (
     data.name === undefined ||
@@ -74,7 +76,6 @@ Layer.statics.create = function (id_user, id_corpus, data, callback) {
     callback('Invalid data type.', null);
     return;
   }
-
 
   var layer = new this({
     id_corpus: id_corpus,
@@ -98,10 +99,15 @@ Layer.statics.create = function (id_user, id_corpus, data, callback) {
 
   layer.ACL.users[id_user] = _.ADMIN;
 
-  layer.save(callback);
+  layer.save(function (error, layer) {
+    if (!error) {
+      layer.history = undefined;
+      layer.ACL = undefined;
+      layer.__v = undefined;
+    }
+    callback(error, layer);
+  });
 
 };
 
-
-
-module.exports = mongoose.model('Layer', Layer);
+module.exports = mongoose.model('Layer', layerSchema);

@@ -24,9 +24,9 @@ SOFTWARE.
 
 var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
-var HistorySchema = require('./History').HistorySchema;
+var historySchema = require('./History');
 
-var Medium = new Schema({
+var mediumSchema = new Schema({
   id_corpus: {
     type: Schema.Types.ObjectId,
     ref: 'Corpus'
@@ -44,11 +44,10 @@ var Medium = new Schema({
     type: String,
     default: ""
   },
-  history: [HistorySchema]
+  history: [historySchema]
 });
 
-
-Medium.statics.create = function (id_user, id_corpus, data, callback) {
+mediumSchema.statics.create = function (id_user, id_corpus, data, callback) {
 
   if (
     data.name === undefined ||
@@ -73,9 +72,14 @@ Medium.statics.create = function (id_user, id_corpus, data, callback) {
     }]
   });
 
-  medium.save(callback);
+  medium.save(function (error, medium) {
+    if (!error) {
+      medium.history = undefined;
+      medium.__v = undefined;
+    }
+    callback(error, medium);
+  });
 
 };
 
-
-module.exports = mongoose.model('Medium', Medium);
+module.exports = mongoose.model('Medium', mediumSchema);

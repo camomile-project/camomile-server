@@ -23,10 +23,12 @@ SOFTWARE.
 */
 
 var mongoose = require('mongoose');
-var Schema = mongoose.Schema;
-var HistorySchema = require('./History').HistorySchema;
+var _ = require('../controllers/utils');
 
-var Corpus = new Schema({
+var Schema = mongoose.Schema;
+var historySchema = require('./History');
+
+var corpusSchema = new Schema({
   name: {
     type: String,
     required: true,
@@ -37,15 +39,14 @@ var Corpus = new Schema({
     type: Schema.Types.Mixed,
     'default': ''
   },
-  history: [HistorySchema],
+  history: [historySchema],
   ACL: {
     type: Schema.Types.Mixed,
     'default': null
   },
 });
 
-
-Corpus.statics.create = function (id_user, data, callback) {
+corpusSchema.statics.create = function (id_user, data, callback) {
 
   // check corpus name validity
   if (
@@ -55,7 +56,7 @@ Corpus.statics.create = function (id_user, data, callback) {
     return;
   }
 
-  var corpus = new Corpus({
+  var corpus = new this({
     name: data.name,
     description: data.description,
     history: [{
@@ -82,6 +83,8 @@ Corpus.statics.create = function (id_user, data, callback) {
       }
     } else {
       corpus.history = undefined;
+      corpus.ACL = undefined;
+      corpus.__v = undefined;
     }
 
     callback(error, corpus);
@@ -90,4 +93,4 @@ Corpus.statics.create = function (id_user, data, callback) {
 
 };
 
-module.exports = mongoose.model('Corpus', Corpus);
+module.exports = mongoose.model('Corpus', corpusSchema);

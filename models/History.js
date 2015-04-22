@@ -25,7 +25,7 @@ SOFTWARE.
 var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
 
-exports.HistorySchema = new Schema({
+var historySchema = new Schema({
   date: {
     type: Date,
     'default': Date.now
@@ -42,3 +42,5 @@ exports.HistorySchema = new Schema({
     index: true
   }
 });
+
+module.exports = historySchema;
