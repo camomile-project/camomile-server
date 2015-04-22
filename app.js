@@ -50,14 +50,40 @@ program
   .option('--media <dir>', 'Path to media root directory')
   .parse(process.argv);
 
-var port = program.port || process.env.PORT || 3000;
-var mongodb_host = program.mongodbHost || process.env.MONGO_HOST || process.env
-  .MONGODB_PORT_27017_TCP_ADDR || 'localhost';
-var mongodb_port = program.mongodbPort || process.env.MONGO_PORT || process.env
-  .MONGODB_PORT_27017_TCP_PORT || 27017;
-var mongodb_name = program.mongodbName || process.env.MONGO_NAME || 'camomile';
-var root_password = program.rootPassword || process.env.ROOT_PASSWORD;
-var media = program.media || process.env.MEDIA || '/media';
+var port =
+  program.port ||
+  process.env.PORT ||
+  3000;
+
+// CLI || env || linked mongo Docker container || default 
+var mongodb_host =
+  program.mongodbHost ||
+  process.env.MONGODB_HOST ||
+  process.env.MONGO_PORT_27017_TCP_ADDR ||
+  'localhost';
+
+// CLI || env || linked mongo Docker container || default 
+var mongodb_port =
+  program.mongodbPort ||
+  process.env.MONGODB_PORT ||
+  process.env.MONGO_PORT_27017_TCP_PORT ||
+  27017;
+
+// CLI || env || default 
+var mongodb_name =
+  program.mongodbName ||
+  process.env.MONGODB_NAME ||
+  'camomile';
+
+var root_password =
+  program.rootPassword ||
+  process.env.ROOT_PASSWORD;
+
+var media =
+  program.media ||
+  process.env.MEDIA ||
+  '/media';
+
 var cookieSecret = process.env.COOKIE_SECRET || Authentication.helper.cookieSecret();
 
 mongoose.connect('mongodb://' + mongodb_host + ':' + mongodb_port + '/' +
