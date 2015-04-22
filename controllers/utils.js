@@ -24,7 +24,6 @@ SOFTWARE.
 
 var async = require('async');
 var User = require('../models/User');
-var cUser = require('../controllers/User');
 var Group = require('../models/Group');
 var Corpus = require('../models/Corpus');
 var Medium = require('../models/Medium');
@@ -145,7 +144,7 @@ exports.request.fFilterResources = function (req, min_right) {
 
     async.waterfall([
         // get user groups
-        cUser.helper.fGetGroups(id_user),
+        User.fGetGroups(id_user),
         // filter according to rights
         function (groups, callback) {
           async.filter(
@@ -253,7 +252,7 @@ exports.middleware.fExistsWithRights = function (model, min_right) {
     async.parallel(
       // find groups and resource in parallel    
       {
-        groups: cUser.helper.fGetGroups(req.session.user._id),
+        groups: User.fGetGroups(req.session.user._id),
         resource: getResource,
       },
       // then combine them 

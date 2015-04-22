@@ -31,34 +31,6 @@ var Layer = require('../models/Layer');
 var Session = require('./Session');
 
 // ----------------------------------------------------------------------------
-// HELPER
-// ----------------------------------------------------------------------------
-
-exports.helper = {};
-
-var fGetGroups = exports.helper.fGetGroups = function (id_user) {
-
-  return function (callback) {
-    Group.find({
-        users: id_user
-      }, '_id',
-      function (error, groups) {
-
-        var group_ids = [];
-
-        if (groups) {
-          for (var i = groups.length - 1; i >= 0; i--) {
-            group_ids.push(groups[i]._id);
-          };
-        }
-
-        callback(error, group_ids);
-
-      });
-  };
-};
-
-// ----------------------------------------------------------------------------
 // ROUTES
 // ----------------------------------------------------------------------------
 
@@ -298,6 +270,6 @@ exports.remove = function (req, res) {
 
 // retrieve the list of group of a user
 exports.getGroups = function (req, res) {
-  fGetGroups(req.params.id_user)(
+  User.fGetGroups(req.params.id_user)(
     _.response.fSendData(res));
 };
