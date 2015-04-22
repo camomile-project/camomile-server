@@ -26,7 +26,6 @@ var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
 var Group = require('./Group');
 
-
 var User = new Schema({
   username: {
     type: String,
@@ -44,23 +43,26 @@ var User = new Schema({
   hash: String
 });
 
-// User.methods.getGroups = function (callback) {
-//   Group.find({
-//       users: this._id
-//     }, '_id',
-//     function (error, groups) {
+User.statics.fGetGroups = function (id_user) {
 
-//       var group_ids = [];
+  return function (callback) {
+    Group.find({
+        users: id_user
+      }, '_id',
+      function (error, groups) {
 
-//       if (groups) {
-//         for (var i = groups.length - 1; i >= 0; i--) {
-//           group_ids.push(groups[i]._id);
-//         };
-//       }
+        var group_ids = [];
 
-//       callback(error, group_ids);
+        if (groups) {
+          for (var i = groups.length - 1; i >= 0; i--) {
+            group_ids.push(groups[i]._id);
+          };
+        }
 
-//     });
-// };
+        callback(error, group_ids);
+
+      });
+  };
+};
 
 module.exports = mongoose.model('User', User);
