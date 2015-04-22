@@ -1,7 +1,7 @@
 {
   "name": "camomile",
   "version": "0.5.0",
-  "description": "",
+  "description": "Camomile REST API",
   "main": "app.js",
   "repository": {
     "type": "git",
@@ -32,6 +32,6 @@
     "forever": "^0.14.1"
   },
   "scripts": {
-    "start": "forever app.js"
+    "start": "app.js"
   }
 }
