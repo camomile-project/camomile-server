@@ -1,0 +1,18 @@
+db:
+  image: mongo
+  volumes:
+   - /data/db
+
+camomile:
+  build: .
+  links:
+   - db:mongo
+  volumes:
+   - /media
+   - .:/app
+  ports:
+   - "3000:3000"
+  environment:
+   - ROOT_PASSWORD=password
+   - MEDIA=/media
+  command: node /app/app.js
