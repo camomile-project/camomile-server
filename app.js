@@ -22,19 +22,23 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-var express = require('express');
 var http = require('http');
+var express = require('express');
+
 var cors = require('cors');
-var app = express();
+var logger = require('morgan');
+var bodyParser = require('body-parser');
+var methodOverride = require('method-override');
+var session = require('express-session');
+var cookieParser = require('cookie-parser');
 
 var program = require('commander');
 var mongoose = require('mongoose');
-var MongoStore = require('connect-mongo')(express);
+var mongoStore = require('connect-mongo')(session);
 
+var routes = require('./routes');
 var User = require('./models/User');
-var routes = require('./routes/routes');
-var Session = require('./controllers/Session');
-
+var Authentication = require('./controllers/Authentication');
 
 program
   .option('--port <port>', 'Local port to listen to (default: 3000)', parseInt)
@@ -54,6 +58,7 @@ var mongodb_port = program.mongodbPort || process.env.MONGO_PORT || process.env
 var mongodb_name = program.mongodbName || process.env.MONGO_NAME || 'camomile';
 var root_password = program.rootPassword || process.env.ROOT_PASSWORD;
 var media = program.media || process.env.MEDIA || '/media';
+var cookieSecret = process.env.COOKIE_SECRET || Authentication.helper.cookieSecret();
 
 mongoose.connect('mongodb://' + mongodb_host + ':' + mongodb_port + '/' +
   mongodb_name);
@@ -68,30 +73,38 @@ var cors_options = {
   credentials: true,
 };
 
-var sessionStore = new MongoStore({
-  mongoose_connection: mongoose.connection,
+var sessionStore = new mongoStore({
+  mongooseConnection: mongoose.connection,
   db: mongoose.connections[0].db,
   clear_interval: 60
 });
 
-var session_options = {
-  key: "camomile.sid",
-  secret: "123camomile",
-  cookie: {
-    maxAge: 24 * 60 * 60 * 1000
-  }, // sessions expire every day
-  store: sessionStore
-};
+var app = express();
 
 app.set('port', port);
 app.set('media', media);
-app.use(express.logger('dev'));
-app.use(express.bodyParser());
-app.use(express.methodOverride());
+app.use(logger('dev'));
 app.use(cors(cors_options));
-app.use(express.cookieParser('your secret here'));
-app.use(express.session(session_options));
-app.use(app.router);
+app.use(methodOverride());
+app.use(session({
+  cookie: {
+    secure: false,
+    maxAge: 24 * 60 * 60 * 1000,
+  },
+  name: 'camomile.sid',
+  proxy: true,
+  resave: false,
+  rolling: false,
+  saveUninitialized: false,
+  secret: cookieSecret,
+  store: sessionStore,
+}));
+
+app.use(cookieParser(cookieSecret));
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({
+  extended: true
+}));
 
 // handle CORS pre-flight requests
 // (must be added before any other route)
@@ -119,7 +132,7 @@ User.findOne({
   }
 
   if (root_password) {
-    Session.helper.generateSaltAndHash(root_password, function (error, salt,
+    Authentication.helper.generateSaltAndHash(root_password, function (error, salt,
       hash) {
       root.salt = salt;
       root.hash = hash;
@@ -134,6 +147,6 @@ User.findOne({
   }
 });
 
-http.createServer(app).listen(app.get('port'), process.env.IP, function () {
+app.listen(app.get('port'), function () {
   console.log('Server listening on port ' + app.get('port'));
 });
