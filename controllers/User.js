@@ -108,6 +108,8 @@ exports.create = function (req, res) {
       user.save(function (error, user) {
         if (error && error.code === 11000) {
           error = 'Invalid username (duplicate).';
+        } else {
+          user.__v = undefined;
         }
 
         // send new user (or error, if any)
