@@ -24,6 +24,7 @@ SOFTWARE.
 
 var async = require('async');
 var _ = require('./utils');
+
 var Group = require('../models/Group');
 var Corpus = require('../models/Corpus');
 var Layer = require('../models/Layer');

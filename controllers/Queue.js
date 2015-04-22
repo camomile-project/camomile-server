@@ -22,8 +22,9 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-var Queue = require('../models/Queue');
 var _ = require('./utils');
+
+var Queue = require('../models/Queue');
 
 // create a queue
 exports.create = function (req, res) {
