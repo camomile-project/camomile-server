@@ -70,10 +70,9 @@ exports.create = function (req, res) {
               if (error) {
                 console.log('TODO - Remove just created layer.')
               }
-              callback(error);
+              callback(error, layer);
             }
           );
-
         }
       );
     },
