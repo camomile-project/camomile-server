@@ -177,10 +177,9 @@ exports.updateUserRights = function (req, res) {
 
   var path = 'ACL.users.' + req.params.id_user;
   var update = {
-    $set: {
-      path: req.body.right
-    }
+    $set: {}
   };
+  update['$set'][path] = req.body.right;
 
   Corpus.findByIdAndUpdate(
     req.params.id_corpus,
@@ -210,10 +209,9 @@ exports.updateGroupRights = function (req, res) {
 
   var path = 'ACL.groups.' + req.params.id_group;
   var update = {
-    $set: {
-      path: req.body.right
-    }
+    $set: {}
   };
+  update['$set'][path] = req.body.right;
 
   Corpus.findByIdAndUpdate(
     req.params.id_corpus,
@@ -232,10 +230,9 @@ exports.removeUserRights = function (req, res) {
 
   var path = 'ACL.users.' + req.params.id_user;
   var update = {
-    $unset: {
-      path: ''
-    }
+    $unset: {}
   };
+  update['$unset'][path] = '';
 
   Corpus.findByIdAndUpdate(
     req.params.id_corpus,
@@ -254,10 +251,9 @@ exports.removeGroupRights = function (req, res) {
 
   var path = 'ACL.groups.' + req.params.id_group;
   var update = {
-    $unset: {
-      path: ''
-    }
+    $unset: {}
   };
+  update['$unset'][path] = '';
 
   Corpus.findByIdAndUpdate(
     req.params.id_corpus,
