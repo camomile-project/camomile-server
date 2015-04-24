@@ -23,9 +23,11 @@ SOFTWARE.
 */
 
 var mongoose = require('mongoose');
+var _ = require('../controllers/utils');
+
 var Schema = mongoose.Schema;
 
-var Queue = new Schema({
+var queueSchema = new Schema({
   name: {
     type: String,
     required: true,
@@ -38,4 +40,28 @@ var Queue = new Schema({
   list: [Schema.Types.Mixed]
 });
 
-module.exports = mongoose.model('Queue', Queue);
+queueSchema.statics.create = function (data, callback) {
+
+  if (
+    data.name === undefined ||
+    data.name === '') {
+    callback('Invalid name', null);
+    return;
+  }
+
+  var queue = new this({
+    name: data.name,
+    description: data.description,
+    list: [],
+  });
+
+  queue.save(function (error, queue) {
+    if (!error) {
+      queue.__v = undefined;
+    }
+    callback(error, queue);
+  });
+
+};
+
+module.exports = mongoose.model('Queue', queueSchema);

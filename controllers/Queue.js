@@ -29,43 +29,14 @@ var Queue = require('../models/Queue');
 // create a queue
 exports.create = function (req, res) {
 
-  if (
-    req.body.name === undefined ||
-    req.body.name === '') {
-    _.sendError(res, 'Invalid name', 400);
-    return;
-  }
+  Queue.create(
+    req.body,
+    _.response.fSendResource(res, Queue));
 
-  var queue = new Queue({
-    name: req.body.name,
-    description: req.body.description,
-    list: [],
-  });
-
-  queue.save(_.response.fSendResource(res, Queue));
 };
 
-// get all queues (root only)
-exports.getAll = function (req, res) {
-
-  var field = 'name description list';
-
-  var filter = {};
-  if (req.query.name) {
-    filter['name'] = req.query.name;
-  }
-
-  Queue.find(filter, field, _.response.fSendResources(res, Queue));
-};
-
-// retrieve a particular queue with his _id
-exports.getOne = function (req, res) {
-  Queue.findById(req.params.id_queue, _.response.fSendResource(res, Queue));
-};
-
-// update information of a queue
+// update a queue
 exports.update = function (req, res) {
-  var error = null;
 
   var update = {};
   if (req.body.name) {
@@ -81,6 +52,25 @@ exports.update = function (req, res) {
   Queue.findByIdAndUpdate(
     req.params.id_queue, update,
     _.response.fSendData(res));
+};
+
+// get all queues
+exports.getAll = function (req, res) {
+
+  var filter = {};
+  if (req.query.name) {
+    filter['name'] = req.query.name;
+  }
+
+  _.request.fGetResources(req, Queue, filter)(
+    _.response.fSendResources(res, Queue));
+
+};
+
+// get one specific queue
+exports.getOne = function (req, res) {
+  _.request.fGetResource(req, Queue)(
+    _.response.fSendResource(res, Queue));
 };
 
 // push element into the queue
