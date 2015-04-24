@@ -22,67 +22,115 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-var express = require('express');
 var http = require('http');
+var express = require('express');
+
 var cors = require('cors');
-var app = express();
+var logger = require('morgan');
+var bodyParser = require('body-parser');
+var methodOverride = require('method-override');
+var session = require('express-session');
+var cookieParser = require('cookie-parser');
 
 var program = require('commander');
 var mongoose = require('mongoose');
-var MongoStore = require('connect-mongo')(express);
+var mongoStore = require('connect-mongo')(session);
 
-var userAPI = require('./controllers/UserAPI');
+var routes = require('./routes');
 var User = require('./models/User');
-var routes = require('./routes/routes');
-var Session = require('./controllers/Session');
+var Authentication = require('./controllers/Authentication');
 
 program
-    .option('--port <port>', 'Local port to listen to (default: 3000)', parseInt)
-    .option('--mongodb-host <host>', 'MongoDB host (default: localhost)')
-    .option('--mongodb-port <port>', 'MongoDB port (default: 27017)', parseInt)
-    .option('--mongodb-name <dbname>', 'MongoDB database name (default: camomile)')
-    .option('--root-password <dbname>', 'Change/set root password')
-    .option('--media <dir>', 'Path to media root directory')
-    .parse(process.argv);
+  .option('--port <port>', 'Local port to listen to (default: 3000)', parseInt)
+  .option('--mongodb-host <host>', 'MongoDB host (default: localhost)')
+  .option('--mongodb-port <port>', 'MongoDB port (default: 27017)', parseInt)
+  .option('--mongodb-name <dbname>',
+    'MongoDB database name (default: camomile)')
+  .option('--root-password <dbname>', 'Change/set root password')
+  .option('--media <dir>', 'Path to media root directory')
+  .parse(process.argv);
 
-var port = program.port || process.env.PORT || 3000;
-var mongodb_host = program.mongodbHost || process.env.MONGO_HOST || process.env.MONGODB_PORT_27017_TCP_ADDR || 'localhost';
-var mongodb_port = program.mongodbPort || process.env.MONGO_PORT || process.env.MONGODB_PORT_27017_TCP_PORT || 27017;
-var mongodb_name = program.mongodbName || process.env.MONGO_NAME || 'camomile';
-var root_password = program.rootPassword || process.env.ROOT_PASSWORD;
-var media = program.media || process.env.MEDIA || '/media';
+var port =
+  program.port ||
+  process.env.PORT ||
+  3000;
 
-mongoose.connect('mongodb://' + mongodb_host + ':' + mongodb_port + '/' + mongodb_name);
+// CLI || env || linked mongo Docker container || default 
+var mongodb_host =
+  program.mongodbHost ||
+  process.env.MONGODB_HOST ||
+  process.env.MONGO_PORT_27017_TCP_ADDR ||
+  'localhost';
+
+// CLI || env || linked mongo Docker container || default 
+var mongodb_port =
+  program.mongodbPort ||
+  process.env.MONGODB_PORT ||
+  process.env.MONGO_PORT_27017_TCP_PORT ||
+  27017;
+
+// CLI || env || default 
+var mongodb_name =
+  program.mongodbName ||
+  process.env.MONGODB_NAME ||
+  'camomile';
+
+var root_password =
+  program.rootPassword ||
+  process.env.ROOT_PASSWORD;
+
+var media =
+  program.media ||
+  process.env.MEDIA ||
+  '/media';
+
+var cookieSecret = process.env.COOKIE_SECRET || Authentication.helper.cookieSecret();
+
+mongoose.connect('mongodb://' + mongodb_host + ':' + mongodb_port + '/' +
+  mongodb_name);
 
 var cors_options = {
   origin: true,
   methods: ['GET', 'PUT', 'POST', 'DELETE'],
-  allowedHeaders: ['X-CSRF-Token', 'X-Requested-With', 'Accept', 'Accept-Version', 'Content-Length', 'Content-MD5', 'Content-Type', 'Date', 'X-Api-Version'],
+  allowedHeaders: ['X-CSRF-Token', 'X-Requested-With', 'Accept',
+    'Accept-Version', 'Content-Length', 'Content-MD5', 'Content-Type', 'Date',
+    'X-Api-Version'
+  ],
   credentials: true,
 };
 
-var sessionStore = new MongoStore({
-    mongoose_connection: mongoose.connection,
-    db: mongoose.connections[0].db,
-    clear_interval: 60
-  });
+var sessionStore = new mongoStore({
+  mongooseConnection: mongoose.connection,
+  db: mongoose.connections[0].db,
+  clear_interval: 60
+});
 
-var session_options = {
-    key : "camomile.sid",
-    secret: "123camomile",
-    cookie: {maxAge: 24 * 60 * 60 * 1000},  // sessions expire every day
-    store: sessionStore
-};
+var app = express();
 
 app.set('port', port);
 app.set('media', media);
-app.use(express.logger('dev'));
-app.use(express.bodyParser());
-app.use(express.methodOverride());
+app.use(logger('dev'));
 app.use(cors(cors_options));
-app.use(express.cookieParser('your secret here'));
-app.use(express.session(session_options));
-app.use(app.router);
+app.use(methodOverride());
+app.use(session({
+  cookie: {
+    secure: false,
+    maxAge: 24 * 60 * 60 * 1000,
+  },
+  name: 'camomile.sid',
+  proxy: true,
+  resave: false,
+  rolling: false,
+  saveUninitialized: false,
+  secret: cookieSecret,
+  store: sessionStore,
+}));
+
+app.use(cookieParser(cookieSecret));
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({
+  extended: true
+}));
 
 // handle CORS pre-flight requests
 // (must be added before any other route)
@@ -91,45 +139,40 @@ app.options('*', cors(cors_options));
 //start routes:
 routes.initialize(app);
 
-User.findOne({username: "root"}, function (error, user) {
-  if (user || root_password) {
+User.findOne({
+  username: "root"
+}, function (error, root) {
 
-    if (!user) {
-      user = new User({username: "root", role: "admin"});
+  if (!root) {
+
+    if (!root_password) {
+      console.log('Please set root password. Exiting.');
+      process.exit(-1);
     }
 
-    // if (root_password) {
-    //   bcrypt.genSalt(10, function(err, salt) {
-    //       bcrypt.hash(root_password, salt, function(err, hash) {
-    //           user.salt = salt;
-    //           user.hash = hash;
-    //           user.save(function (err, user) {
-    //             if (err) {
-    //               console.log('error when setting root password')
-    //             } else {
-    //               console.log('successfully set root password');
-    //             }
-    //           });
-    //       });
-    //   });
-    // }
-
-    if (root_password) {
-      hash(root_password, function (error, new_salt, new_hash) {
-        user.salt = new_salt;
-        user.hash = new_hash;
-        user.save(function (error, user) {
-
-        });
-      });
-    }
-
-    http.createServer(app).listen(app.get('port'), process.env.IP, function () {
-      console.log('Express server listening on port ' + app.get('port'));
+    root = new User({
+      username: 'root',
+      role: 'admin'
     });
 
-  } else {
-    console.log("root user does not exist and root password is not defined to create root user (add '--root-password' option)");
+  }
+
+  if (root_password) {
+    Authentication.helper.generateSaltAndHash(root_password, function (error, salt,
+      hash) {
+      root.salt = salt;
+      root.hash = hash;
+      root.save(function (error) {
+        if (error) {
+          console.log('Could not set root password. Exiting.');
+          process.exit(-1);
+        }
+        console.log('Root password successfully set.');
+      });
+    });
   }
 });
 
+app.listen(app.get('port'), function () {
+  console.log('Server listening on port ' + app.get('port'));
+});

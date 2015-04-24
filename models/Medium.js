@@ -23,42 +23,31 @@ SOFTWARE.
 */
 
 var mongoose = require('mongoose');
-var _ = require('../controllers/utils');
-
 var Schema = mongoose.Schema;
 var historySchema = require('./History');
 
-var layerSchema = new Schema({
+var mediumSchema = new Schema({
   id_corpus: {
     type: Schema.Types.ObjectId,
-    ref: 'CorpusSchema'
+    ref: 'Corpus'
   },
   name: {
     type: String,
-    lowercase: true,
-    trim: true,
-    required: true
+    required: true,
+    trim: true
   },
   description: {
     type: Schema.Types.Mixed,
     'default': ''
   },
-  fragment_type: {
-    type: Schema.Types.Mixed,
-    'default': ''
+  url: {
+    type: String,
+    default: ""
   },
-  data_type: {
-    type: Schema.Types.Mixed,
-    'default': ''
-  },
-  history: [historySchema],
-  ACL: {
-    type: Schema.Types.Mixed,
-    'default': null
-  },
+  history: [historySchema]
 });
 
-layerSchema.statics.create = function (id_user, id_corpus, data, callback) {
+mediumSchema.statics.create = function (id_user, id_corpus, data, callback) {
 
   if (
     data.name === undefined ||
@@ -67,47 +56,30 @@ layerSchema.statics.create = function (id_user, id_corpus, data, callback) {
     return;
   }
 
-  if (data.fragment_type === undefined) {
-    callback('Invalid fragment type.', null);
-    return;
-  }
-
-  if (data.data_type === undefined) {
-    callback('Invalid data type.', null);
-    return;
-  }
-
-  var layer = new this({
+  var medium = new this({
     id_corpus: id_corpus,
     name: data.name,
     description: data.description,
-    fragment_type: data.fragment_type,
-    data_type: data.data_type,
+    url: data.url,
     history: [{
-      date: new Date(),
+      data: new Date(),
       id_user: id_user,
       changes: {
         name: data.name,
-        description: data.description
+        description: data.description,
+        url: data.url
       }
-    }],
-    ACL: {
-      users: {},
-      groups: {}
-    }
+    }]
   });
 
-  layer.ACL.users[id_user] = _.ADMIN;
-
-  layer.save(function (error, layer) {
+  medium.save(function (error, medium) {
     if (!error) {
-      layer.history = undefined;
-      layer.ACL = undefined;
-      layer.__v = undefined;
+      medium.history = undefined;
+      medium.__v = undefined;
     }
-    callback(error, layer);
+    callback(error, medium);
   });
 
 };
 
-module.exports = mongoose.model('Layer', layerSchema);
+module.exports = mongoose.model('Medium', mediumSchema);

@@ -1,7 +1,7 @@
 /*
 The MIT License (MIT)
 
-Copyright (c) 2013-2014 CNRS
+Copyright (c) 2013-2015 CNRS
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -23,15 +23,74 @@ SOFTWARE.
 */
 
 var mongoose = require('mongoose');
+var _ = require('../controllers/utils');
+
 var Schema = mongoose.Schema;
-var ObjectId = Schema.ObjectId;
-var HistorySchema = require('./History').HistorySchema;
+var historySchema = require('./History');
 
-var Corpus = new Schema({
-	name: {type: String, required: true, trim: true},
-	description : {type : Schema.Types.Mixed, 'default' : ''},
-	history : [HistorySchema],
-    ACL: {type : Schema.Types.Mixed, 'default' : null},
-}, { versionKey: false });
+var corpusSchema = new Schema({
+  name: {
+    type: String,
+    required: true,
+    trim: true,
+    unique: true
+  },
+  description: {
+    type: Schema.Types.Mixed,
+    'default': ''
+  },
+  history: [historySchema],
+  ACL: {
+    type: Schema.Types.Mixed,
+    'default': null
+  },
+});
 
-module.exports = mongoose.model('Corpus', Corpus);
+corpusSchema.statics.create = function (id_user, data, callback) {
+
+  // check corpus name validity
+  if (
+    data.name === undefined ||
+    data.name === '') {
+    callback('Invalid name.', null);
+    return;
+  }
+
+  var corpus = new this({
+    name: data.name,
+    description: data.description,
+    history: [{
+      date: new Date(),
+      id_user: id_user,
+      changes: {
+        name: data.name,
+        description: data.description
+      }
+    }],
+    ACL: {
+      users: {},
+      groups: {},
+    }
+  });
+
+  corpus.ACL.users[id_user] = _.ADMIN;
+
+  corpus.save(function (error, corpus) {
+
+    if (error) {
+      if (error.code === 11000) {
+        callback('Invalid name (duplicate).', null);
+      }
+    } else {
+      corpus.history = undefined;
+      corpus.ACL = undefined;
+      corpus.__v = undefined;
+    }
+
+    callback(error, corpus);
+
+  });
+
+};
+
+module.exports = mongoose.model('Corpus', corpusSchema);

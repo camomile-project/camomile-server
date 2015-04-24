@@ -1,7 +1,7 @@
 /*
 The MIT License (MIT)
 
-Copyright (c) 2013-2014 CNRS
+Copyright (c) 2013-2015 CNRS
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -24,13 +24,45 @@ SOFTWARE.
 
 var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
+var Group = require('./Group');
 
-var User = new Schema({
-    username: {type:String, lowercase: true, trim: true, required: true},
-    description: {type : Schema.Types.Mixed, 'default' : ''},   	
-    role: String,
-    salt: String,
-    hash: String
-}, { versionKey: false });
+var userSchema = new Schema({
+  username: {
+    type: String,
+    required: true,
+    trim: true,
+    unique: true,
+    lowercase: true
+  },
+  description: {
+    type: Schema.Types.Mixed,
+    'default': ''
+  },
+  role: String,
+  salt: String,
+  hash: String
+});
 
-module.exports = mongoose.model('users', User);
+userSchema.statics.fGetGroups = function (id_user) {
+
+  return function (callback) {
+    Group.find({
+        users: id_user
+      }, '_id',
+      function (error, groups) {
+
+        var group_ids = [];
+
+        if (groups) {
+          for (var i = groups.length - 1; i >= 0; i--) {
+            group_ids.push(groups[i]._id);
+          };
+        }
+
+        callback(error, group_ids);
+
+      });
+  };
+};
+
+module.exports = mongoose.model('User', userSchema);
