@@ -188,7 +188,7 @@ exports.updateUserRights = function (req, res) {
       new: true
     },
     function (error, corpus) {
-      _response.fSendData(res)(error, corpus.ACL);
+      _.response.fSendData(res)(error, corpus.ACL);
     }
   );
 
@@ -221,7 +221,7 @@ exports.updateGroupRights = function (req, res) {
       new: true
     },
     function (error, corpus) {
-      _response.fSendData(res)(error, corpus.ACL);
+      _.response.fSendData(res)(error, corpus.ACL);
     }
   );
 
@@ -243,7 +243,7 @@ exports.removeUserRights = function (req, res) {
       new: true
     },
     function (error, corpus) {
-      _response.fSendData(res)(error, corpus.ACL);
+      _.response.fSendData(res)(error, corpus.ACL);
     }
   );
 
@@ -265,7 +265,7 @@ exports.removeGroupRights = function (req, res) {
       new: true
     },
     function (error, corpus) {
-      _response.fSendData(res)(error, corpus.ACL);
+      _.response.fSendData(res)(error, corpus.ACL);
     }
   );
 

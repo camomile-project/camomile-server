@@ -197,7 +197,7 @@ exports.remove = function (req, res) {
       }
 
     ],
-    _response.fSendSuccess(res, 'Successfully deleted.'));
+    _.response.fSendSuccess(res, 'Successfully deleted.'));
 
 };
 
@@ -238,7 +238,7 @@ exports.updateUserRights = function (req, res) {
       new: true
     },
     function (error, layer) {
-      _response.fSendData(res)(error, layer.ACL);
+      _.response.fSendData(res)(error, layer.ACL);
     }
   );
 
@@ -271,7 +271,7 @@ exports.updateGroupRights = function (req, res) {
       new: true
     },
     function (error, layer) {
-      _response.fSendData(res)(error, layer.ACL);
+      _.response.fSendData(res)(error, layer.ACL);
     }
   );
 
@@ -293,7 +293,7 @@ exports.removeUserRights = function (req, res) {
       new: true
     },
     function (error, layer) {
-      _response.fSendData(res)(error, layer.ACL);
+      _.response.fSendData(res)(error, layer.ACL);
     }
   );
 
@@ -315,7 +315,7 @@ exports.removeGroupRights = function (req, res) {
       new: true
     },
     function (error, layer) {
-      _response.fSendData(res)(error, layer.ACL);
+      _.response.fSendData(res)(error, layer.ACL);
     }
   );
 
