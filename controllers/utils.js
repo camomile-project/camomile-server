@@ -236,7 +236,11 @@ exports.middleware.fExistsWithRights = function (model, min_right) {
       model.findById(
         req.params[id_name],
         function (error, resource) {
-          resource.getPermissions(callback);
+          if (error) {
+            callback(error, null);
+          } else {
+            resource.getPermissions(callback);
+          }
         });
     };
 
