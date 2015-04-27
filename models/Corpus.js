@@ -80,6 +80,7 @@ corpusSchema.statics.create = function (id_user, data, callback) {
     if (error) {
       if (error.code === 11000) {
         callback('Invalid name (duplicate).', null);
+        return;
       }
     } else {
       corpus.history = undefined;
