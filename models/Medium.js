@@ -47,6 +47,21 @@ var mediumSchema = new Schema({
   history: [historySchema]
 });
 
+mediumSchema.methods.getPermissions = function (callback) {
+  return this.model('Corpus').findById(
+    this.id_corpus,
+    function (error, corpus) {
+      if (error) {
+        callback(error, {
+          users: {},
+          groups: {}
+        });
+      } else {
+        callback(error, corpus.ACL);
+      }
+    });
+};
+
 mediumSchema.statics.create = function (id_user, id_corpus, data, callback) {
 
   if (

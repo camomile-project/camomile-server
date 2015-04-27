@@ -46,6 +46,9 @@ var corpusSchema = new Schema({
   },
 });
 
+corpusSchema.methods.getPermissions = function (callback) {
+  return callback(null, this.ACL);
+};
 corpusSchema.statics.create = function (id_user, data, callback) {
 
   // check corpus name validity

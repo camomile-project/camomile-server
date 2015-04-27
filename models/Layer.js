@@ -58,6 +58,10 @@ var layerSchema = new Schema({
   },
 });
 
+layerSchema.methods.getPermissions = function (callback) {
+  return callback(null, this.ACL);
+};
+
 layerSchema.statics.create = function (id_user, id_corpus, data, callback) {
 
   if (

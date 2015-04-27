@@ -48,6 +48,21 @@ var annotationSchema = new Schema({
   history: [historySchema]
 });
 
+annotationSchema.methods.getPermissions = function (callback) {
+  return this.model('Layer').findById(
+    this.id_layer,
+    function (error, layer) {
+      if (error) {
+        callback(error, {
+          users: {},
+          groups: {}
+        });
+      } else {
+        callback(error, layer.ACL);
+      }
+    });
+};
+
 annotationSchema.statics.create = function (id_user, id_layer, data,
   callback) {
 
