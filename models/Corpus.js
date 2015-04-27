@@ -40,14 +40,14 @@ var corpusSchema = new Schema({
     'default': ''
   },
   history: [historySchema],
-  ACL: {
+  permissions: {
     type: Schema.Types.Mixed,
     'default': null
   },
 });
 
 corpusSchema.methods.getPermissions = function (callback) {
-  return callback(null, this.ACL);
+  return callback(null, this.permissions);
 };
 
 corpusSchema.statics.create = function (id_user, data, callback) {
@@ -71,13 +71,13 @@ corpusSchema.statics.create = function (id_user, data, callback) {
         description: data.description
       }
     }],
-    ACL: {
+    permissions: {
       users: {},
       groups: {},
     }
   });
 
-  corpus.ACL.users[id_user] = _.ADMIN;
+  corpus.permissions.users[id_user] = _.ADMIN;
 
   corpus.save(function (error, corpus) {
 
@@ -88,7 +88,7 @@ corpusSchema.statics.create = function (id_user, data, callback) {
       }
     } else {
       corpus.history = undefined;
-      corpus.ACL = undefined;
+      corpus.permissions = undefined;
       corpus.__v = undefined;
     }
 

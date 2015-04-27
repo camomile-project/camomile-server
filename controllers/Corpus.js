@@ -155,9 +155,9 @@ exports.remove = function (req, res) {
 exports.getRights = function (req, res) {
   Corpus.findById(
     req.params.id_corpus,
-    'ACL',
+    'permissions',
     function (error, corpus) {
-      _.response.fSendData(res)(error, corpus.ACL);
+      _.response.fSendData(res)(error, corpus.permissions);
     });
 };
 
@@ -175,7 +175,7 @@ exports.updateUserRights = function (req, res) {
     return;
   }
 
-  var path = 'ACL.users.' + req.params.id_user;
+  var path = 'permissions.users.' + req.params.id_user;
   var update = {
     $set: {}
   };
@@ -187,7 +187,7 @@ exports.updateUserRights = function (req, res) {
       new: true
     },
     function (error, corpus) {
-      _.response.fSendData(res)(error, corpus.ACL);
+      _.response.fSendData(res)(error, corpus.permissions);
     }
   );
 
@@ -207,7 +207,7 @@ exports.updateGroupRights = function (req, res) {
     return;
   }
 
-  var path = 'ACL.groups.' + req.params.id_group;
+  var path = 'permissions.groups.' + req.params.id_group;
   var update = {
     $set: {}
   };
@@ -219,7 +219,7 @@ exports.updateGroupRights = function (req, res) {
       new: true
     },
     function (error, corpus) {
-      _.response.fSendData(res)(error, corpus.ACL);
+      _.response.fSendData(res)(error, corpus.permissions);
     }
   );
 
@@ -228,7 +228,7 @@ exports.updateGroupRights = function (req, res) {
 // remove user rights
 exports.removeUserRights = function (req, res) {
 
-  var path = 'ACL.users.' + req.params.id_user;
+  var path = 'permissions.users.' + req.params.id_user;
   var update = {
     $unset: {}
   };
@@ -240,7 +240,7 @@ exports.removeUserRights = function (req, res) {
       new: true
     },
     function (error, corpus) {
-      _.response.fSendData(res)(error, corpus.ACL);
+      _.response.fSendData(res)(error, corpus.permissions);
     }
   );
 
@@ -249,7 +249,7 @@ exports.removeUserRights = function (req, res) {
 // remove group rights
 exports.removeGroupRights = function (req, res) {
 
-  var path = 'ACL.groups.' + req.params.id_group;
+  var path = 'permissions.groups.' + req.params.id_group;
   var update = {
     $unset: {}
   };
@@ -261,7 +261,7 @@ exports.removeGroupRights = function (req, res) {
       new: true
     },
     function (error, corpus) {
-      _.response.fSendData(res)(error, corpus.ACL);
+      _.response.fSendData(res)(error, corpus.permissions);
     }
   );
 

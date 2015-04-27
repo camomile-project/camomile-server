@@ -208,9 +208,9 @@ exports.remove = function (req, res) {
         });
       },
 
-      // remove user in all layers ACL
+      // remove user in all corpora permissions
       function (callback) {
-        var path = 'ACL.users.' + id_user;
+        var path = 'permissions.users.' + id_user;
 
         var filter = {};
         filter[path] = {
@@ -228,9 +228,9 @@ exports.remove = function (req, res) {
           });
       },
 
-      // remove user in all layers ACL
+      // remove user in all layers permissions
       function (callback) {
-        var path = 'ACL.users.' + id_user;
+        var path = 'permissions.users.' + id_user;
 
         var filter = {};
         filter[path] = {

@@ -58,7 +58,7 @@ annotationSchema.methods.getPermissions = function (callback) {
           groups: {}
         });
       } else {
-        callback(error, layer.ACL);
+        callback(error, layer.permissions);
       }
     });
 };

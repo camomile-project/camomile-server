@@ -190,7 +190,7 @@ exports.initialize = function (app) {
     Corpus.remove);
 
   // get one corpus' rights
-  app.get('/corpus/:id_corpus/ACL',
+  app.get('/corpus/:id_corpus/permissions',
     Authentication.middleware.isLoggedIn,
     _.middleware.fExistsWithRights(mCorpus, _.ADMIN),
     Corpus.getRights);
@@ -324,7 +324,7 @@ exports.initialize = function (app) {
     Layer.remove);
 
   // get one layer's rights
-  app.get('/layer/:id_layer/ACL',
+  app.get('/layer/:id_layer/permissions',
     Authentication.middleware.isLoggedIn,
     _.middleware.fExistsWithRights(mLayer, _.ADMIN),
     Layer.getRights);

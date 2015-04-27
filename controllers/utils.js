@@ -62,7 +62,7 @@ var getFields = function (model, history) {
   }
 
   if (model.modelName === 'Corpus') {
-    return fields + ' name description ACL';
+    return fields + ' name description permissions';
   }
 
   if (model.modelName === 'Medium') {
@@ -70,7 +70,7 @@ var getFields = function (model, history) {
   }
 
   if (model.modelName === 'Layer') {
-    return fields + ' name description id_corpus fragment_type data_type ACL';
+    return fields + ' name description id_corpus fragment_type data_type permissions';
   }
 
   if (model.modelName === 'Annotation') {
@@ -351,7 +351,7 @@ exports.response.fSendResource = function (res, model) {
     }
 
     if (modelName === 'Corpus' || modelName === 'Layer') {
-      resource.ACL = undefined;
+      resource.permissions = undefined;
     } else if (modelName === 'User') {
       resource.salt = resource.hash = undefined;
     }
@@ -372,13 +372,13 @@ exports.response.fSendResources = function (res, model) {
       return;
     }
 
-    // remove ACL attributes
+    // remove permissions attributes
     async.map(
       resources,
       function (item, callback) {
 
         if (modelName === 'Corpus' || modelName === 'Layer') {
-          item.ACL = undefined;
+          item.permissions = undefined;
         }
         callback(null, item);
       },

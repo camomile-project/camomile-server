@@ -43,8 +43,7 @@ var mediumSchema = new Schema({
   url: {
     type: String,
     default: ""
-  },
-  history: [historySchema]
+}, history: [historySchema]
 });
 
 mediumSchema.methods.getPermissions = function (callback) {
@@ -57,7 +56,7 @@ mediumSchema.methods.getPermissions = function (callback) {
           groups: {}
         });
       } else {
-        callback(error, corpus.ACL);
+        callback(error, corpus.permissions);
       }
     });
 };

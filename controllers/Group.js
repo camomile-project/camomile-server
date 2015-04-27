@@ -100,9 +100,9 @@ exports.remove = function (req, res) {
 
   async.waterfall([
 
-      // remove group in all layers ACL
+      // remove group in all corpora permissions
       function (callback) {
-        var path = 'ACL.groups.' + id_group;
+        var path = 'permissions.groups.' + id_group;
 
         var filter = {};
         filter[path] = {
@@ -120,9 +120,9 @@ exports.remove = function (req, res) {
           });
       },
 
-      // remove group in all layers ACL
+      // remove group in all layers permissions
       function (callback) {
-        var path = 'ACL.groups.' + id_group;
+        var path = 'permissions.groups.' + id_group;
 
         var filter = {};
         filter[path] = {

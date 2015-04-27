@@ -52,14 +52,14 @@ var layerSchema = new Schema({
     'default': ''
   },
   history: [historySchema],
-  ACL: {
+  permissions: {
     type: Schema.Types.Mixed,
     'default': null
   },
 });
 
 layerSchema.methods.getPermissions = function (callback) {
-  return callback(null, this.ACL);
+  return callback(null, this.permissions);
 };
 
 layerSchema.statics.create = function (id_user, id_corpus, data, callback) {
@@ -95,18 +95,18 @@ layerSchema.statics.create = function (id_user, id_corpus, data, callback) {
         description: data.description
       }
     }],
-    ACL: {
+    permissions: {
       users: {},
       groups: {}
     }
   });
 
-  layer.ACL.users[id_user] = _.ADMIN;
+  layer.permissions.users[id_user] = _.ADMIN;
 
   layer.save(function (error, layer) {
     if (!error) {
       layer.history = undefined;
-      layer.ACL = undefined;
+      layer.permissions = undefined;
       layer.__v = undefined;
     }
     callback(error, layer);
