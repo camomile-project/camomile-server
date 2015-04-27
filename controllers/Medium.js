@@ -100,13 +100,8 @@ exports.getAll = function (req, res) {
     filter.name = req.query.name;
   }
 
-  async.waterfall(
-    [
-      _.request.fGetResources(req, Medium, filter),
-      _.request.fFilterResources(req, _.READ)
-    ],
-    _.response.fSendResources(res, Medium)
-  );
+  _.request.fGetResources(req, Medium, filter)(
+    _.response.fSendResources(res, Medium));
 
 };
 
