@@ -138,6 +138,12 @@ exports.request.fGetResources = function (req, model, filter) {
 
 exports.request.fFilterResources = function (req, min_right) {
 
+  // special treatment for (omnipotent) root user
+  if (req.session.user.username === 'root') {
+    return function (resources, callback) {
+      callback(null, resources);
+    };
+  }
 
   var id_user = req.session.user._id;
   return function (resources, callback) {
