@@ -9,10 +9,9 @@ camomile:
    - db:mongo
   volumes:
    - /media
-   - .:/app
   ports:
    - "3000:3000"
   environment:
-   - ROOT_PASSWORD=password
    - MEDIA=/media
+   - ROOT_PASSWORD=password
   command: node /app/app.js
