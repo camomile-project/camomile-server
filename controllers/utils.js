@@ -86,7 +86,7 @@ var getFields = function (model, history) {
 };
 
 // check if user have the good right for the resource (corpus or layer)
-var checkRights = function (acl, user, groups, min_right) {
+var hasPermission = function (acl, user, groups, min_right) {
 
   // check if user was granted right directly
   if (acl.users && (user in acl.users) && (acl.users[user] >= min_right)) {
@@ -138,8 +138,8 @@ exports.request.fGetResources = function (req, model, filter) {
 
 exports.request.fFilterResources = function (req, min_right) {
 
-  var id_user = req.session.user._id;
 
+  var id_user = req.session.user._id;
   return function (resources, callback) {
 
     async.waterfall([
@@ -150,8 +150,15 @@ exports.request.fFilterResources = function (req, min_right) {
           async.filter(
             resources,
             function (resource, callback) {
-              callback(checkRights(resource.ACL, id_user, groups,
-                min_right));
+              resource.getPermissions(
+                function (error, permissions) {
+                  if (error) {
+                    callback(false);
+                  } else {
+                    callback(hasPermission(permissions, id_user, groups, min_right));
+                  }
+                }
+              );
             },
             function (filtered) {
               callback(null, filtered);
@@ -219,53 +226,26 @@ exports.middleware.fExistsWithRights = function (model, min_right) {
 
   return function (req, res, next) {
 
-    // ------------
-    // get resource (or its parent if needed)
-    // ------------
-
-    // this function looks for a resource by its id (from the request)
-    var _getChildResource = function (callback) {
-      model.findById(req.params[id_name], callback);
+    var getResourcePermissions = function (callback) {
+      model.findById(
+        req.params[id_name],
+        function (error, resource) {
+          resource.getPermissions(callback);
+        });
     };
-
-    var tasks = [_getChildResource];
-
-    if (parentModel !== undefined) {
-
-      // this function looks for the parent of a given resource
-      var _getParentResource = function (callback, resource) {
-        parentModel.findById(resource[id_parentName], callback);
-      };
-
-      tasks.push(_getParentResource);
-
-    }
-
-    var getResource = function (callback) {
-      async.waterfall(tasks, callback);
-    };
-
-    // ------------
-    // 
-    // ------------
 
     async.parallel(
       // find groups and resource in parallel    
       {
         groups: User.fGetGroups(req.session.user._id),
-        resource: getResource,
+        permissions: getResourcePermissions,
       },
-      // then combine them 
 
+      // then combine them 
       function (error, result) {
 
         if (error) {
           sendError(res, error);
-          return;
-        }
-
-        if (!result.resource) {
-          sendError(res, model.modelName + ' does not exist.');
           return;
         }
 
@@ -276,12 +256,11 @@ exports.middleware.fExistsWithRights = function (model, min_right) {
         }
 
         // otherwise check for rights
-
         var user = req.session.user._id;
         var groups = result.groups;
-        var acl = result.resource.ACL;
+        var permissions = result.permissions;
 
-        if (!checkRights(acl, user, groups, min_right)) {
+        if (!hasPermission(permissions, user, groups, min_right)) {
           sendError(res, 'Access denied.');
           return;
         }
