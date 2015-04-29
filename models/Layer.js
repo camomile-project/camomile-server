@@ -1,7 +1,7 @@
 /*
 The MIT License (MIT)
 
-Copyright (c) 2013-2014 CNRS
+Copyright (c) 2013-2015 CNRS
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -23,19 +23,95 @@ SOFTWARE.
 */
 
 var mongoose = require('mongoose');
-var Schema = mongoose.Schema;
-var ObjectId = Schema.ObjectId;
-var HistorySchema = require('./History').HistorySchema;
-var CorpusSchema = require('./Corpus').CorpusSchema;
- 
-var Layer = new Schema({
-	id_corpus : {type : ObjectId, ref : 'CorpusSchema'},
-	name: {type:String, lowercase: true, trim: true, required: true},
-	description: {type : Schema.Types.Mixed, 'default' : ''},   	
-	fragment_type : {type : Schema.Types.Mixed, 'default' : ''}, 
-	data_type : {type : Schema.Types.Mixed, 'default' : ''}, 
-	history : [HistorySchema],
-    ACL: {type : Schema.Types.Mixed, 'default' : null},
-}, { versionKey: false });
+var _ = require('../controllers/utils');
 
-module.exports = mongoose.model('Layer', Layer);
+var Schema = mongoose.Schema;
+var historySchema = require('./History');
+
+var layerSchema = new Schema({
+  id_corpus: {
+    type: Schema.Types.ObjectId,
+    ref: 'CorpusSchema'
+  },
+  name: {
+    type: String,
+    lowercase: true,
+    trim: true,
+    required: true
+  },
+  description: {
+    type: Schema.Types.Mixed,
+    'default': ''
+  },
+  fragment_type: {
+    type: Schema.Types.Mixed,
+    'default': ''
+  },
+  data_type: {
+    type: Schema.Types.Mixed,
+    'default': ''
+  },
+  history: [historySchema],
+  permissions: {
+    type: Schema.Types.Mixed,
+    'default': null
+  },
+});
+
+layerSchema.methods.getPermissions = function (callback) {
+  return callback(null, this.permissions);
+};
+
+layerSchema.statics.create = function (id_user, id_corpus, data, callback) {
+
+  if (
+    data.name === undefined ||
+    data.name === '') {
+    callback('Invalid name.', null);
+    return;
+  }
+
+  if (data.fragment_type === undefined) {
+    callback('Invalid fragment type.', null);
+    return;
+  }
+
+  if (data.data_type === undefined) {
+    callback('Invalid data type.', null);
+    return;
+  }
+
+  var layer = new this({
+    id_corpus: id_corpus,
+    name: data.name,
+    description: data.description,
+    fragment_type: data.fragment_type,
+    data_type: data.data_type,
+    history: [{
+      date: new Date(),
+      id_user: id_user,
+      changes: {
+        name: data.name,
+        description: data.description
+      }
+    }],
+    permissions: {
+      users: {},
+      groups: {}
+    }
+  });
+
+  layer.permissions.users[id_user] = _.ADMIN;
+
+  layer.save(function (error, layer) {
+    if (!error) {
+      layer.history = undefined;
+      layer.permissions = undefined;
+      layer.__v = undefined;
+    }
+    callback(error, layer);
+  });
+
+};
+
+module.exports = mongoose.model('Layer', layerSchema);

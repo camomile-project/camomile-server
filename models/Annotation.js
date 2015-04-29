@@ -1,7 +1,7 @@
 /*
 The MIT License (MIT)
 
-Copyright (c) 2013-2014 CNRS
+Copyright (c) 2013-2015 CNRS
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -23,18 +23,74 @@ SOFTWARE.
 */
 
 var mongoose = require('mongoose');
-var Schema = mongoose.Schema;
-var ObjectId = Schema.ObjectId;
-var LayerSchema = require('./Layer').LayerSchema;
-var MediaSchema = require('./Media').MediaSchema;
-var HistorySchema = require('./History').HistorySchema;
- 
-var Annotation = new Schema({
-	id_layer : {type : ObjectId, ref : 'LayerSchema'},
-	id_media : {type : ObjectId, ref : 'MediaSchema'},
-	fragment : {type : Schema.Types.Mixed, index : true, 'default' : ''},
-	data : {type : Schema.Types.Mixed, 'default' : ''},
-	history : [HistorySchema]	
-}, { versionKey: false });
 
-module.exports = mongoose.model('Annotation', Annotation);
+var Schema = mongoose.Schema;
+var historySchema = require('./History');
+
+var annotationSchema = new Schema({
+  id_layer: {
+    type: Schema.Types.ObjectId,
+    ref: 'Layer'
+  },
+  id_medium: {
+    type: Schema.Types.ObjectId,
+    ref: 'Medium'
+  },
+  fragment: {
+    type: Schema.Types.Mixed,
+    index: true,
+    'default': ''
+  },
+  data: {
+    type: Schema.Types.Mixed,
+    'default': ''
+  },
+  history: [historySchema]
+});
+
+annotationSchema.methods.getPermissions = function (callback) {
+  return this.model('Layer').findById(
+    this.id_layer,
+    function (error, layer) {
+      if (error) {
+        callback(error, {
+          users: {},
+          groups: {}
+        });
+      } else {
+        callback(error, layer.permissions);
+      }
+    });
+};
+
+annotationSchema.statics.create = function (id_user, id_layer, data,
+  callback) {
+
+  // TODO: check validity
+
+  var annotation = new this({
+    fragment: data.fragment,
+    data: data.data,
+    id_layer: id_layer,
+    id_medium: data.id_medium,
+    history: [{
+      date: new Date(),
+      id_user: id_user,
+      changes: {
+        fragment: data.fragment,
+        data: data.data
+      }
+    }]
+  });
+
+  annotation.save(function (error, annotation) {
+    if (!error) {
+      annotation.history = undefined;
+      annotation.__v = undefined;
+    }
+    callback(error, annotation);
+  });
+
+};
+
+module.exports = mongoose.model('Annotation', annotationSchema);
