@@ -4,6 +4,8 @@
   - switch to ExpressJS 4
   - BREAKING CHANGE in API
   - BREAKING CHANGE in internal database
+  - wip: unit test
+  - wip: documentation for Javascript and Python clients 
 
 ### Version 0.4.1 (2015-02-03)
 
