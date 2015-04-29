@@ -2,7 +2,7 @@
 
   - major code refactoring
   - switch to ExpressJS 4
-  - BREAKING CHANGE in API
+  - BREAKING CHANGE in external API
   - BREAKING CHANGE in internal database
   - wip: unit test
   - wip: documentation for Javascript and Python clients 
