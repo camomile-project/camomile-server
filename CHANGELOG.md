@@ -1,3 +1,10 @@
+### Version 0.5 (2015-04-29)
+
+  - major code refactoring
+  - switch to ExpressJS 4
+  - BREAKING CHANGE in API
+  - BREAKING CHANGE in internal database
+
 ### Version 0.4.1 (2015-02-03)
 
   - various code improvement
