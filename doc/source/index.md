@@ -2,9 +2,9 @@
 title: Camomile Collaborative Annotation Platform
 
 language_tabs:
-  - http: HTTP
   - python: Python
   - javascript: Javascript
+  - http: HTTP
 
 toc_footers:
   - <a href='http://github.com/tripit/slate'>Documentation Powered by Slate</a>
@@ -19,5 +19,6 @@ includes:
 
 ---
 
-
-# Introduction
+<aside class="notice">
+Work in progress
+</aside>
