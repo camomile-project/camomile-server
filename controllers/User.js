@@ -120,6 +120,45 @@ exports.create = function (req, res) {
 
 };
 
+exports.change_password = function (req, res) {
+
+  // check password validity
+  if (
+    req.body.password !== undefined &&
+    req.body.password.length < 8) {
+    _.response.sendError(res, 'Invalid password.', 400);
+    return;
+  }
+
+  async.waterfall([
+
+      // find self
+      function (callback) {
+        User.findById(req.session.user._id, callback);
+      },
+
+      // update user
+      function (user, callback) {
+
+        Authentication.helper.generateSaltAndHash(
+          req.body.password,
+          function (error, salt, hash) {
+            user.salt = salt;
+            user.hash = hash;
+            callback(error, user);
+          });
+      },
+
+      // save user
+      function (user, callback) {
+        user.save(callback);
+      }
+    ],
+
+    // success
+    _.response.fSendSuccess(res, 'Password successfully updated.'));
+};
+
 // update user
 exports.update = function (req, res) {
 

@@ -64,6 +64,11 @@ exports.initialize = function (app) {
     Authentication.middleware.isLoggedIn,
     Authentication.me);
 
+  // update password
+  app.put('/me',
+    Authentication.middleware.isLoggedIn,
+    User.change_password);
+
   // USERS
 
   // create new user

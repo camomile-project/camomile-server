@@ -210,6 +210,36 @@ GET /me HTTP/1.1
 }
 ```
 
+### update password
+
+```python
+client.update_password("new_password")
+```
+
+```javascript
+client.update_password("new_password", callback);
+```
+
+```http
+PUT /me HTTP/1.1
+```
+
+> Sample JSON request
+
+```json
+{
+  "password": "new_password"
+}
+```
+
+> Sample JSON response
+
+```json
+{
+  "success": "Password successfully updated.""
+}
+```
+
 ## Users & Groups
 
 ### create new user 
