@@ -61,7 +61,7 @@ exports.create = function (req, res) {
   // check username validity
   if (
     req.body.username === undefined ||
-    req.body.username.length < 8 ||
+    req.body.username.length < 2 ||
     req.body.username.indexOf(' ') > -1) {
     _.response.sendError(res, 'Invalid username.', 400);
     return;
