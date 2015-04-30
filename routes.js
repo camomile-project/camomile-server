@@ -251,7 +251,7 @@ exports.initialize = function (app) {
   // create new medium(a) in one corpus
   app.post('/corpus/:id_corpus/medium',
     Authentication.middleware.isLoggedIn,
-    _.middleware.fExistsWithRights(mCorpus, _.WRITE),
+    _.middleware.fExistsWithRights(mCorpus, _.ADMIN),
     Medium.create);
 
   // update one medium
