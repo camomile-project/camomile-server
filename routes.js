@@ -307,7 +307,7 @@ exports.initialize = function (app) {
   // get one corpus' layers
   app.get('/corpus/:id_corpus/layer',
     Authentication.middleware.isLoggedIn,
-    _.middleware.fExists(mCorpus),
+    _.middleware.fExistsWithRights(mCorpus, _.READ),
     Layer.getCorpusLayers);
 
   // create new layer(s) in one corpus
