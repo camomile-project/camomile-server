@@ -1,3 +1,9 @@
+### Version 0.5.1 (2015-04-30)
+
+  - fix: only corpus administrators can create media
+  - fix: only corpus readers can get list of media
+  - doc: update Docker instructions
+
 ### Version 0.5 (2015-04-29)
 
   - major code refactoring
