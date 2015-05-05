@@ -1,3 +1,7 @@
+### Version 0.5.2 (2015-05-05)
+
+  - fix: increase POST limit to 50mb
+
 ### Version 0.5.1 (2015-04-30)
 
   - fix: only corpus administrators can create media
