@@ -74,7 +74,7 @@ var getFields = function (model, history) {
   }
 
   if (model.modelName === 'Annotation') {
-    return fields
+    return fields + ' id_layer id_medium fragment data';
   }
 
   if (model.modelName === 'Queue') {
