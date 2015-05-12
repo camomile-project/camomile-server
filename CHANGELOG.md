@@ -1,3 +1,7 @@
+### Version 0.5.4 (2015-05-12)
+
+  - fix: fix a bug when checking for non-existing resource
+
 ### Version 0.5.3 (2015-05-07)
 
   - fix: fix a bug in .../annotation/... routes
