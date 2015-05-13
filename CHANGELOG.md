@@ -1,3 +1,7 @@
+### Version 0.5.5 (2015-05-13)
+
+  - fix: delete corpus after its layers and media are removed
+
 ### Version 0.5.4 (2015-05-12)
 
   - fix: fix a bug when checking for non-existing resource

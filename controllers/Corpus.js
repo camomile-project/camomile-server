@@ -146,6 +146,14 @@ exports.remove = function (req, res) {
       Medium.remove({
         id_corpus: corpus
       }, callback);
+    },
+
+    // remove corpus
+    function (callback) {
+      Corpus.remove({
+          _id: id_corpus
+        },
+        callback);
     }
 
   ], _.response.fSendSuccess(res, 'Successfully deleted.'));
