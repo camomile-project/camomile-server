@@ -151,7 +151,7 @@ exports.remove = function (req, res) {
     // remove corpus
     function (callback) {
       Corpus.remove({
-          _id: id_corpus
+          _id: corpus
         },
         callback);
     }
