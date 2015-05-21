@@ -410,7 +410,7 @@ exports.initialize = function (app) {
   // get one queue
   app.get('/queue/:id_queue',
     Authentication.middleware.isLoggedIn,
-    _.middleware.fExists(mQueue),
+    _.middleware.fExistsWithRights(mQueue, _.READ),
     Queue.getOne);
 
   // create new queue
@@ -427,13 +427,13 @@ exports.initialize = function (app) {
   // append items to one queue
   app.put('/queue/:id_queue/next',
     Authentication.middleware.isLoggedIn,
-    _.middleware.fExists(mQueue),
+    _.middleware.fExistsWithRights(mQueue, _.WRITE),
     Queue.push);
 
   // pop one item from one queue
   app.get('/queue/:id_queue/next',
     Authentication.middleware.isLoggedIn,
-    _.middleware.fExists(mQueue),
+    _.middleware.fExistsWithRights(mQueue, _.WRITE),
     Queue.pop);
 
   // remove one queue
