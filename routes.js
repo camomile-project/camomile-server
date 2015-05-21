@@ -421,7 +421,7 @@ exports.initialize = function (app) {
   // update one queue
   app.put('/queue/:id_queue',
     Authentication.middleware.isLoggedIn,
-    _.middleware.fExists(mQueue),
+    _.middleware.fExistsWithRights(mQueue, _.ADMIN),
     Queue.update);
 
   // append items to one queue
@@ -439,8 +439,7 @@ exports.initialize = function (app) {
   // remove one queue
   app.delete('/queue/:id_queue',
     Authentication.middleware.isLoggedIn,
-    Authentication.middleware.isAdmin,
-    _.middleware.fExists(mQueue),
+    _.middleware.fExistsWithRights(mQueue, _.ADMIN),
     Queue.remove);
 
   // get one queue' rights
