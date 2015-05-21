@@ -23,6 +23,7 @@ SOFTWARE.
 */
 
 var _ = require('./utils');
+var async = require('async');
 
 var Queue = require('../models/Queue');
 
