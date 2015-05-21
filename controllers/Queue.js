@@ -120,4 +120,118 @@ exports.remove = function (req, res) {
     req.params.id_queue,
     _.response.fSendSuccess(res, 'Successfully deleted.')
   );
+// get queue rights
+exports.getRights = function (req, res) {
+  Queue.findById(
+    req.params.id_queue,
+    'permissions',
+    function (error, queue) {
+      _.response.fSendData(res)(error, queue.permissions);
+    });
+};
+
+// update user rights
+exports.updateUserRights = function (req, res) {
+
+  if (
+    req.body.right != _.ADMIN &&
+    req.body.right != _.WRITE &&
+    req.body.right != _.READ) {
+    _.response.sendError(
+      res,
+      "Right must be 1 (READ), 2 (WRITE) or 3 (ADMIN).",
+      400);
+    return;
+  }
+
+  var path = 'permissions.users.' + req.params.id_user;
+  var update = {
+    $set: {}
+  };
+  update['$set'][path] = req.body.right;
+
+  Queue.findByIdAndUpdate(
+    req.params.id_queue,
+    update, {
+      new: true
+    },
+    function (error, queue) {
+      _.response.fSendData(res)(error, queue.permissions);
+    }
+  );
+
+};
+
+// update group rights
+exports.updateGroupRights = function (req, res) {
+
+  if (
+    req.body.right != _.ADMIN &&
+    req.body.right != _.WRITE &&
+    req.body.right != _.READ) {
+    _.response.sendError(
+      res,
+      "Right must be 1 (READ), 2 (WRITE) or 3 (ADMIN).",
+      400);
+    return;
+  }
+
+  var path = 'permissions.groups.' + req.params.id_group;
+  var update = {
+    $set: {}
+  };
+  update['$set'][path] = req.body.right;
+
+  Queue.findByIdAndUpdate(
+    req.params.id_queue,
+    update, {
+      new: true
+    },
+    function (error, queue) {
+      _.response.fSendData(res)(error, queue.permissions);
+    }
+  );
+
+};
+
+// remove user rights
+exports.removeUserRights = function (req, res) {
+
+  var path = 'permissions.users.' + req.params.id_user;
+  var update = {
+    $unset: {}
+  };
+  update['$unset'][path] = '';
+
+  Queue.findByIdAndUpdate(
+    req.params.id_queue,
+    update, {
+      new: true
+    },
+    function (error, queue) {
+      _.response.fSendData(res)(error, queue.permissions);
+    }
+  );
+
+};
+
+// remove group rights
+exports.removeGroupRights = function (req, res) {
+
+  var path = 'permissions.groups.' + req.params.id_group;
+  var update = {
+    $unset: {}
+  };
+  update['$unset'][path] = '';
+
+  Queue.findByIdAndUpdate(
+    req.params.id_queue,
+    update, {
+      new: true
+    },
+    function (error, queue) {
+      _.response.fSendData(res)(error, queue.permissions);
+    }
+  );
+
 };

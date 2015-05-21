@@ -444,4 +444,38 @@ exports.initialize = function (app) {
     _.middleware.fExists(mQueue),
     Queue.remove);
 
+  // get one queue' rights
+  app.get('/queue/:id_queue/permissions',
+    Authentication.middleware.isLoggedIn,
+    _.middleware.fExistsWithRights(mQueue, _.ADMIN),
+    Queue.getRights);
+
+  // give one user rights to one queue
+  app.put('/queue/:id_queue/user/:id_user',
+    Authentication.middleware.isLoggedIn,
+    _.middleware.fExists(mUser),
+    _.middleware.fExistsWithRights(mQueue, _.ADMIN),
+    Queue.updateUserRights);
+
+  // remove one user's rights to one queue
+  app.delete('/queue/:id_queue/user/:id_user',
+    Authentication.middleware.isLoggedIn,
+    _.middleware.fExists(mUser),
+    _.middleware.fExistsWithRights(mQueue, _.ADMIN),
+    Queue.removeUserRights);
+
+  // give one group rights to one queue
+  app.put('/queue/:id_queue/group/:id_group',
+    Authentication.middleware.isLoggedIn,
+    _.middleware.fExists(mGroup),
+    _.middleware.fExistsWithRights(mQueue, _.ADMIN),
+    Queue.updateGroupRights);
+
+  // remove one group's rights to one queue
+  app.delete('/queue/:id_queue/group/:id_group',
+    Authentication.middleware.isLoggedIn,
+    _.middleware.fExists(mGroup),
+    _.middleware.fExistsWithRights(mQueue, _.ADMIN),
+    Queue.removeGroupRights);
+
 };
