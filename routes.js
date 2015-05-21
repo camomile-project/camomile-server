@@ -402,10 +402,9 @@ exports.initialize = function (app) {
 
   // QUEUE
 
-  // get all queues
+  // get all READable corpora
   app.get('/queue',
     Authentication.middleware.isLoggedIn,
-    Authentication.middleware.isRoot,
     Queue.getAll);
 
   // get one queue

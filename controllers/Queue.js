@@ -52,7 +52,7 @@ exports.update = function (req, res) {
     _.response.fSendData(res));
 };
 
-// get all queues
+// get all READable queues
 exports.getAll = function (req, res) {
 
   var filter = {};
@@ -60,7 +60,10 @@ exports.getAll = function (req, res) {
     filter['name'] = req.query.name;
   }
 
-  _.request.fGetResources(req, Queue, filter)(
+  async.waterfall([
+      _.request.fGetResources(req, Queue, filter),
+      _.request.fFilterResources(req, _.READ)
+    ],
     _.response.fSendResources(res, Queue));
 
 };
@@ -120,6 +123,8 @@ exports.remove = function (req, res) {
     req.params.id_queue,
     _.response.fSendSuccess(res, 'Successfully deleted.')
   );
+};
+
 // get queue rights
 exports.getRights = function (req, res) {
   Queue.findById(
