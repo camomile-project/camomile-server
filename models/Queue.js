@@ -71,6 +71,7 @@ queueSchema.statics.create = function (id_user, data, callback) {
 
   queue.save(function (error, queue) {
     if (!error) {
+      queue.permissions = undefined;
       queue.__v = undefined;
     }
     callback(error, queue);
