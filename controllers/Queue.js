@@ -29,10 +29,8 @@ var Queue = require('../models/Queue');
 // create a queue
 exports.create = function (req, res) {
 
-  Queue.create(
-    req.body,
-    _.response.fSendResource(res, Queue));
-
+  var id_user = req.session.user._id;
+  Queue.create(id_user, req.body, _.response.fSendResource(res, Queue));
 };
 
 // update a queue

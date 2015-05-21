@@ -37,10 +37,18 @@ var queueSchema = new Schema({
     type: Schema.Types.Mixed,
     'default': ''
   },
+  permissions: {
+    type: Schema.Types.Mixed,
+    'default': null
+  },
   list: [Schema.Types.Mixed]
 });
 
-queueSchema.statics.create = function (data, callback) {
+queueSchema.methods.getPermissions = function (callback) {
+  return callback(null, this.permissions);
+};
+
+queueSchema.statics.create = function (id_user, data, callback) {
 
   if (
     data.name === undefined ||
@@ -52,8 +60,14 @@ queueSchema.statics.create = function (data, callback) {
   var queue = new this({
     name: data.name,
     description: data.description,
+    permissions: {
+      users: {},
+      groups: {},
+    },
     list: [],
   });
+
+  queue.permissions.users[id_user] = _.ADMIN;
 
   queue.save(function (error, queue) {
     if (!error) {
