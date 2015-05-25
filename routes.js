@@ -87,13 +87,13 @@ exports.initialize = function (app) {
   // get all users
   app.get('/user',
     Authentication.middleware.isLoggedIn,
-    Authentication.middleware.isAdmin,
+    // Authentication.middleware.isAdmin,
     User.getAll);
 
   // get one user
   app.get('/user/:id_user',
     Authentication.middleware.isLoggedIn,
-    Authentication.middleware.isAdmin,
+    // Authentication.middleware.isAdmin,
     _.middleware.fExists(mUser),
     User.getOne);
 
@@ -116,13 +116,13 @@ exports.initialize = function (app) {
   // get all groups
   app.get('/group',
     Authentication.middleware.isLoggedIn,
-    Authentication.middleware.isAdmin,
+    // Authentication.middleware.isAdmin,
     Group.getAll);
 
   // get one group
   app.get('/group/:id_group',
     Authentication.middleware.isLoggedIn,
-    Authentication.middleware.isAdmin,
+    // Authentication.middleware.isAdmin,
     _.middleware.fExists(mGroup),
     Group.getOne);
 
