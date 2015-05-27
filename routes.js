@@ -64,6 +64,11 @@ exports.initialize = function (app) {
     Authentication.middleware.isLoggedIn,
     Authentication.me);
 
+  // get groups of logged in user
+  app.get('/me/group',
+    Authentication.middleware.isLoggedIn,
+    Authentication.getGroups);
+
   // update password
   app.put('/me',
     Authentication.middleware.isLoggedIn,

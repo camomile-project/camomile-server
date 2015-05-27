@@ -171,3 +171,10 @@ exports.me = function (req, res) {
       description: user.description
     });
 };
+
+// get groups of logged in user
+exports.getGroups = function (req, res) {
+  var user = req.session.user;
+  User.fGetGroups(user._id)(
+    _.response.fSendData(res));
+};
