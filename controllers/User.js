@@ -34,7 +34,7 @@ var Authentication = require('./Authentication');
 // ROUTES
 // ----------------------------------------------------------------------------
 
-// retrieve all users
+// retrieve all users (but root)
 exports.getAll = function (req, res) {
 
   var filter = {};
@@ -45,8 +45,24 @@ exports.getAll = function (req, res) {
     filter.role = req.query.role;
   }
 
-  _.request.fGetResources(req, User, filter)(
-    _.response.fSendResources(res, User));
+  async.waterfall([
+
+      // retrieve all users...
+      _.request.fGetResources(req, User, filter),
+
+      // ... but "root"
+      function (users, callback) {
+        var allUsersButRoot = users.filter(
+          function (user) {
+            return user.username !== 'root';
+          });
+        callback(null, allUsersButRoot);
+      }
+    ],
+
+    // send users
+    _.response.fSendResources(res, User)
+  );
 };
 
 // retrieve a specific user
