@@ -252,15 +252,19 @@ exports.remove = function (req, res) {
 
   async.waterfall([
 
-      // make sure we are not removing root
+      // make sure we are not removing root, nor ourselves
       function (callback) {
-        User.findById(id_user, function (error, user) {
-          if (user.username === "root") {
-            callback('Access denied.');
-          } else {
-            callback(error);
-          }
-        });
+        if (id_user === req.session.user._id) {
+          callback('One cannot delete their own account.');
+        } else {
+          User.findById(id_user, function (error, user) {
+            if (user.username === "root") {
+              callback('Access denied.');
+            } else {
+              callback(error);
+            }
+          });
+        }
       },
 
       // remove user in all corpora permissions
