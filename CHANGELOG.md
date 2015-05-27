@@ -1,5 +1,7 @@
 ### Version 0.6 (2015-xx-xx)
 
+  - feat: add permissions to queue
+  - feat: any user can get the list of users and groups
   - feat: logged in users can get the list of their groups
 
 ### Version 0.5.6 (2015-05-13)
