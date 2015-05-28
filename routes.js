@@ -85,7 +85,7 @@ exports.initialize = function (app) {
   // delete one user
   app.delete('/user/:id_user',
     Authentication.middleware.isLoggedIn,
-    Authentication.middleware.isRoot,
+    Authentication.middleware.isAdmin,
     _.middleware.fExists(mUser),
     User.remove);
 
