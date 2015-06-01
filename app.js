@@ -88,15 +88,22 @@ var media =
   process.env.MEDIA ||
   '/media';
 
-var cookieSecret = process.env.COOKIE_SECRET || Authentication.helper.cookieSecret();
 // CLI || env || ./log
 var logDirectory =
   program.log ||
   process.env.LOG ||
   __dirname + '/log';
 
-mongoose.connect('mongodb://' + mongodb_host + ':' + mongodb_port + '/' +
-  mongodb_name);
+// env || random
+var cookieSecret =
+  process.env.COOKIE_SECRET ||
+  Authentication.helper.cookieSecret();
+
+var app = express();
+
+app.set('port', port);
+app.set('media', media);
+
 // === LOGGING ================================================================
 
 // create log directory
@@ -129,6 +136,7 @@ var logger = morgan(logFormat, {
 
 app.use(logger);
 
+// === CROSS-ORIGIN RESOURCE SHARING ==========================================
 
 var cors_options = {
   origin: true,
@@ -140,18 +148,23 @@ var cors_options = {
   credentials: true,
 };
 
+app.use(cors(cors_options));
+
+// ============================================================================
+
+app.use(methodOverride());
+
+// === SESSION ================================================================
+
+mongoose.connect('mongodb://' + mongodb_host + ':' + mongodb_port + '/' +
+  mongodb_name);
+
 var sessionStore = new mongoStore({
   mongooseConnection: mongoose.connection,
   db: mongoose.connections[0].db,
   clear_interval: 60
 });
 
-var app = express();
-
-app.set('port', port);
-app.set('media', media);
-app.use(cors(cors_options));
-app.use(methodOverride());
 app.use(session({
   cookie: {
     secure: false,
@@ -167,6 +180,9 @@ app.use(session({
 }));
 
 app.use(cookieParser(cookieSecret));
+
+// ============================================================================
+
 app.use(bodyParser.json({
   limit: '50mb'
 }));
@@ -174,6 +190,8 @@ app.use(bodyParser.urlencoded({
   limit: '50mb',
   extended: true
 }));
+
+// ============================================================================
 
 // handle CORS pre-flight requests
 // (must be added before any other route)
