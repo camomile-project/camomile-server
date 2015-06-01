@@ -28,6 +28,7 @@ var User = require('../models/User');
 var Group = require('../models/Group');
 var Corpus = require('../models/Corpus');
 var Layer = require('../models/Layer');
+var Queue = require('../models/Queue');
 var Authentication = require('./Authentication');
 
 // ----------------------------------------------------------------------------
@@ -302,6 +303,26 @@ exports.remove = function (req, res) {
         update.$unset[path] = '';
 
         Layer.update(filter, update,
+          function (error, number) {
+            callback(error);
+          });
+      },
+
+      // remove user in all queues permissions
+      function (callback) {
+        var path = 'permissions.users.' + id_user;
+
+        var filter = {};
+        filter[path] = {
+          $exists: true
+        };
+
+        var update = {
+          $unset: {}
+        };
+        update.$unset[path] = '';
+
+        Queue.update(filter, update,
           function (error, number) {
             callback(error);
           });

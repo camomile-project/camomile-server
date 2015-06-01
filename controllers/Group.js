@@ -28,6 +28,7 @@ var _ = require('./utils');
 var Group = require('../models/Group');
 var Corpus = require('../models/Corpus');
 var Layer = require('../models/Layer');
+var Queue = require('../models/Queue');
 
 // ----------------------------------------------------------------------------
 // ROUTES
@@ -135,6 +136,26 @@ exports.remove = function (req, res) {
         update.$unset[path] = '';
 
         Layer.update(filter, update,
+          function (error, number) {
+            callback(error);
+          });
+      },
+
+      // remove group in all queues permissions
+      function (callback) {
+        var path = 'permissions.groups.' + id_group;
+
+        var filter = {};
+        filter[path] = {
+          $exists: true
+        };
+
+        var update = {
+          $unset: {}
+        };
+        update.$unset[path] = '';
+
+        Queue.update(filter, update,
           function (error, number) {
             callback(error);
           });
