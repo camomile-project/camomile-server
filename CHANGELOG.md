@@ -4,6 +4,7 @@
   - feat: regular users can get the list of users and groups
   - feat: regular users can get the list of their groups
   - feat: admin users can remove accounts (except their own)
+  - feat: daily log rotation
 
 ### Version 0.5.6 (2015-05-13)
 
