@@ -29,7 +29,8 @@
     "connect-mongo": "^0.8.1",
     "commander": "^2.8.0",
     "async": "^0.9.0",
-    "forever": "^0.14.1"
+    "forever": "^0.14.1",
+    "file-stream-rotator": "^0.0.6"
   },
   "scripts": {
     "start": "app.js"

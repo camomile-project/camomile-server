@@ -25,8 +25,11 @@ SOFTWARE.
 var http = require('http');
 var express = require('express');
 
+var morgan = require('morgan');
+var fileStreamRotator = require('file-stream-rotator');
+var fs = require('fs');
+
 var cors = require('cors');
-var logger = require('morgan');
 var bodyParser = require('body-parser');
 var methodOverride = require('method-override');
 var session = require('express-session');
@@ -48,6 +51,7 @@ program
     'MongoDB database name (default: camomile)')
   .option('--root-password <dbname>', 'Change/set root password')
   .option('--media <dir>', 'Path to media root directory')
+  .option('--log <dir>', 'Path to log directory (default: ' + __dirname + '/log)')
   .parse(process.argv);
 
 var port =
@@ -85,9 +89,46 @@ var media =
   '/media';
 
 var cookieSecret = process.env.COOKIE_SECRET || Authentication.helper.cookieSecret();
+// CLI || env || ./log
+var logDirectory =
+  program.log ||
+  process.env.LOG ||
+  __dirname + '/log';
 
 mongoose.connect('mongodb://' + mongodb_host + ':' + mongodb_port + '/' +
   mongodb_name);
+// === LOGGING ================================================================
+
+// create log directory
+fs.existsSync(logDirectory) || fs.mkdirSync(logDirectory);
+
+// create a (daily) rotating write stream
+var accessLogStream = fileStreamRotator.getStream({
+  filename: logDirectory + '/%DATE%.log',
+  frequency: 'daily',
+  verbose: false,
+  date_format: 'YYYYMMDD'
+});
+
+morgan.token('user', function (req, res) {
+  if (req.session && req.session.user) {
+    return req.session.user.username;
+  } else {
+    return 'anonymous';
+  };
+});
+
+var logFormat = '[:date[clf]] :user (:remote-addr) :method :url :status :response-time ms';
+
+var logger = morgan(logFormat, {
+  // skip: function (req, res) {
+  //   return req.method === 'GET';
+  // },
+  stream: accessLogStream
+});
+
+app.use(logger);
+
 
 var cors_options = {
   origin: true,
@@ -109,7 +150,6 @@ var app = express();
 
 app.set('port', port);
 app.set('media', media);
-app.use(logger('dev'));
 app.use(cors(cors_options));
 app.use(methodOverride());
 app.use(session({
