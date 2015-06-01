@@ -128,9 +128,9 @@ morgan.token('user', function (req, res) {
 var logFormat = '[:date[clf]] :user (:remote-addr) :method :url :status :response-time ms';
 
 var logger = morgan(logFormat, {
-  // skip: function (req, res) {
-  //   return req.method === 'GET';
-  // },
+  skip: function (req, res) {
+    return req.method === 'GET';
+  },
   stream: accessLogStream
 });
 
