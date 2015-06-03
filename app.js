@@ -129,7 +129,7 @@ var logFormat = '[:date[clf]] :user (:remote-addr) :method :url :status :respons
 
 var logger = morgan(logFormat, {
   skip: function (req, res) {
-    return req.method === 'GET';
+    return req.method === 'GET' || req.method === 'OPTIONS';
   },
   stream: accessLogStream
 });
