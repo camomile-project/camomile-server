@@ -82,7 +82,7 @@ var getFields = function (model, history, extra_fields) {
   }
 
   if (model.modelName === 'Queue') {
-    return fields + ' name description list permissions';
+    return fields + ' name description permissions';
   }
 
   return fields;
