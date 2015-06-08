@@ -415,14 +415,8 @@ exports.initialize = function (app) {
   // get one queue
   app.get('/queue/:id_queue',
     Authentication.middleware.isLoggedIn,
-    _.middleware.fExistsWithRights(mQueue, _.READ),
-    Queue.getOne);
-
-  // get all items from one queue
-  app.get('/queue/:id_queue/items',
-    Authentication.middleware.isLoggedIn,
     _.middleware.fExistsWithRights(mQueue, _.ADMIN),
-    Queue.getList);
+    Queue.getOne);
 
   // create new queue
   app.post('/queue',
@@ -446,6 +440,24 @@ exports.initialize = function (app) {
     Authentication.middleware.isLoggedIn,
     _.middleware.fExistsWithRights(mQueue, _.WRITE),
     Queue.pop);
+
+  // get all items from one queue
+  app.get('/queue/:id_queue/first',
+    Authentication.middleware.isLoggedIn,
+    _.middleware.fExistsWithRights(mQueue, _.ADMIN),
+    Queue.pickOne);
+
+  // get number of items in one queue
+  app.get('/queue/:id_queue/length',
+    Authentication.middleware.isLoggedIn,
+    _.middleware.fExistsWithRights(mQueue, _.ADMIN),
+    Queue.pickLength);
+
+  // get all items from one queue
+  app.get('/queue/:id_queue/all',
+    Authentication.middleware.isLoggedIn,
+    _.middleware.fExistsWithRights(mQueue, _.ADMIN),
+    Queue.pickAll);
 
   // remove one queue
   app.delete('/queue/:id_queue',

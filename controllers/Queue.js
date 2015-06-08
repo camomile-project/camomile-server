@@ -75,18 +75,6 @@ exports.getOne = function (req, res) {
     _.response.fSendResource(res, Queue));
 };
 
-exports.getList = function (req, res) {
-  var extra_fields = 'list';
-  _.request.fGetResource(req, Queue, extra_fields)(
-    function (error, queue) {
-      if (error) {
-        _.response.sendError(res, 'Could not get queue content.');
-      } else {
-        _.response.fSendData(res)(error, queue.list);
-      }
-    });
-};
-
 // push element into the queue
 exports.push = function (req, res) {
 
@@ -128,6 +116,46 @@ exports.pop = function (req, res) {
       }
     }
   )
+};
+
+exports.pickLength = function (req, res) {
+  var extra_fields = 'list';
+  _.request.fGetResource(req, Queue, extra_fields)(
+    function (error, queue) {
+      if (error) {
+        _.response.sendError(res, 'Could not get queue content.');
+      } else {
+        _.response.fSendData(res)(error, queue.list.length);
+      }
+    });
+};
+
+exports.pickOne = function (req, res) {
+  var extra_fields = 'list';
+  _.request.fGetResource(req, Queue, extra_fields)(
+    function (error, queue) {
+      if (error) {
+        _.response.sendError(res, 'Could not get queue content.');
+      } else {
+        if (queue.list.length == 0) {
+          _.response.sendError(res, 'Empty queue.', 400);
+        } else {
+          _.response.fSendData(res)(error, queue.list[0]);
+        }
+      }
+    });
+};
+
+exports.pickAll = function (req, res) {
+  var extra_fields = 'list';
+  _.request.fGetResource(req, Queue, extra_fields)(
+    function (error, queue) {
+      if (error) {
+        _.response.sendError(res, 'Could not get queue content.');
+      } else {
+        _.response.fSendData(res)(error, queue.list);
+      }
+    });
 };
 
 // remove a given queue
