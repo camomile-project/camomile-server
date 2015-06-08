@@ -75,6 +75,18 @@ exports.getOne = function (req, res) {
     _.response.fSendResource(res, Queue));
 };
 
+exports.getList = function (req, res) {
+  var extra_fields = 'list';
+  _.request.fGetResource(req, Queue, extra_fields)(
+    function (error, queue) {
+      if (error) {
+        _.response.sendError(res, 'Could not get queue content.');
+      } else {
+        _.response.fSendData(res)(error, queue.list);
+      }
+    });
+};
+
 // push element into the queue
 exports.push = function (req, res) {
 

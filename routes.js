@@ -418,6 +418,12 @@ exports.initialize = function (app) {
     _.middleware.fExistsWithRights(mQueue, _.READ),
     Queue.getOne);
 
+  // get all items from one queue
+  app.get('/queue/:id_queue/items',
+    Authentication.middleware.isLoggedIn,
+    _.middleware.fExistsWithRights(mQueue, _.ADMIN),
+    Queue.getList);
+
   // create new queue
   app.post('/queue',
     Authentication.middleware.isLoggedIn,
