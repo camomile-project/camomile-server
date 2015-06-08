@@ -421,6 +421,7 @@ exports.initialize = function (app) {
   // create new queue
   app.post('/queue',
     Authentication.middleware.isLoggedIn,
+    Authentication.middleware.isAdmin,
     Queue.create);
 
   // update one queue
