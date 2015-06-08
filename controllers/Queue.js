@@ -94,7 +94,8 @@ exports.push = function (req, res) {
       }
     }, {
       new: true
-    }, _.response.fSendData(res));
+    }, _.response.fSendSuccess(res, 'Successfully pushed.')
+  );
 };
 
 // pop element from the queue
