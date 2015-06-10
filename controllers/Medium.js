@@ -150,7 +150,7 @@ var streamFormat = function (req, res, extension) {
 
     var pathToFile = medium.url + '.' + extension;
     pathToFile = path.join(req.app.get('media'), pathToFile);
-    res.status(200).sendfile(pathToFile);
+    res.status(200).sendFile(pathToFile);
   });
 };
 
