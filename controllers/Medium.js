@@ -148,9 +148,15 @@ var streamFormat = function (req, res, extension) {
       return;
     }
 
-    var pathToFile = medium.url + '.' + extension;
-    pathToFile = path.join(req.app.get('media'), pathToFile);
-    res.status(200).sendFile(pathToFile);
+    var absolutePathToFile = medium.url + '.' + extension;
+    absolutePathToFile = path.join(req.app.get('media'), absolutePathToFile);
+    res.status(200).sendFile(
+      absolutePathToFile,
+      function (error) {
+        if (error) {
+          res.status(error.status).end();
+        }
+      });
   });
 };
 
