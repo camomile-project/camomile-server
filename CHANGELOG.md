@@ -6,6 +6,7 @@
   - feat: regular users can get the list of their groups
   - feat: admin users can remove any account but their own
   - feat: daily log rotation
+  - feat: filter layers by {fragment|data}_type
   - BREAKING: getting a queue no longer returns its elements (use new picking routes instead)
   - BREAKING: only admin users can create queues
   - BREAKING: queue push returns "success" message instead of queues 

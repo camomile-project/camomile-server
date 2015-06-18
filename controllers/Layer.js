@@ -124,8 +124,17 @@ exports.update = function (req, res) {
 exports.getAll = function (req, res) {
 
   var filter = {};
+
   if (req.query.name) {
-    filter['name'] = req.query.name;
+    filter.name = req.query.name;
+  }
+
+  if (req.query.fragment_type) {
+    filter.fragment_type = req.query.fragment_type;
+  }
+
+  if (req.query.data_type) {
+    filter.data_type = req.query.data_type;
   }
 
   async.waterfall([
