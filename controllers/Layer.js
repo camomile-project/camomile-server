@@ -108,12 +108,12 @@ exports.update = function (req, res) {
       layer.description = changes.description = req.body.description;
     }
 
-    // update history
-    layer.history.push({
-      date: new Date(),
-      id_user: req.session.user._id,
-      changes: changes
-    });
+    // // update history
+    // layer.history.push({
+    //   date: new Date(),
+    //   id_user: req.session.user._id,
+    //   changes: changes
+    // });
 
     layer.save(_.response.fSendResource(res, Layer));
   });

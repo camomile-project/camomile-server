@@ -91,8 +91,8 @@ layerSchema.statics.create = function (id_user, id_corpus, data, callback) {
       date: new Date(),
       id_user: id_user,
       changes: {
-        name: data.name,
-        description: data.description
+        //   name: data.name,
+        //   description: data.description
       }
     }],
     permissions: {
