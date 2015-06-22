@@ -1,1 +1,73 @@
-!function(t){function e(){$("h1, h2").each(function(){var t=$(this),e=t.nextUntil("h1, h2");h.add({id:t.prop("id"),title:t.text(),body:e.text()})})}function i(){r=$(".content"),a=$(".dark-box"),l=$(".search-results"),$("#input-search").on("keyup",n)}function n(t){if(s(),l.addClass("visible"),27===t.keyCode&&(this.value=""),this.value){var e=h.search(this.value).filter(function(t){return t.score>1e-4});e.length?(l.empty(),$.each(e,function(t,e){l.append("<li><a href='#"+e.ref+"'>"+$("#"+e.ref).text()+"</a></li>")}),o.call(this)):(l.html("<li></li>"),$(".search-results li").text('No Results Found for "'+this.value+'"'))}else s(),l.removeClass("visible")}function o(){this.value&&r.highlight(this.value,c)}function s(){r.unhighlight(c)}var r,a,l,c=($(t),{element:"span",className:"search-highlight"}),h=new lunr.Index;h.ref("id"),h.field("title",{boost:10}),h.field("body"),h.pipeline.add(lunr.trimmer,lunr.stopWordFilter),$(e),$(i)}(window);
+(function (global) {
+
+  var $global = $(global);
+  var content, darkBox, searchResults;
+  var highlightOpts = { element: 'span', className: 'search-highlight' };
+
+  var index = new lunr.Index();
+
+  index.ref('id');
+  index.field('title', { boost: 10 });
+  index.field('body');
+  index.pipeline.add(lunr.trimmer, lunr.stopWordFilter);
+
+  $(populate);
+  $(bind);
+
+  function populate() {
+    $('h1, h2').each(function() {
+      var title = $(this);
+      var body = title.nextUntil('h1, h2');
+      index.add({
+        id: title.prop('id'),
+        title: title.text(),
+        body: body.text()
+      });
+    });
+  }
+
+  function bind() {
+    content = $('.content');
+    darkBox = $('.dark-box');
+    searchResults = $('.search-results');
+
+    $('#input-search').on('keyup', search);
+  }
+
+  function search(event) {
+    unhighlight();
+    searchResults.addClass('visible');
+
+    // ESC clears the field
+    if (event.keyCode === 27) this.value = '';
+
+    if (this.value) {
+      var results = index.search(this.value).filter(function(r) {
+        return r.score > 0.0001;
+      });
+
+      if (results.length) {
+        searchResults.empty();
+        $.each(results, function (index, result) {
+          searchResults.append("<li><a href='#" + result.ref + "'>" + $('#'+result.ref).text() + "</a></li>");
+        });
+        highlight.call(this);
+      } else {
+        searchResults.html('<li></li>');
+	$('.search-results li').text('No Results Found for "' + this.value + '"');
+      }
+    } else {
+      unhighlight();
+      searchResults.removeClass('visible');
+    }
+  }
+
+  function highlight() {
+    if (this.value) content.highlight(this.value, highlightOpts);
+  }
+
+  function unhighlight() {
+    content.unhighlight(highlightOpts);
+  }
+
+})(window);
