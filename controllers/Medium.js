@@ -131,13 +131,32 @@ exports.getCorpusMedia = function (req, res) {
 
 };
 
-// remove one medium
+// remove one medium and its annotations
 exports.remove = function (req, res) {
-  Medium.remove({
-      _id: req.params.id_medium
-    },
-    _.response.fSendSuccess(res, 'Successfully deleted.')
-  );
+
+  var id_medium = req.params.id_medium;
+
+  async.parallel([
+
+      // remove annotations
+      function (callback) {
+        Annotation.remove({
+            id_medium: id_medium
+          },
+          callback);
+      },
+
+      // remove medium
+      function (callback) {
+        Medium.remove({
+            _id: id_medium
+          },
+          callback);
+      }
+
+    ],
+    _.response.fSendSuccess(res, 'Successfully deleted.'));
+
 };
 
 var streamFormat = function (req, res, extension) {
