@@ -10,6 +10,7 @@
   - BREAKING: getting a queue no longer returns its elements (use new picking routes instead)
   - BREAKING: only admin users can create queues
   - BREAKING: queue push returns "success" message instead of queues 
+  - fix: delete medium annotations upon medium deletion
 
 ### Version 0.5.6 (2015-05-13)
 
