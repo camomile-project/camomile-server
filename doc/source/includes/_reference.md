@@ -125,8 +125,19 @@ Setting it to `true` will return the resource MongoDB `_id` instead of the compl
 
 ### login
 
+POST /login
+
+Parameter        | Type      | Description
+---------------- | --------- | -----------
+username         | String    | The user name  (required)
+password         | String    | The password  (required)
+
+
 ```http
 POST /login HTTP/1.1
+
+{'username': 'johndoe', 'password': 'yourpwd'}
+
 ```
 
 ```python
@@ -141,23 +152,15 @@ var server = 'http://example.com';
 Camomile.setURL(server);
 ```
 
-> Sample JSON request
-
-```json
-{
-
-}
-```
-
 > Sample JSON response
 
 ```json
-{
-
-}
+{'success': 'Authentication succeeded.'}
 ```
 
 ### logout
+
+POST /logout
 
 ```http
 POST /logout HTTP/1.1
@@ -167,23 +170,15 @@ POST /logout HTTP/1.1
 client.logout()
 ```
 
-> Sample JSON request
-
-```json
-{
-
-}
-```
-
 > Sample JSON response
 
 ```json
-{
-
-}
+{'success': 'Logout succeeded.'}
 ```
 
 ### get logged in user
+
+GET /me 
 
 ```python
 user = client.me()
@@ -194,23 +189,18 @@ id_user = client.me(returns_id=True)
 GET /me HTTP/1.1
 ```
 
-> Sample JSON request
-
-```json
-{
-
-}
-```
-
 > Sample JSON response
 
 ```json
-{
-
-}
+{'_id': '555299eff80f910100d741d1',
+ 'description': '',
+ 'role': 'user',
+ 'username': 'johndoe'}
 ```
 
 ### update password
+
+PUT /me
 
 ```python
 client.update_password("new_password")
@@ -222,11 +212,7 @@ client.update_password("new_password", callback);
 
 ```http
 PUT /me HTTP/1.1
-```
 
-> Sample JSON request
-
-```json
 {
   "password": "new_password"
 }
@@ -236,7 +222,7 @@ PUT /me HTTP/1.1
 
 ```json
 {
-  "success": "Password successfully updated.""
+  'success': 'Password successfully updated.'
 }
 ```
 
@@ -244,8 +230,30 @@ PUT /me HTTP/1.1
 
 ### create new user 
 
+POST /user 
+
+<aside class="notice">
+Restricted to 'admin' user.
+</aside>
+
+#### DATA PARAMETERS
+Parameter        | Type      | Description
+---------------- | --------- | -----------
+username         | String    | The user name  (required, unique and without space, can't be updated)
+password         | String    | The password  (required)
+description      | free      | A description of the user
+role             | String    | The user role ("admin" or "user")  (required)
+
 ```http
 POST /user HTTP/1.1
+
+> Sample JSON request
+
+{'username': 'johndoe',
+ 'password': 'secretpassword',
+ 'description': 'annotator',
+ 'role': 'user'}
+
 ```
 
 ```python
@@ -260,27 +268,6 @@ client.createUser('username', 'password',
                   'user', callback);
 ```
 
-<aside class="notice">
-Restricted to 'admin' user.
-</aside>
-
-
-#### DATA PARAMETERS
-Parameter        | Type      | Description
----------------- | --------- | -----------
-username         | String    | The user name  (required, unique and without space, can't be updated)
-password         | String    | The password  (required)
-description      | free      | A description of the user
-role             | String    | The user role ("admin" or "user")  (required)
-
-> Sample JSON request
-
-```json
-{'username': 'johndoe',
- 'password': 'secretpassword',
- 'description': 'annotator',
- 'role': 'user'}
-```
 
 > Sample JSON response
 
