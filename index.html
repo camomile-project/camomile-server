@@ -515,14 +515,16 @@ Restricted to &lsquo;admin&rsquo; user.
 </span></code></pre>
 
 <h3 id="delete-one-user">delete one user</h3>
-<pre class="highlight python"><code><span class="n">client</span><span class="o">.</span><span class="n">deleteUser</span><span class="p">(</span><span class="n">id_user</span><span class="p">)</span>
-</code></pre>
-<pre class="highlight http"><code><span class="nf">DELETE</span> <span class="nn">/user/:id_user</span> <span class="k">HTTP</span><span class="o">/</span><span class="m">1.1</span>
-</code></pre>
+
+<p>DELETE /user/:id_user</p>
 
 <aside class="warning">
 Restricted to 'root&rsquo; user.
 </aside>
+<pre class="highlight python"><code><span class="n">client</span><span class="o">.</span><span class="n">deleteUser</span><span class="p">(</span><span class="n">id_user</span><span class="p">)</span>
+</code></pre>
+<pre class="highlight http"><code><span class="nf">DELETE</span> <span class="nn">/user/:id_user</span> <span class="k">HTTP</span><span class="o">/</span><span class="m">1.1</span>
+</code></pre>
 
 <blockquote>
 <p>Sample JSON response</p>
@@ -531,20 +533,30 @@ Restricted to 'root&rsquo; user.
 </span></code></pre>
 
 <h3 id="get-all-users">get all users</h3>
-<pre class="highlight python"><code><span class="n">users</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">getUsers</span><span class="p">()</span>
-</code></pre>
-<pre class="highlight http"><code><span class="nf">GET</span> <span class="nn">/user</span> <span class="k">HTTP</span><span class="o">/</span><span class="m">1.1</span>
-</code></pre>
+
+<p>GET /user</p>
 
 <aside class="notice">
 Restricted to 'admin&rsquo; user.
 </aside>
 
-<blockquote>
-<p>Sample JSON request</p>
-</blockquote>
-<pre class="highlight json"><code><span class="p">{}</span><span class="w">
-</span></code></pre>
+<table><thead>
+<tr>
+<th>Parameter</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead><tbody>
+<tr>
+<td>username</td>
+<td>String</td>
+<td>Restrict list to username (optional)</td>
+</tr>
+</tbody></table>
+<pre class="highlight python"><code><span class="n">users</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">getUsers</span><span class="p">()</span>
+</code></pre>
+<pre class="highlight http"><code><span class="nf">GET</span> <span class="nn">/user</span> <span class="k">HTTP</span><span class="o">/</span><span class="m">1.1</span>
+</code></pre>
 
 <blockquote>
 <p>Sample JSON response</p>
@@ -560,14 +572,16 @@ Restricted to 'admin&rsquo; user.
 </span></code></pre>
 
 <h3 id="get-one-user">get one user</h3>
-<pre class="highlight python"><code><span class="n">user</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">getUser</span><span class="p">(</span><span class="n">id_user</span><span class="p">)</span>
-</code></pre>
-<pre class="highlight http"><code><span class="nf">GET</span> <span class="nn">/user/:id_user</span> <span class="k">HTTP</span><span class="o">/</span><span class="m">1.1</span>
-</code></pre>
+
+<p>GET /user/:id_user</p>
 
 <aside class="notice">
 Restricted to 'admin&rsquo; user.
 </aside>
+<pre class="highlight python"><code><span class="n">user</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">getUser</span><span class="p">(</span><span class="n">id_user</span><span class="p">)</span>
+</code></pre>
+<pre class="highlight http"><code><span class="nf">GET</span> <span class="nn">/user/:id_user</span> <span class="k">HTTP</span><span class="o">/</span><span class="m">1.1</span>
+</code></pre>
 
 <blockquote>
 <p>Sample JSON response</p>
@@ -579,23 +593,21 @@ Restricted to 'admin&rsquo; user.
 </span></code></pre>
 
 <h3 id="update-one-user">update one user</h3>
+
+<p>PUT /user/:id_user</p>
+
+<aside class="notice">
+Restricted to 'admin&rsquo; user.
+</aside>
 <pre class="highlight http"><code><span class="nf">PUT</span> <span class="nn">/user/:id_user</span> <span class="k">HTTP</span><span class="o">/</span><span class="m">1.1</span>
+
+{'description': 'expert annotator'}
 </code></pre>
 <pre class="highlight python"><code><span class="n">user</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">updateUser</span><span class="p">(</span><span class="n">id_user</span><span class="p">,</span>
                          <span class="n">password</span><span class="o">=</span><span class="s">'password'</span><span class="p">,</span>
                          <span class="n">description</span><span class="o">=</span><span class="p">{</span><span class="s">'number'</span><span class="p">:</span> <span class="mi">42</span><span class="p">},</span>
                          <span class="n">role</span><span class="o">=</span><span class="s">'admin'</span><span class="p">)</span>
 </code></pre>
-
-<aside class="notice">
-Restricted to 'admin&rsquo; user.
-</aside>
-
-<blockquote>
-<p>Sample JSON request</p>
-</blockquote>
-<pre class="highlight json"><code><span class="p">{</span><span class="err">'description':</span><span class="w"> </span><span class="err">'expert</span><span class="w"> </span><span class="err">annotator'</span><span class="p">}</span><span class="w">
-</span></code></pre>
 
 <blockquote>
 <p>Sample JSON response</p>
@@ -607,6 +619,8 @@ Restricted to 'admin&rsquo; user.
 </span></code></pre>
 
 <h3 id="get-one-user-39-s-groups">get one user&rsquo;s groups</h3>
+
+<p>GET /user/<code class="prettyprint">:id_user</code>/group</p>
 <pre class="highlight http"><code><span class="nf">GET</span> <span class="nn">/user/:id_user/group</span> <span class="k">HTTP</span><span class="o">/</span><span class="m">1.1</span>
 </code></pre>
 <pre class="highlight python"><code><span class="n">id_groups</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">getUserGroups</span><span class="p">(</span><span class="n">id_user</span><span class="p">)</span>
