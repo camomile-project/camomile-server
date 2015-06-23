@@ -351,7 +351,31 @@ Setting it to <code class="prettyprint">true</code> will return the resource Mon
 <h2 id="authentication">Authentication</h2>
 
 <h3 id="login">login</h3>
+
+<p>POST /login</p>
+
+<table><thead>
+<tr>
+<th>Parameter</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead><tbody>
+<tr>
+<td>username</td>
+<td>String</td>
+<td>The user name  (required)</td>
+</tr>
+<tr>
+<td>password</td>
+<td>String</td>
+<td>The password  (required)</td>
+</tr>
+</tbody></table>
 <pre class="highlight http"><code><span class="nf">POST</span> <span class="nn">/login</span> <span class="k">HTTP</span><span class="o">/</span><span class="m">1.1</span>
+
+{'username': 'johndoe', 'password': 'yourpwd'}
+
 </code></pre>
 <pre class="highlight python"><code><span class="kn">from</span> <span class="nn">camomile</span> <span class="kn">import</span> <span class="n">Camomile</span> 
 <span class="n">server</span> <span class="o">=</span> <span class="s">'http://example.com'</span>  
@@ -363,44 +387,28 @@ Setting it to <code class="prettyprint">true</code> will return the resource Mon
 </code></pre>
 
 <blockquote>
-<p>Sample JSON request</p>
-</blockquote>
-<pre class="highlight json"><code><span class="p">{</span><span class="w">
-
-</span><span class="p">}</span><span class="w">
-</span></code></pre>
-
-<blockquote>
 <p>Sample JSON response</p>
 </blockquote>
-<pre class="highlight json"><code><span class="p">{</span><span class="w">
-
-</span><span class="p">}</span><span class="w">
+<pre class="highlight json"><code><span class="p">{</span><span class="err">'success':</span><span class="w"> </span><span class="err">'Authentication</span><span class="w"> </span><span class="err">succeeded.'</span><span class="p">}</span><span class="w">
 </span></code></pre>
 
 <h3 id="logout">logout</h3>
+
+<p>POST /logout</p>
 <pre class="highlight http"><code><span class="nf">POST</span> <span class="nn">/logout</span> <span class="k">HTTP</span><span class="o">/</span><span class="m">1.1</span>
 </code></pre>
 <pre class="highlight python"><code><span class="n">client</span><span class="o">.</span><span class="n">logout</span><span class="p">()</span>
 </code></pre>
 
 <blockquote>
-<p>Sample JSON request</p>
-</blockquote>
-<pre class="highlight json"><code><span class="p">{</span><span class="w">
-
-</span><span class="p">}</span><span class="w">
-</span></code></pre>
-
-<blockquote>
 <p>Sample JSON response</p>
 </blockquote>
-<pre class="highlight json"><code><span class="p">{</span><span class="w">
-
-</span><span class="p">}</span><span class="w">
+<pre class="highlight json"><code><span class="p">{</span><span class="err">'success':</span><span class="w"> </span><span class="err">'Logout</span><span class="w"> </span><span class="err">succeeded.'</span><span class="p">}</span><span class="w">
 </span></code></pre>
 
 <h3 id="get-logged-in-user">get logged in user</h3>
+
+<p>GET /me </p>
 <pre class="highlight python"><code><span class="n">user</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">me</span><span class="p">()</span>
 <span class="n">id_user</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">me</span><span class="p">(</span><span class="n">returns_id</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
 </code></pre>
@@ -408,58 +416,41 @@ Setting it to <code class="prettyprint">true</code> will return the resource Mon
 </code></pre>
 
 <blockquote>
-<p>Sample JSON request</p>
-</blockquote>
-<pre class="highlight json"><code><span class="p">{</span><span class="w">
-
-</span><span class="p">}</span><span class="w">
-</span></code></pre>
-
-<blockquote>
 <p>Sample JSON response</p>
 </blockquote>
-<pre class="highlight json"><code><span class="p">{</span><span class="w">
-
-</span><span class="p">}</span><span class="w">
+<pre class="highlight json"><code><span class="p">{</span><span class="err">'_id':</span><span class="w"> </span><span class="err">'555299eff80f910100d741d1',</span><span class="w">
+ </span><span class="err">'description':</span><span class="w"> </span><span class="err">'',</span><span class="w">
+ </span><span class="err">'role':</span><span class="w"> </span><span class="err">'user',</span><span class="w">
+ </span><span class="err">'username':</span><span class="w"> </span><span class="err">'johndoe'</span><span class="p">}</span><span class="w">
 </span></code></pre>
 
 <h3 id="update-password">update password</h3>
+
+<p>PUT /me</p>
 <pre class="highlight python"><code><span class="n">client</span><span class="o">.</span><span class="n">update_password</span><span class="p">(</span><span class="s">"new_password"</span><span class="p">)</span>
 </code></pre>
 <pre class="highlight javascript"><code><span class="nx">client</span><span class="p">.</span><span class="nx">update_password</span><span class="p">(</span><span class="s2">"new_password"</span><span class="p">,</span> <span class="nx">callback</span><span class="p">);</span>
 </code></pre>
 <pre class="highlight http"><code><span class="nf">PUT</span> <span class="nn">/me</span> <span class="k">HTTP</span><span class="o">/</span><span class="m">1.1</span>
-</code></pre>
 
-<blockquote>
-<p>Sample JSON request</p>
-</blockquote>
-<pre class="highlight json"><code><span class="p">{</span><span class="w">
-  </span><span class="nt">"password"</span><span class="p">:</span><span class="w"> </span><span class="s2">"new_password"</span><span class="w">
-</span><span class="p">}</span><span class="w">
-</span></code></pre>
+{
+  "password": "new_password"
+}
+</code></pre>
 
 <blockquote>
 <p>Sample JSON response</p>
 </blockquote>
 <pre class="highlight json"><code><span class="p">{</span><span class="w">
-  </span><span class="nt">"success"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Password successfully updated."</span><span class="err">"</span><span class="w">
+  </span><span class="err">'success':</span><span class="w"> </span><span class="err">'Password</span><span class="w"> </span><span class="err">successfully</span><span class="w"> </span><span class="err">updated.'</span><span class="w">
 </span><span class="p">}</span><span class="w">
 </span></code></pre>
 
 <h2 id="users-amp-groups">Users &amp; Groups</h2>
 
 <h3 id="create-new-user">create new user</h3>
-<pre class="highlight http"><code><span class="nf">POST</span> <span class="nn">/user</span> <span class="k">HTTP</span><span class="o">/</span><span class="m">1.1</span>
-</code></pre>
-<pre class="highlight python"><code><span class="n">user</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">createUser</span><span class="p">(</span><span class="s">'username'</span><span class="p">,</span> <span class="s">'password'</span><span class="p">,</span> <span class="n">role</span><span class="o">=</span><span class="s">'user'</span><span class="p">,</span>
-                         <span class="n">description</span><span class="o">=</span><span class="p">{</span><span class="s">'affiliation'</span><span class="p">:</span> <span class="s">'LIMSI/CNRS'</span><span class="p">,</span> 
-                                      <span class="s">'status'</span><span class="p">:</span> <span class="s">'PhD student'</span><span class="p">})</span>
-</code></pre>
-<pre class="highlight javascript"><code><span class="nx">client</span><span class="p">.</span><span class="nx">createUser</span><span class="p">(</span><span class="s1">'username'</span><span class="p">,</span> <span class="s1">'password'</span><span class="p">,</span> 
-                  <span class="p">{</span><span class="s1">'affiliation'</span><span class="p">:</span> <span class="s1">'LIMSI/CNRS'</span><span class="p">,</span> <span class="s1">'status'</span><span class="p">:</span> <span class="s1">'PhD student'</span><span class="p">}</span>
-                  <span class="s1">'user'</span><span class="p">,</span> <span class="nx">callback</span><span class="p">);</span>
-</code></pre>
+
+<p>POST /user </p>
 
 <aside class="notice">
 Restricted to &lsquo;admin&rsquo; user.
@@ -495,15 +486,24 @@ Restricted to &lsquo;admin&rsquo; user.
 <td>The user role (&ldquo;admin&rdquo; or &ldquo;user&rdquo;)  (required)</td>
 </tr>
 </tbody></table>
+<pre class="highlight http"><code><span class="nf">POST</span> <span class="nn">/user</span> <span class="k">HTTP</span><span class="o">/</span><span class="m">1.1</span>
 
-<blockquote>
-<p>Sample JSON request</p>
-</blockquote>
-<pre class="highlight json"><code><span class="p">{</span><span class="err">'username':</span><span class="w"> </span><span class="err">'johndoe',</span><span class="w">
- </span><span class="err">'password':</span><span class="w"> </span><span class="err">'secretpassword',</span><span class="w">
- </span><span class="err">'description':</span><span class="w"> </span><span class="err">'annotator',</span><span class="w">
- </span><span class="err">'role':</span><span class="w"> </span><span class="err">'user'</span><span class="p">}</span><span class="w">
-</span></code></pre>
+&gt; Sample JSON request
+
+{'username': 'johndoe',
+ 'password': 'secretpassword',
+ 'description': 'annotator',
+ 'role': 'user'}
+
+</code></pre>
+<pre class="highlight python"><code><span class="n">user</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">createUser</span><span class="p">(</span><span class="s">'username'</span><span class="p">,</span> <span class="s">'password'</span><span class="p">,</span> <span class="n">role</span><span class="o">=</span><span class="s">'user'</span><span class="p">,</span>
+                         <span class="n">description</span><span class="o">=</span><span class="p">{</span><span class="s">'affiliation'</span><span class="p">:</span> <span class="s">'LIMSI/CNRS'</span><span class="p">,</span> 
+                                      <span class="s">'status'</span><span class="p">:</span> <span class="s">'PhD student'</span><span class="p">})</span>
+</code></pre>
+<pre class="highlight javascript"><code><span class="nx">client</span><span class="p">.</span><span class="nx">createUser</span><span class="p">(</span><span class="s1">'username'</span><span class="p">,</span> <span class="s1">'password'</span><span class="p">,</span> 
+                  <span class="p">{</span><span class="s1">'affiliation'</span><span class="p">:</span> <span class="s1">'LIMSI/CNRS'</span><span class="p">,</span> <span class="s1">'status'</span><span class="p">:</span> <span class="s1">'PhD student'</span><span class="p">}</span>
+                  <span class="s1">'user'</span><span class="p">,</span> <span class="nx">callback</span><span class="p">);</span>
+</code></pre>
 
 <blockquote>
 <p>Sample JSON response</p>
