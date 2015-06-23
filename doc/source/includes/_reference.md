@@ -127,6 +127,7 @@ Setting it to `true` will return the resource MongoDB `_id` instead of the compl
 
 POST /login
 
+#### DATA PARAMETERS
 Parameter        | Type      | Description
 ---------------- | --------- | -----------
 username         | String    | The user name  (required)
@@ -152,7 +153,7 @@ var server = 'http://example.com';
 Camomile.setURL(server);
 ```
 
-> Sample JSON response
+> JSON response upon success
 
 ```json
 {'success': 'Authentication succeeded.'}
@@ -170,7 +171,7 @@ POST /logout HTTP/1.1
 client.logout()
 ```
 
-> Sample JSON response
+> JSON response upon success
 
 ```json
 {'success': 'Logout succeeded.'}
@@ -218,7 +219,7 @@ PUT /me HTTP/1.1
 }
 ```
 
-> Sample JSON response
+> JSON response upon success
 
 ```json
 {
@@ -230,11 +231,11 @@ PUT /me HTTP/1.1
 
 ### create new user 
 
-POST /user 
-
 <aside class="notice">
 Restricted to 'admin' user.
 </aside>
+
+POST /user 
 
 #### DATA PARAMETERS
 Parameter        | Type      | Description
@@ -278,11 +279,16 @@ client.createUser('username', 'password',
 
 ### delete one user
 
-DELETE /user/`:id_user`
-
 <aside class="warning">
 Restricted to 'root' user.
 </aside>
+
+DELETE /user/`:id_user`
+
+#### QUERY PARAMETERS
+Parameter        | Type      | Description
+---------------- | --------- | -----------
+id_user          | String    | The user identifier (required)
 
 ```python
 client.deleteUser(id_user)
@@ -292,7 +298,7 @@ client.deleteUser(id_user)
 DELETE /user/:id_user HTTP/1.1
 ```
 
-> Sample JSON response
+> JSON response upon success
 
 ```json
 {'success': 'Successfully deleted.'}
@@ -306,6 +312,7 @@ GET /user
 Restricted to 'admin' user.
 </aside>
 
+#### DATA PARAMETERS
 Parameter        | Type      | Description
 ---------------- | --------- | -----------
 username         | String    | filter users by username (optional)
@@ -334,11 +341,16 @@ GET /user HTTP/1.1
 
 ### get one user
 
-GET /user/`:id_user`
-
 <aside class="notice">
 Restricted to 'admin' user.
 </aside>
+
+GET /user/`:id_user`
+
+#### QUERY PARAMETERS
+Parameter        | Type      | Description
+---------------- | --------- | -----------
+id_user          | String    | The user identifier (required)
 
 ```python
 user = client.getUser(id_user)
@@ -359,12 +371,18 @@ GET /user/:id_user HTTP/1.1
 
 ### update one user
 
-PUT /user/`:id_user`
-
 <aside class="notice">
 Restricted to 'admin' user.
 </aside>
 
+PUT /user/`:id_user`
+
+#### QUERY PARAMETERS
+Parameter        | Type      | Description
+---------------- | --------- | -----------
+id_user          | String    | The user identifier (required)
+
+#### DATA PARAMETERS
 Parameter        | Type      | Description
 ---------------- | --------- | -----------
 password         | String    | The password
@@ -395,12 +413,16 @@ user = client.updateUser(id_user,
 
 ### get one user's groups
 
-GET /user/`:id_user`/group
-
 <aside class="notice">
 Restricted to 'admin' user.
 </aside>
 
+GET /user/`:id_user`/group
+
+#### QUERY PARAMETERS
+Parameter        | Type      | Description
+---------------- | --------- | -----------
+id_user          | String    | The user identifier (required)
 
 ```http
 GET /user/:id_user/group HTTP/1.1
@@ -419,12 +441,13 @@ id_groups = client.getUserGroups(id_user)
 
 ### get all groups
 
-GET /group
-
 <aside class="notice">
 Restricted to 'admin' user.
 </aside>
 
+GET /group
+
+#### DATA PARAMETERS
 Parameter        | Type      | Description
 ---------------- | --------- | -----------
 name             | String    | filter groups by name (optional)
@@ -450,12 +473,16 @@ groups = client.getGroups()
 
 ### get one group
 
-GET /group/`:id_group`
-
 <aside class="notice">
 Restricted to 'admin' user.
 </aside>
 
+GET /group/`:id_group`
+
+#### QUERY PARAMETERS
+Parameter        | Type      | Description
+---------------- | --------- | -----------
+id_group         | String    | The group identifier (required)
 
 ```http
 GET /group/:id_group HTTP/1.1
@@ -477,16 +504,17 @@ group = client.getGroup(id_group)
 
 ### create new group
 
+<aside class="notice">
+Restricted to 'admin' user.
+</aside>
+
 POST /group
 
+#### DATA PARAMETERS
 Parameter        | Type      | Description
 ---------------- | --------- | -----------
 name             | String    | The group name (can't be updated)
 description      | free      | A description of the group
-
-<aside class="notice">
-Restricted to 'admin' user.
-</aside>
 
 ```http
 POST /group HTTP/1.1
@@ -511,15 +539,21 @@ group = client.createGroup(
 
 ### update one group
 
-PUT /group/`:id_group`
-
-Parameter        | Type      | Description
----------------- | --------- | -----------
-description      | free      | A description of the group
-
 <aside class="notice">
 Restricted to 'admin' user.
 </aside>
+
+PUT /group/`:id_group`
+
+#### QUERY PARAMETERS
+Parameter        | Type      | Description
+---------------- | --------- | -----------
+id_group         | String    | The group identifier (required)
+
+#### DATA PARAMETERS
+Parameter        | Type      | Description
+---------------- | --------- | -----------
+description      | free      | A description of the group
 
 
 ```http
@@ -545,11 +579,16 @@ group = client.updateGroup(
 
 ### delete one group
 
-DELETE /group/`:id_group`
-
 <aside class="warning">
 Restricted to 'root' user.
 </aside>
+
+DELETE /group/`:id_group`
+
+#### QUERY PARAMETERS
+Parameter        | Type      | Description
+---------------- | --------- | -----------
+id_group         | String    | The group identifier (required)
 
 ```http
 DELETE /group/:id_group HTTP/1.1
@@ -559,7 +598,7 @@ DELETE /group/:id_group HTTP/1.1
 client.deleteGroup(id_group)
 ```
 
-> Sample JSON response
+> JSON response upon success
 
 ```json
 {'success': 'Successfully deleted.'}
@@ -567,11 +606,18 @@ client.deleteGroup(id_group)
 
 ### add one user to one group
 
-PUT /group/`:id_group`/user/`:id_user`
-
 <aside class="notice">
 Restricted to 'admin' user.
 </aside>
+
+PUT /group/`:id_group`/user/`:id_user`
+
+#### QUERY PARAMETERS
+Parameter        | Type      | Description
+---------------- | --------- | -----------
+id_group         | String    | The group identifier (required)
+id_user          | String    | The user identifier (required)
+
 
 ```http
 PUT /group/:id_group/user/:id_user HTTP/1.1
@@ -592,11 +638,17 @@ client.addUserToGroup(id_user, id_group)
 
 ### remove one user from one group
 
-DELETE /group/`:id_group`/user/`:id_user`
-
 <aside class="notice">
 Restricted to 'admin' user.
 </aside>
+
+DELETE /group/`:id_group`/user/`:id_user`
+
+#### QUERY PARAMETERS
+Parameter        | Type      | Description
+---------------- | --------- | -----------
+id_group         | String    | The group identifier (required)
+id_user          | String    | The user identifier (required)
 
 ```python
 client.removeUserFromGroup(id_user, id_group)
@@ -640,6 +692,11 @@ GET /corpus HTTP/1.1
 
 GET /corpus/`:id_corpus`
 
+#### QUERY PARAMETERS
+Parameter        | Type      | Description
+---------------- | --------- | -----------
+id_corpus        | String    | The corpus identifier (required)
+
 ```python
 corpus = client.getCorpus(id_corpus)
 ```
@@ -658,17 +715,17 @@ GET /corpus/:id_corpus HTTP/1.1
 
 ### create new corpus
 
-POST /corpus
-
 <aside class="notice">
 Restricted to 'admin' user.
 </aside>
 
+POST /corpus
+
+#### DATA PARAMETERS
 Parameter        | Type      | Description
 ---------------- | --------- | -----------
 name             | String    | The corpus name (unique)
 description      | free      | A description of the corpus
-
 
 ```python
 corpus = client.createCorpus(
@@ -693,17 +750,20 @@ POST /corpus HTTP/1.1
 
 ### update one corpus
 
+<aside class="notice">Restricted to user with ADMIN privileges.</aside>
+
 PUT /corpus/`:id_corpus`
 
-<aside class="notice">
-Restricted to user with ADMIN privileges.
-</aside>
+#### QUERY PARAMETERS
+Parameter        | Type      | Description
+---------------- | --------- | -----------
+id_corpus        | String    | The corpus identifier (required)
 
+#### DATA PARAMETERS
 Parameter        | Type      | Description
 ---------------- | --------- | -----------
 name             | String    | The corpus name (unique)
 description      | free      | A description of the corpus
-
 
 ```python
 corpus = client.updateCorpus(
@@ -729,11 +789,19 @@ PUT /corpus/:id_corpus HTTP/1.1
 
 ### delete one corpus
 
-DELETE /corpus/`:id_corpus`
-
 <aside class="notice">
 Restricted to user with ADMIN privileges.
 </aside>
+
+<aside class="warning">This request also delete media, layers and annotations inside the corpus</aside>
+
+DELETE /corpus/`:id_corpus`
+
+#### QUERY PARAMETERS
+Parameter        | Type      | Description
+---------------- | --------- | -----------
+id_corpus        | String    | The corpus identifier (required)
+
 
 ```python
 client.deleteCorpus(id_corpus)
@@ -743,7 +811,7 @@ client.deleteCorpus(id_corpus)
 DELETE /corpus/:id_corpus HTTP/1.1
 ```
 
-> Sample JSON response
+> JSON response upon success
 
 ```json
 {'success': 'Successfully deleted.'}
@@ -751,11 +819,16 @@ DELETE /corpus/:id_corpus HTTP/1.1
 
 ### get one corpus' permissions
 
-GET /corpus/`:id_corpus`/permissions
-
 <aside class="notice">
 Restricted to user with ADMIN privileges.
 </aside>
+
+GET /corpus/`:id_corpus`/permissions
+
+#### QUERY PARAMETERS
+Parameter        | Type      | Description
+---------------- | --------- | -----------
+id_corpus        | String    | The corpus identifier (required)
 
 ```http
 GET /corpus/:id_corpus/permissions HTTP/1.1
@@ -782,12 +855,20 @@ permissions = client.getCorpusPermissions(id_corpus)
 
 ### give one user permissions to one corpus
 
-PUT /corpus/`:id_corpus`/user/`:id_user`
-
 <aside class="notice">
 Restricted to user with ADMIN privileges.
 </aside>
 
+PUT /corpus/`:id_corpus`/user/`:id_user`
+
+#### QUERY PARAMETERS
+Parameter        | Type      | Description
+---------------- | --------- | -----------
+id_corpus        | String    | The corpus identifier (required)
+id_user          | String    | The user identifier (required)
+
+
+#### DATA PARAMETERS
 Parameter        | Type      | Description
 ---------------- | --------- | -----------
 right            | 1, 2 or 3 | The corpus permissions (1:READ, 2:WRITE, 3:ADMIN)
@@ -811,11 +892,17 @@ PUT /corpus/:id_corpus/user/:id_user HTTP/1.1
 
 ### remove one user's permissions to one corpus
 
-DELETE /corpus/`:id_corpus`/user/`:id_user`
-
 <aside class="notice">
 Restricted to user with ADMIN privileges.
 </aside>
+
+DELETE /corpus/`:id_corpus`/user/`:id_user`
+
+#### QUERY PARAMETERS
+Parameter        | Type      | Description
+---------------- | --------- | -----------
+id_corpus        | String    | The corpus identifier (required)
+id_user          | String    | The user identifier (required)
 
 ```python
 client.removeCorpusPermissions(id_corpus, user=id_user)
@@ -834,12 +921,19 @@ DELETE /corpus/:id_corpus/user/:id_user HTTP/1.1
 
 ### give one group permissions to one corpus
 
-PUT /corpus/`:id_corpus`/group/`:id_group`
-
 <aside class="notice">
 Restricted to user with ADMIN privileges.
 </aside>
 
+PUT /corpus/`:id_corpus`/group/`:id_group`
+
+#### QUERY PARAMETERS
+Parameter        | Type      | Description
+---------------- | --------- | -----------
+id_corpus        | String    | The corpus identifier (required)
+id_group         | String    | The group identifier (required)
+
+#### DATA PARAMETERS
 Parameter        | Type      | Description
 ---------------- | --------- | -----------
 right            | 1, 2 or 3 | The corpus permissions (1:READ, 2:WRITE, 3:ADMIN)
@@ -863,11 +957,17 @@ PUT /corpus/:id_corpus/group/:id_group HTTP/1.1
 
 ### remove one group's permissions to one corpus
 
-DELETE /corpus/`:id_corpus`/group/`:id_group`
-
 <aside class="notice">
 Restricted to user with ADMIN privileges.
 </aside>
+
+DELETE /corpus/`:id_corpus`/group/`:id_group`
+
+#### QUERY PARAMETERS
+Parameter        | Type      | Description
+---------------- | --------- | -----------
+id_corpus        | String    | The corpus identifier (required)
+id_group         | String    | The group identifier (required)
 
 ```python
 client.removeCorpusPermissions(id_corpus, group=id_group)
@@ -888,12 +988,13 @@ DELETE /corpus/:id_corpus/group/:id_group HTTP/1.1
 
 ### get all media
 
-GET /medium 
-
 <aside class="warning">
 Restricted to 'root' user.
 </aside>
 
+GET /medium 
+
+#### DATA PARAMETERS
 Parameter        | Type      | Description
 ---------------- | --------- | -----------
 name             | String    | filter media by name
@@ -918,6 +1019,11 @@ GET /medium HTTP/1.1
 
 GET /medium/:id_medium`
 
+#### QUERY PARAMETERS
+Parameter        | Type      | Description
+---------------- | --------- | -----------
+id_medium        | String    | The medium identifier (required)
+
 ```python
 client.getMedium(id_medium)
 ```
@@ -940,6 +1046,12 @@ GET /medium/:id_medium HTTP/1.1
 
 GET /corpus/`:id_corpus`/medium
 
+#### QUERY PARAMETERS
+Parameter        | Type      | Description
+---------------- | --------- | -----------
+id_corpus        | String    | The corpus identifier (required)
+
+#### DATA PARAMETERS
 Parameter        | Type      | Description
 ---------------- | --------- | -----------
 name             | String    | filter media by name
@@ -966,6 +1078,12 @@ GET /corpus/:id_corpus/medium HTTP/1.1
 
 POST /corpus/:id_corpus/medium
 
+#### QUERY PARAMETERS
+Parameter        | Type      | Description
+---------------- | --------- | -----------
+id_corpus        | String    | The corpus identifier (required)
+
+#### DATA PARAMETERS
 Parameter        | Type      | Description
 ---------------- | --------- | -----------
 name             | String    | The medium name (unique)
@@ -999,6 +1117,12 @@ POST /corpus/:id_corpus/medium HTTP/1.1
 
 PUT /medium/:id_medium
 
+#### QUERY PARAMETERS
+Parameter        | Type      | Description
+---------------- | --------- | -----------
+id_medium        | String    | The medium identifier (required)
+
+#### DATA PARAMETERS
 Parameter        | Type      | Description
 ---------------- | --------- | -----------
 name             | String    | The medium name (unique)
@@ -1029,6 +1153,11 @@ PUT /medium/:id_medium HTTP/1.1
 
 DELETE /medium/:id_medium
 
+#### QUERY PARAMETERS
+Parameter        | Type      | Description
+---------------- | --------- | -----------
+id_medium        | String    | The medium identifier (required)
+
 ```python
 client.deleteMedium(id_medium)
 ```
@@ -1037,7 +1166,7 @@ client.deleteMedium(id_medium)
 DELETE /medium/:id_medium HTTP/1.1
 ```
 
-> Sample JSON response
+> JSON response upon success
 
 ```json
 {'success': 'Successfully deleted.'}
@@ -1047,6 +1176,11 @@ DELETE /medium/:id_medium HTTP/1.1
 
 GET /medium/:id_medium/video
 
+#### QUERY PARAMETERS
+Parameter        | Type      | Description
+---------------- | --------- | -----------
+id_medium        | String    | The medium identifier (required)
+
 ```python
 client.streamMedium(id_medium)
 ```
@@ -1055,47 +1189,38 @@ client.streamMedium(id_medium)
 GET /medium/:id_medium/video HTTP/1.1
 ```
 
-### stream one medium in WebM
+### stream one medium in WebM, MP4 or OGV
 
 GET /medium/:id_medium/webm
+GET /medium/:id_medium/mp4
+GET /medium/:id_medium/ogv
+
+#### QUERY PARAMETERS
+Parameter        | Type      | Description
+---------------- | --------- | -----------
+id_medium        | String    | The medium identifier (required)
 
 ```python
 client.streamMedium(id_medium, format='webm')
-```
-
-```http
-GET /medium/:id_medium/webm HTTP/1.1
-```
-
-### stream one medium in MP4
-
-GET /medium/:id_medium/mp4
-
-```python
 client.streamMedium(id_medium, format='mp4')
-```
-
-```http
-GET /medium/:id_medium/mp4 HTTP/1.1
-```
-
-### stream one medium in OGV
-
-GET /medium/:id_medium/ogv
-
-```python
 client.streamMedium(id_medium, format='ogv')
 ```
 
 ```http
+GET /medium/:id_medium/webm HTTP/1.1
+GET /medium/:id_medium/mp4 HTTP/1.1
 GET /medium/:id_medium/ogv HTTP/1.1
 ```
 
-## Layers
+ ## Layers
 
 ### get all layers
 
 GET /layer
+
+<aside class="warning">
+Restricted to 'root' user.
+</aside>
 
 ```http
 GET /layer HTTP/1.1
