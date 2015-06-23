@@ -374,7 +374,7 @@ Setting it to <code class="prettyprint">true</code> will return the resource Mon
 </tbody></table>
 <pre class="highlight http"><code><span class="nf">POST</span> <span class="nn">/login</span> <span class="k">HTTP</span><span class="o">/</span><span class="m">1.1</span>
 
-{'username': 'johndoe', 'password': 'yourpwd'}
+{'username': 'johndoe', 'password': 'secretpassword'}
 
 </code></pre>
 <pre class="highlight python"><code><span class="kn">from</span> <span class="nn">camomile</span> <span class="kn">import</span> <span class="n">Camomile</span> 
@@ -427,7 +427,7 @@ Setting it to <code class="prettyprint">true</code> will return the resource Mon
 <h3 id="update-password">update password</h3>
 
 <p>PUT /me</p>
-<pre class="highlight python"><code><span class="n">client</span><span class="o">.</span><span class="n">update_password</span><span class="p">(</span><span class="s">"new_password"</span><span class="p">)</span>
+<pre class="highlight python"><code><span class="n">client</span><span class="o">.</span><span class="n">update_password</span><span class="p">(</span><span class="s">'new_password'</span><span class="p">)</span>
 </code></pre>
 <pre class="highlight javascript"><code><span class="nx">client</span><span class="p">.</span><span class="nx">update_password</span><span class="p">(</span><span class="s2">"new_password"</span><span class="p">,</span> <span class="nx">callback</span><span class="p">);</span>
 </code></pre>
@@ -487,8 +487,6 @@ Restricted to &lsquo;admin&rsquo; user.
 </tr>
 </tbody></table>
 <pre class="highlight http"><code><span class="nf">POST</span> <span class="nn">/user</span> <span class="k">HTTP</span><span class="o">/</span><span class="m">1.1</span>
-
-&gt; Sample JSON request
 
 {'username': 'johndoe',
  'password': 'secretpassword',
@@ -608,9 +606,19 @@ Restricted to 'admin&rsquo; user.
 </tr>
 </thead><tbody>
 <tr>
+<td>password</td>
+<td>String</td>
+<td>The password</td>
+</tr>
+<tr>
 <td>description</td>
 <td>free</td>
 <td>A description of the user</td>
+</tr>
+<tr>
+<td>role</td>
+<td>String</td>
+<td>The user role (&ldquo;admin&rdquo; or &ldquo;user&rdquo;)</td>
 </tr>
 </tbody></table>
 <pre class="highlight http"><code><span class="nf">PUT</span> <span class="nn">/user/:id_user</span> <span class="k">HTTP</span><span class="o">/</span><span class="m">1.1</span>
@@ -711,22 +719,37 @@ Restricted to 'admin&rsquo; user.
 <h3 id="create-new-group">create new group</h3>
 
 <p>POST /group</p>
+
+<table><thead>
+<tr>
+<th>Parameter</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead><tbody>
+<tr>
+<td>name</td>
+<td>String</td>
+<td>The group name (can&rsquo;t be updated)</td>
+</tr>
+<tr>
+<td>description</td>
+<td>free</td>
+<td>A description of the group</td>
+</tr>
+</tbody></table>
+
+<aside class="notice">
+Restricted to 'admin&rsquo; user.
+</aside>
 <pre class="highlight http"><code><span class="nf">POST</span> <span class="nn">/group</span> <span class="k">HTTP</span><span class="o">/</span><span class="m">1.1</span>
+
+{'name': 'guests'}
 </code></pre>
 <pre class="highlight python"><code><span class="n">group</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">createGroup</span><span class="p">(</span>
   <span class="s">'limsi'</span><span class="p">,</span> 
   <span class="n">description</span><span class="o">=</span><span class="p">{</span><span class="s">'affiliation'</span><span class="p">:</span> <span class="s">'LIMSI'</span><span class="p">})</span>
 </code></pre>
-
-<aside class="notice">
-Restricted to 'admin&rsquo; user.
-</aside>
-
-<blockquote>
-<p>Sample JSON request</p>
-</blockquote>
-<pre class="highlight json"><code><span class="p">{</span><span class="err">'name':</span><span class="w"> </span><span class="err">'guests'</span><span class="p">}</span><span class="w">
-</span></code></pre>
 
 <blockquote>
 <p>Sample JSON response</p>
@@ -741,10 +764,26 @@ Restricted to 'admin&rsquo; user.
 
 <p>PUT /group/<code class="prettyprint">:id_group</code></p>
 
+<table><thead>
+<tr>
+<th>Parameter</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead><tbody>
+<tr>
+<td>description</td>
+<td>free</td>
+<td>A description of the group</td>
+</tr>
+</tbody></table>
+
 <aside class="notice">
 Restricted to 'admin&rsquo; user.
 </aside>
 <pre class="highlight http"><code><span class="nf">PUT</span> <span class="nn">/group/:id_group</span> <span class="k">HTTP</span><span class="o">/</span><span class="m">1.1</span>
+
+{ 'description': 'open trial'}
 </code></pre>
 <pre class="highlight python"><code><span class="n">group</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">updateGroup</span><span class="p">(</span>
   <span class="n">id_group</span><span class="p">,</span> 
@@ -752,31 +791,25 @@ Restricted to 'admin&rsquo; user.
 </code></pre>
 
 <blockquote>
-<p>Sample JSON request</p>
-</blockquote>
-<pre class="highlight json"><code><span class="p">{</span><span class="w"> </span><span class="err">'description':</span><span class="w"> </span><span class="err">'open</span><span class="w"> </span><span class="err">trial'</span><span class="p">}</span><span class="w">
-</span></code></pre>
-
-<blockquote>
 <p>Sample JSON response</p>
 </blockquote>
 <pre class="highlight json"><code><span class="p">{</span><span class="err">'_id':</span><span class="w"> </span><span class="err">'55881f8301e0ef01006e979e',</span><span class="w">
  </span><span class="err">'description':</span><span class="w"> </span><span class="err">'open</span><span class="w"> </span><span class="err">trial',</span><span class="w">
- </span><span class="err">'name':</span><span class="w"> </span><span class="err">u'guests',</span><span class="w">
+ </span><span class="err">'name':</span><span class="w"> </span><span class="err">'guests',</span><span class="w">
  </span><span class="err">'users':</span><span class="w"> </span><span class="err">[]</span><span class="p">}</span><span class="w">
 </span></code></pre>
 
 <h3 id="delete-one-group">delete one group</h3>
 
 <p>DELETE /group/<code class="prettyprint">:id_group</code></p>
-<pre class="highlight http"><code><span class="nf">DELETE</span> <span class="nn">/group/:id_group</span> <span class="k">HTTP</span><span class="o">/</span><span class="m">1.1</span>
-</code></pre>
-<pre class="highlight python"><code><span class="n">client</span><span class="o">.</span><span class="n">deleteGroup</span><span class="p">(</span><span class="n">id_group</span><span class="p">)</span>
-</code></pre>
 
 <aside class="warning">
 Restricted to 'root&rsquo; user.
 </aside>
+<pre class="highlight http"><code><span class="nf">DELETE</span> <span class="nn">/group/:id_group</span> <span class="k">HTTP</span><span class="o">/</span><span class="m">1.1</span>
+</code></pre>
+<pre class="highlight python"><code><span class="n">client</span><span class="o">.</span><span class="n">deleteGroup</span><span class="p">(</span><span class="n">id_group</span><span class="p">)</span>
+</code></pre>
 
 <blockquote>
 <p>Sample JSON response</p>
@@ -839,25 +872,26 @@ Restricted to 'admin&rsquo; user.
 <blockquote>
 <p>Sample JSON response</p>
 </blockquote>
-<pre class="highlight json"><code><span class="p">{</span><span class="w">
+<pre class="highlight json"><code><span class="p">[{</span><span class="err">'_id':</span><span class="w"> </span><span class="err">'555daefff80f910100d741d6',</span><span class="w">
+  </span><span class="err">'description':</span><span class="w"> </span><span class="err">'Test</span><span class="w"> </span><span class="err">corpus',</span><span class="w">
+  </span><span class="err">'name':</span><span class="w"> </span><span class="err">'ctest'</span><span class="p">}</span><span class="err">```</span><span class="w">
 
-</span><span class="p">}</span><span class="w">
+</span><span class="err">###</span><span class="w"> </span><span class="err">get</span><span class="w"> </span><span class="err">one</span><span class="w"> </span><span class="err">corpus</span><span class="w">
+
+</span><span class="err">GET</span><span class="w"> </span><span class="err">/corpus/`:id_corpus`</span><span class="w">
+
+</span><span class="err">```python</span><span class="w">
+</span><span class="err">corpus</span><span class="w"> </span><span class="err">=</span><span class="w"> </span><span class="err">client.getCorpus(id_corpus)</span><span class="w">
 </span></code></pre>
-
-<h3 id="get-one-corpus">get one corpus</h3>
-
-<p>GET /corpus/<code class="prettyprint">:id_corpus</code></p>
-<pre class="highlight python"><code><span class="n">corpus</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">getCorpus</span><span class="p">(</span><span class="n">id_corpus</span><span class="p">)</span>
-</code></pre>
 <pre class="highlight http"><code><span class="nf">GET</span> <span class="nn">/corpus/:id_corpus</span> <span class="k">HTTP</span><span class="o">/</span><span class="m">1.1</span>
 </code></pre>
 
 <blockquote>
 <p>Sample JSON response</p>
 </blockquote>
-<pre class="highlight json"><code><span class="p">{</span><span class="w">
-
-</span><span class="p">}</span><span class="w">
+<pre class="highlight json"><code><span class="p">{</span><span class="err">'_id':</span><span class="w"> </span><span class="err">'555daefff80f910100d741d6',</span><span class="w">
+  </span><span class="err">'description':</span><span class="w"> </span><span class="err">'Test</span><span class="w"> </span><span class="err">corpus',</span><span class="w">
+  </span><span class="err">'name':</span><span class="w"> </span><span class="err">'ctest'</span><span class="p">}</span><span class="w">
 </span></code></pre>
 
 <h3 id="create-new-corpus">create new corpus</h3>
@@ -867,19 +901,41 @@ Restricted to 'admin&rsquo; user.
 <aside class="notice">
 Restricted to 'admin&rsquo; user.
 </aside>
+
+<table><thead>
+<tr>
+<th>Parameter</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead><tbody>
+<tr>
+<td>name</td>
+<td>String</td>
+<td>The corpus name (unique)</td>
+</tr>
+<tr>
+<td>description</td>
+<td>free</td>
+<td>A description of the corpus</td>
+</tr>
+</tbody></table>
 <pre class="highlight python"><code><span class="n">corpus</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">createCorpus</span><span class="p">(</span>
   <span class="s">'unique name'</span><span class="p">,</span> 
   <span class="n">description</span><span class="o">=</span><span class="p">{</span><span class="s">'license'</span><span class="p">:</span> <span class="s">'Creative Commons'</span><span class="p">})</span>
 </code></pre>
 <pre class="highlight http"><code><span class="nf">POST</span> <span class="nn">/corpus</span> <span class="k">HTTP</span><span class="o">/</span><span class="m">1.1</span>
+
+{'name': 'unique name', 'description': {'license': 'Creative Commons'}}
+
 </code></pre>
 
 <blockquote>
 <p>Sample JSON response</p>
 </blockquote>
-<pre class="highlight json"><code><span class="p">{</span><span class="w">
-
-</span><span class="p">}</span><span class="w">
+<pre class="highlight json"><code><span class="p">{</span><span class="err">_id':</span><span class="w"> </span><span class="err">'555daefff80f910100d741d6',</span><span class="w">
+ </span><span class="err">'description':</span><span class="w"> </span><span class="err">{'license':</span><span class="w"> </span><span class="err">'Creative</span><span class="w"> </span><span class="err">Commons'</span><span class="p">}</span><span class="err">,</span><span class="w">
+ </span><span class="err">'name':</span><span class="w"> </span><span class="err">'unique</span><span class="w"> </span><span class="err">name'}</span><span class="w">
 </span></code></pre>
 
 <h3 id="update-one-corpus">update one corpus</h3>
@@ -889,20 +945,42 @@ Restricted to 'admin&rsquo; user.
 <aside class="notice">
 Restricted to user with ADMIN privileges.
 </aside>
+
+<table><thead>
+<tr>
+<th>Parameter</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead><tbody>
+<tr>
+<td>name</td>
+<td>String</td>
+<td>The corpus name (unique)</td>
+</tr>
+<tr>
+<td>description</td>
+<td>free</td>
+<td>A description of the corpus</td>
+</tr>
+</tbody></table>
 <pre class="highlight python"><code><span class="n">corpus</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">updateCorpus</span><span class="p">(</span>
   <span class="n">id_corpus</span><span class="p">,</span> 
   <span class="n">name</span><span class="o">=</span><span class="s">'new name'</span><span class="p">,</span> 
   <span class="n">description</span><span class="o">=</span><span class="p">{</span><span class="s">'license'</span><span class="p">:</span> <span class="s">'MIT'</span><span class="p">})</span>
 </code></pre>
 <pre class="highlight http"><code><span class="nf">PUT</span> <span class="nn">/corpus/:id_corpus</span> <span class="k">HTTP</span><span class="o">/</span><span class="m">1.1</span>
+
+{'description': {'license': 'MIT'},
+ 'name': 'new name'}
 </code></pre>
 
 <blockquote>
 <p>Sample JSON response</p>
 </blockquote>
-<pre class="highlight json"><code><span class="p">{</span><span class="w">
-
-</span><span class="p">}</span><span class="w">
+<pre class="highlight json"><code><span class="p">{</span><span class="err">_id':</span><span class="w"> </span><span class="err">'555daefff80f910100d741d6',</span><span class="w">
+ </span><span class="err">'description':</span><span class="w"> </span><span class="err">{'license':</span><span class="w"> </span><span class="err">'MIT'</span><span class="p">}</span><span class="err">,</span><span class="w">
+ </span><span class="err">'name':</span><span class="w"> </span><span class="err">'new</span><span class="w"> </span><span class="err">name'}</span><span class="w">
 </span></code></pre>
 
 <h3 id="delete-one-corpus">delete one corpus</h3>
@@ -920,9 +998,7 @@ Restricted to user with ADMIN privileges.
 <blockquote>
 <p>Sample JSON response</p>
 </blockquote>
-<pre class="highlight json"><code><span class="p">{</span><span class="w">
-
-</span><span class="p">}</span><span class="w">
+<pre class="highlight json"><code><span class="p">{</span><span class="err">'success':</span><span class="w"> </span><span class="err">'Successfully</span><span class="w"> </span><span class="err">deleted.'</span><span class="p">}</span><span class="w">
 </span></code></pre>
 
 <h3 id="get-one-corpus-39-permissions">get one corpus&rsquo; permissions</h3>
@@ -958,17 +1034,32 @@ Restricted to user with ADMIN privileges.
 <aside class="notice">
 Restricted to user with ADMIN privileges.
 </aside>
-<pre class="highlight python"><code><span class="n">client</span><span class="o">.</span><span class="n">setCorpusPermissions</span><span class="p">(</span><span class="n">id_corpus</span><span class="p">,</span> <span class="n">ADMIN</span><span class="p">,</span> <span class="n">user</span><span class="o">=</span><span class="n">id_user</span><span class="p">)</span>
+
+<table><thead>
+<tr>
+<th>Parameter</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead><tbody>
+<tr>
+<td>right</td>
+<td>1</td>
+<td>2</td>
+</tr>
+</tbody></table>
+<pre class="highlight python"><code><span class="n">client</span><span class="o">.</span><span class="n">setCorpusPermissions</span><span class="p">(</span><span class="n">id_corpus</span><span class="p">,</span> <span class="n">client</span><span class="o">.</span><span class="n">ADMIN</span><span class="p">,</span> <span class="n">user</span><span class="o">=</span><span class="n">id_user</span><span class="p">)</span>
 </code></pre>
 <pre class="highlight http"><code><span class="nf">PUT</span> <span class="nn">/corpus/:id_corpus/user/:id_user</span> <span class="k">HTTP</span><span class="o">/</span><span class="m">1.1</span>
+<span class="na">{'right'</span><span class="p">:</span> <span class="s">3}</span>
 </code></pre>
 
 <blockquote>
 <p>Sample JSON response</p>
 </blockquote>
-<pre class="highlight json"><code><span class="p">{</span><span class="w">
-
-</span><span class="p">}</span><span class="w">
+<pre class="highlight json"><code><span class="p">{</span><span class="err">'users':</span><span class="w"> </span><span class="err">{'555299eff80f910100d741d1':</span><span class="w"> </span><span class="err">3,</span><span class="w">
+  </span><span class="err">'5552bf5cf80f910100d741d2':</span><span class="w"> </span><span class="err">2,</span><span class="w">
+  </span><span class="err">'55881d6001e0ef01006e979d':</span><span class="w"> </span><span class="err">3</span><span class="p">}</span><span class="err">}</span><span class="w">
 </span></code></pre>
 
 <h3 id="remove-one-user-39-s-permissions-to-one-corpus">remove one user&rsquo;s permissions to one corpus</h3>
@@ -986,9 +1077,8 @@ Restricted to user with ADMIN privileges.
 <blockquote>
 <p>Sample JSON response</p>
 </blockquote>
-<pre class="highlight json"><code><span class="p">{</span><span class="w">
-
-</span><span class="p">}</span><span class="w">
+<pre class="highlight json"><code><span class="p">{</span><span class="err">'users':</span><span class="w"> </span><span class="err">{'555299eff80f910100d741d1':</span><span class="w"> </span><span class="err">3,</span><span class="w">
+  </span><span class="err">'5552bf5cf80f910100d741d2':</span><span class="w"> </span><span class="err">2</span><span class="p">}</span><span class="err">}</span><span class="w">
 </span></code></pre>
 
 <h3 id="give-one-group-permissions-to-one-corpus">give one group permissions to one corpus</h3>
@@ -998,6 +1088,20 @@ Restricted to user with ADMIN privileges.
 <aside class="notice">
 Restricted to user with ADMIN privileges.
 </aside>
+
+<table><thead>
+<tr>
+<th>Parameter</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead><tbody>
+<tr>
+<td>right</td>
+<td>1</td>
+<td>2</td>
+</tr>
+</tbody></table>
 <pre class="highlight python"><code><span class="n">client</span><span class="o">.</span><span class="n">setCorpusPermissions</span><span class="p">(</span><span class="n">id_corpus</span><span class="p">,</span> <span class="n">ADMIN</span><span class="p">,</span> <span class="n">group</span><span class="o">=</span><span class="n">id_group</span><span class="p">)</span>
 </code></pre>
 <pre class="highlight http"><code><span class="nf">PUT</span> <span class="nn">/corpus/:id_corpus/group/:id_group</span> <span class="k">HTTP</span><span class="o">/</span><span class="m">1.1</span>
@@ -1006,9 +1110,9 @@ Restricted to user with ADMIN privileges.
 <blockquote>
 <p>Sample JSON response</p>
 </blockquote>
-<pre class="highlight json"><code><span class="p">{</span><span class="w">
-
-</span><span class="p">}</span><span class="w">
+<pre class="highlight json"><code><span class="p">{</span><span class="err">'groups':</span><span class="w"> </span><span class="err">{'55881d1601e0ef01006e979c':</span><span class="w"> </span><span class="err">2</span><span class="p">}</span><span class="err">,</span><span class="w">
+ </span><span class="err">'users':</span><span class="w"> </span><span class="p">{</span><span class="err">'555299eff80f910100d741d1':</span><span class="w"> </span><span class="err">3,</span><span class="w"> 
+   </span><span class="err">'5552bf5cf80f910100d741d2':</span><span class="w"> </span><span class="err">2</span><span class="p">}</span><span class="err">}</span><span class="w">
 </span></code></pre>
 
 <h3 id="remove-one-group-39-s-permissions-to-one-corpus">remove one group&rsquo;s permissions to one corpus</h3>
@@ -1026,9 +1130,8 @@ Restricted to user with ADMIN privileges.
 <blockquote>
 <p>Sample JSON response</p>
 </blockquote>
-<pre class="highlight json"><code><span class="p">{</span><span class="w">
-
-</span><span class="p">}</span><span class="w">
+<pre class="highlight json"><code><span class="p">{</span><span class="err">'users':</span><span class="w"> </span><span class="err">{'555299eff80f910100d741d1':</span><span class="w"> </span><span class="err">3,</span><span class="w">
+  </span><span class="err">'5552bf5cf80f910100d741d2':</span><span class="w"> </span><span class="err">2</span><span class="p">}</span><span class="err">}</span><span class="w">
 </span></code></pre>
 
 <h2 id="media">Media</h2>
