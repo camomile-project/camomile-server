@@ -69,21 +69,21 @@ PUT /corpus/:id_corpus/user/:id_user HTTP/1.1
 ```
 
 ```python
-client.setCorpusRights(id_corpus, client.ADMIN, user=id_user)
-client.setCorpusRights(id_corpus, client.WRITE, yser=id_user)
-client.setCorpusRights(id_corpus, client.READ, group=id_group)
+client.setCorpusPermissions(id_corpus, client.ADMIN, user=id_user)
+client.setCorpusPermissions(id_corpus, client.WRITE, user=id_user)
+client.setCorpusPermissions(id_corpus, client.READ, group=id_group)
 ```
 
 ```javascript
-Camomile.setCorpusRightsForUser(
+Camomile.setCorpusPermissionsForUser(
   id_corpus, id_user, Camomile.ADMIN, callback);
-Camomile.setCorpusRightsForUser(
+Camomile.setCorpusPermissionsForUser(
   id_corpus, id_user, Camomile.WRITE, callback);
-Camomile.setCorpusRightsForGroup(
+Camomile.setCorpusPermissionsForGroup(
   id_corpus, id_group, Camomile.READ, callback);
 ```
 
-The Camomile platform also handles permission: a user may access only the resources for which they have enough permission.
+The Camomile platform handles permissions: a user may access only the resources for which they have enough permission.
 
 Three levels of permissions are supported: 
 
@@ -265,20 +265,30 @@ Restricted to 'admin' user.
 </aside>
 
 
+#### DATA PARAMETERS
+Parameter        | Type      | Description
+---------------- | --------- | -----------
+username         | String    | The user name  (required, unique and without space, can't be updated)
+password         | String    | The password  (required)
+description      | free      | A description of the user
+role             | String    | The user role ("admin" or "user")  (required)
+
 > Sample JSON request
 
 ```json
-{
-
-}
+{'username': 'johndoe',
+ 'password': 'secretpassword',
+ 'description': 'annotator',
+ 'role': 'user'}
 ```
 
 > Sample JSON response
 
 ```json
-{
-
-}
+{'_id': '558818da01e0ef01006e979b',
+ 'description': 'annotator',
+ 'role': 'user',
+ 'username': 'johndoe'}
 ```
 
 ### delete one user
@@ -295,20 +305,11 @@ DELETE /user/:id_user HTTP/1.1
 Restricted to 'root' user.
 </aside>
 
-> Sample JSON request
-
-```json
-{
-
-}
-```
 
 > Sample JSON response
 
 ```json
-{
-
-}
+{'success': 'Successfully deleted.'}
 ```
 
 ### get all users
@@ -329,17 +330,20 @@ Restricted to 'admin' user.
 > Sample JSON request
 
 ```json
-{
-
-}
+{}
 ```
 
 > Sample JSON response
 
 ```json
-{
-
-}
+[{'_id': '5552998df80f910100d741d0',
+  'description': '',
+  'role': 'admin',
+  'username': 'root'},
+ {'_id': '558818da01e0ef01006e979b',
+  'description': 'annotator',
+  'role': 'user',
+  'username': 'johndoe'}]
 ```
 
 ### get one user
@@ -357,20 +361,13 @@ Restricted to 'admin' user.
 </aside>
 
 
-> Sample JSON request
-
-```json
-{
-
-}
-```
-
 > Sample JSON response
 
 ```json
-{
-
-}
+{'_id': '558818da01e0ef01006e979b',
+'description': 'annotator',
+'role': 'user',
+'username': 'johndoe'}
 ```
 
 ### update one user
@@ -394,17 +391,16 @@ Restricted to 'admin' user.
 > Sample JSON request
 
 ```json
-{
-
-}
+{'description': 'expert annotator'}
 ```
 
 > Sample JSON response
 
 ```json
-{
-
-}
+{'_id': '558818da01e0ef01006e979b',
+'description': 'expert annotator',
+'role': 'user',
+'username': 'johndoe'}
 ```
 
 ### get one user's groups
@@ -457,17 +453,16 @@ Restricted to 'admin' user.
 > Sample JSON request
 
 ```json
-{
-
-}
+{'name': 'project'}
 ```
 
 > Sample JSON response
 
 ```json
-{
-
-}
+[{'_id': '55881d1601e0ef01006e979c',
+  'description': 'members of the project',
+  'name': 'project',
+  'users': ['558818da01e0ef01006e979b', '55881d6001e0ef01006e979d']}]
 ```
 
 ### get one group
@@ -485,20 +480,13 @@ Restricted to 'admin' user.
 </aside>
 
 
-> Sample JSON request
-
-```json
-{
-
-}
-```
-
 > Sample JSON response
 
 ```json
-{
-
-}
+{'_id': '55881d1601e0ef01006e979c',
+  'description': 'members of the project',
+  'name': 'project',
+  'users': ['558818da01e0ef01006e979b', '55881d6001e0ef01006e979d']}
 ```
 
 
@@ -522,17 +510,16 @@ Restricted to 'admin' user.
 > Sample JSON request
 
 ```json
-{
-
-}
+{'name': 'guests'}
 ```
 
 > Sample JSON response
 
 ```json
-{
-
-}
+{'_id': '55881f8301e0ef01006e979e',
+ 'description': '',
+ 'name': 'guests',
+ 'users': []}
 ```
 
 ### update one group
@@ -555,17 +542,16 @@ Restricted to 'admin' user.
 > Sample JSON request
 
 ```json
-{
-
-}
+{ 'description': 'open trial'}
 ```
 
 > Sample JSON response
 
 ```json
-{
-
-}
+{'_id': '55881f8301e0ef01006e979e',
+ 'description': 'open trial',
+ 'name': u'guests',
+ 'users': []}
 ```
 
 ### delete one group
@@ -582,20 +568,10 @@ client.deleteGroup(id_group)
 Restricted to 'root' user.
 </aside>
 
-> Sample JSON request
-
-```json
-{
-
-}
-```
-
 > Sample JSON response
 
 ```json
-{
-
-}
+{'success': 'Successfully deleted.'}
 ```
 
 ### add one user to one group
@@ -613,20 +589,13 @@ Restricted to 'admin' user.
 </aside>
 
 
-> Sample JSON request
-
-```json
-{
-
-}
-```
-
 > Sample JSON response
 
 ```json
-{
-
-}
+{'_id': '55881d1601e0ef01006e979c',
+  'description': 'members of the project',
+  'name': 'project',
+  'users': ['558818da01e0ef01006e979b', '55881d6001e0ef01006e979d']}
 ```
 
 ### remove one user from one group
@@ -643,20 +612,13 @@ Restricted to 'admin' user.
 DELETE /group/:id_group/user/:id_user HTTP/1.1
 ```
 
-> Sample JSON request
-
-```json
-{
-
-}
-```
-
 > Sample JSON response
 
 ```json
-{
-
-}
+{'_id': '55881d1601e0ef01006e979c',
+  'description': 'members of the project',
+  'name': 'project',
+  'users': ['558818da01e0ef01006e979b']}
 ```
 
 ## Corpora
@@ -809,14 +771,14 @@ DELETE /corpus/:id_corpus HTTP/1.1
 }
 ```
 
-### get one corpus' rights
+### get one corpus' permissions
 
 ```http
 GET /corpus/:id_corpus/permissions HTTP/1.1
 ```
 
 ```python
-rights = client.getCorpusRights(id_corpus)
+permissions = client.getCorpusPermissions(id_corpus)
 ```
 
 <aside class="notice">
@@ -843,10 +805,10 @@ Restricted to user with ADMIN privileges.
 ```
 
 
-### give one user rights to one corpus
+### give one user permissions to one corpus
 
 ```python
-client.setCorpusRights(id_corpus, ADMIN, user=id_user)
+client.setCorpusPermissions(id_corpus, ADMIN, user=id_user)
 ```
 
 <aside class="notice">
@@ -873,10 +835,10 @@ PUT /corpus/:id_corpus/user/:id_user HTTP/1.1
 }
 ```
 
-### remove one user's rights to one corpus
+### remove one user's permissions to one corpus
 
 ```python
-client.removeCorpusRights(id_corpus, user=id_user)
+client.removeCorpusPermissions(id_corpus, user=id_user)
 ```
 
 <aside class="notice">
@@ -903,10 +865,10 @@ DELETE /corpus/:id_corpus/user/:id_user HTTP/1.1
 }
 ```
 
-### give one group rights to one corpus
+### give one group permissions to one corpus
 
 ```python
-client.setCorpusRights(id_corpus, ADMIN, group=id_group)
+client.setCorpusPermissions(id_corpus, ADMIN, group=id_group)
 ```
 
 <aside class="notice">
@@ -933,10 +895,10 @@ PUT /corpus/:id_corpus/group/:id_group HTTP/1.1
 }
 ```
 
-### remove one group's rights to one corpus
+### remove one group's permissions to one corpus
 
 ```python
-client.removeCorpusRights(id_corpus, group=id_group)
+client.removeCorpusPermissions(id_corpus, group=id_group)
 ```
 
 <aside class="notice">
@@ -1319,7 +1281,7 @@ DELETE /layer/:id_layer HTTP/1.1
 }
 ```
 
-### get one layer's rights
+### get one layer's permissions
 
 ```http
 GET /layer/:id_layer/permissions HTTP/1.1
@@ -1341,7 +1303,7 @@ GET /layer/:id_layer/permissions HTTP/1.1
 }
 ```
 
-### give one user rights to one layer
+### give one user permissions to one layer
 
 ```http
 PUT /layer/:id_layer/user/:id_user HTTP/1.1
@@ -1363,7 +1325,7 @@ PUT /layer/:id_layer/user/:id_user HTTP/1.1
 }
 ```
 
-### remove one user's rights to one layer
+### remove one user's permissions to one layer
 
 ```http
 DELETE /layer/:id_layer/user/:id_user HTTP/1.1
@@ -1385,7 +1347,7 @@ DELETE /layer/:id_layer/user/:id_user HTTP/1.1
 }
 ```
 
-### give one group rights to one layer
+### give one group permissions to one layer
 
 ```http
 PUT /layer/:id_layer/group/:id_group HTTP/1.1
@@ -1407,7 +1369,7 @@ PUT /layer/:id_layer/group/:id_group HTTP/1.1
 }
 ```
 
-### remove on group's rights to one layer
+### remove on group's permissions to one layer
 
 ```http
 DELETE /layer/:id_layer/group/:id_group HTTP/1.1
