@@ -280,6 +280,12 @@ client.createUser('username', 'password',
 
 ### delete one user
 
+DELETE /user/:id_user
+
+<aside class="warning">
+Restricted to 'root' user.
+</aside>
+
 ```python
 client.deleteUser(id_user)
 ```
@@ -287,11 +293,6 @@ client.deleteUser(id_user)
 ```http
 DELETE /user/:id_user HTTP/1.1
 ```
-
-<aside class="warning">
-Restricted to 'root' user.
-</aside>
-
 
 > Sample JSON response
 
@@ -301,6 +302,16 @@ Restricted to 'root' user.
 
 ### get all users
 
+GET /user
+
+<aside class="notice">
+Restricted to 'admin' user.
+</aside>
+
+Parameter        | Type      | Description
+---------------- | --------- | -----------
+username         | String    | Restrict list to username (optional)
+
 ```python
 users = client.getUsers()
 ```
@@ -309,16 +320,6 @@ users = client.getUsers()
 GET /user HTTP/1.1
 ```
 
-<aside class="notice">
-Restricted to 'admin' user.
-</aside>
-
-
-> Sample JSON request
-
-```json
-{}
-```
 
 > Sample JSON response
 
@@ -335,6 +336,12 @@ Restricted to 'admin' user.
 
 ### get one user
 
+GET /user/:id_user
+
+<aside class="notice">
+Restricted to 'admin' user.
+</aside>
+
 ```python
 user = client.getUser(id_user)
 ```
@@ -342,11 +349,6 @@ user = client.getUser(id_user)
 ```http
 GET /user/:id_user HTTP/1.1
 ```
-
-<aside class="notice">
-Restricted to 'admin' user.
-</aside>
-
 
 > Sample JSON response
 
@@ -359,8 +361,16 @@ Restricted to 'admin' user.
 
 ### update one user
 
+PUT /user/:id_user
+
+<aside class="notice">
+Restricted to 'admin' user.
+</aside>
+
 ```http
 PUT /user/:id_user HTTP/1.1
+
+{'description': 'expert annotator'}
 ```
 
 ```python
@@ -368,17 +378,6 @@ user = client.updateUser(id_user,
                          password='password',
                          description={'number': 42},
                          role='admin')
-```
-
-<aside class="notice">
-Restricted to 'admin' user.
-</aside>
-
-
-> Sample JSON request
-
-```json
-{'description': 'expert annotator'}
 ```
 
 > Sample JSON response
@@ -391,6 +390,8 @@ Restricted to 'admin' user.
 ```
 
 ### get one user's groups
+
+GET /user/`:id_user`/group
 
 ```http
 GET /user/:id_user/group HTTP/1.1
