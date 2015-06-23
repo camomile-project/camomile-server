@@ -27,6 +27,7 @@ var async = require('async');
 var _ = require('./utils');
 
 var Medium = require('../models/Medium');
+var Annotation = require('../models/Annotation');
 
 // create medium(a)
 exports.create = function (req, res) {
