@@ -280,7 +280,7 @@ client.createUser('username', 'password',
 
 ### delete one user
 
-DELETE /user/:id_user
+DELETE /user/`:id_user`
 
 <aside class="warning">
 Restricted to 'root' user.
@@ -336,7 +336,7 @@ GET /user HTTP/1.1
 
 ### get one user
 
-GET /user/:id_user
+GET /user/`:id_user`
 
 <aside class="notice">
 Restricted to 'admin' user.
@@ -361,11 +361,15 @@ GET /user/:id_user HTTP/1.1
 
 ### update one user
 
-PUT /user/:id_user
+PUT /user/`:id_user`
 
 <aside class="notice">
 Restricted to 'admin' user.
 </aside>
+
+Parameter        | Type      | Description
+---------------- | --------- | -----------
+description      | free      | A description of the user
 
 ```http
 PUT /user/:id_user HTTP/1.1
@@ -393,6 +397,11 @@ user = client.updateUser(id_user,
 
 GET /user/`:id_user`/group
 
+<aside class="notice">
+Restricted to 'admin' user.
+</aside>
+
+
 ```http
 GET /user/:id_user/group HTTP/1.1
 ```
@@ -401,47 +410,34 @@ GET /user/:id_user/group HTTP/1.1
 id_groups = client.getUserGroups(id_user)
 ```
 
-<aside class="notice">
-Restricted to 'admin' user.
-</aside>
-
-
-> Sample JSON request
-
-```json
-{
-
-}
-```
 
 > Sample JSON response
 
 ```json
-{
-
-}
+['55881d1601e0ef01006e979c']
 ```
 
 
 ### get all groups
 
-
-```http
-GET /group HTTP/1.1
-```
-
-```python
-groups = client.getGroups()
-```
+GET /group
 
 <aside class="notice">
 Restricted to 'admin' user.
 </aside>
 
-> Sample JSON request
+Parameter        | Type      | Description
+---------------- | --------- | -----------
+name             | String    | Restrict list to group name
 
-```json
+```http
+GET /group HTTP/1.1
+
 {'name': 'project'}
+```
+
+```python
+groups = client.getGroups()
 ```
 
 > Sample JSON response
@@ -455,6 +451,13 @@ Restricted to 'admin' user.
 
 ### get one group
 
+GET /group/`:id_group`
+
+<aside class="notice">
+Restricted to 'admin' user.
+</aside>
+
+
 ```http
 GET /group/:id_group HTTP/1.1
 ```
@@ -462,10 +465,6 @@ GET /group/:id_group HTTP/1.1
 ```python
 group = client.getGroup(id_group)
 ```
-
-<aside class="notice">
-Restricted to 'admin' user.
-</aside>
 
 
 > Sample JSON response
@@ -479,6 +478,8 @@ Restricted to 'admin' user.
 
 
 ### create new group
+
+POST /group
 
 ```http
 POST /group HTTP/1.1
@@ -512,6 +513,13 @@ Restricted to 'admin' user.
 
 ### update one group
 
+PUT /group/`:id_group`
+
+<aside class="notice">
+Restricted to 'admin' user.
+</aside>
+
+
 ```http
 PUT /group/:id_group HTTP/1.1
 ```
@@ -521,10 +529,6 @@ group = client.updateGroup(
   id_group, 
   description={'affiliation': 'LIMSI/CNRS'})
 ```
-
-<aside class="notice">
-Restricted to 'admin' user.
-</aside>
 
 
 > Sample JSON request
@@ -543,6 +547,8 @@ Restricted to 'admin' user.
 ```
 
 ### delete one group
+
+DELETE /group/`:id_group`
 
 ```http
 DELETE /group/:id_group HTTP/1.1
@@ -564,6 +570,12 @@ Restricted to 'root' user.
 
 ### add one user to one group
 
+PUT /group/`:id_group`/user/`:id_user`
+
+<aside class="notice">
+Restricted to 'admin' user.
+</aside>
+
 ```http
 PUT /group/:id_group/user/:id_user HTTP/1.1
 ```
@@ -571,11 +583,6 @@ PUT /group/:id_group/user/:id_user HTTP/1.1
 ```python
 client.addUserToGroup(id_user, id_group)
 ```
-
-<aside class="notice">
-Restricted to 'admin' user.
-</aside>
-
 
 > Sample JSON response
 
@@ -588,13 +595,15 @@ Restricted to 'admin' user.
 
 ### remove one user from one group
 
-```python
-client.removeUserFromGroup(id_user, id_group)
-```
+DELETE /group/`:id_group`/user/`:id_user`
 
 <aside class="notice">
 Restricted to 'admin' user.
 </aside>
+
+```python
+client.removeUserFromGroup(id_user, id_group)
+```
 
 ```http
 DELETE /group/:id_group/user/:id_user HTTP/1.1
@@ -613,20 +622,14 @@ DELETE /group/:id_group/user/:id_user HTTP/1.1
 
 ### get all READable corpora
 
+GET /corpus
+
 ```python
 corpora = client.getCorpora()
 ```
 
 ```http
 GET /corpus HTTP/1.1
-```
-
-> Sample JSON request
-
-```json
-{
-
-}
 ```
 
 > Sample JSON response
@@ -639,20 +642,14 @@ GET /corpus HTTP/1.1
 
 ### get one corpus
 
+GET /corpus/`:id_corpus`
+
 ```python
 corpus = client.getCorpus(id_corpus)
 ```
 
 ```http
 GET /corpus/:id_corpus HTTP/1.1
-```
-
-> Sample JSON request
-
-```json
-{
-
-}
 ```
 
 > Sample JSON response
@@ -665,27 +662,21 @@ GET /corpus/:id_corpus HTTP/1.1
 
 ### create new corpus
 
+POST /corpus
+
+<aside class="notice">
+Restricted to 'admin' user.
+</aside>
+
 ```python
 corpus = client.createCorpus(
   'unique name', 
   description={'license': 'Creative Commons'})
 ```
 
-<aside class="notice">
-Restricted to 'admin' user.
-</aside>
-
 
 ```http
 POST /corpus HTTP/1.1
-```
-
-> Sample JSON request
-
-```json
-{
-
-}
 ```
 
 > Sample JSON response
@@ -698,6 +689,12 @@ POST /corpus HTTP/1.1
 
 ### update one corpus
 
+PUT /corpus/`:id_corpus`
+
+<aside class="notice">
+Restricted to user with ADMIN privileges.
+</aside>
+
 ```python
 corpus = client.updateCorpus(
   id_corpus, 
@@ -705,20 +702,8 @@ corpus = client.updateCorpus(
   description={'license': 'MIT'})
 ```
 
-<aside class="notice">
-Restricted to user with ADMIN privileges.
-</aside>
-
 ```http
 PUT /corpus/:id_corpus HTTP/1.1
-```
-
-> Sample JSON request
-
-```json
-{
-
-}
 ```
 
 > Sample JSON response
@@ -731,24 +716,18 @@ PUT /corpus/:id_corpus HTTP/1.1
 
 ### delete one corpus
 
-```python
-client.deleteCorpus(id_corpus)
-```
+DELETE /corpus/:id_corpus
 
 <aside class="notice">
 Restricted to user with ADMIN privileges.
 </aside>
 
-```http
-DELETE /corpus/:id_corpus HTTP/1.1
+```python
+client.deleteCorpus(id_corpus)
 ```
 
-> Sample JSON request
-
-```json
-{
-
-}
+```http
+DELETE /corpus/:id_corpus HTTP/1.1
 ```
 
 > Sample JSON response
@@ -761,21 +740,18 @@ DELETE /corpus/:id_corpus HTTP/1.1
 
 ### get one corpus' permissions
 
+GET /corpus/:id_corpus/permissions
+
+<aside class="notice">
+Restricted to user with ADMIN privileges.
+</aside>
+
 ```http
 GET /corpus/:id_corpus/permissions HTTP/1.1
 ```
 
 ```python
 permissions = client.getCorpusPermissions(id_corpus)
-```
-
-<aside class="notice">
-Restricted to user with ADMIN privileges.
-</aside>
-
-> Sample JSON request
-
-```json
 ```
 
 > Sample JSON response
@@ -795,24 +771,18 @@ Restricted to user with ADMIN privileges.
 
 ### give one user permissions to one corpus
 
-```python
-client.setCorpusPermissions(id_corpus, ADMIN, user=id_user)
-```
+PUT /corpus/`:id_corpus`/user/`:id_user`
 
 <aside class="notice">
 Restricted to user with ADMIN privileges.
 </aside>
 
-```http
-PUT /corpus/:id_corpus/user/:id_user HTTP/1.1
+```python
+client.setCorpusPermissions(id_corpus, ADMIN, user=id_user)
 ```
 
-> Sample JSON request
-
-```json
-{
-
-}
+```http
+PUT /corpus/:id_corpus/user/:id_user HTTP/1.1
 ```
 
 > Sample JSON response
@@ -825,24 +795,18 @@ PUT /corpus/:id_corpus/user/:id_user HTTP/1.1
 
 ### remove one user's permissions to one corpus
 
-```python
-client.removeCorpusPermissions(id_corpus, user=id_user)
-```
+DELETE /corpus/`:id_corpus`/user/`:id_user`
 
 <aside class="notice">
 Restricted to user with ADMIN privileges.
 </aside>
 
-```http
-DELETE /corpus/:id_corpus/user/:id_user HTTP/1.1
+```python
+client.removeCorpusPermissions(id_corpus, user=id_user)
 ```
 
-> Sample JSON request
-
-```json
-{
-
-}
+```http
+DELETE /corpus/:id_corpus/user/:id_user HTTP/1.1
 ```
 
 > Sample JSON response
@@ -855,24 +819,18 @@ DELETE /corpus/:id_corpus/user/:id_user HTTP/1.1
 
 ### give one group permissions to one corpus
 
-```python
-client.setCorpusPermissions(id_corpus, ADMIN, group=id_group)
-```
+PUT /corpus/`:id_corpus`/group/`:id_group`
 
 <aside class="notice">
 Restricted to user with ADMIN privileges.
 </aside>
 
-```http
-PUT /corpus/:id_corpus/group/:id_group HTTP/1.1
+```python
+client.setCorpusPermissions(id_corpus, ADMIN, group=id_group)
 ```
 
-> Sample JSON request
-
-```json
-{
-
-}
+```http
+PUT /corpus/:id_corpus/group/:id_group HTTP/1.1
 ```
 
 > Sample JSON response
@@ -885,24 +843,18 @@ PUT /corpus/:id_corpus/group/:id_group HTTP/1.1
 
 ### remove one group's permissions to one corpus
 
-```python
-client.removeCorpusPermissions(id_corpus, group=id_group)
-```
+DELETE /corpus/`:id_corpus`/group/`:id_group
 
 <aside class="notice">
 Restricted to user with ADMIN privileges.
 </aside>
 
-```http
-DELETE /corpus/:id_corpus/group/:id_group HTTP/1.1
+```python
+client.removeCorpusPermissions(id_corpus, group=id_group)
 ```
 
-> Sample JSON request
-
-```json
-{
-
-}
+```http
+DELETE /corpus/:id_corpus/group/:id_group HTTP/1.1
 ```
 
 > Sample JSON response
@@ -917,16 +869,10 @@ DELETE /corpus/:id_corpus/group/:id_group HTTP/1.1
 
 ### get all media
 
+GET /medium 
+
 ```http
 GET /medium HTTP/1.1
-```
-
-> Sample JSON request
-
-```json
-{
-
-}
 ```
 
 > Sample JSON response
@@ -939,16 +885,10 @@ GET /medium HTTP/1.1
 
 ### get one medium
 
+GET /medium/:id_medium`
+
 ```http
 GET /medium/:id_medium HTTP/1.1
-```
-
-> Sample JSON request
-
-```json
-{
-
-}
 ```
 
 > Sample JSON response
@@ -961,16 +901,10 @@ GET /medium/:id_medium HTTP/1.1
 
 ### get one corpus' media
 
+GET /corpus/`:id_corpus`/medium
+
 ```http
 GET /corpus/:id_corpus/medium HTTP/1.1
-```
-
-> Sample JSON request
-
-```json
-{
-
-}
 ```
 
 > Sample JSON response
@@ -983,16 +917,10 @@ GET /corpus/:id_corpus/medium HTTP/1.1
 
 ### create new medium(a) in one corpus
 
+POST /corpus/:id_corpus/medium
+
 ```http
 POST /corpus/:id_corpus/medium HTTP/1.1
-```
-
-> Sample JSON request
-
-```json
-{
-
-}
 ```
 
 > Sample JSON response
@@ -1005,16 +933,10 @@ POST /corpus/:id_corpus/medium HTTP/1.1
 
 ### update one medium
 
+PUT /medium/:id_medium
+
 ```http
 PUT /medium/:id_medium HTTP/1.1
-```
-
-> Sample JSON request
-
-```json
-{
-
-}
 ```
 
 > Sample JSON response
@@ -1027,16 +949,10 @@ PUT /medium/:id_medium HTTP/1.1
 
 ### delete one medium
 
+DELETE /medium/:id_medium
+
 ```http
 DELETE /medium/:id_medium HTTP/1.1
-```
-
-> Sample JSON request
-
-```json
-{
-
-}
 ```
 
 > Sample JSON response
@@ -1049,16 +965,10 @@ DELETE /medium/:id_medium HTTP/1.1
 
 ### stream one medium in default format
 
+GET /medium/:id_medium/video
+
 ```http
 GET /medium/:id_medium/video HTTP/1.1
-```
-
-> Sample JSON request
-
-```json
-{
-
-}
 ```
 
 > Sample JSON response
@@ -1071,16 +981,10 @@ GET /medium/:id_medium/video HTTP/1.1
 
 ### stream one medium in WebM
 
+GET /medium/:id_medium/webm
+
 ```http
 GET /medium/:id_medium/webm HTTP/1.1
-```
-
-> Sample JSON request
-
-```json
-{
-
-}
 ```
 
 > Sample JSON response
@@ -1093,16 +997,10 @@ GET /medium/:id_medium/webm HTTP/1.1
 
 ### stream one medium in MP4
 
+GET /medium/:id_medium/mp4
+
 ```http
 GET /medium/:id_medium/mp4 HTTP/1.1
-```
-
-> Sample JSON request
-
-```json
-{
-
-}
 ```
 
 > Sample JSON response
@@ -1115,16 +1013,10 @@ GET /medium/:id_medium/mp4 HTTP/1.1
 
 ### stream one medium in OGV
 
+GET /medium/:id_medium/ogv
+
 ```http
 GET /medium/:id_medium/ogv HTTP/1.1
-```
-
-> Sample JSON request
-
-```json
-{
-
-}
 ```
 
 > Sample JSON response
@@ -1139,16 +1031,10 @@ GET /medium/:id_medium/ogv HTTP/1.1
 
 ### get all layers
 
+GET /layer
+
 ```http
 GET /layer HTTP/1.1
-```
-
-> Sample JSON request
-
-```json
-{
-
-}
 ```
 
 > Sample JSON response
@@ -1161,16 +1047,10 @@ GET /layer HTTP/1.1
 
 ### get one layer
 
+GET /layer/:id_layer
+
 ```http
 GET /layer/:id_layer HTTP/1.1
-```
-
-> Sample JSON request
-
-```json
-{
-
-}
 ```
 
 > Sample JSON response
@@ -1183,16 +1063,10 @@ GET /layer/:id_layer HTTP/1.1
 
 ### get one corpus' layers
 
+GET /corpus/:id_corpus/layer
+
 ```http
 GET /corpus/:id_corpus/layer HTTP/1.1
-```
-
-> Sample JSON request
-
-```json
-{
-
-}
 ```
 
 > Sample JSON response
@@ -1205,16 +1079,10 @@ GET /corpus/:id_corpus/layer HTTP/1.1
 
 ### create new layer(s) in one corpus
 
+POST /corpus/:id_corpus/layer
+
 ```http
 POST /corpus/:id_corpus/layer HTTP/1.1
-```
-
-> Sample JSON request
-
-```json
-{
-
-}
 ```
 
 > Sample JSON response
@@ -1227,16 +1095,10 @@ POST /corpus/:id_corpus/layer HTTP/1.1
 
 ### update one layer
 
+PUT /layer/:id_layer
+
 ```http
 PUT /layer/:id_layer HTTP/1.1
-```
-
-> Sample JSON request
-
-```json
-{
-
-}
 ```
 
 > Sample JSON response
@@ -1249,16 +1111,10 @@ PUT /layer/:id_layer HTTP/1.1
 
 ### delete one layer
 
+DELETE /layer/:id_layer
+
 ```http
 DELETE /layer/:id_layer HTTP/1.1
-```
-
-> Sample JSON request
-
-```json
-{
-
-}
 ```
 
 > Sample JSON response
@@ -1271,16 +1127,10 @@ DELETE /layer/:id_layer HTTP/1.1
 
 ### get one layer's permissions
 
+GET /layer/:id_layer/permissions
+
 ```http
 GET /layer/:id_layer/permissions HTTP/1.1
-```
-
-> Sample JSON request
-
-```json
-{
-
-}
 ```
 
 > Sample JSON response
@@ -1293,16 +1143,10 @@ GET /layer/:id_layer/permissions HTTP/1.1
 
 ### give one user permissions to one layer
 
+PUT /layer/:id_layer/user/:id_user
+
 ```http
 PUT /layer/:id_layer/user/:id_user HTTP/1.1
-```
-
-> Sample JSON request
-
-```json
-{
-
-}
 ```
 
 > Sample JSON response
@@ -1315,16 +1159,10 @@ PUT /layer/:id_layer/user/:id_user HTTP/1.1
 
 ### remove one user's permissions to one layer
 
+DELETE /layer/:id_layer/user/:id_user
+
 ```http
 DELETE /layer/:id_layer/user/:id_user HTTP/1.1
-```
-
-> Sample JSON request
-
-```json
-{
-
-}
 ```
 
 > Sample JSON response
@@ -1337,16 +1175,10 @@ DELETE /layer/:id_layer/user/:id_user HTTP/1.1
 
 ### give one group permissions to one layer
 
+PUT /layer/:id_layer/group/:id_group 
+
 ```http
 PUT /layer/:id_layer/group/:id_group HTTP/1.1
-```
-
-> Sample JSON request
-
-```json
-{
-
-}
 ```
 
 > Sample JSON response
@@ -1359,16 +1191,10 @@ PUT /layer/:id_layer/group/:id_group HTTP/1.1
 
 ### remove on group's permissions to one layer
 
+DELETE /layer/:id_layer/group/:id_group
+
 ```http
 DELETE /layer/:id_layer/group/:id_group HTTP/1.1
-```
-
-> Sample JSON request
-
-```json
-{
-
-}
 ```
 
 > Sample JSON response
@@ -1383,16 +1209,10 @@ DELETE /layer/:id_layer/group/:id_group HTTP/1.1
 
 ### get all annotations
 
+GET /annotation
+
 ```http
 GET /annotation HTTP/1.1
-```
-
-> Sample JSON request
-
-```json
-{
-
-}
 ```
 
 > Sample JSON response
@@ -1405,16 +1225,10 @@ GET /annotation HTTP/1.1
 
 ### get one annotation
 
+GET /annotation/:id_annotation
+
 ```http
 GET /annotation/:id_annotation HTTP/1.1
-```
-
-> Sample JSON request
-
-```json
-{
-
-}
 ```
 
 > Sample JSON response
@@ -1427,16 +1241,10 @@ GET /annotation/:id_annotation HTTP/1.1
 
 ### get one layer's annotations
 
+GET /layer/:id_layer/annotation
+
 ```http
 GET /layer/:id_layer/annotation HTTP/1.1
-```
-
-> Sample JSON request
-
-```json
-{
-
-}
 ```
 
 > Sample JSON response
@@ -1449,16 +1257,10 @@ GET /layer/:id_layer/annotation HTTP/1.1
 
 ### create new annotation(s) in one layer
 
+POST /layer/:id_layer/annotation
+
 ```http
 POST /layer/:id_layer/annotation HTTP/1.1
-```
-
-> Sample JSON request
-
-```json
-{
-
-}
 ```
 
 > Sample JSON response
@@ -1471,16 +1273,10 @@ POST /layer/:id_layer/annotation HTTP/1.1
 
 ### update one annotation
 
+PUT /annotation/:id_annotation
+
 ```http
 PUT /annotation/:id_annotation HTTP/1.1
-```
-
-> Sample JSON request
-
-```json
-{
-
-}
 ```
 
 > Sample JSON response
@@ -1493,16 +1289,10 @@ PUT /annotation/:id_annotation HTTP/1.1
 
 ### delete one annotation
 
+DELETE /annotation/:id_annotation
+
 ```http
 DELETE /annotation/:id_annotation HTTP/1.1
-```
-
-> Sample JSON request
-
-```json
-{
-
-}
 ```
 
 > Sample JSON response
@@ -1516,6 +1306,8 @@ DELETE /annotation/:id_annotation HTTP/1.1
 ## Queues
 
 ### get all queues
+
+GET /queue
 
 ```http
 GET /queue HTTP/1.1
@@ -1541,6 +1333,8 @@ queues = client.getQueues()
 
 ### get one queue
 
+GET /queue/:id_queue
+
 ```http
 GET /queue/:id_queue HTTP/1.1
 ```
@@ -1557,6 +1351,8 @@ GET /queue/:id_queue HTTP/1.1
 ```
 
 ### create new queue
+
+POST /queue
 
 ```http
 POST /queue HTTP/1.1
@@ -1587,6 +1383,8 @@ queue = client.createQueue('queue name', description={'my': 'description'})
 ```
 
 ### update one queue
+
+PUT /queue/:id_queue
 
 ```http
 PUT /queue/:id_queue HTTP/1.1
@@ -1621,20 +1419,14 @@ queue = client.updateQueue(id_queue,
 
 ### append item(s) to one queue
 
+PUT /queue/:id_queue/next
+
 ```http
 PUT /queue/:id_queue/next HTTP/1.1
 ```
 
 ```python
 queue = client.enqueue(id_queue, items)
-```
-
-> Sample JSON request
-
-```json
-{
-
-}
 ```
 
 > Sample JSON response
@@ -1647,6 +1439,8 @@ queue = client.enqueue(id_queue, items)
 
 ### pop one item from one queue
 
+GET /queue/:id_queue/next
+
 ```http
 GET /queue/:id_queue/next HTTP/1.1
 ```
@@ -1656,6 +1450,8 @@ item = client.dequeue(id_queue)
 ```
 
 ### remove one queue
+
+DELETE /queue/:id_queue
 
 ```http
 DELETE /queue/:id_queue HTTP/1.1
@@ -1677,16 +1473,10 @@ client.deleteQueue(id_corpus)
 
 ### get current date/time
 
+GET /date
+
 ```http
 GET /date HTTP/1.1
-```
-
-> Sample JSON request
-
-```json
-{
-
-}
 ```
 
 > Sample JSON response
