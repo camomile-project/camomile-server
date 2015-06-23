@@ -308,7 +308,7 @@ Restricted to 'admin' user.
 
 Parameter        | Type      | Description
 ---------------- | --------- | -----------
-username         | String    | Restrict list to username (optional)
+username         | String    | filter users by username (optional)
 
 ```python
 users = client.getUsers()
@@ -427,7 +427,7 @@ Restricted to 'admin' user.
 
 Parameter        | Type      | Description
 ---------------- | --------- | -----------
-name             | String    | Restrict list to group name
+name             | String    | filter groups by name (optional)
 
 ```http
 GET /group HTTP/1.1
@@ -729,7 +729,7 @@ PUT /corpus/:id_corpus HTTP/1.1
 
 ### delete one corpus
 
-DELETE /corpus/:id_corpus
+DELETE /corpus/`:id_corpus`
 
 <aside class="notice">
 Restricted to user with ADMIN privileges.
@@ -751,7 +751,7 @@ DELETE /corpus/:id_corpus HTTP/1.1
 
 ### get one corpus' permissions
 
-GET /corpus/:id_corpus/permissions
+GET /corpus/`:id_corpus`/permissions
 
 <aside class="notice">
 Restricted to user with ADMIN privileges.
@@ -790,7 +790,7 @@ Restricted to user with ADMIN privileges.
 
 Parameter        | Type      | Description
 ---------------- | --------- | -----------
-right            | 1|2|3     | The corpus permissions (1:READ, 2:WRITE, 3:ADMIN)
+right            | 1, 2 or 3 | The corpus permissions (1:READ, 2:WRITE, 3:ADMIN)
 
 ```python
 client.setCorpusPermissions(id_corpus, client.ADMIN, user=id_user)
@@ -842,7 +842,7 @@ Restricted to user with ADMIN privileges.
 
 Parameter        | Type      | Description
 ---------------- | --------- | -----------
-right            | 1|2|3     | The corpus permissions (1:READ, 2:WRITE, 3:ADMIN)
+right            | 1, 2 or 3 | The corpus permissions (1:READ, 2:WRITE, 3:ADMIN)
 
 
 ```python
@@ -863,7 +863,7 @@ PUT /corpus/:id_corpus/group/:id_group HTTP/1.1
 
 ### remove one group's permissions to one corpus
 
-DELETE /corpus/`:id_corpus`/group/`:id_group
+DELETE /corpus/`:id_corpus`/group/`:id_group`
 
 <aside class="notice">
 Restricted to user with ADMIN privileges.
@@ -890,6 +890,18 @@ DELETE /corpus/:id_corpus/group/:id_group HTTP/1.1
 
 GET /medium 
 
+<aside class="warning">
+Restricted to 'root' user.
+</aside>
+
+Parameter        | Type      | Description
+---------------- | --------- | -----------
+name             | String    | filter media by name
+
+```python
+client.getMedia()
+```
+
 ```http
 GET /medium HTTP/1.1
 ```
@@ -897,14 +909,18 @@ GET /medium HTTP/1.1
 > Sample JSON response
 
 ```json
-{
-
-}
+[{'_id': '...', 'description': '', 'id_corpus': '...', 'name': 'show1', 'url': ''},
+{'_id': '...', 'description': '', 'id_corpus': '...', 'name': 'show2', 'url': ''}
+...]
 ```
 
 ### get one medium
 
 GET /medium/:id_medium`
+
+```python
+client.getMedium(id_medium)
+```
 
 ```http
 GET /medium/:id_medium HTTP/1.1
@@ -913,14 +929,24 @@ GET /medium/:id_medium HTTP/1.1
 > Sample JSON response
 
 ```json
-{
-
-}
+{'_id': '555db2e6f80f910100d741d8',
+  'description': '',
+  'id_corpus': '555daefff80f910100d741d6',
+  'name': 'LCP_PileEtFace_2012-11-30_012500',
+  'url': ''}
 ```
 
 ### get one corpus' media
 
 GET /corpus/`:id_corpus`/medium
+
+Parameter        | Type      | Description
+---------------- | --------- | -----------
+name             | String    | filter media by name
+
+```python
+client.getMedia(id_corpus)
+```
 
 ```http
 GET /corpus/:id_corpus/medium HTTP/1.1
@@ -929,46 +955,83 @@ GET /corpus/:id_corpus/medium HTTP/1.1
 > Sample JSON response
 
 ```json
-{
-
-}
+{'_id': '555db2e6f80f910100d741d8',
+  'description': '',
+  'id_corpus': '555daefff80f910100d741d6',
+  'name': 'LCP_PileEtFace_2012-11-30_012500',
+  'url': ''}
 ```
 
 ### create new medium(a) in one corpus
 
 POST /corpus/:id_corpus/medium
 
+Parameter        | Type      | Description
+---------------- | --------- | -----------
+name             | String    | The medium name (unique)
+url              | String    | absolute or relative URL to the medium
+description      | free      | A description of the medium
+
+OR list of {name, url, description}
+
+```python
+client.createMedium(id_corpus, name, url, description)
+
+media = [{'name':'show1'}, {'name':'show2'}]
+client.createMedia(id_corpus, media)
+```
+
 ```http
 POST /corpus/:id_corpus/medium HTTP/1.1
+
+{'name': 'LCP_PileEtFace_2012-11-30_012500'}
 ```
 
 > Sample JSON response
 
 ```json
-{
-
-}
-```
+{'_id': '55895e90c70125010026f6b5',
+ 'id_corpus': '558955cec70125010026f6aa',
+ 'name': 'LCP_PileEtFace_2012-11-30_012500',
+ 'url': ''}```
 
 ### update one medium
 
 PUT /medium/:id_medium
 
+Parameter        | Type      | Description
+---------------- | --------- | -----------
+name             | String    | The medium name (unique)
+url              | String    | absolute or relative URL to the medium
+description      | free      | A description of the medium
+
+```python
+client.updateMedium(id_medium, name, url, description)
+```
+
 ```http
 PUT /medium/:id_medium HTTP/1.1
+
+{'description': 'LCP channel'}
 ```
 
 > Sample JSON response
 
 ```json
-{
-
-}
-```
+{'_id': '55895e90c70125010026f6b5',
+ 'id_corpus': '558955cec70125010026f6aa',
+ 'name': 'LCP_PileEtFace_2012-11-30_012500',
+ 'url': '',
+ 'description': 'LCP channel'}
+ ```
 
 ### delete one medium
 
 DELETE /medium/:id_medium
+
+```python
+client.deleteMedium(id_medium)
+```
 
 ```http
 DELETE /medium/:id_medium HTTP/1.1
@@ -977,73 +1040,55 @@ DELETE /medium/:id_medium HTTP/1.1
 > Sample JSON response
 
 ```json
-{
-
-}
+{'success': 'Successfully deleted.'}
 ```
 
 ### stream one medium in default format
 
 GET /medium/:id_medium/video
 
-```http
-GET /medium/:id_medium/video HTTP/1.1
+```python
+client.streamMedium(id_medium)
 ```
 
-> Sample JSON response
-
-```json
-{
-
-}
+```http
+GET /medium/:id_medium/video HTTP/1.1
 ```
 
 ### stream one medium in WebM
 
 GET /medium/:id_medium/webm
 
-```http
-GET /medium/:id_medium/webm HTTP/1.1
+```python
+client.streamMedium(id_medium, format='webm')
 ```
 
-> Sample JSON response
-
-```json
-{
-
-}
+```http
+GET /medium/:id_medium/webm HTTP/1.1
 ```
 
 ### stream one medium in MP4
 
 GET /medium/:id_medium/mp4
 
-```http
-GET /medium/:id_medium/mp4 HTTP/1.1
+```python
+client.streamMedium(id_medium, format='mp4')
 ```
 
-> Sample JSON response
-
-```json
-{
-
-}
+```http
+GET /medium/:id_medium/mp4 HTTP/1.1
 ```
 
 ### stream one medium in OGV
 
 GET /medium/:id_medium/ogv
 
-```http
-GET /medium/:id_medium/ogv HTTP/1.1
+```python
+client.streamMedium(id_medium, format='ogv')
 ```
 
-> Sample JSON response
-
-```json
-{
-
-}
+```http
+GET /medium/:id_medium/ogv HTTP/1.1
 ```
 
 ## Layers
