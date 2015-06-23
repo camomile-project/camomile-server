@@ -548,7 +548,7 @@ Restricted to 'admin&rsquo; user.
 <tr>
 <td>username</td>
 <td>String</td>
-<td>Restrict list to username (optional)</td>
+<td>filter users by username (optional)</td>
 </tr>
 </tbody></table>
 <pre class="highlight python"><code><span class="n">users</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">getUsers</span><span class="p">()</span>
@@ -676,7 +676,7 @@ Restricted to 'admin&rsquo; user.
 <tr>
 <td>name</td>
 <td>String</td>
-<td>Restrict list to group name</td>
+<td>filter groups by name (optional)</td>
 </tr>
 </tbody></table>
 <pre class="highlight http"><code><span class="nf">GET</span> <span class="nn">/group</span> <span class="k">HTTP</span><span class="o">/</span><span class="m">1.1</span>
@@ -985,7 +985,7 @@ Restricted to user with ADMIN privileges.
 
 <h3 id="delete-one-corpus">delete one corpus</h3>
 
-<p>DELETE /corpus/:id_corpus</p>
+<p>DELETE /corpus/<code class="prettyprint">:id_corpus</code></p>
 
 <aside class="notice">
 Restricted to user with ADMIN privileges.
@@ -1003,7 +1003,7 @@ Restricted to user with ADMIN privileges.
 
 <h3 id="get-one-corpus-39-permissions">get one corpus&rsquo; permissions</h3>
 
-<p>GET /corpus/:id_corpus/permissions</p>
+<p>GET /corpus/<code class="prettyprint">:id_corpus</code>/permissions</p>
 
 <aside class="notice">
 Restricted to user with ADMIN privileges.
@@ -1044,8 +1044,8 @@ Restricted to user with ADMIN privileges.
 </thead><tbody>
 <tr>
 <td>right</td>
-<td>1</td>
-<td>2</td>
+<td>1, 2 or 3</td>
+<td>The corpus permissions (1:READ, 2:WRITE, 3:ADMIN)</td>
 </tr>
 </tbody></table>
 <pre class="highlight python"><code><span class="n">client</span><span class="o">.</span><span class="n">setCorpusPermissions</span><span class="p">(</span><span class="n">id_corpus</span><span class="p">,</span> <span class="n">client</span><span class="o">.</span><span class="n">ADMIN</span><span class="p">,</span> <span class="n">user</span><span class="o">=</span><span class="n">id_user</span><span class="p">)</span>
@@ -1098,8 +1098,8 @@ Restricted to user with ADMIN privileges.
 </thead><tbody>
 <tr>
 <td>right</td>
-<td>1</td>
-<td>2</td>
+<td>1, 2 or 3</td>
+<td>The corpus permissions (1:READ, 2:WRITE, 3:ADMIN)</td>
 </tr>
 </tbody></table>
 <pre class="highlight python"><code><span class="n">client</span><span class="o">.</span><span class="n">setCorpusPermissions</span><span class="p">(</span><span class="n">id_corpus</span><span class="p">,</span> <span class="n">ADMIN</span><span class="p">,</span> <span class="n">group</span><span class="o">=</span><span class="n">id_group</span><span class="p">)</span>
@@ -1117,7 +1117,7 @@ Restricted to user with ADMIN privileges.
 
 <h3 id="remove-one-group-39-s-permissions-to-one-corpus">remove one group&rsquo;s permissions to one corpus</h3>
 
-<p>DELETE /corpus/<code class="prettyprint">:id_corpus</code>/group/`:id_group</p>
+<p>DELETE /corpus/<code class="prettyprint">:id_corpus</code>/group/<code class="prettyprint">:id_group</code></p>
 
 <aside class="notice">
 Restricted to user with ADMIN privileges.
@@ -1139,142 +1139,207 @@ Restricted to user with ADMIN privileges.
 <h3 id="get-all-media">get all media</h3>
 
 <p>GET /medium </p>
+
+<aside class="warning">
+Restricted to 'root&rsquo; user.
+</aside>
+
+<table><thead>
+<tr>
+<th>Parameter</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead><tbody>
+<tr>
+<td>name</td>
+<td>String</td>
+<td>filter media by name</td>
+</tr>
+</tbody></table>
+<pre class="highlight python"><code><span class="n">client</span><span class="o">.</span><span class="n">getMedia</span><span class="p">()</span>
+</code></pre>
 <pre class="highlight http"><code><span class="nf">GET</span> <span class="nn">/medium</span> <span class="k">HTTP</span><span class="o">/</span><span class="m">1.1</span>
 </code></pre>
 
 <blockquote>
 <p>Sample JSON response</p>
 </blockquote>
-<pre class="highlight json"><code><span class="p">{</span><span class="w">
-
-</span><span class="p">}</span><span class="w">
+<pre class="highlight json"><code><span class="p">[{</span><span class="err">'_id':</span><span class="w"> </span><span class="err">'...',</span><span class="w"> </span><span class="err">'description':</span><span class="w"> </span><span class="err">'',</span><span class="w"> </span><span class="err">'id_corpus':</span><span class="w"> </span><span class="err">'...',</span><span class="w"> </span><span class="err">'name':</span><span class="w"> </span><span class="err">'show1',</span><span class="w"> </span><span class="err">'url':</span><span class="w"> </span><span class="err">''</span><span class="p">},</span><span class="w">
+</span><span class="p">{</span><span class="err">'_id':</span><span class="w"> </span><span class="err">'...',</span><span class="w"> </span><span class="err">'description':</span><span class="w"> </span><span class="err">'',</span><span class="w"> </span><span class="err">'id_corpus':</span><span class="w"> </span><span class="err">'...',</span><span class="w"> </span><span class="err">'name':</span><span class="w"> </span><span class="err">'show2',</span><span class="w"> </span><span class="err">'url':</span><span class="w"> </span><span class="err">''</span><span class="p">}</span><span class="w">
+</span><span class="err">...</span><span class="p">]</span><span class="w">
 </span></code></pre>
 
 <h3 id="get-one-medium">get one medium</h3>
 
 <p>GET /medium/:id_medium`</p>
+<pre class="highlight python"><code><span class="n">client</span><span class="o">.</span><span class="n">getMedium</span><span class="p">(</span><span class="n">id_medium</span><span class="p">)</span>
+</code></pre>
 <pre class="highlight http"><code><span class="nf">GET</span> <span class="nn">/medium/:id_medium</span> <span class="k">HTTP</span><span class="o">/</span><span class="m">1.1</span>
 </code></pre>
 
 <blockquote>
 <p>Sample JSON response</p>
 </blockquote>
-<pre class="highlight json"><code><span class="p">{</span><span class="w">
-
-</span><span class="p">}</span><span class="w">
+<pre class="highlight json"><code><span class="p">{</span><span class="err">'_id':</span><span class="w"> </span><span class="err">'555db2e6f80f910100d741d8',</span><span class="w">
+  </span><span class="err">'description':</span><span class="w"> </span><span class="err">'',</span><span class="w">
+  </span><span class="err">'id_corpus':</span><span class="w"> </span><span class="err">'555daefff80f910100d741d6',</span><span class="w">
+  </span><span class="err">'name':</span><span class="w"> </span><span class="err">'LCP_PileEtFace_2012-11-30_012500',</span><span class="w">
+  </span><span class="err">'url':</span><span class="w"> </span><span class="err">''</span><span class="p">}</span><span class="w">
 </span></code></pre>
 
 <h3 id="get-one-corpus-39-media">get one corpus&rsquo; media</h3>
 
 <p>GET /corpus/<code class="prettyprint">:id_corpus</code>/medium</p>
+
+<table><thead>
+<tr>
+<th>Parameter</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead><tbody>
+<tr>
+<td>name</td>
+<td>String</td>
+<td>filter media by name</td>
+</tr>
+</tbody></table>
+<pre class="highlight python"><code><span class="n">client</span><span class="o">.</span><span class="n">getMedia</span><span class="p">(</span><span class="n">id_corpus</span><span class="p">)</span>
+</code></pre>
 <pre class="highlight http"><code><span class="nf">GET</span> <span class="nn">/corpus/:id_corpus/medium</span> <span class="k">HTTP</span><span class="o">/</span><span class="m">1.1</span>
 </code></pre>
 
 <blockquote>
 <p>Sample JSON response</p>
 </blockquote>
-<pre class="highlight json"><code><span class="p">{</span><span class="w">
-
-</span><span class="p">}</span><span class="w">
+<pre class="highlight json"><code><span class="p">{</span><span class="err">'_id':</span><span class="w"> </span><span class="err">'555db2e6f80f910100d741d8',</span><span class="w">
+  </span><span class="err">'description':</span><span class="w"> </span><span class="err">'',</span><span class="w">
+  </span><span class="err">'id_corpus':</span><span class="w"> </span><span class="err">'555daefff80f910100d741d6',</span><span class="w">
+  </span><span class="err">'name':</span><span class="w"> </span><span class="err">'LCP_PileEtFace_2012-11-30_012500',</span><span class="w">
+  </span><span class="err">'url':</span><span class="w"> </span><span class="err">''</span><span class="p">}</span><span class="w">
 </span></code></pre>
 
 <h3 id="create-new-medium-a-in-one-corpus">create new medium(a) in one corpus</h3>
 
 <p>POST /corpus/:id_corpus/medium</p>
+
+<table><thead>
+<tr>
+<th>Parameter</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead><tbody>
+<tr>
+<td>name</td>
+<td>String</td>
+<td>The medium name (unique)</td>
+</tr>
+<tr>
+<td>url</td>
+<td>String</td>
+<td>absolute or relative URL to the medium</td>
+</tr>
+<tr>
+<td>description</td>
+<td>free</td>
+<td>A description of the medium</td>
+</tr>
+</tbody></table>
+
+<p>OR list of {name, url, description}</p>
+<pre class="highlight python"><code><span class="n">client</span><span class="o">.</span><span class="n">createMedium</span><span class="p">(</span><span class="n">id_corpus</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">url</span><span class="p">,</span> <span class="n">description</span><span class="p">)</span>
+
+<span class="n">media</span> <span class="o">=</span> <span class="p">[{</span><span class="s">'name'</span><span class="p">:</span><span class="s">'show1'</span><span class="p">},</span> <span class="p">{</span><span class="s">'name'</span><span class="p">:</span><span class="s">'show2'</span><span class="p">}]</span>
+<span class="n">client</span><span class="o">.</span><span class="n">createMedia</span><span class="p">(</span><span class="n">id_corpus</span><span class="p">,</span> <span class="n">media</span><span class="p">)</span>
+</code></pre>
 <pre class="highlight http"><code><span class="nf">POST</span> <span class="nn">/corpus/:id_corpus/medium</span> <span class="k">HTTP</span><span class="o">/</span><span class="m">1.1</span>
+
+{'name': 'LCP_PileEtFace_2012-11-30_012500'}
 </code></pre>
 
 <blockquote>
 <p>Sample JSON response</p>
 </blockquote>
-<pre class="highlight json"><code><span class="p">{</span><span class="w">
+<pre class="highlight json"><code><span class="p">{</span><span class="err">'_id':</span><span class="w"> </span><span class="err">'55895e90c70125010026f6b5',</span><span class="w">
+ </span><span class="err">'id_corpus':</span><span class="w"> </span><span class="err">'558955cec70125010026f6aa',</span><span class="w">
+ </span><span class="err">'name':</span><span class="w"> </span><span class="err">'LCP_PileEtFace_2012-11-30_012500',</span><span class="w">
+ </span><span class="err">'url':</span><span class="w"> </span><span class="err">''</span><span class="p">}</span><span class="err">```</span><span class="w">
 
-</span><span class="p">}</span><span class="w">
+</span><span class="err">###</span><span class="w"> </span><span class="err">update</span><span class="w"> </span><span class="err">one</span><span class="w"> </span><span class="err">medium</span><span class="w">
+
+</span><span class="err">PUT</span><span class="w"> </span><span class="err">/medium/:id_medium</span><span class="w">
+
+</span><span class="err">Parameter</span><span class="w">        </span><span class="err">|</span><span class="w"> </span><span class="err">Type</span><span class="w">      </span><span class="err">|</span><span class="w"> </span><span class="err">Description</span><span class="w">
+</span><span class="err">----------------</span><span class="w"> </span><span class="err">|</span><span class="w"> </span><span class="err">---------</span><span class="w"> </span><span class="err">|</span><span class="w"> </span><span class="err">-----------</span><span class="w">
+</span><span class="err">name</span><span class="w">             </span><span class="err">|</span><span class="w"> </span><span class="err">String</span><span class="w">    </span><span class="err">|</span><span class="w"> </span><span class="err">The</span><span class="w"> </span><span class="err">medium</span><span class="w"> </span><span class="err">name</span><span class="w"> </span><span class="err">(unique)</span><span class="w">
+</span><span class="err">url</span><span class="w">              </span><span class="err">|</span><span class="w"> </span><span class="err">String</span><span class="w">    </span><span class="err">|</span><span class="w"> </span><span class="err">absolute</span><span class="w"> </span><span class="err">or</span><span class="w"> </span><span class="err">relative</span><span class="w"> </span><span class="err">URL</span><span class="w"> </span><span class="err">to</span><span class="w"> </span><span class="err">the</span><span class="w"> </span><span class="err">medium</span><span class="w">
+</span><span class="err">description</span><span class="w">      </span><span class="err">|</span><span class="w"> </span><span class="err">free</span><span class="w">      </span><span class="err">|</span><span class="w"> </span><span class="err">A</span><span class="w"> </span><span class="err">description</span><span class="w"> </span><span class="err">of</span><span class="w"> </span><span class="err">the</span><span class="w"> </span><span class="err">medium</span><span class="w">
+
+</span><span class="err">```python</span><span class="w">
+</span><span class="err">client.updateMedium(id_medium,</span><span class="w"> </span><span class="err">name,</span><span class="w"> </span><span class="err">url,</span><span class="w"> </span><span class="err">description)</span><span class="w">
 </span></code></pre>
-
-<h3 id="update-one-medium">update one medium</h3>
-
-<p>PUT /medium/:id_medium</p>
 <pre class="highlight http"><code><span class="nf">PUT</span> <span class="nn">/medium/:id_medium</span> <span class="k">HTTP</span><span class="o">/</span><span class="m">1.1</span>
+
+{'description': 'LCP channel'}
 </code></pre>
 
 <blockquote>
 <p>Sample JSON response</p>
 </blockquote>
-<pre class="highlight json"><code><span class="p">{</span><span class="w">
-
-</span><span class="p">}</span><span class="w">
+<pre class="highlight json"><code><span class="p">{</span><span class="err">'_id':</span><span class="w"> </span><span class="err">'55895e90c70125010026f6b5',</span><span class="w">
+ </span><span class="err">'id_corpus':</span><span class="w"> </span><span class="err">'558955cec70125010026f6aa',</span><span class="w">
+ </span><span class="err">'name':</span><span class="w"> </span><span class="err">'LCP_PileEtFace_2012-11-30_012500',</span><span class="w">
+ </span><span class="err">'url':</span><span class="w"> </span><span class="err">'',</span><span class="w">
+ </span><span class="err">'description':</span><span class="w"> </span><span class="err">'LCP</span><span class="w"> </span><span class="err">channel'</span><span class="p">}</span><span class="w">
 </span></code></pre>
 
 <h3 id="delete-one-medium">delete one medium</h3>
 
 <p>DELETE /medium/:id_medium</p>
+<pre class="highlight python"><code><span class="n">client</span><span class="o">.</span><span class="n">deleteMedium</span><span class="p">(</span><span class="n">id_medium</span><span class="p">)</span>
+</code></pre>
 <pre class="highlight http"><code><span class="nf">DELETE</span> <span class="nn">/medium/:id_medium</span> <span class="k">HTTP</span><span class="o">/</span><span class="m">1.1</span>
 </code></pre>
 
 <blockquote>
 <p>Sample JSON response</p>
 </blockquote>
-<pre class="highlight json"><code><span class="p">{</span><span class="w">
-
-</span><span class="p">}</span><span class="w">
+<pre class="highlight json"><code><span class="p">{</span><span class="err">'success':</span><span class="w"> </span><span class="err">'Successfully</span><span class="w"> </span><span class="err">deleted.'</span><span class="p">}</span><span class="w">
 </span></code></pre>
 
 <h3 id="stream-one-medium-in-default-format">stream one medium in default format</h3>
 
 <p>GET /medium/:id_medium/video</p>
+<pre class="highlight python"><code><span class="n">client</span><span class="o">.</span><span class="n">streamMedium</span><span class="p">(</span><span class="n">id_medium</span><span class="p">)</span>
+</code></pre>
 <pre class="highlight http"><code><span class="nf">GET</span> <span class="nn">/medium/:id_medium/video</span> <span class="k">HTTP</span><span class="o">/</span><span class="m">1.1</span>
 </code></pre>
-
-<blockquote>
-<p>Sample JSON response</p>
-</blockquote>
-<pre class="highlight json"><code><span class="p">{</span><span class="w">
-
-</span><span class="p">}</span><span class="w">
-</span></code></pre>
 
 <h3 id="stream-one-medium-in-webm">stream one medium in WebM</h3>
 
 <p>GET /medium/:id_medium/webm</p>
+<pre class="highlight python"><code><span class="n">client</span><span class="o">.</span><span class="n">streamMedium</span><span class="p">(</span><span class="n">id_medium</span><span class="p">,</span> <span class="n">format</span><span class="o">=</span><span class="s">'webm'</span><span class="p">)</span>
+</code></pre>
 <pre class="highlight http"><code><span class="nf">GET</span> <span class="nn">/medium/:id_medium/webm</span> <span class="k">HTTP</span><span class="o">/</span><span class="m">1.1</span>
 </code></pre>
-
-<blockquote>
-<p>Sample JSON response</p>
-</blockquote>
-<pre class="highlight json"><code><span class="p">{</span><span class="w">
-
-</span><span class="p">}</span><span class="w">
-</span></code></pre>
 
 <h3 id="stream-one-medium-in-mp4">stream one medium in MP4</h3>
 
 <p>GET /medium/:id_medium/mp4</p>
+<pre class="highlight python"><code><span class="n">client</span><span class="o">.</span><span class="n">streamMedium</span><span class="p">(</span><span class="n">id_medium</span><span class="p">,</span> <span class="n">format</span><span class="o">=</span><span class="s">'mp4'</span><span class="p">)</span>
+</code></pre>
 <pre class="highlight http"><code><span class="nf">GET</span> <span class="nn">/medium/:id_medium/mp4</span> <span class="k">HTTP</span><span class="o">/</span><span class="m">1.1</span>
 </code></pre>
-
-<blockquote>
-<p>Sample JSON response</p>
-</blockquote>
-<pre class="highlight json"><code><span class="p">{</span><span class="w">
-
-</span><span class="p">}</span><span class="w">
-</span></code></pre>
 
 <h3 id="stream-one-medium-in-ogv">stream one medium in OGV</h3>
 
 <p>GET /medium/:id_medium/ogv</p>
+<pre class="highlight python"><code><span class="n">client</span><span class="o">.</span><span class="n">streamMedium</span><span class="p">(</span><span class="n">id_medium</span><span class="p">,</span> <span class="n">format</span><span class="o">=</span><span class="s">'ogv'</span><span class="p">)</span>
+</code></pre>
 <pre class="highlight http"><code><span class="nf">GET</span> <span class="nn">/medium/:id_medium/ogv</span> <span class="k">HTTP</span><span class="o">/</span><span class="m">1.1</span>
 </code></pre>
-
-<blockquote>
-<p>Sample JSON response</p>
-</blockquote>
-<pre class="highlight json"><code><span class="p">{</span><span class="w">
-
-</span><span class="p">}</span><span class="w">
-</span></code></pre>
 
 <h2 id="layers">Layers</h2>
 
