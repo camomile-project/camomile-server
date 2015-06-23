@@ -136,7 +136,7 @@ password         | String    | The password  (required)
 ```http
 POST /login HTTP/1.1
 
-{'username': 'johndoe', 'password': 'yourpwd'}
+{'username': 'johndoe', 'password': 'secretpassword'}
 
 ```
 
@@ -203,7 +203,7 @@ GET /me HTTP/1.1
 PUT /me
 
 ```python
-client.update_password("new_password")
+client.update_password('new_password')
 ```
 
 ```javascript
@@ -246,8 +246,6 @@ role             | String    | The user role ("admin" or "user")  (required)
 
 ```http
 POST /user HTTP/1.1
-
-> Sample JSON request
 
 {'username': 'johndoe',
  'password': 'secretpassword',
@@ -369,7 +367,9 @@ Restricted to 'admin' user.
 
 Parameter        | Type      | Description
 ---------------- | --------- | -----------
+password         | String    | The password
 description      | free      | A description of the user
+role             | String    | The user role ("admin" or "user")
 
 ```http
 PUT /user/:id_user HTTP/1.1
@@ -409,7 +409,6 @@ GET /user/:id_user/group HTTP/1.1
 ```python
 id_groups = client.getUserGroups(id_user)
 ```
-
 
 > Sample JSON response
 
@@ -466,7 +465,6 @@ GET /group/:id_group HTTP/1.1
 group = client.getGroup(id_group)
 ```
 
-
 > Sample JSON response
 
 ```json
@@ -481,25 +479,25 @@ group = client.getGroup(id_group)
 
 POST /group
 
+Parameter        | Type      | Description
+---------------- | --------- | -----------
+name             | String    | The group name (can't be updated)
+description      | free      | A description of the group
+
+<aside class="notice">
+Restricted to 'admin' user.
+</aside>
+
 ```http
 POST /group HTTP/1.1
+
+{'name': 'guests'}
 ```
 
 ```python
 group = client.createGroup(
   'limsi', 
   description={'affiliation': 'LIMSI'})
-```
-
-<aside class="notice">
-Restricted to 'admin' user.
-</aside>
-
-
-> Sample JSON request
-
-```json
-{'name': 'guests'}
 ```
 
 > Sample JSON response
@@ -515,6 +513,10 @@ Restricted to 'admin' user.
 
 PUT /group/`:id_group`
 
+Parameter        | Type      | Description
+---------------- | --------- | -----------
+description      | free      | A description of the group
+
 <aside class="notice">
 Restricted to 'admin' user.
 </aside>
@@ -522,6 +524,8 @@ Restricted to 'admin' user.
 
 ```http
 PUT /group/:id_group HTTP/1.1
+
+{ 'description': 'open trial'}
 ```
 
 ```python
@@ -530,25 +534,22 @@ group = client.updateGroup(
   description={'affiliation': 'LIMSI/CNRS'})
 ```
 
-
-> Sample JSON request
-
-```json
-{ 'description': 'open trial'}
-```
-
 > Sample JSON response
 
 ```json
 {'_id': '55881f8301e0ef01006e979e',
  'description': 'open trial',
- 'name': u'guests',
+ 'name': 'guests',
  'users': []}
 ```
 
 ### delete one group
 
 DELETE /group/`:id_group`
+
+<aside class="warning">
+Restricted to 'root' user.
+</aside>
 
 ```http
 DELETE /group/:id_group HTTP/1.1
@@ -557,10 +558,6 @@ DELETE /group/:id_group HTTP/1.1
 ```python
 client.deleteGroup(id_group)
 ```
-
-<aside class="warning">
-Restricted to 'root' user.
-</aside>
 
 > Sample JSON response
 
@@ -635,10 +632,9 @@ GET /corpus HTTP/1.1
 > Sample JSON response
 
 ```json
-{
-
-}
-```
+[{'_id': '555daefff80f910100d741d6',
+  'description': 'Test corpus',
+  'name': 'ctest'}```
 
 ### get one corpus
 
@@ -655,9 +651,9 @@ GET /corpus/:id_corpus HTTP/1.1
 > Sample JSON response
 
 ```json
-{
-
-}
+{'_id': '555daefff80f910100d741d6',
+  'description': 'Test corpus',
+  'name': 'ctest'}
 ```
 
 ### create new corpus
@@ -668,23 +664,31 @@ POST /corpus
 Restricted to 'admin' user.
 </aside>
 
+Parameter        | Type      | Description
+---------------- | --------- | -----------
+name             | String    | The corpus name (unique)
+description      | free      | A description of the corpus
+
+
 ```python
 corpus = client.createCorpus(
   'unique name', 
   description={'license': 'Creative Commons'})
 ```
 
-
 ```http
 POST /corpus HTTP/1.1
+
+{'name': 'unique name', 'description': {'license': 'Creative Commons'}}
+
 ```
 
 > Sample JSON response
 
 ```json
-{
-
-}
+{_id': '555daefff80f910100d741d6',
+ 'description': {'license': 'Creative Commons'},
+ 'name': 'unique name'}
 ```
 
 ### update one corpus
@@ -695,6 +699,12 @@ PUT /corpus/`:id_corpus`
 Restricted to user with ADMIN privileges.
 </aside>
 
+Parameter        | Type      | Description
+---------------- | --------- | -----------
+name             | String    | The corpus name (unique)
+description      | free      | A description of the corpus
+
+
 ```python
 corpus = client.updateCorpus(
   id_corpus, 
@@ -704,14 +714,17 @@ corpus = client.updateCorpus(
 
 ```http
 PUT /corpus/:id_corpus HTTP/1.1
+
+{'description': {'license': 'MIT'},
+ 'name': 'new name'}
 ```
 
 > Sample JSON response
 
 ```json
-{
-
-}
+{_id': '555daefff80f910100d741d6',
+ 'description': {'license': 'MIT'},
+ 'name': 'new name'}
 ```
 
 ### delete one corpus
@@ -733,9 +746,7 @@ DELETE /corpus/:id_corpus HTTP/1.1
 > Sample JSON response
 
 ```json
-{
-
-}
+{'success': 'Successfully deleted.'}
 ```
 
 ### get one corpus' permissions
@@ -777,20 +788,25 @@ PUT /corpus/`:id_corpus`/user/`:id_user`
 Restricted to user with ADMIN privileges.
 </aside>
 
+Parameter        | Type      | Description
+---------------- | --------- | -----------
+right            | 1|2|3     | The corpus permissions (1:READ, 2:WRITE, 3:ADMIN)
+
 ```python
-client.setCorpusPermissions(id_corpus, ADMIN, user=id_user)
+client.setCorpusPermissions(id_corpus, client.ADMIN, user=id_user)
 ```
 
 ```http
 PUT /corpus/:id_corpus/user/:id_user HTTP/1.1
+{'right': 3}
 ```
 
 > Sample JSON response
 
 ```json
-{
-
-}
+{'users': {'555299eff80f910100d741d1': 3,
+  '5552bf5cf80f910100d741d2': 2,
+  '55881d6001e0ef01006e979d': 3}}
 ```
 
 ### remove one user's permissions to one corpus
@@ -812,9 +828,8 @@ DELETE /corpus/:id_corpus/user/:id_user HTTP/1.1
 > Sample JSON response
 
 ```json
-{
-
-}
+{'users': {'555299eff80f910100d741d1': 3,
+  '5552bf5cf80f910100d741d2': 2}}
 ```
 
 ### give one group permissions to one corpus
@@ -824,6 +839,11 @@ PUT /corpus/`:id_corpus`/group/`:id_group`
 <aside class="notice">
 Restricted to user with ADMIN privileges.
 </aside>
+
+Parameter        | Type      | Description
+---------------- | --------- | -----------
+right            | 1|2|3     | The corpus permissions (1:READ, 2:WRITE, 3:ADMIN)
+
 
 ```python
 client.setCorpusPermissions(id_corpus, ADMIN, group=id_group)
@@ -836,10 +856,10 @@ PUT /corpus/:id_corpus/group/:id_group HTTP/1.1
 > Sample JSON response
 
 ```json
-{
-
-}
-```
+{'groups': {'55881d1601e0ef01006e979c': 2},
+ 'users': {'555299eff80f910100d741d1': 3, 
+   '5552bf5cf80f910100d741d2': 2}}
+ ```
 
 ### remove one group's permissions to one corpus
 
@@ -860,9 +880,8 @@ DELETE /corpus/:id_corpus/group/:id_group HTTP/1.1
 > Sample JSON response
 
 ```json
-{
-
-}
+{'users': {'555299eff80f910100d741d1': 3,
+  '5552bf5cf80f910100d741d2': 2}}
 ```
 
 ## Media
