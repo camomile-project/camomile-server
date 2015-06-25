@@ -190,6 +190,15 @@ html, body {
       font-size: 12px;
     }
 
+   .tocify-subheader {
+      background-color: $nav-subsubitem-bg;
+      .tocify-item>a {
+          // Styling here for a level 2 nesting. For example ->
+          padding-left: $nav-padding + $nav-indent * 2;
+          font-size: 11px;
+       }
+    }
+
     // for embossed look:
     @include embossed-bg;
     &>li:last-child {

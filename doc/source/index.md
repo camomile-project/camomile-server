@@ -20,5 +20,5 @@ includes:
 ---
 
 <aside class="notice">
-Work in progress
+Documentation synchronized with Camomile-server 0.6.0
 </aside>
