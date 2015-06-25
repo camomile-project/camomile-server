@@ -279,8 +279,8 @@ client.createUser('username', 'password',
 
 ### delete one user
 
-<aside class="warning">
-Restricted to 'root' user.
+<aside class="notice">
+Restricted to 'admin' user.
 </aside>
 
 DELETE /user/`:id_user`
@@ -307,10 +307,6 @@ DELETE /user/:id_user HTTP/1.1
 ### get all users
 
 GET /user
-
-<aside class="notice">
-Restricted to 'admin' user.
-</aside>
 
 #### DATA PARAMETERS
 Parameter        | Type      | Description
@@ -340,10 +336,6 @@ GET /user HTTP/1.1
 ```
 
 ### get one user
-
-<aside class="notice">
-Restricted to 'admin' user.
-</aside>
 
 GET /user/`:id_user`
 
@@ -690,6 +682,8 @@ GET /corpus HTTP/1.1
 
 ### get one corpus
 
+<aside class="notice">Restricted to user with READ privileges.</aside>
+
 GET /corpus/`:id_corpus`
 
 #### QUERY PARAMETERS
@@ -790,7 +784,7 @@ PUT /corpus/:id_corpus HTTP/1.1
 ### delete one corpus
 
 <aside class="notice">
-Restricted to user with ADMIN privileges.
+Restricted to 'admin' user with ADMIN privileges.
 </aside>
 
 <aside class="warning">This request also delete media, layers and annotations inside the corpus</aside>
@@ -1017,6 +1011,8 @@ GET /medium HTTP/1.1
 
 ### get one medium
 
+<aside class="notice">Restricted to user with READ privileges.</aside>
+
 GET /medium/:id_medium`
 
 #### QUERY PARAMETERS
@@ -1043,6 +1039,8 @@ GET /medium/:id_medium HTTP/1.1
 ```
 
 ### get one corpus' media
+
+<aside class="notice">Restricted to user with READ privileges.</aside>
 
 GET /corpus/`:id_corpus`/medium
 
@@ -1075,6 +1073,8 @@ GET /corpus/:id_corpus/medium HTTP/1.1
 ```
 
 ### create new medium(a) in one corpus
+
+<aside class="notice">Restricted to user with ADMIN privileges.</aside>
 
 POST /corpus/:id_corpus/medium
 
@@ -1115,6 +1115,8 @@ POST /corpus/:id_corpus/medium HTTP/1.1
 
 ### update one medium
 
+<aside class="notice">Restricted to user with ADMIN privileges.</aside>
+
 PUT /medium/:id_medium
 
 #### QUERY PARAMETERS
@@ -1151,6 +1153,8 @@ PUT /medium/:id_medium HTTP/1.1
 
 ### delete one medium
 
+<aside class="notice">Restricted to user with ADMIN privileges.</aside>
+
 DELETE /medium/:id_medium
 
 #### QUERY PARAMETERS
@@ -1174,6 +1178,8 @@ DELETE /medium/:id_medium HTTP/1.1
 
 ### stream one medium in default format
 
+<aside class="notice">Restricted to user with READ privileges.</aside>
+
 GET /medium/:id_medium/video
 
 #### QUERY PARAMETERS
@@ -1191,9 +1197,9 @@ GET /medium/:id_medium/video HTTP/1.1
 
 ### stream one medium in WebM, MP4 or OGV
 
-GET /medium/:id_medium/webm
-GET /medium/:id_medium/mp4
-GET /medium/:id_medium/ogv
+<aside class="notice">Restricted to user with READ privileges.</aside>
+
+GET /medium/:id_medium/{webm,mp4,ogv}
 
 #### QUERY PARAMETERS
 Parameter        | Type      | Description
@@ -1208,7 +1214,9 @@ client.streamMedium(id_medium, format='ogv')
 
 ```http
 GET /medium/:id_medium/webm HTTP/1.1
+
 GET /medium/:id_medium/mp4 HTTP/1.1
+
 GET /medium/:id_medium/ogv HTTP/1.1
 ```
 
@@ -1216,11 +1224,11 @@ GET /medium/:id_medium/ogv HTTP/1.1
 
 ### get all layers
 
-GET /layer
-
 <aside class="warning">
 Restricted to 'root' user.
 </aside>
+
+GET /layer
 
 ```http
 GET /layer HTTP/1.1
@@ -1235,6 +1243,8 @@ GET /layer HTTP/1.1
 ```
 
 ### get one layer
+
+<aside class="notice">Restricted to user with READ privileges.</aside>
 
 GET /layer/:id_layer
 
@@ -1252,6 +1262,8 @@ GET /layer/:id_layer HTTP/1.1
 
 ### get one corpus' layers
 
+<aside class="notice">Restricted to user with READ privileges.</aside>
+
 GET /corpus/:id_corpus/layer
 
 ```http
@@ -1267,6 +1279,8 @@ GET /corpus/:id_corpus/layer HTTP/1.1
 ```
 
 ### create new layer(s) in one corpus
+
+<aside class="notice">Restricted to user with WRITE privileges.</aside>
 
 POST /corpus/:id_corpus/layer
 
@@ -1284,6 +1298,8 @@ POST /corpus/:id_corpus/layer HTTP/1.1
 
 ### update one layer
 
+<aside class="notice">Restricted to user with ADMIN privileges.</aside>
+
 PUT /layer/:id_layer
 
 ```http
@@ -1299,6 +1315,8 @@ PUT /layer/:id_layer HTTP/1.1
 ```
 
 ### delete one layer
+
+<aside class="notice">Restricted to user with ADMIN privileges.</aside>
 
 DELETE /layer/:id_layer
 
@@ -1316,6 +1334,8 @@ DELETE /layer/:id_layer HTTP/1.1
 
 ### get one layer's permissions
 
+<aside class="notice">Restricted to user with ADMIN privileges.</aside>
+
 GET /layer/:id_layer/permissions
 
 ```http
@@ -1331,6 +1351,8 @@ GET /layer/:id_layer/permissions HTTP/1.1
 ```
 
 ### give one user permissions to one layer
+
+<aside class="notice">Restricted to user with ADMIN privileges.</aside>
 
 PUT /layer/:id_layer/user/:id_user
 
@@ -1348,6 +1370,8 @@ PUT /layer/:id_layer/user/:id_user HTTP/1.1
 
 ### remove one user's permissions to one layer
 
+<aside class="notice">Restricted to user with ADMIN privileges.</aside>
+
 DELETE /layer/:id_layer/user/:id_user
 
 ```http
@@ -1364,6 +1388,8 @@ DELETE /layer/:id_layer/user/:id_user HTTP/1.1
 
 ### give one group permissions to one layer
 
+<aside class="notice">Restricted to user with ADMIN privileges.</aside>
+
 PUT /layer/:id_layer/group/:id_group 
 
 ```http
@@ -1379,6 +1405,8 @@ PUT /layer/:id_layer/group/:id_group HTTP/1.1
 ```
 
 ### remove on group's permissions to one layer
+
+<aside class="notice">Restricted to user with ADMIN privileges.</aside>
 
 DELETE /layer/:id_layer/group/:id_group
 
@@ -1398,6 +1426,10 @@ DELETE /layer/:id_layer/group/:id_group HTTP/1.1
 
 ### get all annotations
 
+<aside class="warning">
+Restricted to 'root' user.
+</aside>
+
 GET /annotation
 
 ```http
@@ -1413,6 +1445,8 @@ GET /annotation HTTP/1.1
 ```
 
 ### get one annotation
+
+<aside class="notice">Restricted to user with READ privileges.</aside>
 
 GET /annotation/:id_annotation
 
@@ -1430,6 +1464,8 @@ GET /annotation/:id_annotation HTTP/1.1
 
 ### get one layer's annotations
 
+<aside class="notice">Restricted to user with READ privileges.</aside>
+
 GET /layer/:id_layer/annotation
 
 ```http
@@ -1445,6 +1481,8 @@ GET /layer/:id_layer/annotation HTTP/1.1
 ```
 
 ### create new annotation(s) in one layer
+
+<aside class="notice">Restricted to user with WRITE privileges.</aside>
 
 POST /layer/:id_layer/annotation
 
@@ -1462,6 +1500,8 @@ POST /layer/:id_layer/annotation HTTP/1.1
 
 ### update one annotation
 
+<aside class="notice">Restricted to user with WRITE privileges.</aside>
+
 PUT /annotation/:id_annotation
 
 ```http
@@ -1477,6 +1517,8 @@ PUT /annotation/:id_annotation HTTP/1.1
 ```
 
 ### delete one annotation
+
+<aside class="notice">Restricted to user with ADMIN privileges.</aside>
 
 DELETE /annotation/:id_annotation
 
@@ -1522,6 +1564,8 @@ queues = client.getQueues()
 
 ### get one queue
 
+<aside class="notice">Restricted to user with WRITE privileges.</aside>
+
 GET /queue/:id_queue
 
 ```http
@@ -1540,6 +1584,8 @@ GET /queue/:id_queue HTTP/1.1
 ```
 
 ### create new queue
+
+<aside class="notice">Restricted to 'admin' user.</aside>
 
 POST /queue
 
@@ -1572,6 +1618,8 @@ queue = client.createQueue('queue name', description={'my': 'description'})
 ```
 
 ### update one queue
+
+<aside class="notice">Restricted to user with ADMIN privileges.</aside>
 
 PUT /queue/:id_queue
 
@@ -1608,6 +1656,8 @@ queue = client.updateQueue(id_queue,
 
 ### append item(s) to one queue
 
+<aside class="notice">Restricted to user with WRITE privileges.</aside>
+
 PUT /queue/:id_queue/next
 
 ```http
@@ -1628,6 +1678,8 @@ queue = client.enqueue(id_queue, items)
 
 ### pop one item from one queue
 
+<aside class="notice">Restricted to user with WRITE privileges.</aside>
+
 GET /queue/:id_queue/next
 
 ```http
@@ -1638,7 +1690,57 @@ GET /queue/:id_queue/next HTTP/1.1
 item = client.dequeue(id_queue)
 ```
 
+### get next item on one queue (without actually removing it)
+
+<aside class="notice">Restricted to user with ADMIN privileges.</aside>
+
+(Non-destructively) pick first element of queue
+
+GET /queue/:id_queue/first
+
+```http
+GET /queue/:id_queue/first HTTP/1.1
+```
+
+```python
+item = client.pick(id_queue)
+```
+
+### get number of items in one queue
+
+<aside class="notice">Restricted to user with ADMIN privileges.</aside>
+
+(Non-destructively) get number of elements in queue
+
+GET /queue/:id_queue/length
+
+```http
+GET /queue/:id_queue/length HTTP/1.1
+```
+
+```python
+item = client.pickLength(id_queue)
+```
+
+### get all items from one queue
+
+<aside class="notice">Restricted to user with ADMIN privileges.</aside>
+
+(Non-destructively) pick all elements of queue
+
+GET /queue/:id_queue/all
+
+```http
+GET /queue/:id_queue/all HTTP/1.1
+```
+
+```python
+item = client.pickAll(id_queue)
+```
+
 ### remove one queue
+
+<aside class="notice">Restricted to user with ADMIN privileges.</aside>
 
 DELETE /queue/:id_queue
 
@@ -1655,6 +1757,118 @@ client.deleteQueue(id_corpus)
 ```json
 {
   "success": "Successfully deleted."
+}
+```
+
+```
+
+### get one queue's permissions
+
+<aside class="notice">Restricted to user with ADMIN privileges.</aside>
+
+GET /queue/:id_queue/permissions
+
+```http
+GET /queue/:id_queue/permissions HTTP/1.1
+```
+
+```python
+client.getQueuePermissions(id_queue)
+```
+
+> Sample JSON response
+
+```json
+{
+
+}
+```
+
+### give one user permissions to one queue
+
+<aside class="notice">Restricted to user with ADMIN privileges.</aside>
+
+PUT /queue/:id_queue/user/:id_user
+
+```http
+PUT /queue/:id_queue/user/:id_user HTTP/1.1
+```
+
+```python
+client.setQueuePermissions(id_queue, client.WRITE, user=id_user)
+```
+
+> Sample JSON response
+
+```json
+{
+
+}
+```
+
+### remove one user's permissions to one queue
+
+<aside class="notice">Restricted to user with ADMIN privileges.</aside>
+
+DELETE /queue/:id_queue/user/:id_user
+
+```http
+DELETE /queue/:id_queue/user/:id_user HTTP/1.1
+```
+
+```python
+client.removeQueuePermissions(id_queue, user=id_user)
+```
+
+> Sample JSON response
+
+```json
+{
+
+}
+```
+
+### give one group permissions to one queue
+
+<aside class="notice">Restricted to user with ADMIN privileges.</aside>
+
+PUT /queue/:id_queue/group/:id_group 
+
+```http
+PUT /queue/:id_queue/group/:id_group HTTP/1.1
+```
+
+```python
+client.setQueuePermissions(id_queue, client.WRITE, group=id_group)
+```
+
+> Sample JSON response
+
+```json
+{
+
+}
+```
+
+### remove on group's permissions to one queue
+
+<aside class="notice">Restricted to user with ADMIN privileges.</aside>
+
+DELETE /queue/:id_queue/group/:id_group
+
+```http
+DELETE /queue/:id_queue/group/:id_group HTTP/1.1
+```
+
+```python
+client.removeQueuePermissions(id_queue, group=id_group)
+```
+
+> Sample JSON response
+
+```json
+{
+
 }
 ```
 
