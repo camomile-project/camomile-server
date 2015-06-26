@@ -254,7 +254,7 @@ Documentation synchronized with Camomile-server 0.6.0
 <h3 id="crud-rest-api">CRUD REST API</h3>
 
 <p>CAMOMILE server follows the conventional REST API for CRUD (Create, Read, Update, Delete) data access.
-For a given resource (either corpus, medium, layer, annotation), the correspondance with HTTP commands and Python or Javascript interface is as follows.</p>
+For a given <em>resource</em> (either corpus, medium, layer, annotation), the correspondance with HTTP commands and Python or Javascript interface is as follows.</p>
 
 <table><thead>
 <tr>
@@ -265,23 +265,23 @@ For a given resource (either corpus, medium, layer, annotation), the corresponda
 </thead><tbody>
 <tr>
 <td>Create</td>
-<td>POST /<code class="prettyprint">resource</code></td>
-<td>.create<code class="prettyprint">Resource</code>()</td>
+<td>POST /<em>resource</em></td>
+<td>.create*Resource*(&hellip;)</td>
 </tr>
 <tr>
 <td>Read</td>
-<td>GET /<code class="prettyprint">resource</code>/<code class="prettyprint">:id_resource</code></td>
-<td>.get<code class="prettyprint">Resource</code>()</td>
+<td>GET /<em>resource</em>/<code class="prettyprint">:id_resource</code></td>
+<td>.get*Resource*(<code class="prettyprint">:id_resource</code>)</td>
 </tr>
 <tr>
 <td>Update</td>
-<td>PUT /<code class="prettyprint">resource</code>/<code class="prettyprint">:id_resource</code></td>
-<td>.update<code class="prettyprint">Resource</code>()</td>
+<td>PUT /<em>resource</em>/<code class="prettyprint">:id_resource</code></td>
+<td>.update*Resource*(<code class="prettyprint">:id_resource</code>,&hellip;)</td>
 </tr>
 <tr>
 <td>Delete</td>
-<td>DELETE /<code class="prettyprint">resource</code>/<code class="prettyprint">:id_resource</code></td>
-<td>.delete<code class="prettyprint">Resource</code>()</td>
+<td>DELETE /<em>resource</em>/<code class="prettyprint">:id_resource</code></td>
+<td>.delete*Resource*(<code class="prettyprint">:id_resource</code>)</td>
 </tr>
 </tbody></table>
 
@@ -2368,15 +2368,13 @@ Restricted to 'root&rsquo; user.
   </span><span class="nt">"success"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Successfully deleted."</span><span class="w">
 </span><span class="p">}</span><span class="w">
 </span></code></pre>
-<pre class="highlight plaintext"><code>
-### get one queue's permissions
 
-&lt;aside class="notice"&gt;Restricted to user with ADMIN permissions to the resource.&lt;/aside&gt;
+<h3 id="get-one-queue-39-s-permissions">get one queue&rsquo;s permissions</h3>
 
-GET /queue/:id_queue/permissions
+<aside class="notice">Restricted to user with ADMIN permissions to the resource.</aside>
 
-```http
-GET /queue/:id_queue/permissions HTTP/1.1
+<p>GET /queue/:id_queue/permissions</p>
+<pre class="highlight http"><code><span class="nf">GET</span> <span class="nn">/queue/:id_queue/permissions</span> <span class="k">HTTP</span><span class="o">/</span><span class="m">1.1</span>
 </code></pre>
 <pre class="highlight python"><code><span class="n">client</span><span class="o">.</span><span class="n">getQueuePermissions</span><span class="p">(</span><span class="n">id_queue</span><span class="p">)</span>
 </code></pre>
