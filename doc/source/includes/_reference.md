@@ -3,6 +3,19 @@
 
 ## Foreword
 
+### CRUD REST API
+
+CAMOMILE server follows the conventional REST API for CRUD (Create, Read, Update, Delete) data access.
+For a given resource (either corpus, medium, layer, annotation), the correspondance with HTTP commands and Python or Javascript interface is as follows.
+
+Action  | HTTP command                       | Python/Javascript interface
+--------|------------------------------------|------------------
+Create  | POST /`resource`                   | .create`Resource`()
+Read    | GET /`resource`/`:id_resource`     | .get`Resource`()
+Update  | PUT /`resource`/`:id_resource`     | .update`Resource`()
+Delete  | DELETE /`resource`/`:id_resource`  | .delete`Resource`()
+
+
 ### History
 
 ```http
@@ -87,8 +100,8 @@ The Camomile platform handles permissions: a user may access only the resources 
 
 Three levels of permissions are supported: 
 
-  - `3 - ADMIN` admin privileges
-  - `2 - WRITE` edition privileges
+  - `3 - ADMIN` admin permissions to the resource
+  - `2 - WRITE` edition permissions to the resource
   - `1 - READ` read-only
 
 `Annotations` inherit permissions from the `layer` they belong to.
@@ -156,7 +169,9 @@ Camomile.setURL(server);
 > JSON response upon success
 
 ```json
-{'success': 'Authentication succeeded.'}
+{
+ 'success': 'Authentication succeeded.'
+}
 ```
 
 ### logout
@@ -174,7 +189,9 @@ client.logout()
 > JSON response upon success
 
 ```json
-{'success': 'Logout succeeded.'}
+{
+ 'success': 'Logout succeeded.'
+}
 ```
 
 ### get logged in user
@@ -193,10 +210,12 @@ GET /me HTTP/1.1
 > Sample JSON response
 
 ```json
-{'_id': '555299eff80f910100d741d1',
+{
+ '_id': '555299eff80f910100d741d1',
  'description': '',
  'role': 'user',
- 'username': 'johndoe'}
+ 'username': 'johndoe'
+}
 ```
 
 ### update password
@@ -232,7 +251,7 @@ PUT /me HTTP/1.1
 ### create new user 
 
 <aside class="notice">
-Restricted to 'admin' user.
+Restricted to user with 'admin' role.
 </aside>
 
 POST /user 
@@ -271,16 +290,18 @@ client.createUser('username', 'password',
 > Sample JSON response
 
 ```json
-{'_id': '558818da01e0ef01006e979b',
+{
+ '_id': '558818da01e0ef01006e979b',
  'description': 'annotator',
  'role': 'user',
- 'username': 'johndoe'}
+ 'username': 'johndoe'
+}
 ```
 
 ### delete one user
 
 <aside class="notice">
-Restricted to 'admin' user.
+Restricted to user with 'admin' role.
 </aside>
 
 DELETE /user/`:id_user`
@@ -301,7 +322,9 @@ DELETE /user/:id_user HTTP/1.1
 > JSON response upon success
 
 ```json
-{'success': 'Successfully deleted.'}
+{
+ 'success': 'Successfully deleted.'
+}
 ```
 
 ### get all users
@@ -325,14 +348,20 @@ GET /user HTTP/1.1
 > Sample JSON response
 
 ```json
-[{'_id': '5552998df80f910100d741d0',
+[
+ {
+  '_id': '5552998df80f910100d741d0',
   'description': '',
   'role': 'admin',
-  'username': 'root'},
- {'_id': '558818da01e0ef01006e979b',
+  'username': 'root'
+ },
+ {
+  '_id': '558818da01e0ef01006e979b',
   'description': 'annotator',
   'role': 'user',
-  'username': 'johndoe'}]
+  'username': 'johndoe'
+ }
+]
 ```
 
 ### get one user
@@ -355,16 +384,18 @@ GET /user/:id_user HTTP/1.1
 > Sample JSON response
 
 ```json
-{'_id': '558818da01e0ef01006e979b',
-'description': 'annotator',
-'role': 'user',
-'username': 'johndoe'}
+{
+ '_id': '558818da01e0ef01006e979b',
+ 'description': 'annotator',
+ 'role': 'user',
+ 'username': 'johndoe'
+}
 ```
 
 ### update one user
 
 <aside class="notice">
-Restricted to 'admin' user.
+Restricted to user with 'admin' role.
 </aside>
 
 PUT /user/`:id_user`
@@ -397,16 +428,18 @@ user = client.updateUser(id_user,
 > Sample JSON response
 
 ```json
-{'_id': '558818da01e0ef01006e979b',
-'description': 'expert annotator',
-'role': 'user',
-'username': 'johndoe'}
+{
+ '_id': '558818da01e0ef01006e979b',
+ 'description': 'expert annotator',
+ 'role': 'user',
+ 'username': 'johndoe'
+}
 ```
 
 ### get one user's groups
 
 <aside class="notice">
-Restricted to 'admin' user.
+Restricted to user with 'admin' role.
 </aside>
 
 GET /user/`:id_user`/group
@@ -427,14 +460,16 @@ id_groups = client.getUserGroups(id_user)
 > Sample JSON response
 
 ```json
-['55881d1601e0ef01006e979c']
+[
+ '55881d1601e0ef01006e979c'
+]
 ```
 
 
 ### get all groups
 
 <aside class="notice">
-Restricted to 'admin' user.
+Restricted to user with 'admin' role.
 </aside>
 
 GET /group
@@ -457,16 +492,20 @@ groups = client.getGroups()
 > Sample JSON response
 
 ```json
-[{'_id': '55881d1601e0ef01006e979c',
+[
+ {
+  '_id': '55881d1601e0ef01006e979c',
   'description': 'members of the project',
   'name': 'project',
-  'users': ['558818da01e0ef01006e979b', '55881d6001e0ef01006e979d']}]
+  'users': ['558818da01e0ef01006e979b', '55881d6001e0ef01006e979d']
+ }
+]
 ```
 
 ### get one group
 
 <aside class="notice">
-Restricted to 'admin' user.
+Restricted to user with 'admin' role.
 </aside>
 
 GET /group/`:id_group`
@@ -487,17 +526,19 @@ group = client.getGroup(id_group)
 > Sample JSON response
 
 ```json
-{'_id': '55881d1601e0ef01006e979c',
+{
+  '_id': '55881d1601e0ef01006e979c',
   'description': 'members of the project',
   'name': 'project',
-  'users': ['558818da01e0ef01006e979b', '55881d6001e0ef01006e979d']}
+  'users': ['558818da01e0ef01006e979b', '55881d6001e0ef01006e979d']
+}
 ```
 
 
 ### create new group
 
 <aside class="notice">
-Restricted to 'admin' user.
+Restricted to user with 'admin' role.
 </aside>
 
 POST /group
@@ -523,16 +564,18 @@ group = client.createGroup(
 > Sample JSON response
 
 ```json
-{'_id': '55881f8301e0ef01006e979e',
+{
+ '_id': '55881f8301e0ef01006e979e',
  'description': '',
  'name': 'guests',
- 'users': []}
+ 'users': []
+}
 ```
 
 ### update one group
 
 <aside class="notice">
-Restricted to 'admin' user.
+Restricted to user with 'admin' role.
 </aside>
 
 PUT /group/`:id_group`
@@ -563,10 +606,12 @@ group = client.updateGroup(
 > Sample JSON response
 
 ```json
-{'_id': '55881f8301e0ef01006e979e',
+{
+ '_id': '55881f8301e0ef01006e979e',
  'description': 'open trial',
  'name': 'guests',
- 'users': []}
+ 'users': []
+}
 ```
 
 ### delete one group
@@ -593,13 +638,15 @@ client.deleteGroup(id_group)
 > JSON response upon success
 
 ```json
-{'success': 'Successfully deleted.'}
+{
+ 'success': 'Successfully deleted.'
+}
 ```
 
 ### add one user to one group
 
 <aside class="notice">
-Restricted to 'admin' user.
+Restricted to user with 'admin' role.
 </aside>
 
 PUT /group/`:id_group`/user/`:id_user`
@@ -622,16 +669,18 @@ client.addUserToGroup(id_user, id_group)
 > Sample JSON response
 
 ```json
-{'_id': '55881d1601e0ef01006e979c',
+{
+  '_id': '55881d1601e0ef01006e979c',
   'description': 'members of the project',
   'name': 'project',
-  'users': ['558818da01e0ef01006e979b', '55881d6001e0ef01006e979d']}
+  'users': ['558818da01e0ef01006e979b', '55881d6001e0ef01006e979d']
+}
 ```
 
 ### remove one user from one group
 
 <aside class="notice">
-Restricted to 'admin' user.
+Restricted to user with 'admin' role.
 </aside>
 
 DELETE /group/`:id_group`/user/`:id_user`
@@ -653,10 +702,12 @@ DELETE /group/:id_group/user/:id_user HTTP/1.1
 > Sample JSON response
 
 ```json
-{'_id': '55881d1601e0ef01006e979c',
+{
+  '_id': '55881d1601e0ef01006e979c',
   'description': 'members of the project',
   'name': 'project',
-  'users': ['558818da01e0ef01006e979b']}
+  'users': ['558818da01e0ef01006e979b']
+}
 ```
 
 ## Corpora
@@ -676,13 +727,18 @@ GET /corpus HTTP/1.1
 > Sample JSON response
 
 ```json
-[{'_id': '555daefff80f910100d741d6',
+[
+ {
+  '_id': '555daefff80f910100d741d6',
   'description': 'Test corpus',
-  'name': 'ctest'}```
+  'name': 'ctest'
+ }
+]
+```
 
 ### get one corpus
 
-<aside class="notice">Restricted to user with READ privileges.</aside>
+<aside class="notice">Restricted to user with READ permissions to the resource.</aside>
 
 GET /corpus/`:id_corpus`
 
@@ -702,15 +758,17 @@ GET /corpus/:id_corpus HTTP/1.1
 > Sample JSON response
 
 ```json
-{'_id': '555daefff80f910100d741d6',
+{
+  '_id': '555daefff80f910100d741d6',
   'description': 'Test corpus',
-  'name': 'ctest'}
+  'name': 'ctest'
+}
 ```
 
 ### create new corpus
 
 <aside class="notice">
-Restricted to 'admin' user.
+Restricted to user with 'admin' role.
 </aside>
 
 POST /corpus
@@ -737,14 +795,16 @@ POST /corpus HTTP/1.1
 > Sample JSON response
 
 ```json
-{_id': '555daefff80f910100d741d6',
+{
+ '_id': '555daefff80f910100d741d6',
  'description': {'license': 'Creative Commons'},
- 'name': 'unique name'}
+ 'name': 'unique name'
+}
 ```
 
 ### update one corpus
 
-<aside class="notice">Restricted to user with ADMIN privileges.</aside>
+<aside class="notice">Restricted to user with ADMIN permissions to the resource.</aside>
 
 PUT /corpus/`:id_corpus`
 
@@ -776,15 +836,17 @@ PUT /corpus/:id_corpus HTTP/1.1
 > Sample JSON response
 
 ```json
-{_id': '555daefff80f910100d741d6',
+{
+ '_id': '555daefff80f910100d741d6',
  'description': {'license': 'MIT'},
- 'name': 'new name'}
+ 'name': 'new name'
+}
 ```
 
 ### delete one corpus
 
 <aside class="notice">
-Restricted to 'admin' user with ADMIN privileges.
+Restricted to user with 'admin' role and ADMIN permissions to the resource.
 </aside>
 
 <aside class="warning">This request also delete media, layers and annotations inside the corpus</aside>
@@ -808,13 +870,15 @@ DELETE /corpus/:id_corpus HTTP/1.1
 > JSON response upon success
 
 ```json
-{'success': 'Successfully deleted.'}
+{
+ 'success': 'Successfully deleted.'
+}
 ```
 
 ### get one corpus' permissions
 
 <aside class="notice">
-Restricted to user with ADMIN privileges.
+Restricted to user with ADMIN permissions to the resource.
 </aside>
 
 GET /corpus/`:id_corpus`/permissions
@@ -850,7 +914,7 @@ permissions = client.getCorpusPermissions(id_corpus)
 ### give one user permissions to one corpus
 
 <aside class="notice">
-Restricted to user with ADMIN privileges.
+Restricted to user with ADMIN permissions to the resource.
 </aside>
 
 PUT /corpus/`:id_corpus`/user/`:id_user`
@@ -879,15 +943,17 @@ PUT /corpus/:id_corpus/user/:id_user HTTP/1.1
 > Sample JSON response
 
 ```json
-{'users': {'555299eff80f910100d741d1': 3,
+{
+  'users': {'555299eff80f910100d741d1': 3,
   '5552bf5cf80f910100d741d2': 2,
-  '55881d6001e0ef01006e979d': 3}}
+  '55881d6001e0ef01006e979d': 3}
+}
 ```
 
 ### remove one user's permissions to one corpus
 
 <aside class="notice">
-Restricted to user with ADMIN privileges.
+Restricted to user with ADMIN permissions to the resource.
 </aside>
 
 DELETE /corpus/`:id_corpus`/user/`:id_user`
@@ -909,14 +975,16 @@ DELETE /corpus/:id_corpus/user/:id_user HTTP/1.1
 > Sample JSON response
 
 ```json
-{'users': {'555299eff80f910100d741d1': 3,
-  '5552bf5cf80f910100d741d2': 2}}
+{
+ 'users': {'555299eff80f910100d741d1': 3,
+  '5552bf5cf80f910100d741d2': 2}
+}
 ```
 
 ### give one group permissions to one corpus
 
 <aside class="notice">
-Restricted to user with ADMIN privileges.
+Restricted to user with ADMIN permissions to the resource.
 </aside>
 
 PUT /corpus/`:id_corpus`/group/`:id_group`
@@ -944,15 +1012,17 @@ PUT /corpus/:id_corpus/group/:id_group HTTP/1.1
 > Sample JSON response
 
 ```json
-{'groups': {'55881d1601e0ef01006e979c': 2},
+{
+ 'groups': {'55881d1601e0ef01006e979c': 2},
  'users': {'555299eff80f910100d741d1': 3, 
-   '5552bf5cf80f910100d741d2': 2}}
+   '5552bf5cf80f910100d741d2': 2}
+}
  ```
 
 ### remove one group's permissions to one corpus
 
 <aside class="notice">
-Restricted to user with ADMIN privileges.
+Restricted to user with ADMIN permissions to the resource.
 </aside>
 
 DELETE /corpus/`:id_corpus`/group/`:id_group`
@@ -974,8 +1044,10 @@ DELETE /corpus/:id_corpus/group/:id_group HTTP/1.1
 > Sample JSON response
 
 ```json
-{'users': {'555299eff80f910100d741d1': 3,
-  '5552bf5cf80f910100d741d2': 2}}
+{
+ 'users': {'555299eff80f910100d741d1': 3,
+  '5552bf5cf80f910100d741d2': 2}
+}
 ```
 
 ## Media
@@ -1004,14 +1076,16 @@ GET /medium HTTP/1.1
 > Sample JSON response
 
 ```json
-[{'_id': '...', 'description': '', 'id_corpus': '...', 'name': 'show1', 'url': ''},
-{'_id': '...', 'description': '', 'id_corpus': '...', 'name': 'show2', 'url': ''}
-...]
+[
+ {'_id': '...', 'description': '', 'id_corpus': '...', 'name': 'show1', 'url': ''},
+ {'_id': '...', 'description': '', 'id_corpus': '...', 'name': 'show2', 'url': ''}
+ ...
+]
 ```
 
 ### get one medium
 
-<aside class="notice">Restricted to user with READ privileges.</aside>
+<aside class="notice">Restricted to user with READ permissions to the resource.</aside>
 
 GET /medium/:id_medium`
 
@@ -1031,16 +1105,18 @@ GET /medium/:id_medium HTTP/1.1
 > Sample JSON response
 
 ```json
-{'_id': '555db2e6f80f910100d741d8',
+{
+  '_id': '555db2e6f80f910100d741d8',
   'description': '',
   'id_corpus': '555daefff80f910100d741d6',
   'name': 'LCP_PileEtFace_2012-11-30_012500',
-  'url': ''}
+  'url': ''
+}
 ```
 
 ### get one corpus' media
 
-<aside class="notice">Restricted to user with READ privileges.</aside>
+<aside class="notice">Restricted to user with READ permissions to the resource.</aside>
 
 GET /corpus/`:id_corpus`/medium
 
@@ -1065,16 +1141,18 @@ GET /corpus/:id_corpus/medium HTTP/1.1
 > Sample JSON response
 
 ```json
-{'_id': '555db2e6f80f910100d741d8',
+{
+  '_id': '555db2e6f80f910100d741d8',
   'description': '',
   'id_corpus': '555daefff80f910100d741d6',
   'name': 'LCP_PileEtFace_2012-11-30_012500',
-  'url': ''}
+  'url': ''
+}
 ```
 
 ### create new medium(a) in one corpus
 
-<aside class="notice">Restricted to user with ADMIN privileges.</aside>
+<aside class="notice">Restricted to user with ADMIN permissions to the resource.</aside>
 
 POST /corpus/:id_corpus/medium
 
@@ -1108,14 +1186,17 @@ POST /corpus/:id_corpus/medium HTTP/1.1
 > Sample JSON response
 
 ```json
-{'_id': '55895e90c70125010026f6b5',
+{
+ '_id': '55895e90c70125010026f6b5',
  'id_corpus': '558955cec70125010026f6aa',
  'name': 'LCP_PileEtFace_2012-11-30_012500',
- 'url': ''}```
+ 'url': ''
+}
+```
 
 ### update one medium
 
-<aside class="notice">Restricted to user with ADMIN privileges.</aside>
+<aside class="notice">Restricted to user with ADMIN permissions to the resource.</aside>
 
 PUT /medium/:id_medium
 
@@ -1144,16 +1225,18 @@ PUT /medium/:id_medium HTTP/1.1
 > Sample JSON response
 
 ```json
-{'_id': '55895e90c70125010026f6b5',
+{
+ '_id': '55895e90c70125010026f6b5',
  'id_corpus': '558955cec70125010026f6aa',
  'name': 'LCP_PileEtFace_2012-11-30_012500',
  'url': '',
- 'description': 'LCP channel'}
+ 'description': 'LCP channel'
+}
  ```
 
 ### delete one medium
 
-<aside class="notice">Restricted to user with ADMIN privileges.</aside>
+<aside class="notice">Restricted to user with ADMIN permissions to the resource.</aside>
 
 DELETE /medium/:id_medium
 
@@ -1173,12 +1256,14 @@ DELETE /medium/:id_medium HTTP/1.1
 > JSON response upon success
 
 ```json
-{'success': 'Successfully deleted.'}
+{
+ 'success': 'Successfully deleted.'
+}
 ```
 
 ### stream one medium in default format
 
-<aside class="notice">Restricted to user with READ privileges.</aside>
+<aside class="notice">Restricted to user with READ permissions to the resource.</aside>
 
 GET /medium/:id_medium/video
 
@@ -1197,7 +1282,7 @@ GET /medium/:id_medium/video HTTP/1.1
 
 ### stream one medium in WebM, MP4 or OGV
 
-<aside class="notice">Restricted to user with READ privileges.</aside>
+<aside class="notice">Restricted to user with READ permissions to the resource.</aside>
 
 GET /medium/:id_medium/{webm,mp4,ogv}
 
@@ -1244,7 +1329,7 @@ GET /layer HTTP/1.1
 
 ### get one layer
 
-<aside class="notice">Restricted to user with READ privileges.</aside>
+<aside class="notice">Restricted to user with READ permissions to the resource.</aside>
 
 GET /layer/:id_layer
 
@@ -1262,7 +1347,7 @@ GET /layer/:id_layer HTTP/1.1
 
 ### get one corpus' layers
 
-<aside class="notice">Restricted to user with READ privileges.</aside>
+<aside class="notice">Restricted to user with READ permissions to the resource.</aside>
 
 GET /corpus/:id_corpus/layer
 
@@ -1280,7 +1365,7 @@ GET /corpus/:id_corpus/layer HTTP/1.1
 
 ### create new layer(s) in one corpus
 
-<aside class="notice">Restricted to user with WRITE privileges.</aside>
+<aside class="notice">Restricted to user with WRITE permissions to the resource.</aside>
 
 POST /corpus/:id_corpus/layer
 
@@ -1298,7 +1383,7 @@ POST /corpus/:id_corpus/layer HTTP/1.1
 
 ### update one layer
 
-<aside class="notice">Restricted to user with ADMIN privileges.</aside>
+<aside class="notice">Restricted to user with ADMIN permissions to the resource.</aside>
 
 PUT /layer/:id_layer
 
@@ -1316,7 +1401,7 @@ PUT /layer/:id_layer HTTP/1.1
 
 ### delete one layer
 
-<aside class="notice">Restricted to user with ADMIN privileges.</aside>
+<aside class="notice">Restricted to user with ADMIN permissions to the resource.</aside>
 
 DELETE /layer/:id_layer
 
@@ -1334,7 +1419,7 @@ DELETE /layer/:id_layer HTTP/1.1
 
 ### get one layer's permissions
 
-<aside class="notice">Restricted to user with ADMIN privileges.</aside>
+<aside class="notice">Restricted to user with ADMIN permissions to the resource.</aside>
 
 GET /layer/:id_layer/permissions
 
@@ -1352,7 +1437,7 @@ GET /layer/:id_layer/permissions HTTP/1.1
 
 ### give one user permissions to one layer
 
-<aside class="notice">Restricted to user with ADMIN privileges.</aside>
+<aside class="notice">Restricted to user with ADMIN permissions to the resource.</aside>
 
 PUT /layer/:id_layer/user/:id_user
 
@@ -1370,7 +1455,7 @@ PUT /layer/:id_layer/user/:id_user HTTP/1.1
 
 ### remove one user's permissions to one layer
 
-<aside class="notice">Restricted to user with ADMIN privileges.</aside>
+<aside class="notice">Restricted to user with ADMIN permissions to the resource.</aside>
 
 DELETE /layer/:id_layer/user/:id_user
 
@@ -1388,7 +1473,7 @@ DELETE /layer/:id_layer/user/:id_user HTTP/1.1
 
 ### give one group permissions to one layer
 
-<aside class="notice">Restricted to user with ADMIN privileges.</aside>
+<aside class="notice">Restricted to user with ADMIN permissions to the resource.</aside>
 
 PUT /layer/:id_layer/group/:id_group 
 
@@ -1406,7 +1491,7 @@ PUT /layer/:id_layer/group/:id_group HTTP/1.1
 
 ### remove on group's permissions to one layer
 
-<aside class="notice">Restricted to user with ADMIN privileges.</aside>
+<aside class="notice">Restricted to user with ADMIN permissions to the resource.</aside>
 
 DELETE /layer/:id_layer/group/:id_group
 
@@ -1446,7 +1531,7 @@ GET /annotation HTTP/1.1
 
 ### get one annotation
 
-<aside class="notice">Restricted to user with READ privileges.</aside>
+<aside class="notice">Restricted to user with READ permissions to the resource.</aside>
 
 GET /annotation/:id_annotation
 
@@ -1464,7 +1549,7 @@ GET /annotation/:id_annotation HTTP/1.1
 
 ### get one layer's annotations
 
-<aside class="notice">Restricted to user with READ privileges.</aside>
+<aside class="notice">Restricted to user with READ permissions to the resource.</aside>
 
 GET /layer/:id_layer/annotation
 
@@ -1482,7 +1567,7 @@ GET /layer/:id_layer/annotation HTTP/1.1
 
 ### create new annotation(s) in one layer
 
-<aside class="notice">Restricted to user with WRITE privileges.</aside>
+<aside class="notice">Restricted to user with WRITE permissions to the resource.</aside>
 
 POST /layer/:id_layer/annotation
 
@@ -1500,7 +1585,7 @@ POST /layer/:id_layer/annotation HTTP/1.1
 
 ### update one annotation
 
-<aside class="notice">Restricted to user with WRITE privileges.</aside>
+<aside class="notice">Restricted to user with WRITE permissions to the resource.</aside>
 
 PUT /annotation/:id_annotation
 
@@ -1518,7 +1603,7 @@ PUT /annotation/:id_annotation HTTP/1.1
 
 ### delete one annotation
 
-<aside class="notice">Restricted to user with ADMIN privileges.</aside>
+<aside class="notice">Restricted to user with ADMIN permissions to the resource.</aside>
 
 DELETE /annotation/:id_annotation
 
@@ -1564,7 +1649,7 @@ queues = client.getQueues()
 
 ### get one queue
 
-<aside class="notice">Restricted to user with WRITE privileges.</aside>
+<aside class="notice">Restricted to user with WRITE permissions to the resource.</aside>
 
 GET /queue/:id_queue
 
@@ -1585,7 +1670,7 @@ GET /queue/:id_queue HTTP/1.1
 
 ### create new queue
 
-<aside class="notice">Restricted to 'admin' user.</aside>
+<aside class="notice">Restricted to user with 'admin' role.</aside>
 
 POST /queue
 
@@ -1619,7 +1704,7 @@ queue = client.createQueue('queue name', description={'my': 'description'})
 
 ### update one queue
 
-<aside class="notice">Restricted to user with ADMIN privileges.</aside>
+<aside class="notice">Restricted to user with ADMIN permissions to the resource.</aside>
 
 PUT /queue/:id_queue
 
@@ -1656,7 +1741,7 @@ queue = client.updateQueue(id_queue,
 
 ### append item(s) to one queue
 
-<aside class="notice">Restricted to user with WRITE privileges.</aside>
+<aside class="notice">Restricted to user with WRITE permissions to the resource.</aside>
 
 PUT /queue/:id_queue/next
 
@@ -1678,7 +1763,7 @@ queue = client.enqueue(id_queue, items)
 
 ### pop one item from one queue
 
-<aside class="notice">Restricted to user with WRITE privileges.</aside>
+<aside class="notice">Restricted to user with WRITE permissions to the resource.</aside>
 
 GET /queue/:id_queue/next
 
@@ -1692,7 +1777,7 @@ item = client.dequeue(id_queue)
 
 ### get next item on one queue (without actually removing it)
 
-<aside class="notice">Restricted to user with ADMIN privileges.</aside>
+<aside class="notice">Restricted to user with ADMIN permissions to the resource.</aside>
 
 (Non-destructively) pick first element of queue
 
@@ -1708,7 +1793,7 @@ item = client.pick(id_queue)
 
 ### get number of items in one queue
 
-<aside class="notice">Restricted to user with ADMIN privileges.</aside>
+<aside class="notice">Restricted to user with ADMIN permissions to the resource.</aside>
 
 (Non-destructively) get number of elements in queue
 
@@ -1724,7 +1809,7 @@ item = client.pickLength(id_queue)
 
 ### get all items from one queue
 
-<aside class="notice">Restricted to user with ADMIN privileges.</aside>
+<aside class="notice">Restricted to user with ADMIN permissions to the resource.</aside>
 
 (Non-destructively) pick all elements of queue
 
@@ -1740,7 +1825,7 @@ item = client.pickAll(id_queue)
 
 ### remove one queue
 
-<aside class="notice">Restricted to user with ADMIN privileges.</aside>
+<aside class="notice">Restricted to user with ADMIN permissions to the resource.</aside>
 
 DELETE /queue/:id_queue
 
@@ -1764,7 +1849,7 @@ client.deleteQueue(id_corpus)
 
 ### get one queue's permissions
 
-<aside class="notice">Restricted to user with ADMIN privileges.</aside>
+<aside class="notice">Restricted to user with ADMIN permissions to the resource.</aside>
 
 GET /queue/:id_queue/permissions
 
@@ -1786,7 +1871,7 @@ client.getQueuePermissions(id_queue)
 
 ### give one user permissions to one queue
 
-<aside class="notice">Restricted to user with ADMIN privileges.</aside>
+<aside class="notice">Restricted to user with ADMIN permissions to the resource.</aside>
 
 PUT /queue/:id_queue/user/:id_user
 
@@ -1808,7 +1893,7 @@ client.setQueuePermissions(id_queue, client.WRITE, user=id_user)
 
 ### remove one user's permissions to one queue
 
-<aside class="notice">Restricted to user with ADMIN privileges.</aside>
+<aside class="notice">Restricted to user with ADMIN permissions to the resource.</aside>
 
 DELETE /queue/:id_queue/user/:id_user
 
@@ -1830,7 +1915,7 @@ client.removeQueuePermissions(id_queue, user=id_user)
 
 ### give one group permissions to one queue
 
-<aside class="notice">Restricted to user with ADMIN privileges.</aside>
+<aside class="notice">Restricted to user with ADMIN permissions to the resource.</aside>
 
 PUT /queue/:id_queue/group/:id_group 
 
@@ -1852,7 +1937,7 @@ client.setQueuePermissions(id_queue, client.WRITE, group=id_group)
 
 ### remove on group's permissions to one queue
 
-<aside class="notice">Restricted to user with ADMIN privileges.</aside>
+<aside class="notice">Restricted to user with ADMIN permissions to the resource.</aside>
 
 DELETE /queue/:id_queue/group/:id_group
 
