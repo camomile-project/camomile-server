@@ -264,24 +264,24 @@ For a given <em>resource</em> (either corpus, medium, layer, annotation), the co
 </tr>
 </thead><tbody>
 <tr>
-<td>Create</td>
+<td><strong>C</strong>reate</td>
 <td>POST /<em>resource</em></td>
-<td>.create*Resource*(&hellip;)</td>
+<td>.createResource(&hellip;)</td>
 </tr>
 <tr>
-<td>Read</td>
+<td><strong>R</strong>ead</td>
 <td>GET /<em>resource</em>/<code class="prettyprint">:id_resource</code></td>
-<td>.get*Resource*(<code class="prettyprint">:id_resource</code>)</td>
+<td>.getResource(<code class="prettyprint">:id_resource</code>)</td>
 </tr>
 <tr>
-<td>Update</td>
+<td><strong>U</strong>pdate</td>
 <td>PUT /<em>resource</em>/<code class="prettyprint">:id_resource</code></td>
-<td>.update*Resource*(<code class="prettyprint">:id_resource</code>,&hellip;)</td>
+<td>.updateResource(<code class="prettyprint">:id_resource</code>,&hellip;)</td>
 </tr>
 <tr>
-<td>Delete</td>
+<td><strong>D</strong>elete</td>
 <td>DELETE /<em>resource</em>/<code class="prettyprint">:id_resource</code></td>
-<td>.delete*Resource*(<code class="prettyprint">:id_resource</code>)</td>
+<td>.deleteResource(<code class="prettyprint">:id_resource</code>)</td>
 </tr>
 </tbody></table>
 
@@ -392,7 +392,7 @@ Setting it to <code class="prettyprint">true</code> will return the resource Mon
 
 <table><thead>
 <tr>
-<th>Parameter</th>
+<th>Key</th>
 <th>Type</th>
 <th>Description</th>
 </tr>
@@ -502,7 +502,7 @@ Restricted to user with &lsquo;admin&rsquo; role.
 
 <table><thead>
 <tr>
-<th>Parameter</th>
+<th>Key</th>
 <th>Type</th>
 <th>Description</th>
 </tr>
@@ -600,7 +600,7 @@ Restricted to user with 'admin&rsquo; role.
 
 <table><thead>
 <tr>
-<th>Parameter</th>
+<th>Key</th>
 <th>Type</th>
 <th>Description</th>
 </tr>
@@ -698,7 +698,7 @@ Restricted to user with 'admin&rsquo; role.
 
 <table><thead>
 <tr>
-<th>Parameter</th>
+<th>Key</th>
 <th>Type</th>
 <th>Description</th>
 </tr>
@@ -788,7 +788,7 @@ Restricted to user with 'admin&rsquo; role.
 
 <table><thead>
 <tr>
-<th>Parameter</th>
+<th>Key</th>
 <th>Type</th>
 <th>Description</th>
 </tr>
@@ -870,7 +870,7 @@ Restricted to user with 'admin&rsquo; role.
 
 <table><thead>
 <tr>
-<th>Parameter</th>
+<th>Key</th>
 <th>Type</th>
 <th>Description</th>
 </tr>
@@ -934,7 +934,7 @@ Restricted to user with 'admin&rsquo; role.
 
 <table><thead>
 <tr>
-<th>Parameter</th>
+<th>Key</th>
 <th>Type</th>
 <th>Description</th>
 </tr>
@@ -1159,7 +1159,7 @@ Restricted to user with 'admin&rsquo; role.
 
 <table><thead>
 <tr>
-<th>Parameter</th>
+<th>Key</th>
 <th>Type</th>
 <th>Description</th>
 </tr>
@@ -1221,7 +1221,7 @@ Restricted to user with 'admin&rsquo; role.
 
 <table><thead>
 <tr>
-<th>Parameter</th>
+<th>Key</th>
 <th>Type</th>
 <th>Description</th>
 </tr>
@@ -1371,7 +1371,7 @@ Restricted to user with ADMIN permissions to the resource.
 
 <table><thead>
 <tr>
-<th>Parameter</th>
+<th>Key</th>
 <th>Type</th>
 <th>Description</th>
 </tr>
@@ -1473,7 +1473,7 @@ Restricted to user with ADMIN permissions to the resource.
 
 <table><thead>
 <tr>
-<th>Parameter</th>
+<th>Key</th>
 <th>Type</th>
 <th>Description</th>
 </tr>
@@ -1555,7 +1555,7 @@ Restricted to 'root&rsquo; user.
 
 <table><thead>
 <tr>
-<th>Parameter</th>
+<th>Key</th>
 <th>Type</th>
 <th>Description</th>
 </tr>
@@ -1645,7 +1645,7 @@ Restricted to 'root&rsquo; user.
 
 <table><thead>
 <tr>
-<th>Parameter</th>
+<th>Key</th>
 <th>Type</th>
 <th>Description</th>
 </tr>
@@ -1699,7 +1699,7 @@ Restricted to 'root&rsquo; user.
 
 <table><thead>
 <tr>
-<th>Parameter</th>
+<th>Key</th>
 <th>Type</th>
 <th>Description</th>
 </tr>
@@ -1769,7 +1769,7 @@ Restricted to 'root&rsquo; user.
 
 <table><thead>
 <tr>
-<th>Parameter</th>
+<th>Key</th>
 <th>Type</th>
 <th>Description</th>
 </tr>
@@ -1910,7 +1910,35 @@ Restricted to 'root&rsquo; user.
 </aside>
 
 <p>GET /layer</p>
+
+<h4 id="data-parameters">DATA PARAMETERS</h4>
+
+<table><thead>
+<tr>
+<th>Key</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead><tbody>
+<tr>
+<td>name</td>
+<td>String</td>
+<td>filter layers by name (optional)</td>
+</tr>
+<tr>
+<td>fragment_type</td>
+<td>String</td>
+<td>filter layers by fragment type (optional)</td>
+</tr>
+<tr>
+<td>data_type</td>
+<td>String</td>
+<td>filter layers by data type (optional)</td>
+</tr>
+</tbody></table>
 <pre class="highlight http"><code><span class="nf">GET</span> <span class="nn">/layer</span> <span class="k">HTTP</span><span class="o">/</span><span class="m">1.1</span>
+</code></pre>
+<pre class="highlight python"><code><span class="n">layers</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">getLayers</span><span class="p">()</span>
 </code></pre>
 
 <blockquote>
@@ -1926,7 +1954,25 @@ Restricted to 'root&rsquo; user.
 <aside class="notice">Restricted to user with READ permissions to the resource.</aside>
 
 <p>GET /layer/:id_layer</p>
+
+<h4 id="query-parameters">QUERY PARAMETERS</h4>
+
+<table><thead>
+<tr>
+<th>Parameter</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead><tbody>
+<tr>
+<td>id_layer</td>
+<td>String</td>
+<td>The layer identifier (required)</td>
+</tr>
+</tbody></table>
 <pre class="highlight http"><code><span class="nf">GET</span> <span class="nn">/layer/:id_layer</span> <span class="k">HTTP</span><span class="o">/</span><span class="m">1.1</span>
+</code></pre>
+<pre class="highlight python"><code><span class="n">layer</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">getLayer</span><span class="p">(</span><span class="n">id_layer</span><span class="p">)</span>
 </code></pre>
 
 <blockquote>
@@ -1942,7 +1988,51 @@ Restricted to 'root&rsquo; user.
 <aside class="notice">Restricted to user with READ permissions to the resource.</aside>
 
 <p>GET /corpus/:id_corpus/layer</p>
+
+<h4 id="query-parameters">QUERY PARAMETERS</h4>
+
+<table><thead>
+<tr>
+<th>Parameter</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead><tbody>
+<tr>
+<td>id_corpus</td>
+<td>String</td>
+<td>The corpus identifier (required)</td>
+</tr>
+</tbody></table>
+
+<h4 id="data-parameters">DATA PARAMETERS</h4>
+
+<table><thead>
+<tr>
+<th>Key</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead><tbody>
+<tr>
+<td>name</td>
+<td>String</td>
+<td>filter layers by name (optional)</td>
+</tr>
+<tr>
+<td>fragment_type</td>
+<td>String</td>
+<td>filter layers by fragment type (optional)</td>
+</tr>
+<tr>
+<td>data_type</td>
+<td>String</td>
+<td>filter layers by data type (optional)</td>
+</tr>
+</tbody></table>
 <pre class="highlight http"><code><span class="nf">GET</span> <span class="nn">/corpus/:id_corpus/layer</span> <span class="k">HTTP</span><span class="o">/</span><span class="m">1.1</span>
+</code></pre>
+<pre class="highlight python"><code><span class="n">layer</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">getLayers</span><span class="p">(</span><span class="n">id_corpus</span><span class="p">)</span>
 </code></pre>
 
 <blockquote>
@@ -1958,7 +2048,61 @@ Restricted to 'root&rsquo; user.
 <aside class="notice">Restricted to user with WRITE permissions to the resource.</aside>
 
 <p>POST /corpus/:id_corpus/layer</p>
+
+<h4 id="query-parameters">QUERY PARAMETERS</h4>
+
+<table><thead>
+<tr>
+<th>Parameter</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead><tbody>
+<tr>
+<td>id_corpus</td>
+<td>String</td>
+<td>The corpus identifier (required)</td>
+</tr>
+</tbody></table>
+
+<h4 id="data-parameters">DATA PARAMETERS</h4>
+
+<table><thead>
+<tr>
+<th>Key</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead><tbody>
+<tr>
+<td>name</td>
+<td>String</td>
+<td>layer name (required)</td>
+</tr>
+<tr>
+<td>description</td>
+<td>free</td>
+<td>layer description (optional)</td>
+</tr>
+<tr>
+<td>fragment_type</td>
+<td>free</td>
+<td>layer fragment type (optional)</td>
+</tr>
+<tr>
+<td>data_type</td>
+<td>free</td>
+<td>layer data type (optional)</td>
+</tr>
+<tr>
+<td>annotations</td>
+<td>list</td>
+<td>list of annotations (optional)</td>
+</tr>
+</tbody></table>
 <pre class="highlight http"><code><span class="nf">POST</span> <span class="nn">/corpus/:id_corpus/layer</span> <span class="k">HTTP</span><span class="o">/</span><span class="m">1.1</span>
+</code></pre>
+<pre class="highlight python"><code><span class="n">client</span><span class="o">.</span><span class="n">createLayer</span><span class="p">(</span><span class="n">id_corpus</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">description</span><span class="p">,</span> <span class="n">fragment_type</span><span class="p">,</span> <span class="n">data_type</span><span class="p">,</span> <span class="n">annotations</span><span class="p">)</span>
 </code></pre>
 
 <blockquote>
@@ -1974,7 +2118,56 @@ Restricted to 'root&rsquo; user.
 <aside class="notice">Restricted to user with ADMIN permissions to the resource.</aside>
 
 <p>PUT /layer/:id_layer</p>
+
+<h4 id="query-parameters">QUERY PARAMETERS</h4>
+
+<table><thead>
+<tr>
+<th>Parameter</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead><tbody>
+<tr>
+<td>id_layer</td>
+<td>String</td>
+<td>The layer identifier (required)</td>
+</tr>
+</tbody></table>
+
+<h4 id="data-parameters">DATA PARAMETERS</h4>
+
+<table><thead>
+<tr>
+<th>Key</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead><tbody>
+<tr>
+<td>name</td>
+<td>String</td>
+<td>layer name (optional)</td>
+</tr>
+<tr>
+<td>description</td>
+<td>free</td>
+<td>layer description (optional)</td>
+</tr>
+<tr>
+<td>fragment_type</td>
+<td>free</td>
+<td>layer fragment type (optional)</td>
+</tr>
+<tr>
+<td>data_type</td>
+<td>free</td>
+<td>layer data type (optional)</td>
+</tr>
+</tbody></table>
 <pre class="highlight http"><code><span class="nf">PUT</span> <span class="nn">/layer/:id_layer</span> <span class="k">HTTP</span><span class="o">/</span><span class="m">1.1</span>
+</code></pre>
+<pre class="highlight python"><code><span class="n">client</span><span class="o">.</span><span class="n">updateLayer</span><span class="p">(</span><span class="n">id_layer</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">description</span><span class="p">,</span> <span class="n">fragment_type</span><span class="p">,</span> <span class="n">data_type</span><span class="p">)</span>
 </code></pre>
 
 <blockquote>
@@ -1990,7 +2183,25 @@ Restricted to 'root&rsquo; user.
 <aside class="notice">Restricted to user with ADMIN permissions to the resource.</aside>
 
 <p>DELETE /layer/:id_layer</p>
+
+<h4 id="query-parameters">QUERY PARAMETERS</h4>
+
+<table><thead>
+<tr>
+<th>Parameter</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead><tbody>
+<tr>
+<td>id_layer</td>
+<td>String</td>
+<td>The layer identifier (required)</td>
+</tr>
+</tbody></table>
 <pre class="highlight http"><code><span class="nf">DELETE</span> <span class="nn">/layer/:id_layer</span> <span class="k">HTTP</span><span class="o">/</span><span class="m">1.1</span>
+</code></pre>
+<pre class="highlight python"><code><span class="n">client</span><span class="o">.</span><span class="n">deleteLayer</span><span class="p">(</span><span class="n">id_layer</span><span class="p">)</span>
 </code></pre>
 
 <blockquote>
@@ -2006,7 +2217,25 @@ Restricted to 'root&rsquo; user.
 <aside class="notice">Restricted to user with ADMIN permissions to the resource.</aside>
 
 <p>GET /layer/:id_layer/permissions</p>
+
+<h4 id="query-parameters">QUERY PARAMETERS</h4>
+
+<table><thead>
+<tr>
+<th>Parameter</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead><tbody>
+<tr>
+<td>id_layer</td>
+<td>String</td>
+<td>The layer identifier (required)</td>
+</tr>
+</tbody></table>
 <pre class="highlight http"><code><span class="nf">GET</span> <span class="nn">/layer/:id_layer/permissions</span> <span class="k">HTTP</span><span class="o">/</span><span class="m">1.1</span>
+</code></pre>
+<pre class="highlight python"><code><span class="n">permission</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">getLayerPermission</span><span class="p">(</span><span class="n">id_layer</span><span class="p">)</span>
 </code></pre>
 
 <blockquote>
@@ -2022,7 +2251,46 @@ Restricted to 'root&rsquo; user.
 <aside class="notice">Restricted to user with ADMIN permissions to the resource.</aside>
 
 <p>PUT /layer/:id_layer/user/:id_user</p>
+
+<h4 id="query-parameters">QUERY PARAMETERS</h4>
+
+<table><thead>
+<tr>
+<th>Parameter</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead><tbody>
+<tr>
+<td>id_layer</td>
+<td>String</td>
+<td>The layer identifier (required)</td>
+</tr>
+<tr>
+<td>id_user</td>
+<td>String</td>
+<td>The user identifier (required)</td>
+</tr>
+</tbody></table>
+
+<h4 id="data-parameters">DATA PARAMETERS</h4>
+
+<table><thead>
+<tr>
+<th>Key</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead><tbody>
+<tr>
+<td>right</td>
+<td>1, 2 or 3</td>
+<td>The layer permissions (1:READ, 2:WRITE, 3:ADMIN)</td>
+</tr>
+</tbody></table>
 <pre class="highlight http"><code><span class="nf">PUT</span> <span class="nn">/layer/:id_layer/user/:id_user</span> <span class="k">HTTP</span><span class="o">/</span><span class="m">1.1</span>
+</code></pre>
+<pre class="highlight python"><code><span class="n">client</span><span class="o">.</span><span class="n">setLayerPermission</span><span class="p">(</span><span class="n">id_layer</span><span class="p">,</span> <span class="n">permission</span><span class="p">,</span> <span class="n">user</span><span class="o">=</span><span class="n">id_user</span><span class="p">)</span>
 </code></pre>
 
 <blockquote>
@@ -2038,7 +2306,30 @@ Restricted to 'root&rsquo; user.
 <aside class="notice">Restricted to user with ADMIN permissions to the resource.</aside>
 
 <p>DELETE /layer/:id_layer/user/:id_user</p>
+
+<h4 id="query-parameters">QUERY PARAMETERS</h4>
+
+<table><thead>
+<tr>
+<th>Parameter</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead><tbody>
+<tr>
+<td>id_layer</td>
+<td>String</td>
+<td>The layer identifier (required)</td>
+</tr>
+<tr>
+<td>id_user</td>
+<td>String</td>
+<td>The user identifier (required)</td>
+</tr>
+</tbody></table>
 <pre class="highlight http"><code><span class="nf">DELETE</span> <span class="nn">/layer/:id_layer/user/:id_user</span> <span class="k">HTTP</span><span class="o">/</span><span class="m">1.1</span>
+</code></pre>
+<pre class="highlight python"><code><span class="n">client</span><span class="o">.</span><span class="n">removeLayerPermission</span><span class="p">(</span><span class="n">id_layer</span><span class="p">,</span> <span class="n">permission</span><span class="p">,</span> <span class="n">user</span><span class="o">=</span><span class="n">id_user</span><span class="p">)</span>
 </code></pre>
 
 <blockquote>
@@ -2054,7 +2345,46 @@ Restricted to 'root&rsquo; user.
 <aside class="notice">Restricted to user with ADMIN permissions to the resource.</aside>
 
 <p>PUT /layer/:id_layer/group/:id_group </p>
+
+<h4 id="query-parameters">QUERY PARAMETERS</h4>
+
+<table><thead>
+<tr>
+<th>Parameter</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead><tbody>
+<tr>
+<td>id_layer</td>
+<td>String</td>
+<td>The layer identifier (required)</td>
+</tr>
+<tr>
+<td>id_group</td>
+<td>String</td>
+<td>The group identifier (required)</td>
+</tr>
+</tbody></table>
+
+<h4 id="data-parameters">DATA PARAMETERS</h4>
+
+<table><thead>
+<tr>
+<th>Key</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead><tbody>
+<tr>
+<td>right</td>
+<td>1, 2 or 3</td>
+<td>The layer permissions (1:READ, 2:WRITE, 3:ADMIN)</td>
+</tr>
+</tbody></table>
 <pre class="highlight http"><code><span class="nf">PUT</span> <span class="nn">/layer/:id_layer/group/:id_group</span> <span class="k">HTTP</span><span class="o">/</span><span class="m">1.1</span>
+</code></pre>
+<pre class="highlight python"><code><span class="n">client</span><span class="o">.</span><span class="n">setLayerPermission</span><span class="p">(</span><span class="n">id_layer</span><span class="p">,</span> <span class="n">permission</span><span class="p">,</span> <span class="n">group</span><span class="o">=</span><span class="n">id_group</span><span class="p">)</span>
 </code></pre>
 
 <blockquote>
@@ -2070,7 +2400,30 @@ Restricted to 'root&rsquo; user.
 <aside class="notice">Restricted to user with ADMIN permissions to the resource.</aside>
 
 <p>DELETE /layer/:id_layer/group/:id_group</p>
+
+<h4 id="query-parameters">QUERY PARAMETERS</h4>
+
+<table><thead>
+<tr>
+<th>Parameter</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead><tbody>
+<tr>
+<td>id_layer</td>
+<td>String</td>
+<td>The layer identifier (required)</td>
+</tr>
+<tr>
+<td>id_group</td>
+<td>String</td>
+<td>The group identifier (required)</td>
+</tr>
+</tbody></table>
 <pre class="highlight http"><code><span class="nf">DELETE</span> <span class="nn">/layer/:id_layer/group/:id_group</span> <span class="k">HTTP</span><span class="o">/</span><span class="m">1.1</span>
+</code></pre>
+<pre class="highlight python"><code><span class="n">client</span><span class="o">.</span><span class="n">removeLayerPermission</span><span class="p">(</span><span class="n">id_layer</span><span class="p">,</span> <span class="n">permission</span><span class="p">,</span> <span class="n">group</span><span class="o">=</span><span class="n">id_group</span><span class="p">)</span>
 </code></pre>
 
 <blockquote>
@@ -2090,7 +2443,35 @@ Restricted to 'root&rsquo; user.
 </aside>
 
 <p>GET /annotation</p>
+
+<h4 id="data-parameters">DATA PARAMETERS</h4>
+
+<table><thead>
+<tr>
+<th>Key</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead><tbody>
+<tr>
+<td>id_medium</td>
+<td>String</td>
+<td>filter annotations by medium (optional)</td>
+</tr>
+<tr>
+<td>fragment</td>
+<td>String</td>
+<td>filter annotations by fragment (optional)</td>
+</tr>
+<tr>
+<td>data</td>
+<td>String</td>
+<td>filter annotations by data (optional)</td>
+</tr>
+</tbody></table>
 <pre class="highlight http"><code><span class="nf">GET</span> <span class="nn">/annotation</span> <span class="k">HTTP</span><span class="o">/</span><span class="m">1.1</span>
+</code></pre>
+<pre class="highlight python"><code><span class="n">client</span><span class="o">.</span><span class="n">getAnnotations</span><span class="p">(</span><span class="n">medium</span><span class="o">=</span><span class="n">id_medium</span><span class="p">,</span> <span class="n">fragment</span><span class="o">=</span><span class="n">fragment</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">)</span>
 </code></pre>
 
 <blockquote>
@@ -2106,7 +2487,25 @@ Restricted to 'root&rsquo; user.
 <aside class="notice">Restricted to user with READ permissions to the resource.</aside>
 
 <p>GET /annotation/:id_annotation</p>
+
+<h4 id="query-parameters">QUERY PARAMETERS</h4>
+
+<table><thead>
+<tr>
+<th>Parameter</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead><tbody>
+<tr>
+<td>id_annotation</td>
+<td>String</td>
+<td>The annotation identifier (required)</td>
+</tr>
+</tbody></table>
 <pre class="highlight http"><code><span class="nf">GET</span> <span class="nn">/annotation/:id_annotation</span> <span class="k">HTTP</span><span class="o">/</span><span class="m">1.1</span>
+</code></pre>
+<pre class="highlight python"><code><span class="n">client</span><span class="o">.</span><span class="n">getAnnotation</span><span class="p">(</span><span class="n">id_annotation</span><span class="p">)</span>
 </code></pre>
 
 <blockquote>
@@ -2122,7 +2521,51 @@ Restricted to 'root&rsquo; user.
 <aside class="notice">Restricted to user with READ permissions to the resource.</aside>
 
 <p>GET /layer/:id_layer/annotation</p>
+
+<h4 id="query-parameters">QUERY PARAMETERS</h4>
+
+<table><thead>
+<tr>
+<th>Parameter</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead><tbody>
+<tr>
+<td>id_layer</td>
+<td>String</td>
+<td>The layer identifier (required)</td>
+</tr>
+</tbody></table>
+
+<h4 id="data-parameters">DATA PARAMETERS</h4>
+
+<table><thead>
+<tr>
+<th>Key</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead><tbody>
+<tr>
+<td>id_medium</td>
+<td>String</td>
+<td>filter annotations by medium (optional)</td>
+</tr>
+<tr>
+<td>fragment</td>
+<td>String</td>
+<td>filter annotations by fragment (optional)</td>
+</tr>
+<tr>
+<td>data</td>
+<td>String</td>
+<td>filter annotations by data (optional)</td>
+</tr>
+</tbody></table>
 <pre class="highlight http"><code><span class="nf">GET</span> <span class="nn">/layer/:id_layer/annotation</span> <span class="k">HTTP</span><span class="o">/</span><span class="m">1.1</span>
+</code></pre>
+<pre class="highlight python"><code><span class="n">client</span><span class="o">.</span><span class="n">getAnnotations</span><span class="p">(</span><span class="n">id_layer</span><span class="p">,</span> <span class="n">medium</span><span class="o">=</span><span class="n">id_medium</span><span class="p">,</span> <span class="n">fragment</span><span class="o">=</span><span class="n">fragment</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">)</span>
 </code></pre>
 
 <blockquote>
@@ -2138,7 +2581,60 @@ Restricted to 'root&rsquo; user.
 <aside class="notice">Restricted to user with WRITE permissions to the resource.</aside>
 
 <p>POST /layer/:id_layer/annotation</p>
+
+<h4 id="query-parameters">QUERY PARAMETERS</h4>
+
+<table><thead>
+<tr>
+<th>Parameter</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead><tbody>
+<tr>
+<td>id_layer</td>
+<td>String</td>
+<td>The layer identifier (required)</td>
+</tr>
+</tbody></table>
+
+<h4 id="data-parameters">DATA PARAMETERS</h4>
+
+<table><thead>
+<tr>
+<th>Key</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead><tbody>
+<tr>
+<td>id_medium</td>
+<td>String</td>
+<td>medium identifier (required)</td>
+</tr>
+<tr>
+<td>fragment</td>
+<td>free</td>
+<td>annotation fragment (required)</td>
+</tr>
+<tr>
+<td>data</td>
+<td>free</td>
+<td>annotation data (required)</td>
+</tr>
+</tbody></table>
+
+<p>OR</p>
+
+<p>list of {id_medium:&hellip;, fragment:&hellip;, data:&hellip;}</p>
 <pre class="highlight http"><code><span class="nf">POST</span> <span class="nn">/layer/:id_layer/annotation</span> <span class="k">HTTP</span><span class="o">/</span><span class="m">1.1</span>
+</code></pre>
+<pre class="highlight python"><code><span class="n">client</span><span class="o">.</span><span class="n">createAnnotation</span><span class="p">(</span><span class="n">id_layer</span><span class="p">,</span> <span class="n">medium</span><span class="o">=</span><span class="n">id_medium</span><span class="p">,</span> <span class="n">fragment</span><span class="o">=</span><span class="n">fragment</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">)</span>
+
+<span class="n">OR</span>
+
+<span class="n">client</span><span class="o">.</span><span class="n">createAnnotations</span><span class="p">(</span><span class="n">id_layer</span><span class="p">,</span><span class="n">annotations</span><span class="p">)</span>
+
 </code></pre>
 
 <blockquote>
@@ -2154,7 +2650,46 @@ Restricted to 'root&rsquo; user.
 <aside class="notice">Restricted to user with WRITE permissions to the resource.</aside>
 
 <p>PUT /annotation/:id_annotation</p>
+
+<h4 id="query-parameters">QUERY PARAMETERS</h4>
+
+<table><thead>
+<tr>
+<th>Parameter</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead><tbody>
+<tr>
+<td>id_annotation</td>
+<td>String</td>
+<td>The annotation identifier (required)</td>
+</tr>
+</tbody></table>
+
+<h4 id="data-parameters">DATA PARAMETERS</h4>
+
+<table><thead>
+<tr>
+<th>Key</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead><tbody>
+<tr>
+<td>fragment</td>
+<td>free</td>
+<td>annotation fragment (optional)</td>
+</tr>
+<tr>
+<td>data</td>
+<td>free</td>
+<td>annotation data (optional)</td>
+</tr>
+</tbody></table>
 <pre class="highlight http"><code><span class="nf">PUT</span> <span class="nn">/annotation/:id_annotation</span> <span class="k">HTTP</span><span class="o">/</span><span class="m">1.1</span>
+</code></pre>
+<pre class="highlight python"><code><span class="n">client</span><span class="o">.</span><span class="n">updateAnnotation</span><span class="p">(</span><span class="n">id_annotation</span><span class="p">,</span> <span class="n">fragment</span><span class="o">=</span><span class="n">fragment</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">)</span>
 </code></pre>
 
 <blockquote>
@@ -2170,7 +2705,25 @@ Restricted to 'root&rsquo; user.
 <aside class="notice">Restricted to user with ADMIN permissions to the resource.</aside>
 
 <p>DELETE /annotation/:id_annotation</p>
+
+<h4 id="query-parameters">QUERY PARAMETERS</h4>
+
+<table><thead>
+<tr>
+<th>Parameter</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead><tbody>
+<tr>
+<td>id_annotation</td>
+<td>String</td>
+<td>The annotation identifier (required)</td>
+</tr>
+</tbody></table>
 <pre class="highlight http"><code><span class="nf">DELETE</span> <span class="nn">/annotation/:id_annotation</span> <span class="k">HTTP</span><span class="o">/</span><span class="m">1.1</span>
+</code></pre>
+<pre class="highlight python"><code><span class="n">client</span><span class="o">.</span><span class="n">deleteAnnotation</span><span class="p">(</span><span class="n">id_annotation</span><span class="p">)</span>
 </code></pre>
 
 <blockquote>
@@ -2186,6 +2739,22 @@ Restricted to 'root&rsquo; user.
 <h3 id="get-all-queues">get all queues</h3>
 
 <p>GET /queue</p>
+
+<h4 id="data-parameters">DATA PARAMETERS</h4>
+
+<table><thead>
+<tr>
+<th>Key</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead><tbody>
+<tr>
+<td>name</td>
+<td>String</td>
+<td>queue name (optional)</td>
+</tr>
+</tbody></table>
 <pre class="highlight http"><code><span class="nf">GET</span> <span class="nn">/queue</span> <span class="k">HTTP</span><span class="o">/</span><span class="m">1.1</span>
 </code></pre>
 <pre class="highlight python"><code><span class="n">queues</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">getQueues</span><span class="p">()</span>
@@ -2210,7 +2779,25 @@ Restricted to 'root&rsquo; user.
 <aside class="notice">Restricted to user with WRITE permissions to the resource.</aside>
 
 <p>GET /queue/:id_queue</p>
+
+<h4 id="query-parameters">QUERY PARAMETERS</h4>
+
+<table><thead>
+<tr>
+<th>Parameter</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead><tbody>
+<tr>
+<td>id_queue</td>
+<td>String</td>
+<td>The queue identifier (required)</td>
+</tr>
+</tbody></table>
 <pre class="highlight http"><code><span class="nf">GET</span> <span class="nn">/queue/:id_queue</span> <span class="k">HTTP</span><span class="o">/</span><span class="m">1.1</span>
+</code></pre>
+<pre class="highlight python"><code><span class="n">queues</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">getQueue</span><span class="p">(</span><span class="n">id_queue</span><span class="p">)</span>
 </code></pre>
 
 <blockquote>
@@ -2229,6 +2816,27 @@ Restricted to 'root&rsquo; user.
 <aside class="notice">Restricted to user with 'admin&rsquo; role.</aside>
 
 <p>POST /queue</p>
+
+<h4 id="data-parameters">DATA PARAMETERS</h4>
+
+<table><thead>
+<tr>
+<th>Key</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead><tbody>
+<tr>
+<td>name</td>
+<td>String</td>
+<td>queue name (required)</td>
+</tr>
+<tr>
+<td>description</td>
+<td>free</td>
+<td>queue description (optional)</td>
+</tr>
+</tbody></table>
 <pre class="highlight http"><code><span class="nf">POST</span> <span class="nn">/queue</span> <span class="k">HTTP</span><span class="o">/</span><span class="m">1.1</span>
 </code></pre>
 <pre class="highlight python"><code><span class="n">queue</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">createQueue</span><span class="p">(</span><span class="s">'queue name'</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="p">{</span><span class="s">'my'</span><span class="p">:</span> <span class="s">'description'</span><span class="p">})</span>
@@ -2259,6 +2867,48 @@ Restricted to 'root&rsquo; user.
 <aside class="notice">Restricted to user with ADMIN permissions to the resource.</aside>
 
 <p>PUT /queue/:id_queue</p>
+
+<h4 id="query-parameters">QUERY PARAMETERS</h4>
+
+<table><thead>
+<tr>
+<th>Parameter</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead><tbody>
+<tr>
+<td>id_queue</td>
+<td>String</td>
+<td>The queue identifier (required)</td>
+</tr>
+</tbody></table>
+
+<h4 id="data-parameters">DATA PARAMETERS</h4>
+
+<table><thead>
+<tr>
+<th>Key</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead><tbody>
+<tr>
+<td>name</td>
+<td>String</td>
+<td>queue name (optional)</td>
+</tr>
+<tr>
+<td>description</td>
+<td>free</td>
+<td>queue description (optional)</td>
+</tr>
+<tr>
+<td>list</td>
+<td>list</td>
+<td>list of new queue elements (optional)</td>
+</tr>
+</tbody></table>
 <pre class="highlight http"><code><span class="nf">PUT</span> <span class="nn">/queue/:id_queue</span> <span class="k">HTTP</span><span class="o">/</span><span class="m">1.1</span>
 </code></pre>
 <pre class="highlight python"><code><span class="n">queue</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">updateQueue</span><span class="p">(</span><span class="n">id_queue</span><span class="p">,</span> 
@@ -2292,6 +2942,36 @@ Restricted to 'root&rsquo; user.
 <aside class="notice">Restricted to user with WRITE permissions to the resource.</aside>
 
 <p>PUT /queue/:id_queue/next</p>
+
+<h4 id="query-parameters">QUERY PARAMETERS</h4>
+
+<table><thead>
+<tr>
+<th>Parameter</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead><tbody>
+<tr>
+<td>id_queue</td>
+<td>String</td>
+<td>The queue identifier (required)</td>
+</tr>
+</tbody></table>
+
+<h4 id="data-parameters">DATA PARAMETERS</h4>
+
+<table><thead>
+<tr>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead><tbody>
+<tr>
+<td>list</td>
+<td>list of queue elements</td>
+</tr>
+</tbody></table>
 <pre class="highlight http"><code><span class="nf">PUT</span> <span class="nn">/queue/:id_queue/next</span> <span class="k">HTTP</span><span class="o">/</span><span class="m">1.1</span>
 </code></pre>
 <pre class="highlight python"><code><span class="n">queue</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">enqueue</span><span class="p">(</span><span class="n">id_queue</span><span class="p">,</span> <span class="n">items</span><span class="p">)</span>
@@ -2310,6 +2990,22 @@ Restricted to 'root&rsquo; user.
 <aside class="notice">Restricted to user with WRITE permissions to the resource.</aside>
 
 <p>GET /queue/:id_queue/next</p>
+
+<h4 id="query-parameters">QUERY PARAMETERS</h4>
+
+<table><thead>
+<tr>
+<th>Parameter</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead><tbody>
+<tr>
+<td>id_queue</td>
+<td>String</td>
+<td>The queue identifier (required)</td>
+</tr>
+</tbody></table>
 <pre class="highlight http"><code><span class="nf">GET</span> <span class="nn">/queue/:id_queue/next</span> <span class="k">HTTP</span><span class="o">/</span><span class="m">1.1</span>
 </code></pre>
 <pre class="highlight python"><code><span class="n">item</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">dequeue</span><span class="p">(</span><span class="n">id_queue</span><span class="p">)</span>
@@ -2322,6 +3018,22 @@ Restricted to 'root&rsquo; user.
 <p>(Non-destructively) pick first element of queue</p>
 
 <p>GET /queue/:id_queue/first</p>
+
+<h4 id="query-parameters">QUERY PARAMETERS</h4>
+
+<table><thead>
+<tr>
+<th>Parameter</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead><tbody>
+<tr>
+<td>id_queue</td>
+<td>String</td>
+<td>The queue identifier (required)</td>
+</tr>
+</tbody></table>
 <pre class="highlight http"><code><span class="nf">GET</span> <span class="nn">/queue/:id_queue/first</span> <span class="k">HTTP</span><span class="o">/</span><span class="m">1.1</span>
 </code></pre>
 <pre class="highlight python"><code><span class="n">item</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">pick</span><span class="p">(</span><span class="n">id_queue</span><span class="p">)</span>
@@ -2334,6 +3046,22 @@ Restricted to 'root&rsquo; user.
 <p>(Non-destructively) get number of elements in queue</p>
 
 <p>GET /queue/:id_queue/length</p>
+
+<h4 id="query-parameters">QUERY PARAMETERS</h4>
+
+<table><thead>
+<tr>
+<th>Parameter</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead><tbody>
+<tr>
+<td>id_queue</td>
+<td>String</td>
+<td>The queue identifier (required)</td>
+</tr>
+</tbody></table>
 <pre class="highlight http"><code><span class="nf">GET</span> <span class="nn">/queue/:id_queue/length</span> <span class="k">HTTP</span><span class="o">/</span><span class="m">1.1</span>
 </code></pre>
 <pre class="highlight python"><code><span class="n">item</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">pickLength</span><span class="p">(</span><span class="n">id_queue</span><span class="p">)</span>
@@ -2346,6 +3074,22 @@ Restricted to 'root&rsquo; user.
 <p>(Non-destructively) pick all elements of queue</p>
 
 <p>GET /queue/:id_queue/all</p>
+
+<h4 id="query-parameters">QUERY PARAMETERS</h4>
+
+<table><thead>
+<tr>
+<th>Parameter</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead><tbody>
+<tr>
+<td>id_queue</td>
+<td>String</td>
+<td>The queue identifier (required)</td>
+</tr>
+</tbody></table>
 <pre class="highlight http"><code><span class="nf">GET</span> <span class="nn">/queue/:id_queue/all</span> <span class="k">HTTP</span><span class="o">/</span><span class="m">1.1</span>
 </code></pre>
 <pre class="highlight python"><code><span class="n">item</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">pickAll</span><span class="p">(</span><span class="n">id_queue</span><span class="p">)</span>
@@ -2356,6 +3100,22 @@ Restricted to 'root&rsquo; user.
 <aside class="notice">Restricted to user with ADMIN permissions to the resource.</aside>
 
 <p>DELETE /queue/:id_queue</p>
+
+<h4 id="query-parameters">QUERY PARAMETERS</h4>
+
+<table><thead>
+<tr>
+<th>Parameter</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead><tbody>
+<tr>
+<td>id_queue</td>
+<td>String</td>
+<td>The queue identifier (required)</td>
+</tr>
+</tbody></table>
 <pre class="highlight http"><code><span class="nf">DELETE</span> <span class="nn">/queue/:id_queue</span> <span class="k">HTTP</span><span class="o">/</span><span class="m">1.1</span>
 </code></pre>
 <pre class="highlight python"><code><span class="n">client</span><span class="o">.</span><span class="n">deleteQueue</span><span class="p">(</span><span class="n">id_corpus</span><span class="p">)</span>
@@ -2374,6 +3134,22 @@ Restricted to 'root&rsquo; user.
 <aside class="notice">Restricted to user with ADMIN permissions to the resource.</aside>
 
 <p>GET /queue/:id_queue/permissions</p>
+
+<h4 id="query-parameters">QUERY PARAMETERS</h4>
+
+<table><thead>
+<tr>
+<th>Parameter</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead><tbody>
+<tr>
+<td>id_queue</td>
+<td>String</td>
+<td>The queue identifier (required)</td>
+</tr>
+</tbody></table>
 <pre class="highlight http"><code><span class="nf">GET</span> <span class="nn">/queue/:id_queue/permissions</span> <span class="k">HTTP</span><span class="o">/</span><span class="m">1.1</span>
 </code></pre>
 <pre class="highlight python"><code><span class="n">client</span><span class="o">.</span><span class="n">getQueuePermissions</span><span class="p">(</span><span class="n">id_queue</span><span class="p">)</span>
@@ -2392,6 +3168,43 @@ Restricted to 'root&rsquo; user.
 <aside class="notice">Restricted to user with ADMIN permissions to the resource.</aside>
 
 <p>PUT /queue/:id_queue/user/:id_user</p>
+
+<h4 id="query-parameters">QUERY PARAMETERS</h4>
+
+<table><thead>
+<tr>
+<th>Parameter</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead><tbody>
+<tr>
+<td>id_queue</td>
+<td>String</td>
+<td>The queue identifier (required)</td>
+</tr>
+<tr>
+<td>id_user</td>
+<td>String</td>
+<td>The user identifier (required)</td>
+</tr>
+</tbody></table>
+
+<h4 id="data-parameters">DATA PARAMETERS</h4>
+
+<table><thead>
+<tr>
+<th>Key</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead><tbody>
+<tr>
+<td>right</td>
+<td>1, 2 or 3</td>
+<td>The queue permissions (1:READ, 2:WRITE, 3:ADMIN)</td>
+</tr>
+</tbody></table>
 <pre class="highlight http"><code><span class="nf">PUT</span> <span class="nn">/queue/:id_queue/user/:id_user</span> <span class="k">HTTP</span><span class="o">/</span><span class="m">1.1</span>
 </code></pre>
 <pre class="highlight python"><code><span class="n">client</span><span class="o">.</span><span class="n">setQueuePermissions</span><span class="p">(</span><span class="n">id_queue</span><span class="p">,</span> <span class="n">client</span><span class="o">.</span><span class="n">WRITE</span><span class="p">,</span> <span class="n">user</span><span class="o">=</span><span class="n">id_user</span><span class="p">)</span>
@@ -2410,6 +3223,27 @@ Restricted to 'root&rsquo; user.
 <aside class="notice">Restricted to user with ADMIN permissions to the resource.</aside>
 
 <p>DELETE /queue/:id_queue/user/:id_user</p>
+
+<h4 id="query-parameters">QUERY PARAMETERS</h4>
+
+<table><thead>
+<tr>
+<th>Parameter</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead><tbody>
+<tr>
+<td>id_queue</td>
+<td>String</td>
+<td>The queue identifier (required)</td>
+</tr>
+<tr>
+<td>id_user</td>
+<td>String</td>
+<td>The user identifier (required)</td>
+</tr>
+</tbody></table>
 <pre class="highlight http"><code><span class="nf">DELETE</span> <span class="nn">/queue/:id_queue/user/:id_user</span> <span class="k">HTTP</span><span class="o">/</span><span class="m">1.1</span>
 </code></pre>
 <pre class="highlight python"><code><span class="n">client</span><span class="o">.</span><span class="n">removeQueuePermissions</span><span class="p">(</span><span class="n">id_queue</span><span class="p">,</span> <span class="n">user</span><span class="o">=</span><span class="n">id_user</span><span class="p">)</span>
@@ -2428,6 +3262,43 @@ Restricted to 'root&rsquo; user.
 <aside class="notice">Restricted to user with ADMIN permissions to the resource.</aside>
 
 <p>PUT /queue/:id_queue/group/:id_group </p>
+
+<h4 id="query-parameters">QUERY PARAMETERS</h4>
+
+<table><thead>
+<tr>
+<th>Parameter</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead><tbody>
+<tr>
+<td>id_queue</td>
+<td>String</td>
+<td>The queue identifier (required)</td>
+</tr>
+<tr>
+<td>id_group</td>
+<td>String</td>
+<td>The group identifier (required)</td>
+</tr>
+</tbody></table>
+
+<h4 id="data-parameters">DATA PARAMETERS</h4>
+
+<table><thead>
+<tr>
+<th>Key</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead><tbody>
+<tr>
+<td>right</td>
+<td>1, 2 or 3</td>
+<td>The queue permissions (1:READ, 2:WRITE, 3:ADMIN)</td>
+</tr>
+</tbody></table>
 <pre class="highlight http"><code><span class="nf">PUT</span> <span class="nn">/queue/:id_queue/group/:id_group</span> <span class="k">HTTP</span><span class="o">/</span><span class="m">1.1</span>
 </code></pre>
 <pre class="highlight python"><code><span class="n">client</span><span class="o">.</span><span class="n">setQueuePermissions</span><span class="p">(</span><span class="n">id_queue</span><span class="p">,</span> <span class="n">client</span><span class="o">.</span><span class="n">WRITE</span><span class="p">,</span> <span class="n">group</span><span class="o">=</span><span class="n">id_group</span><span class="p">)</span>
@@ -2446,6 +3317,27 @@ Restricted to 'root&rsquo; user.
 <aside class="notice">Restricted to user with ADMIN permissions to the resource.</aside>
 
 <p>DELETE /queue/:id_queue/group/:id_group</p>
+
+<h4 id="query-parameters">QUERY PARAMETERS</h4>
+
+<table><thead>
+<tr>
+<th>Parameter</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead><tbody>
+<tr>
+<td>id_queue</td>
+<td>String</td>
+<td>The queue identifier (required)</td>
+</tr>
+<tr>
+<td>id_group</td>
+<td>String</td>
+<td>The group identifier (required)</td>
+</tr>
+</tbody></table>
 <pre class="highlight http"><code><span class="nf">DELETE</span> <span class="nn">/queue/:id_queue/group/:id_group</span> <span class="k">HTTP</span><span class="o">/</span><span class="m">1.1</span>
 </code></pre>
 <pre class="highlight python"><code><span class="n">client</span><span class="o">.</span><span class="n">removeQueuePermissions</span><span class="p">(</span><span class="n">id_queue</span><span class="p">,</span> <span class="n">group</span><span class="o">=</span><span class="n">id_group</span><span class="p">)</span>
