@@ -6,14 +6,14 @@
 ### CRUD REST API
 
 CAMOMILE server follows the conventional REST API for CRUD (Create, Read, Update, Delete) data access.
-For a given resource (either corpus, medium, layer, annotation), the correspondance with HTTP commands and Python or Javascript interface is as follows.
+For a given *resource* (either corpus, medium, layer, annotation), the correspondance with HTTP commands and Python or Javascript interface is as follows.
 
 Action  | HTTP command                       | Python/Javascript interface
 --------|------------------------------------|------------------
-Create  | POST /`resource`                   | .create`Resource`()
-Read    | GET /`resource`/`:id_resource`     | .get`Resource`()
-Update  | PUT /`resource`/`:id_resource`     | .update`Resource`()
-Delete  | DELETE /`resource`/`:id_resource`  | .delete`Resource`()
+Create  | POST /*resource*                   | .create*Resource*(...)
+Read    | GET /*resource*/`:id_resource`     | .get*Resource*(`:id_resource`)
+Update  | PUT /*resource*/`:id_resource`     | .update*Resource*(`:id_resource`,...)
+Delete  | DELETE /*resource*/`:id_resource`  | .delete*Resource*(`:id_resource`)
 
 
 ### History
@@ -1843,8 +1843,6 @@ client.deleteQueue(id_corpus)
 {
   "success": "Successfully deleted."
 }
-```
-
 ```
 
 ### get one queue's permissions
