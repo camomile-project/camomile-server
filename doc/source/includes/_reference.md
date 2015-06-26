@@ -8,12 +8,12 @@
 CAMOMILE server follows the conventional REST API for CRUD (Create, Read, Update, Delete) data access.
 For a given *resource* (either corpus, medium, layer, annotation), the correspondance with HTTP commands and Python or Javascript interface is as follows.
 
-Action  | HTTP command                       | Python/Javascript interface
---------|------------------------------------|------------------
-Create  | POST /*resource*                   | .create*Resource*(...)
-Read    | GET /*resource*/`:id_resource`     | .get*Resource*(`:id_resource`)
-Update  | PUT /*resource*/`:id_resource`     | .update*Resource*(`:id_resource`,...)
-Delete  | DELETE /*resource*/`:id_resource`  | .delete*Resource*(`:id_resource`)
+Action      | HTTP command                       | Python/Javascript interface
+------------|------------------------------------|------------------
+**C**reate  | POST /*resource*                   | .createResource(...)
+**R**ead    | GET /*resource*/`:id_resource`     | .getResource(`:id_resource`)
+**U**pdate  | PUT /*resource*/`:id_resource`     | .updateResource(`:id_resource`,...)
+**D**elete  | DELETE /*resource*/`:id_resource`  | .deleteResource(`:id_resource`)
 
 
 ### History
@@ -141,7 +141,7 @@ Setting it to `true` will return the resource MongoDB `_id` instead of the compl
 POST /login
 
 #### DATA PARAMETERS
-Parameter        | Type      | Description
+Key              | Type      | Description
 ---------------- | --------- | -----------
 username         | String    | The user name  (required)
 password         | String    | The password  (required)
@@ -257,7 +257,7 @@ Restricted to user with 'admin' role.
 POST /user 
 
 #### DATA PARAMETERS
-Parameter        | Type      | Description
+Key              | Type      | Description
 ---------------- | --------- | -----------
 username         | String    | The user name  (required, unique and without space, can't be updated)
 password         | String    | The password  (required)
@@ -332,7 +332,7 @@ DELETE /user/:id_user HTTP/1.1
 GET /user
 
 #### DATA PARAMETERS
-Parameter        | Type      | Description
+Key              | Type      | Description
 ---------------- | --------- | -----------
 username         | String    | filter users by username (optional)
 
@@ -406,7 +406,7 @@ Parameter        | Type      | Description
 id_user          | String    | The user identifier (required)
 
 #### DATA PARAMETERS
-Parameter        | Type      | Description
+Key              | Type      | Description
 ---------------- | --------- | -----------
 password         | String    | The password
 description      | free      | A description of the user
@@ -475,7 +475,7 @@ Restricted to user with 'admin' role.
 GET /group
 
 #### DATA PARAMETERS
-Parameter        | Type      | Description
+Key              | Type      | Description
 ---------------- | --------- | -----------
 name             | String    | filter groups by name (optional)
 
@@ -544,7 +544,7 @@ Restricted to user with 'admin' role.
 POST /group
 
 #### DATA PARAMETERS
-Parameter        | Type      | Description
+Key              | Type      | Description
 ---------------- | --------- | -----------
 name             | String    | The group name (can't be updated)
 description      | free      | A description of the group
@@ -586,7 +586,7 @@ Parameter        | Type      | Description
 id_group         | String    | The group identifier (required)
 
 #### DATA PARAMETERS
-Parameter        | Type      | Description
+Key              | Type      | Description
 ---------------- | --------- | -----------
 description      | free      | A description of the group
 
@@ -774,7 +774,7 @@ Restricted to user with 'admin' role.
 POST /corpus
 
 #### DATA PARAMETERS
-Parameter        | Type      | Description
+Key              | Type      | Description
 ---------------- | --------- | -----------
 name             | String    | The corpus name (unique)
 description      | free      | A description of the corpus
@@ -814,7 +814,7 @@ Parameter        | Type      | Description
 id_corpus        | String    | The corpus identifier (required)
 
 #### DATA PARAMETERS
-Parameter        | Type      | Description
+Key              | Type      | Description
 ---------------- | --------- | -----------
 name             | String    | The corpus name (unique)
 description      | free      | A description of the corpus
@@ -927,7 +927,7 @@ id_user          | String    | The user identifier (required)
 
 
 #### DATA PARAMETERS
-Parameter        | Type      | Description
+Key              | Type      | Description
 ---------------- | --------- | -----------
 right            | 1, 2 or 3 | The corpus permissions (1:READ, 2:WRITE, 3:ADMIN)
 
@@ -996,7 +996,7 @@ id_corpus        | String    | The corpus identifier (required)
 id_group         | String    | The group identifier (required)
 
 #### DATA PARAMETERS
-Parameter        | Type      | Description
+Key              | Type      | Description
 ---------------- | --------- | -----------
 right            | 1, 2 or 3 | The corpus permissions (1:READ, 2:WRITE, 3:ADMIN)
 
@@ -1061,7 +1061,7 @@ Restricted to 'root' user.
 GET /medium 
 
 #### DATA PARAMETERS
-Parameter        | Type      | Description
+Key              | Type      | Description
 ---------------- | --------- | -----------
 name             | String    | filter media by name
 
@@ -1126,7 +1126,7 @@ Parameter        | Type      | Description
 id_corpus        | String    | The corpus identifier (required)
 
 #### DATA PARAMETERS
-Parameter        | Type      | Description
+Key              | Type      | Description
 ---------------- | --------- | -----------
 name             | String    | filter media by name
 
@@ -1162,7 +1162,7 @@ Parameter        | Type      | Description
 id_corpus        | String    | The corpus identifier (required)
 
 #### DATA PARAMETERS
-Parameter        | Type      | Description
+Key              | Type      | Description
 ---------------- | --------- | -----------
 name             | String    | The medium name (unique)
 url              | String    | absolute or relative URL to the medium
@@ -1206,7 +1206,7 @@ Parameter        | Type      | Description
 id_medium        | String    | The medium identifier (required)
 
 #### DATA PARAMETERS
-Parameter        | Type      | Description
+Key              | Type      | Description
 ---------------- | --------- | -----------
 name             | String    | The medium name (unique)
 url              | String    | absolute or relative URL to the medium
@@ -1315,8 +1315,19 @@ Restricted to 'root' user.
 
 GET /layer
 
+#### DATA PARAMETERS
+Key              | Type      | Description
+---------------- | --------- | -----------
+name             | String    | filter layers by name (optional)
+fragment_type    | String    | filter layers by fragment type (optional)
+data_type        | String    | filter layers by data type (optional)
+
 ```http
 GET /layer HTTP/1.1
+```
+
+```python
+layers = client.getLayers()
 ```
 
 > Sample JSON response
@@ -1333,8 +1344,17 @@ GET /layer HTTP/1.1
 
 GET /layer/:id_layer
 
+#### QUERY PARAMETERS
+Parameter        | Type      | Description
+---------------- | --------- | -----------
+id_layer         | String    | The layer identifier (required)
+
 ```http
 GET /layer/:id_layer HTTP/1.1
+```
+
+```python
+layer = client.getLayer(id_layer)
 ```
 
 > Sample JSON response
@@ -1351,8 +1371,24 @@ GET /layer/:id_layer HTTP/1.1
 
 GET /corpus/:id_corpus/layer
 
+#### QUERY PARAMETERS
+Parameter        | Type      | Description
+---------------- | --------- | -----------
+id_corpus        | String    | The corpus identifier (required)
+
+#### DATA PARAMETERS
+Key              | Type      | Description
+---------------- | --------- | -----------
+name             | String    | filter layers by name (optional)
+fragment_type    | String    | filter layers by fragment type (optional)
+data_type        | String    | filter layers by data type (optional)
+
 ```http
 GET /corpus/:id_corpus/layer HTTP/1.1
+```
+
+```python
+layer = client.getLayers(id_corpus)
 ```
 
 > Sample JSON response
@@ -1369,8 +1405,26 @@ GET /corpus/:id_corpus/layer HTTP/1.1
 
 POST /corpus/:id_corpus/layer
 
+#### QUERY PARAMETERS
+Parameter        | Type      | Description
+---------------- | --------- | -----------
+id_corpus        | String    | The corpus identifier (required)
+
+#### DATA PARAMETERS
+Key           | Type      | Description
+------------- | --------- | -----------
+name          | String    | layer name (required)
+description   | free      | layer description (optional)
+fragment_type | free      | layer fragment type (optional)
+data_type     | free      | layer data type (optional)
+annotations   | list      | list of annotations (optional)
+
 ```http
 POST /corpus/:id_corpus/layer HTTP/1.1
+```
+
+```python
+client.createLayer(id_corpus, name, description, fragment_type, data_type, annotations)
 ```
 
 > Sample JSON response
@@ -1387,8 +1441,25 @@ POST /corpus/:id_corpus/layer HTTP/1.1
 
 PUT /layer/:id_layer
 
+#### QUERY PARAMETERS
+Parameter        | Type      | Description
+---------------- | --------- | -----------
+id_layer         | String    | The layer identifier (required)
+
+#### DATA PARAMETERS
+Key           | Type      | Description
+------------- | --------- | -----------
+name          | String    | layer name (optional)
+description   | free      | layer description (optional)
+fragment_type | free      | layer fragment type (optional)
+data_type     | free      | layer data type (optional)
+
 ```http
 PUT /layer/:id_layer HTTP/1.1
+```
+
+```python
+client.updateLayer(id_layer, name, description, fragment_type, data_type)
 ```
 
 > Sample JSON response
@@ -1405,8 +1476,17 @@ PUT /layer/:id_layer HTTP/1.1
 
 DELETE /layer/:id_layer
 
+#### QUERY PARAMETERS
+Parameter        | Type      | Description
+---------------- | --------- | -----------
+id_layer         | String    | The layer identifier (required)
+
 ```http
 DELETE /layer/:id_layer HTTP/1.1
+```
+
+```python
+client.deleteLayer(id_layer)
 ```
 
 > Sample JSON response
@@ -1423,8 +1503,17 @@ DELETE /layer/:id_layer HTTP/1.1
 
 GET /layer/:id_layer/permissions
 
+#### QUERY PARAMETERS
+Parameter        | Type      | Description
+---------------- | --------- | -----------
+id_layer         | String    | The layer identifier (required)
+
 ```http
 GET /layer/:id_layer/permissions HTTP/1.1
+```
+
+```python
+permission = client.getLayerPermission(id_layer)
 ```
 
 > Sample JSON response
@@ -1441,8 +1530,23 @@ GET /layer/:id_layer/permissions HTTP/1.1
 
 PUT /layer/:id_layer/user/:id_user
 
+#### QUERY PARAMETERS
+Parameter        | Type      | Description
+---------------- | --------- | -----------
+id_layer         | String    | The layer identifier (required)
+id_user          | String    | The user identifier (required)
+
+#### DATA PARAMETERS
+Key              | Type      | Description
+---------------- | --------- | -----------
+right            | 1, 2 or 3 | The layer permissions (1:READ, 2:WRITE, 3:ADMIN)
+
 ```http
 PUT /layer/:id_layer/user/:id_user HTTP/1.1
+```
+
+```python
+client.setLayerPermission(id_layer, permission, user=id_user)
 ```
 
 > Sample JSON response
@@ -1459,8 +1563,18 @@ PUT /layer/:id_layer/user/:id_user HTTP/1.1
 
 DELETE /layer/:id_layer/user/:id_user
 
+#### QUERY PARAMETERS
+Parameter        | Type      | Description
+---------------- | --------- | -----------
+id_layer         | String    | The layer identifier (required)
+id_user          | String    | The user identifier (required)
+
 ```http
 DELETE /layer/:id_layer/user/:id_user HTTP/1.1
+```
+
+```python
+client.removeLayerPermission(id_layer, permission, user=id_user)
 ```
 
 > Sample JSON response
@@ -1477,8 +1591,23 @@ DELETE /layer/:id_layer/user/:id_user HTTP/1.1
 
 PUT /layer/:id_layer/group/:id_group 
 
+#### QUERY PARAMETERS
+Parameter        | Type      | Description
+---------------- | --------- | -----------
+id_layer         | String    | The layer identifier (required)
+id_group         | String    | The group identifier (required)
+
+#### DATA PARAMETERS
+Key              | Type      | Description
+---------------- | --------- | -----------
+right            | 1, 2 or 3 | The layer permissions (1:READ, 2:WRITE, 3:ADMIN)
+
 ```http
 PUT /layer/:id_layer/group/:id_group HTTP/1.1
+```
+
+```python
+client.setLayerPermission(id_layer, permission, group=id_group)
 ```
 
 > Sample JSON response
@@ -1495,8 +1624,18 @@ PUT /layer/:id_layer/group/:id_group HTTP/1.1
 
 DELETE /layer/:id_layer/group/:id_group
 
+#### QUERY PARAMETERS
+Parameter        | Type      | Description
+---------------- | --------- | -----------
+id_layer         | String    | The layer identifier (required)
+id_group         | String    | The group identifier (required)
+
 ```http
 DELETE /layer/:id_layer/group/:id_group HTTP/1.1
+```
+
+```python
+client.removeLayerPermission(id_layer, permission, group=id_group)
 ```
 
 > Sample JSON response
@@ -1517,8 +1656,19 @@ Restricted to 'root' user.
 
 GET /annotation
 
+#### DATA PARAMETERS
+Key         | Type      | Description
+----------- | --------- | -----------
+id_medium   | String    | filter annotations by medium (optional)
+fragment    | String    | filter annotations by fragment (optional)
+data        | String    | filter annotations by data (optional)
+
 ```http
 GET /annotation HTTP/1.1
+```
+
+```python
+client.getAnnotations(medium=id_medium, fragment=fragment, data=data)
 ```
 
 > Sample JSON response
@@ -1535,8 +1685,17 @@ GET /annotation HTTP/1.1
 
 GET /annotation/:id_annotation
 
+#### QUERY PARAMETERS
+Parameter        | Type      | Description
+---------------- | --------- | -----------
+id_annotation    | String    | The annotation identifier (required)
+
 ```http
 GET /annotation/:id_annotation HTTP/1.1
+```
+
+```python
+client.getAnnotation(id_annotation)
 ```
 
 > Sample JSON response
@@ -1553,8 +1712,24 @@ GET /annotation/:id_annotation HTTP/1.1
 
 GET /layer/:id_layer/annotation
 
+#### QUERY PARAMETERS
+Parameter        | Type      | Description
+---------------- | --------- | -----------
+id_layer         | String    | The layer identifier (required)
+
+#### DATA PARAMETERS
+Key         | Type      | Description
+----------- | --------- | -----------
+id_medium   | String    | filter annotations by medium (optional)
+fragment    | String    | filter annotations by fragment (optional)
+data        | String    | filter annotations by data (optional)
+
 ```http
 GET /layer/:id_layer/annotation HTTP/1.1
+```
+
+```python
+client.getAnnotations(id_layer, medium=id_medium, fragment=fragment, data=data)
 ```
 
 > Sample JSON response
@@ -1571,8 +1746,33 @@ GET /layer/:id_layer/annotation HTTP/1.1
 
 POST /layer/:id_layer/annotation
 
+#### QUERY PARAMETERS
+Parameter        | Type      | Description
+---------------- | --------- | -----------
+id_layer         | String    | The layer identifier (required)
+
+#### DATA PARAMETERS
+Key           | Type      | Description
+------------- | --------- | -----------
+id_medium     | String    | medium identifier (required)
+fragment      | free      | annotation fragment (required)
+data          | free      | annotation data (required)
+
+OR
+
+list of {id_medium:..., fragment:..., data:...}
+
 ```http
 POST /layer/:id_layer/annotation HTTP/1.1
+```
+
+```python
+client.createAnnotation(id_layer, medium=id_medium, fragment=fragment, data=data)
+
+OR
+
+client.createAnnotations(id_layer,annotations)
+
 ```
 
 > Sample JSON response
@@ -1589,8 +1789,23 @@ POST /layer/:id_layer/annotation HTTP/1.1
 
 PUT /annotation/:id_annotation
 
+#### QUERY PARAMETERS
+Parameter        | Type      | Description
+---------------- | --------- | -----------
+id_annotation    | String    | The annotation identifier (required)
+
+#### DATA PARAMETERS
+Key           | Type      | Description
+------------- | --------- | -----------
+fragment      | free      | annotation fragment (optional)
+data          | free      | annotation data (optional)
+
 ```http
 PUT /annotation/:id_annotation HTTP/1.1
+```
+
+```python
+client.updateAnnotation(id_annotation, fragment=fragment, data=data)
 ```
 
 > Sample JSON response
@@ -1607,8 +1822,17 @@ PUT /annotation/:id_annotation HTTP/1.1
 
 DELETE /annotation/:id_annotation
 
+#### QUERY PARAMETERS
+Parameter        | Type      | Description
+---------------- | --------- | -----------
+id_annotation    | String    | The annotation identifier (required)
+
 ```http
 DELETE /annotation/:id_annotation HTTP/1.1
+```
+
+```python
+client.deleteAnnotation(id_annotation)
 ```
 
 > Sample JSON response
@@ -1624,6 +1848,12 @@ DELETE /annotation/:id_annotation HTTP/1.1
 ### get all queues
 
 GET /queue
+
+#### DATA PARAMETERS
+Key           | Type      | Description
+------------- | --------- | -----------
+name          | String    | queue name (optional)
+
 
 ```http
 GET /queue HTTP/1.1
@@ -1653,8 +1883,17 @@ queues = client.getQueues()
 
 GET /queue/:id_queue
 
+#### QUERY PARAMETERS
+Parameter        | Type      | Description
+---------------- | --------- | -----------
+id_queue         | String    | The queue identifier (required)
+
 ```http
 GET /queue/:id_queue HTTP/1.1
+```
+
+```python
+queues = client.getQueue(id_queue)
 ```
 
 > Sample JSON response
@@ -1673,6 +1912,12 @@ GET /queue/:id_queue HTTP/1.1
 <aside class="notice">Restricted to user with 'admin' role.</aside>
 
 POST /queue
+
+#### DATA PARAMETERS
+Key           | Type      | Description
+------------- | --------- | -----------
+name          | String    | queue name (required)
+description   | free      | queue description (optional)
 
 ```http
 POST /queue HTTP/1.1
@@ -1707,6 +1952,18 @@ queue = client.createQueue('queue name', description={'my': 'description'})
 <aside class="notice">Restricted to user with ADMIN permissions to the resource.</aside>
 
 PUT /queue/:id_queue
+
+#### QUERY PARAMETERS
+Parameter        | Type      | Description
+---------------- | --------- | -----------
+id_queue         | String    | The queue identifier (required)
+
+#### DATA PARAMETERS
+Key           | Type      | Description
+------------- | --------- | -----------
+name          | String    | queue name (optional)
+description   | free      | queue description (optional)
+list          | list      | list of new queue elements (optional)
 
 ```http
 PUT /queue/:id_queue HTTP/1.1
@@ -1745,6 +2002,16 @@ queue = client.updateQueue(id_queue,
 
 PUT /queue/:id_queue/next
 
+#### QUERY PARAMETERS
+Parameter        | Type      | Description
+---------------- | --------- | -----------
+id_queue         | String    | The queue identifier (required)
+
+#### DATA PARAMETERS
+Type      | Description
+--------- | -----------
+list      | list of queue elements
+
 ```http
 PUT /queue/:id_queue/next HTTP/1.1
 ```
@@ -1767,6 +2034,11 @@ queue = client.enqueue(id_queue, items)
 
 GET /queue/:id_queue/next
 
+#### QUERY PARAMETERS
+Parameter        | Type      | Description
+---------------- | --------- | -----------
+id_queue         | String    | The queue identifier (required)
+
 ```http
 GET /queue/:id_queue/next HTTP/1.1
 ```
@@ -1782,6 +2054,11 @@ item = client.dequeue(id_queue)
 (Non-destructively) pick first element of queue
 
 GET /queue/:id_queue/first
+
+#### QUERY PARAMETERS
+Parameter        | Type      | Description
+---------------- | --------- | -----------
+id_queue         | String    | The queue identifier (required)
 
 ```http
 GET /queue/:id_queue/first HTTP/1.1
@@ -1799,6 +2076,11 @@ item = client.pick(id_queue)
 
 GET /queue/:id_queue/length
 
+#### QUERY PARAMETERS
+Parameter        | Type      | Description
+---------------- | --------- | -----------
+id_queue         | String    | The queue identifier (required)
+
 ```http
 GET /queue/:id_queue/length HTTP/1.1
 ```
@@ -1815,6 +2097,11 @@ item = client.pickLength(id_queue)
 
 GET /queue/:id_queue/all
 
+#### QUERY PARAMETERS
+Parameter        | Type      | Description
+---------------- | --------- | -----------
+id_queue         | String    | The queue identifier (required)
+
 ```http
 GET /queue/:id_queue/all HTTP/1.1
 ```
@@ -1828,6 +2115,11 @@ item = client.pickAll(id_queue)
 <aside class="notice">Restricted to user with ADMIN permissions to the resource.</aside>
 
 DELETE /queue/:id_queue
+
+#### QUERY PARAMETERS
+Parameter        | Type      | Description
+---------------- | --------- | -----------
+id_queue         | String    | The queue identifier (required)
 
 ```http
 DELETE /queue/:id_queue HTTP/1.1
@@ -1851,6 +2143,11 @@ client.deleteQueue(id_corpus)
 
 GET /queue/:id_queue/permissions
 
+#### QUERY PARAMETERS
+Parameter        | Type      | Description
+---------------- | --------- | -----------
+id_queue         | String    | The queue identifier (required)
+
 ```http
 GET /queue/:id_queue/permissions HTTP/1.1
 ```
@@ -1872,6 +2169,17 @@ client.getQueuePermissions(id_queue)
 <aside class="notice">Restricted to user with ADMIN permissions to the resource.</aside>
 
 PUT /queue/:id_queue/user/:id_user
+
+#### QUERY PARAMETERS
+Parameter        | Type      | Description
+---------------- | --------- | -----------
+id_queue         | String    | The queue identifier (required)
+id_user          | String    | The user identifier (required)
+
+#### DATA PARAMETERS
+Key              | Type      | Description
+---------------- | --------- | -----------
+right            | 1, 2 or 3 | The queue permissions (1:READ, 2:WRITE, 3:ADMIN)
 
 ```http
 PUT /queue/:id_queue/user/:id_user HTTP/1.1
@@ -1895,6 +2203,12 @@ client.setQueuePermissions(id_queue, client.WRITE, user=id_user)
 
 DELETE /queue/:id_queue/user/:id_user
 
+#### QUERY PARAMETERS
+Parameter        | Type      | Description
+---------------- | --------- | -----------
+id_queue         | String    | The queue identifier (required)
+id_user          | String    | The user identifier (required)
+
 ```http
 DELETE /queue/:id_queue/user/:id_user HTTP/1.1
 ```
@@ -1917,6 +2231,17 @@ client.removeQueuePermissions(id_queue, user=id_user)
 
 PUT /queue/:id_queue/group/:id_group 
 
+#### QUERY PARAMETERS
+Parameter        | Type      | Description
+---------------- | --------- | -----------
+id_queue         | String    | The queue identifier (required)
+id_group         | String    | The group identifier (required)
+
+#### DATA PARAMETERS
+Key              | Type      | Description
+---------------- | --------- | -----------
+right            | 1, 2 or 3 | The queue permissions (1:READ, 2:WRITE, 3:ADMIN)
+
 ```http
 PUT /queue/:id_queue/group/:id_group HTTP/1.1
 ```
@@ -1938,6 +2263,12 @@ client.setQueuePermissions(id_queue, client.WRITE, group=id_group)
 <aside class="notice">Restricted to user with ADMIN permissions to the resource.</aside>
 
 DELETE /queue/:id_queue/group/:id_group
+
+#### QUERY PARAMETERS
+Parameter        | Type      | Description
+---------------- | --------- | -----------
+id_queue         | String    | The queue identifier (required)
+id_group         | String    | The group identifier (required)
 
 ```http
 DELETE /queue/:id_queue/group/:id_group HTTP/1.1
