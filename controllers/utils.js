@@ -140,6 +140,14 @@ exports.request.fGetResources = function (req, model, filter, extra_fields) {
 
 };
 
+exports.request.fCountResources = function (req, model, filter) {
+
+  return function (callback) {
+    model.count(filter, callback);
+  };
+
+};
+
 exports.request.fFilterResources = function (req, min_right) {
 
   // special treatment for (omnipotent) root user

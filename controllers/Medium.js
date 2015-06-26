@@ -132,6 +132,25 @@ exports.getCorpusMedia = function (req, res) {
 
 };
 
+// get number of media of a specific corpus
+exports.getCorpusMediaCount = function (req, res) {
+
+  var filter = {};
+
+  // only this corpus
+  filter.id_corpus = req.params.id_corpus;
+
+  // filter by name
+  if (req.query.name) {
+    filter.name = req.query.name;
+  }
+
+  _.request.fCountResources(req, Medium, filter)(
+    _.response.fSendData(res)
+  );
+
+};
+
 // remove one medium and its annotations
 exports.remove = function (req, res) {
 
