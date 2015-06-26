@@ -170,7 +170,7 @@ Camomile.setURL(server);
 
 ```json
 {
- 'success': 'Authentication succeeded.'
+ "success": "Authentication succeeded."
 }
 ```
 
@@ -190,7 +190,7 @@ client.logout()
 
 ```json
 {
- 'success': 'Logout succeeded.'
+ "success": "Logout succeeded."
 }
 ```
 
@@ -211,10 +211,10 @@ GET /me HTTP/1.1
 
 ```json
 {
- '_id': '555299eff80f910100d741d1',
- 'description': '',
- 'role': 'user',
- 'username': 'johndoe'
+ "_id": "555299eff80f910100d741d1",
+ "description": "",
+ "role": "user",
+ "username": "johndoe"
 }
 ```
 
@@ -242,7 +242,7 @@ PUT /me HTTP/1.1
 
 ```json
 {
-  'success': 'Password successfully updated.'
+  "success": "Password successfully updated."
 }
 ```
 
@@ -291,10 +291,10 @@ client.createUser('username', 'password',
 
 ```json
 {
- '_id': '558818da01e0ef01006e979b',
- 'description': 'annotator',
- 'role': 'user',
- 'username': 'johndoe'
+ "_id": "558818da01e0ef01006e979b",
+ "description": "annotator",
+ "role": "user",
+ "username": "johndoe"
 }
 ```
 
@@ -323,7 +323,7 @@ DELETE /user/:id_user HTTP/1.1
 
 ```json
 {
- 'success': 'Successfully deleted.'
+ "success": "Successfully deleted."
 }
 ```
 
@@ -350,16 +350,16 @@ GET /user HTTP/1.1
 ```json
 [
  {
-  '_id': '5552998df80f910100d741d0',
-  'description': '',
-  'role': 'admin',
-  'username': 'root'
+  "_id": "5552998df80f910100d741d0",
+  "description": "",
+  "role": "admin",
+  "username": "root"
  },
  {
-  '_id': '558818da01e0ef01006e979b',
-  'description': 'annotator',
-  'role': 'user',
-  'username': 'johndoe'
+  "_id": "558818da01e0ef01006e979b",
+  "description": "annotator",
+  "role": "user",
+  "username": "johndoe"
  }
 ]
 ```
@@ -385,10 +385,10 @@ GET /user/:id_user HTTP/1.1
 
 ```json
 {
- '_id': '558818da01e0ef01006e979b',
- 'description': 'annotator',
- 'role': 'user',
- 'username': 'johndoe'
+ "_id": "558818da01e0ef01006e979b",
+ "description": "annotator",
+ "role": "user",
+ "username": "johndoe"
 }
 ```
 
@@ -429,10 +429,10 @@ user = client.updateUser(id_user,
 
 ```json
 {
- '_id': '558818da01e0ef01006e979b',
- 'description': 'expert annotator',
- 'role': 'user',
- 'username': 'johndoe'
+ "_id": "558818da01e0ef01006e979b",
+ "description": "expert annotator",
+ "role": "user",
+ "username": "johndoe"
 }
 ```
 
@@ -461,7 +461,7 @@ id_groups = client.getUserGroups(id_user)
 
 ```json
 [
- '55881d1601e0ef01006e979c'
+ "55881d1601e0ef01006e979c"
 ]
 ```
 
@@ -494,10 +494,10 @@ groups = client.getGroups()
 ```json
 [
  {
-  '_id': '55881d1601e0ef01006e979c',
-  'description': 'members of the project',
-  'name': 'project',
-  'users': ['558818da01e0ef01006e979b', '55881d6001e0ef01006e979d']
+  "_id": "55881d1601e0ef01006e979c",
+  "description": "members of the project",
+  "name": "project",
+  "users": ["558818da01e0ef01006e979b", "55881d6001e0ef01006e979d"]
  }
 ]
 ```
@@ -527,10 +527,10 @@ group = client.getGroup(id_group)
 
 ```json
 {
-  '_id': '55881d1601e0ef01006e979c',
-  'description': 'members of the project',
-  'name': 'project',
-  'users': ['558818da01e0ef01006e979b', '55881d6001e0ef01006e979d']
+  "_id": "55881d1601e0ef01006e979c",
+  "description": "members of the project",
+  "name": "project",
+  "users": ["558818da01e0ef01006e979b", "55881d6001e0ef01006e979d"]
 }
 ```
 
@@ -565,10 +565,10 @@ group = client.createGroup(
 
 ```json
 {
- '_id': '55881f8301e0ef01006e979e',
- 'description': '',
- 'name': 'guests',
- 'users': []
+ "_id": "55881f8301e0ef01006e979e",
+ "description": "",
+ "name": "guests",
+ "users": []
 }
 ```
 
@@ -607,10 +607,10 @@ group = client.updateGroup(
 
 ```json
 {
- '_id': '55881f8301e0ef01006e979e',
- 'description': 'open trial',
- 'name': 'guests',
- 'users': []
+ "_id": "55881f8301e0ef01006e979e",
+ "description": "open trial",
+ "name": "guests",
+ "users": []
 }
 ```
 
@@ -639,7 +639,7 @@ client.deleteGroup(id_group)
 
 ```json
 {
- 'success': 'Successfully deleted.'
+ "success": "Successfully deleted."
 }
 ```
 
@@ -670,10 +670,10 @@ client.addUserToGroup(id_user, id_group)
 
 ```json
 {
-  '_id': '55881d1601e0ef01006e979c',
-  'description': 'members of the project',
-  'name': 'project',
-  'users': ['558818da01e0ef01006e979b', '55881d6001e0ef01006e979d']
+  "_id": "55881d1601e0ef01006e979c",
+  "description": "members of the project",
+  "name": "project",
+  "users": ["558818da01e0ef01006e979b", "55881d6001e0ef01006e979d"]
 }
 ```
 
@@ -703,10 +703,10 @@ DELETE /group/:id_group/user/:id_user HTTP/1.1
 
 ```json
 {
-  '_id': '55881d1601e0ef01006e979c',
-  'description': 'members of the project',
-  'name': 'project',
-  'users': ['558818da01e0ef01006e979b']
+  "_id": "55881d1601e0ef01006e979c",
+  "description": "members of the project",
+  "name": "project",
+  "users": ["558818da01e0ef01006e979b"]
 }
 ```
 
@@ -729,9 +729,9 @@ GET /corpus HTTP/1.1
 ```json
 [
  {
-  '_id': '555daefff80f910100d741d6',
-  'description': 'Test corpus',
-  'name': 'ctest'
+  "_id": "555daefff80f910100d741d6",
+  "description": "Test corpus",
+  "name": "ctest"
  }
 ]
 ```
@@ -759,9 +759,9 @@ GET /corpus/:id_corpus HTTP/1.1
 
 ```json
 {
-  '_id': '555daefff80f910100d741d6',
-  'description': 'Test corpus',
-  'name': 'ctest'
+  "_id": "555daefff80f910100d741d6",
+  "description": "Test corpus",
+  "name": "ctest"
 }
 ```
 
@@ -796,9 +796,9 @@ POST /corpus HTTP/1.1
 
 ```json
 {
- '_id': '555daefff80f910100d741d6',
- 'description': {'license': 'Creative Commons'},
- 'name': 'unique name'
+ "_id": "555daefff80f910100d741d6",
+ "description": {"license": "Creative Commons"},
+ "name": "unique name"
 }
 ```
 
@@ -837,9 +837,9 @@ PUT /corpus/:id_corpus HTTP/1.1
 
 ```json
 {
- '_id': '555daefff80f910100d741d6',
- 'description': {'license': 'MIT'},
- 'name': 'new name'
+ "_id": "555daefff80f910100d741d6",
+ "description": {"license": "MIT"},
+ "name": "new name"
 }
 ```
 
@@ -871,7 +871,7 @@ DELETE /corpus/:id_corpus HTTP/1.1
 
 ```json
 {
- 'success': 'Successfully deleted.'
+ "success": "Successfully deleted."
 }
 ```
 
@@ -944,9 +944,9 @@ PUT /corpus/:id_corpus/user/:id_user HTTP/1.1
 
 ```json
 {
-  'users': {'555299eff80f910100d741d1': 3,
-  '5552bf5cf80f910100d741d2': 2,
-  '55881d6001e0ef01006e979d': 3}
+  "users": {"555299eff80f910100d741d1": 3,
+  "5552bf5cf80f910100d741d2": 2,
+  "55881d6001e0ef01006e979d": 3}
 }
 ```
 
@@ -976,8 +976,8 @@ DELETE /corpus/:id_corpus/user/:id_user HTTP/1.1
 
 ```json
 {
- 'users': {'555299eff80f910100d741d1': 3,
-  '5552bf5cf80f910100d741d2': 2}
+ "users": {"555299eff80f910100d741d1": 3,
+  "5552bf5cf80f910100d741d2": 2}
 }
 ```
 
@@ -1013,9 +1013,9 @@ PUT /corpus/:id_corpus/group/:id_group HTTP/1.1
 
 ```json
 {
- 'groups': {'55881d1601e0ef01006e979c': 2},
- 'users': {'555299eff80f910100d741d1': 3, 
-   '5552bf5cf80f910100d741d2': 2}
+ "groups": {"55881d1601e0ef01006e979c": 2},
+ "users": {"555299eff80f910100d741d1": 3, 
+   "5552bf5cf80f910100d741d2": 2}
 }
  ```
 
@@ -1045,8 +1045,8 @@ DELETE /corpus/:id_corpus/group/:id_group HTTP/1.1
 
 ```json
 {
- 'users': {'555299eff80f910100d741d1': 3,
-  '5552bf5cf80f910100d741d2': 2}
+ "users": {"555299eff80f910100d741d1": 3,
+  "5552bf5cf80f910100d741d2": 2}
 }
 ```
 
@@ -1077,8 +1077,8 @@ GET /medium HTTP/1.1
 
 ```json
 [
- {'_id': '...', 'description': '', 'id_corpus': '...', 'name': 'show1', 'url': ''},
- {'_id': '...', 'description': '', 'id_corpus': '...', 'name': 'show2', 'url': ''}
+ {"_id": "...", "description": "", "id_corpus": "...", "name": "show1", "url": ""},
+ {"_id": "...", "description": "", "id_corpus": "...", "name": "show2", "url": ""}
  ...
 ]
 ```
@@ -1106,11 +1106,11 @@ GET /medium/:id_medium HTTP/1.1
 
 ```json
 {
-  '_id': '555db2e6f80f910100d741d8',
-  'description': '',
-  'id_corpus': '555daefff80f910100d741d6',
-  'name': 'LCP_PileEtFace_2012-11-30_012500',
-  'url': ''
+  "_id": "555db2e6f80f910100d741d8",
+  "description": "",
+  "id_corpus": "555daefff80f910100d741d6",
+  "name": "LCP_PileEtFace_2012-11-30_012500",
+  "url": ""
 }
 ```
 
@@ -1142,11 +1142,11 @@ GET /corpus/:id_corpus/medium HTTP/1.1
 
 ```json
 {
-  '_id': '555db2e6f80f910100d741d8',
-  'description': '',
-  'id_corpus': '555daefff80f910100d741d6',
-  'name': 'LCP_PileEtFace_2012-11-30_012500',
-  'url': ''
+  "_id": "555db2e6f80f910100d741d8",
+  "description": "",
+  "id_corpus": "555daefff80f910100d741d6",
+  "name": "LCP_PileEtFace_2012-11-30_012500",
+  "url": ""
 }
 ```
 
@@ -1187,10 +1187,10 @@ POST /corpus/:id_corpus/medium HTTP/1.1
 
 ```json
 {
- '_id': '55895e90c70125010026f6b5',
- 'id_corpus': '558955cec70125010026f6aa',
- 'name': 'LCP_PileEtFace_2012-11-30_012500',
- 'url': ''
+ "_id": "55895e90c70125010026f6b5",
+ "id_corpus": "558955cec70125010026f6aa",
+ "name": "LCP_PileEtFace_2012-11-30_012500",
+ "url": ""
 }
 ```
 
@@ -1226,11 +1226,11 @@ PUT /medium/:id_medium HTTP/1.1
 
 ```json
 {
- '_id': '55895e90c70125010026f6b5',
- 'id_corpus': '558955cec70125010026f6aa',
- 'name': 'LCP_PileEtFace_2012-11-30_012500',
- 'url': '',
- 'description': 'LCP channel'
+ "_id": "55895e90c70125010026f6b5",
+ "id_corpus": "558955cec70125010026f6aa",
+ "name": "LCP_PileEtFace_2012-11-30_012500",
+ "url": "",
+ "description": "LCP channel"
 }
  ```
 
@@ -1257,7 +1257,7 @@ DELETE /medium/:id_medium HTTP/1.1
 
 ```json
 {
- 'success': 'Successfully deleted.'
+ "success": "Successfully deleted."
 }
 ```
 
