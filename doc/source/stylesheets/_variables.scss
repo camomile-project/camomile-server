@@ -28,7 +28,6 @@ $examples-bg: #393939;
 $code-bg: #292929;
 $code-annotation-bg: #1c1c1c;
 $nav-subitem-bg: #262626;
-$nav-subsubitem-bg: #131313;
 $nav-active-bg: #2467af;
 $lang-select-border: #000;
 $lang-select-bg: #222;
@@ -69,7 +68,7 @@ $phone-width: $tablet-width - $nav-width; // min width before reverting to mobil
 // FONTS
 ////////////////////
 %default-font {
-  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-family: "Helvetica Neue", Helvetica, Arial, "Microsoft Yahei","微软雅黑", STXihei, "华文细黑", sans-serif;
   font-size: 13px;
 }
 
@@ -101,13 +100,10 @@ $search-box-border-color: #666;
 // These settings are probably best left alone.
 
 %break-words {
- -ms-word-break: break-all;
      word-break: break-all;
 
      /* Non standard for webkit */
      word-break: break-word;
 
--webkit-hyphens: auto;
-   -moz-hyphens: auto;
         hyphens: auto;
 }
