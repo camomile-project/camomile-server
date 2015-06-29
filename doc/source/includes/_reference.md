@@ -16,6 +16,12 @@ Action      | HTTP command                       | Python/Javascript interface
 **D**elete  | DELETE /*resource*/`:id_resource`  | .deleteResource(`:id_resource`)
 
 
+### Users and groups
+
+  - a 'root' user is created when the server is launched; associated password is configured at launch time. The 'root' user can perform all actions and should only be used for creating other users.
+  - users with 'admin' role are the only ones allowed to create users, groups, corpora and queues. 'root' has 'admin' role and can create other 'admin' users.
+  - 
+  
 ### Permissions
 
 ```http
@@ -39,7 +45,7 @@ Camomile.setCorpusPermissionsForGroup(
   id_corpus, id_group, Camomile.READ, callback);
 ```
 
-The Camomile platform handles permissions: a user may access only the resources for which they have enough permission.
+The Camomile platform handles permissions: users may access only the resources for which they have enough permission.
 
 Three levels of permissions are supported: 
 
@@ -51,36 +57,48 @@ Three levels of permissions are supported:
 
 `Media` inherit permissions from the `corpus` they belong to.
 
-Permissions needed for the main actions are summarized in the table below
-(3-C..1-C are for Corpus-level permissions, 3-L..1-L are for Layer-level permissions)
+Permissions needed for the CRUD actions are summarized in the table below
 
-Action                | 'admin' | 3-C | 2-C | 1-C | 3-L | 2-L | 1-L |
-----------------------|---------|-----|-----|-----|-----|-----|-----|
-**C**reate Corpus     | Y       |     |     |     |     |     |     |
-**R**ead   Corpus     |         | Y   | Y   | Y   |     |     |     |
-**U**pdate Corpus     |         | Y   |     |     |     |     |     |
-**D**elete Corpus     |         | Y   |     |     |     |     |     |
 
-Action                | 'admin' | 3-C | 2-C | 1-C | 3-L | 2-L | 1-L |
-----------------------|---------|-----|-----|-----|-----|-----|-----|
-**C**reate Medium     |         | Y   |     |     |     |     |     |
-**R**ead   Medium     |         | Y   | Y   | Y   |     |     |     |
-**U**pdate Medium     |         | Y   |     |     |     |     |     |
-**D**elete Medium     |         | Y   |     |     |     |     |     |
+Corpus     | Permission needed
+-----------|---------------------------
+**C**      | 'admin' role              
+**R**      | >= READ to the **corpus**
+**U/D**    | ADMIN to the **corpus**
 
-Action                | 'admin' | 3-C | 2-C | 1-C | 3-L | 2-L | 1-L |
-----------------------|---------|-----|-----|-----|-----|-----|-----|
-**C**reate Layer      |         |     | Y   |     |     |     |     |
-**R**ead   Layer      |         |     |     |     | Y   | Y   | Y   |
-**U**pdate Layer      |         |     |     |     | Y   |     |     |
-**D**elete Layer      |         |     |     |     | Y   |     |     |
+Medium     | Permission needed
+------------------|---------------------------
+**C/U**    | ADMIN to the **corpus**  
+**R**      | >= READ to the **corpus**
+**D**      | ADMIN to the **corpus**  and 'admin' role
 
-Action                | 'admin' | 3-C | 2-C | 1-C | 3-L | 2-L | 1-L |
-----------------------|---------|-----|-----|-----|-----|-----|-----|
-**C**reate Annotation |         |     |     |     | Y   | Y   |     |  
-**R**ead   Annotation |         |     |     |     | Y   | Y   | Y   |
-**U**pdate Annotation |         |     |     |     | Y   | Y   |     |
-**D**elete Annotation |         |     |     |     | Y   | Y   |     |
+Layer      | Permission needed
+-----------|---------------------------
+**C**      | >= WRITE to the **corpus** 
+**R**      | >= READ to the **layer**  
+**U/D**    | ADMIN to the **layer**    
+
+Annotation | Permission needed
+-----------|---------------------------
+**C/U/D**  | >= WRITE to the **layer** 
+**R**      | >= READ to the **layer**  
+
+Users      | Permission needed
+-----------|---------------------------
+**C/U/D**  | 'admin' role              
+**R**      | authenticated user
+
+Groups     | Permission needed
+-----------|---------------------------
+**C/U**    | 'admin' role              
+**R**      | authenticated user
+**D**      | 'root' user
+
+Queues     | Permission needed
+-----------|---------------------------
+**C**      | 'admin' role              
+**R**      | WRITE to the **queue** (destructive access)            
+**U/D**    | ADMIN to the **queue**
 
  - a user with 'admin' role can create a corpus; (s)he becomes owner of the corpus and can share this ownership with selected users
  - a corpus-owner (3-C = ADMIN permission on the corpus) can manage the corpus, its permissions and the associated media.
@@ -512,10 +530,6 @@ id_groups = client.getUserGroups(id_user)
 
 ### get all groups
 
-<aside class="notice">
-Restricted to user with 'admin' role.
-</aside>
-
 GET /group
 
 #### DATA PARAMETERS
@@ -547,10 +561,6 @@ groups = client.getGroups()
 ```
 
 ### get one group
-
-<aside class="notice">
-Restricted to user with 'admin' role.
-</aside>
 
 GET /group/`:id_group`
 
