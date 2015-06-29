@@ -58,28 +58,28 @@ Documentation synchronized with Camomile-server 0.6.0
 <table><thead>
 <tr>
 <th>attributes</th>
-<th>description</th>
+<th>type</th>
 </tr>
 </thead><tbody>
 <tr>
 <td><code class="prettyprint">name</code></td>
-<td></td>
+<td>String</td>
 </tr>
 <tr>
 <td><code class="prettyprint">url</code></td>
-<td></td>
+<td>String</td>
 </tr>
 <tr>
 <td><code class="prettyprint">description</code></td>
-<td></td>
+<td>free</td>
 </tr>
 <tr>
 <td><code class="prettyprint">history</code></td>
-<td></td>
+<td>list</td>
 </tr>
 <tr>
 <td><code class="prettyprint">id_corpus</code></td>
-<td></td>
+<td>id</td>
 </tr>
 </tbody></table>
 
@@ -90,24 +90,24 @@ Documentation synchronized with Camomile-server 0.6.0
 <table><thead>
 <tr>
 <th>attributes</th>
-<th>description</th>
+<th>type</th>
 </tr>
 </thead><tbody>
 <tr>
 <td><code class="prettyprint">name</code></td>
-<td></td>
+<td>String</td>
 </tr>
 <tr>
 <td><code class="prettyprint">description</code></td>
-<td></td>
+<td>free</td>
 </tr>
 <tr>
 <td><code class="prettyprint">history</code></td>
-<td></td>
+<td>list</td>
 </tr>
 <tr>
 <td><code class="prettyprint">permissions</code></td>
-<td></td>
+<td>dict</td>
 </tr>
 </tbody></table>
 
@@ -126,28 +126,28 @@ Documentation synchronized with Camomile-server 0.6.0
 <table><thead>
 <tr>
 <th>attributes</th>
-<th>description</th>
+<th>type</th>
 </tr>
 </thead><tbody>
 <tr>
 <td><code class="prettyprint">fragment</code></td>
-<td></td>
+<td>free</td>
 </tr>
 <tr>
 <td><code class="prettyprint">data</code></td>
-<td></td>
+<td>free</td>
 </tr>
 <tr>
 <td><code class="prettyprint">history</code></td>
-<td></td>
+<td>list</td>
 </tr>
 <tr>
 <td><code class="prettyprint">id_layer</code></td>
-<td></td>
+<td>id</td>
 </tr>
 <tr>
 <td><code class="prettyprint">id_medium</code></td>
-<td></td>
+<td>id</td>
 </tr>
 </tbody></table>
 
@@ -158,36 +158,36 @@ Documentation synchronized with Camomile-server 0.6.0
 <table><thead>
 <tr>
 <th>attributes</th>
-<th>description</th>
+<th>type</th>
 </tr>
 </thead><tbody>
 <tr>
 <td><code class="prettyprint">name</code></td>
-<td></td>
+<td>String (lowercase)</td>
 </tr>
 <tr>
 <td><code class="prettyprint">description</code></td>
-<td></td>
+<td>free</td>
 </tr>
 <tr>
 <td><code class="prettyprint">fragment_type</code></td>
-<td></td>
+<td>free</td>
 </tr>
 <tr>
 <td><code class="prettyprint">data_type</code></td>
-<td></td>
+<td>free</td>
 </tr>
 <tr>
 <td><code class="prettyprint">history</code></td>
-<td></td>
+<td>list</td>
 </tr>
 <tr>
 <td><code class="prettyprint">permissions</code></td>
-<td></td>
+<td>dict</td>
 </tr>
 <tr>
 <td><code class="prettyprint">id_corpus</code></td>
-<td></td>
+<td>id</td>
 </tr>
 </tbody></table>
 
@@ -195,9 +195,73 @@ Documentation synchronized with Camomile-server 0.6.0
 
 <p>A <code class="prettyprint">user</code> is a person with an account on the Camomile platform.</p>
 
+<table><thead>
+<tr>
+<th>attributes</th>
+<th>type</th>
+</tr>
+</thead><tbody>
+<tr>
+<td><code class="prettyprint">username</code></td>
+<td>String (lowercase, unique)</td>
+</tr>
+<tr>
+<td><code class="prettyprint">description</code></td>
+<td>free</td>
+</tr>
+<tr>
+<td><code class="prettyprint">role</code></td>
+<td>&ldquo;user&rdquo; or &ldquo;admin&rdquo;</td>
+</tr>
+</tbody></table>
+
 <h2 id="group">Group</h2>
 
 <p>A <code class="prettyprint">group</code> is simply a set of <code class="prettyprint">users</code> &ndash; how extraordinary!</p>
+
+<table><thead>
+<tr>
+<th>attributes</th>
+<th>type</th>
+</tr>
+</thead><tbody>
+<tr>
+<td><code class="prettyprint">name</code></td>
+<td>String (lowercase, unique)</td>
+</tr>
+<tr>
+<td><code class="prettyprint">description</code></td>
+<td>free</td>
+</tr>
+<tr>
+<td><code class="prettyprint">users</code></td>
+<td>list</td>
+</tr>
+</tbody></table>
+
+<h2 id="queue">Queue</h2>
+
+<p>A <code class="prettyprint">queue</code> is a list of items</p>
+
+<table><thead>
+<tr>
+<th>attributes</th>
+<th>type</th>
+</tr>
+</thead><tbody>
+<tr>
+<td><code class="prettyprint">name</code></td>
+<td>String (lowercase, unique)</td>
+</tr>
+<tr>
+<td><code class="prettyprint">description</code></td>
+<td>free</td>
+</tr>
+<tr>
+<td><code class="prettyprint">list</code></td>
+<td>list of items</td>
+</tr>
+</tbody></table>
 
           <h1 id="server">Server</h1>
 
@@ -290,7 +354,6 @@ For a given <em>resource</em> (either corpus, medium, layer, annotation), the co
 <ul>
 <li>a &lsquo;root&rsquo; user is created when the server is launched; associated password is configured at launch time. The &#39;root&rsquo; user can perform all actions and should only be used for creating other users.</li>
 <li>users with &#39;admin&rsquo; role are the only ones allowed to create users, groups, corpora and queues. &#39;root&rsquo; has &#39;admin&rsquo; role and can create other &#39;admin&rsquo; users.</li>
-<li></li>
 </ul>
 
 <h3 id="permissions">Permissions</h3>
@@ -354,15 +417,15 @@ For a given <em>resource</em> (either corpus, medium, layer, annotation), the co
 </thead><tbody>
 <tr>
 <td><strong>C/U</strong></td>
-<td>ADMIN to the <strong>corpus</strong></td>
+<td>ADMIN to the <code class="prettyprint">corpus</code></td>
 </tr>
 <tr>
 <td><strong>R</strong></td>
-<td>&gt;= READ to the <strong>corpus</strong></td>
+<td>&gt;= READ to the <code class="prettyprint">corpus</code></td>
 </tr>
 <tr>
 <td><strong>D</strong></td>
-<td>ADMIN to the <strong>corpus</strong>  and &#39;admin&rsquo; role</td>
+<td>ADMIN to the <code class="prettyprint">corpus</code> and &#39;admin&rsquo; role</td>
 </tr>
 </tbody></table>
 
@@ -374,15 +437,15 @@ For a given <em>resource</em> (either corpus, medium, layer, annotation), the co
 </thead><tbody>
 <tr>
 <td><strong>C</strong></td>
-<td>&gt;= WRITE to the <strong>corpus</strong></td>
+<td>&gt;= WRITE to the <code class="prettyprint">corpus</code></td>
 </tr>
 <tr>
 <td><strong>R</strong></td>
-<td>&gt;= READ to the <strong>layer</strong></td>
+<td>&gt;= READ to the <code class="prettyprint">layer</code></td>
 </tr>
 <tr>
 <td><strong>U/D</strong></td>
-<td>ADMIN to the <strong>layer</strong></td>
+<td>ADMIN to the <code class="prettyprint">layer</code></td>
 </tr>
 </tbody></table>
 
@@ -394,17 +457,17 @@ For a given <em>resource</em> (either corpus, medium, layer, annotation), the co
 </thead><tbody>
 <tr>
 <td><strong>C/U/D</strong></td>
-<td>&gt;= WRITE to the <strong>layer</strong></td>
+<td>&gt;= WRITE to the <code class="prettyprint">layer</code></td>
 </tr>
 <tr>
 <td><strong>R</strong></td>
-<td>&gt;= READ to the <strong>layer</strong></td>
+<td>&gt;= READ to the <code class="prettyprint">layer</code></td>
 </tr>
 </tbody></table>
 
 <table><thead>
 <tr>
-<th>Users</th>
+<th>User</th>
 <th>Permission needed</th>
 </tr>
 </thead><tbody>
@@ -420,7 +483,7 @@ For a given <em>resource</em> (either corpus, medium, layer, annotation), the co
 
 <table><thead>
 <tr>
-<th>Groups</th>
+<th>Group</th>
 <th>Permission needed</th>
 </tr>
 </thead><tbody>
@@ -440,7 +503,7 @@ For a given <em>resource</em> (either corpus, medium, layer, annotation), the co
 
 <table><thead>
 <tr>
-<th>Queues</th>
+<th>Queue</th>
 <th>Permission needed</th>
 </tr>
 </thead><tbody>
@@ -450,11 +513,11 @@ For a given <em>resource</em> (either corpus, medium, layer, annotation), the co
 </tr>
 <tr>
 <td><strong>R</strong></td>
-<td>WRITE to the <strong>queue</strong> (destructive access)</td>
+<td>WRITE to the <code class="prettyprint">queue</code> (destructive access)</td>
 </tr>
 <tr>
 <td><strong>U/D</strong></td>
-<td>ADMIN to the <strong>queue</strong></td>
+<td>ADMIN to the <code class="prettyprint">queue</code></td>
 </tr>
 </tbody></table>
 
