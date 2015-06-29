@@ -285,6 +285,14 @@ For a given <em>resource</em> (either corpus, medium, layer, annotation), the co
 </tr>
 </tbody></table>
 
+<h3 id="users-and-groups">Users and groups</h3>
+
+<ul>
+<li>a &lsquo;root&rsquo; user is created when the server is launched; associated password is configured at launch time. The &#39;root&rsquo; user can perform all actions and should only be used for creating other users.</li>
+<li>users with &#39;admin&rsquo; role are the only ones allowed to create users, groups, corpora and queues. &#39;root&rsquo; has &#39;admin&rsquo; role and can create other &#39;admin&rsquo; users.</li>
+<li></li>
+</ul>
+
 <h3 id="permissions">Permissions</h3>
 <pre class="highlight http"><code><span class="nf">PUT</span> <span class="nn">/corpus/:id_corpus/user/:id_user</span> <span class="k">HTTP</span><span class="o">/</span><span class="m">1.1</span>
 
@@ -302,7 +310,7 @@ For a given <em>resource</em> (either corpus, medium, layer, annotation), the co
   <span class="nx">id_corpus</span><span class="p">,</span> <span class="nx">id_group</span><span class="p">,</span> <span class="nx">Camomile</span><span class="p">.</span><span class="nx">READ</span><span class="p">,</span> <span class="nx">callback</span><span class="p">);</span>
 </code></pre>
 
-<p>The Camomile platform handles permissions: a user may access only the resources for which they have enough permission.</p>
+<p>The Camomile platform handles permissions: users may access only the resources for which they have enough permission.</p>
 
 <p>Three levels of permissions are supported: </p>
 
@@ -316,222 +324,137 @@ For a given <em>resource</em> (either corpus, medium, layer, annotation), the co
 
 <p><code class="prettyprint">Media</code> inherit permissions from the <code class="prettyprint">corpus</code> they belong to.</p>
 
-<p>Permissions needed for the main actions are summarized in the table below
-(3-C..1-C are for Corpus-level permissions, 3-L..1-L are for Layer-level permissions)</p>
+<p>Permissions needed for the CRUD actions are summarized in the table below</p>
 
 <table><thead>
 <tr>
-<th>Action</th>
-<th>&lsquo;admin&rsquo;</th>
-<th>3-C</th>
-<th>2-C</th>
-<th>1-C</th>
-<th>3-L</th>
-<th>2-L</th>
-<th>1-L</th>
+<th>Corpus</th>
+<th>Permission needed</th>
 </tr>
 </thead><tbody>
 <tr>
-<td><strong>C</strong>reate Corpus</td>
-<td>Y</td>
-<td></td>
-<td></td>
-<td></td>
-<td></td>
-<td></td>
-<td></td>
+<td><strong>C</strong></td>
+<td>&#39;admin&rsquo; role</td>
 </tr>
 <tr>
-<td><strong>R</strong>ead   Corpus</td>
-<td></td>
-<td>Y</td>
-<td>Y</td>
-<td>Y</td>
-<td></td>
-<td></td>
-<td></td>
+<td><strong>R</strong></td>
+<td>&gt;= READ to the <strong>corpus</strong></td>
 </tr>
 <tr>
-<td><strong>U</strong>pdate Corpus</td>
-<td></td>
-<td>Y</td>
-<td></td>
-<td></td>
-<td></td>
-<td></td>
-<td></td>
-</tr>
-<tr>
-<td><strong>D</strong>elete Corpus</td>
-<td></td>
-<td>Y</td>
-<td></td>
-<td></td>
-<td></td>
-<td></td>
-<td></td>
+<td><strong>U/D</strong></td>
+<td>ADMIN to the <strong>corpus</strong></td>
 </tr>
 </tbody></table>
 
 <table><thead>
 <tr>
-<th>Action</th>
-<th>&#39;admin&rsquo;</th>
-<th>3-C</th>
-<th>2-C</th>
-<th>1-C</th>
-<th>3-L</th>
-<th>2-L</th>
-<th>1-L</th>
+<th>Medium</th>
+<th>Permission needed</th>
 </tr>
 </thead><tbody>
 <tr>
-<td><strong>C</strong>reate Medium</td>
-<td></td>
-<td>Y</td>
-<td></td>
-<td></td>
-<td></td>
-<td></td>
-<td></td>
+<td><strong>C/U</strong></td>
+<td>ADMIN to the <strong>corpus</strong></td>
 </tr>
 <tr>
-<td><strong>R</strong>ead   Medium</td>
-<td></td>
-<td>Y</td>
-<td>Y</td>
-<td>Y</td>
-<td></td>
-<td></td>
-<td></td>
+<td><strong>R</strong></td>
+<td>&gt;= READ to the <strong>corpus</strong></td>
 </tr>
 <tr>
-<td><strong>U</strong>pdate Medium</td>
-<td></td>
-<td>Y</td>
-<td></td>
-<td></td>
-<td></td>
-<td></td>
-<td></td>
-</tr>
-<tr>
-<td><strong>D</strong>elete Medium</td>
-<td></td>
-<td>Y</td>
-<td></td>
-<td></td>
-<td></td>
-<td></td>
-<td></td>
+<td><strong>D</strong></td>
+<td>ADMIN to the <strong>corpus</strong>  and &#39;admin&rsquo; role</td>
 </tr>
 </tbody></table>
 
 <table><thead>
 <tr>
-<th>Action</th>
-<th>&#39;admin&rsquo;</th>
-<th>3-C</th>
-<th>2-C</th>
-<th>1-C</th>
-<th>3-L</th>
-<th>2-L</th>
-<th>1-L</th>
+<th>Layer</th>
+<th>Permission needed</th>
 </tr>
 </thead><tbody>
 <tr>
-<td><strong>C</strong>reate Layer</td>
-<td></td>
-<td></td>
-<td>Y</td>
-<td></td>
-<td></td>
-<td></td>
-<td></td>
+<td><strong>C</strong></td>
+<td>&gt;= WRITE to the <strong>corpus</strong></td>
 </tr>
 <tr>
-<td><strong>R</strong>ead   Layer</td>
-<td></td>
-<td></td>
-<td></td>
-<td></td>
-<td>Y</td>
-<td>Y</td>
-<td>Y</td>
+<td><strong>R</strong></td>
+<td>&gt;= READ to the <strong>layer</strong></td>
 </tr>
 <tr>
-<td><strong>U</strong>pdate Layer</td>
-<td></td>
-<td></td>
-<td></td>
-<td></td>
-<td>Y</td>
-<td></td>
-<td></td>
-</tr>
-<tr>
-<td><strong>D</strong>elete Layer</td>
-<td></td>
-<td></td>
-<td></td>
-<td></td>
-<td>Y</td>
-<td></td>
-<td></td>
+<td><strong>U/D</strong></td>
+<td>ADMIN to the <strong>layer</strong></td>
 </tr>
 </tbody></table>
 
 <table><thead>
 <tr>
-<th>Action</th>
-<th>&#39;admin&rsquo;</th>
-<th>3-C</th>
-<th>2-C</th>
-<th>1-C</th>
-<th>3-L</th>
-<th>2-L</th>
-<th>1-L</th>
+<th>Annotation</th>
+<th>Permission needed</th>
 </tr>
 </thead><tbody>
 <tr>
-<td><strong>C</strong>reate Annotation</td>
-<td></td>
-<td></td>
-<td></td>
-<td></td>
-<td>Y</td>
-<td>Y</td>
-<td></td>
+<td><strong>C/U/D</strong></td>
+<td>&gt;= WRITE to the <strong>layer</strong></td>
 </tr>
 <tr>
-<td><strong>R</strong>ead   Annotation</td>
-<td></td>
-<td></td>
-<td></td>
-<td></td>
-<td>Y</td>
-<td>Y</td>
-<td>Y</td>
+<td><strong>R</strong></td>
+<td>&gt;= READ to the <strong>layer</strong></td>
+</tr>
+</tbody></table>
+
+<table><thead>
+<tr>
+<th>Users</th>
+<th>Permission needed</th>
+</tr>
+</thead><tbody>
+<tr>
+<td><strong>C/U/D</strong></td>
+<td>&#39;admin&rsquo; role</td>
 </tr>
 <tr>
-<td><strong>U</strong>pdate Annotation</td>
-<td></td>
-<td></td>
-<td></td>
-<td></td>
-<td>Y</td>
-<td>Y</td>
-<td></td>
+<td><strong>R</strong></td>
+<td>authenticated user</td>
+</tr>
+</tbody></table>
+
+<table><thead>
+<tr>
+<th>Groups</th>
+<th>Permission needed</th>
+</tr>
+</thead><tbody>
+<tr>
+<td><strong>C/U</strong></td>
+<td>&#39;admin&rsquo; role</td>
 </tr>
 <tr>
-<td><strong>D</strong>elete Annotation</td>
-<td></td>
-<td></td>
-<td></td>
-<td></td>
-<td>Y</td>
-<td>Y</td>
-<td></td>
+<td><strong>R</strong></td>
+<td>authenticated user</td>
+</tr>
+<tr>
+<td><strong>D</strong></td>
+<td>&#39;root&rsquo; user</td>
+</tr>
+</tbody></table>
+
+<table><thead>
+<tr>
+<th>Queues</th>
+<th>Permission needed</th>
+</tr>
+</thead><tbody>
+<tr>
+<td><strong>C</strong></td>
+<td>&#39;admin&rsquo; role</td>
+</tr>
+<tr>
+<td><strong>R</strong></td>
+<td>WRITE to the <strong>queue</strong> (destructive access)</td>
+</tr>
+<tr>
+<td><strong>U/D</strong></td>
+<td>ADMIN to the <strong>queue</strong></td>
 </tr>
 </tbody></table>
 
@@ -1011,10 +934,6 @@ Restricted to user with 'admin&rsquo; role.
 
 <h3 id="get-all-groups">get all groups</h3>
 
-<aside class="notice">
-Restricted to user with 'admin&rsquo; role.
-</aside>
-
 <p>GET /group</p>
 
 <h4 id="data-parameters">DATA PARAMETERS</h4>
@@ -1053,10 +972,6 @@ Restricted to user with 'admin&rsquo; role.
 </span></code></pre>
 
 <h3 id="get-one-group">get one group</h3>
-
-<aside class="notice">
-Restricted to user with 'admin&rsquo; role.
-</aside>
 
 <p>GET /group/<code class="prettyprint">:id_group</code></p>
 
