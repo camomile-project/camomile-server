@@ -285,52 +285,6 @@ For a given <em>resource</em> (either corpus, medium, layer, annotation), the co
 </tr>
 </tbody></table>
 
-<h3 id="history">History</h3>
-<pre class="highlight http"><code><span class="nf">GET</span> <span class="nn">/corpus?history=on</span> <span class="k">HTTP</span><span class="o">/</span><span class="m">1.1</span>
-</code></pre>
-<pre class="highlight python"><code><span class="n">corpus</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">getCorpus</span><span class="p">(</span><span class="n">id_corpus</span><span class="p">,</span> <span class="n">history</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
-<span class="n">do_something_with</span><span class="p">(</span><span class="n">corpus</span><span class="o">.</span><span class="n">history</span><span class="p">)</span>
-</code></pre>
-<pre class="highlight javascript"><code><span class="nx">client</span><span class="p">.</span><span class="nx">getCorpus</span><span class="p">(</span>
-  <span class="nx">id_corpus</span><span class="p">,</span> 
-  <span class="kd">function</span> <span class="p">(</span><span class="nx">corpus</span><span class="p">)</span> <span class="p">{</span> 
-    <span class="nx">do_something_with</span><span class="p">(</span><span class="nx">corpus</span><span class="p">.</span><span class="nx">history</span><span class="p">);</span> 
-  <span class="p">},</span>
-  <span class="p">{</span><span class="na">history</span><span class="p">:</span> <span class="nx">True</span><span class="p">}</span>
-<span class="p">);</span>
-</code></pre>
-
-<p>The API keeps track of all changes made to corpora, media, layers and annotations, in a dedicated <code class="prettyprint">history</code> attribute. </p>
-
-<p>The <code class="prettyprint">history</code> is simply a list of updates that were applied to the resource. 
-Each update has the following attributes:</p>
-
-<ul>
-<li><code class="prettyprint">date</code>: when the resource has changed</li>
-<li><code class="prettyprint">id_user</code>: which user applied the change</li>
-<li><code class="prettyprint">changes</code>: the actual modification</li>
-</ul>
-
-<p>However, to avoid sending what may become a very large amount of data with every request, the default behavior is to not send <code class="prettyprint">history</code>. </p>
-
-<p>If you really want to get the history, you need to ask for it explicitely to get it.</p>
-
-<h3 id="filters">Filters</h3>
-<pre class="highlight http"><code><span class="nf">GET</span> <span class="nn">/corpus?name='my%20corpus'</span> <span class="k">HTTP</span><span class="o">/</span><span class="m">1.1</span>
-</code></pre>
-<pre class="highlight python"><code><span class="n">corpora</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">getCorpora</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s">'my corpus'</span><span class="p">)</span>
-<span class="k">assert</span> <span class="n">corpora</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s">'my corpus'</span>
-</code></pre>
-<pre class="highlight javascript"><code><span class="nx">client</span><span class="p">.</span><span class="nx">getCorpora</span><span class="p">(</span>
-  <span class="kd">function</span><span class="p">(</span><span class="nx">corpora</span><span class="p">)</span> <span class="p">{</span>
-
-  <span class="p">},</span>
-  <span class="p">{</span><span class="na">filter</span><span class="p">:</span> <span class="p">{</span><span class="na">name</span><span class="p">:</span> <span class="s1">'my corpus'</span><span class="p">}}</span>
-<span class="p">);</span>
-</code></pre>
-
-<p>Most <code class="prettyprint">get{Resource}</code> methods (e.g. <code class="prettyprint">getCorpora</code>, <code class="prettyprint">getLayers</code>, &hellip;) support filtering by resource attribute. </p>
-
 <h3 id="permissions">Permissions</h3>
 <pre class="highlight http"><code><span class="nf">PUT</span> <span class="nn">/corpus/:id_corpus/user/:id_user</span> <span class="k">HTTP</span><span class="o">/</span><span class="m">1.1</span>
 
@@ -362,6 +316,223 @@ Each update has the following attributes:</p>
 
 <p><code class="prettyprint">Media</code> inherit permissions from the <code class="prettyprint">corpus</code> they belong to.</p>
 
+<p>Permissions needed for the main actions are summarized in the table below
+(3-C..1-C are for Corpus-level permissions, 3-L..1-L are for Layer-level permissions)</p>
+
+<table><thead>
+<tr>
+<th>Action</th>
+<th>&lsquo;admin&rsquo;</th>
+<th>3-C</th>
+<th>2-C</th>
+<th>1-C</th>
+<th>3-L</th>
+<th>2-L</th>
+<th>1-L</th>
+</tr>
+</thead><tbody>
+<tr>
+<td><strong>C</strong>reate Corpus</td>
+<td>Y</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td><strong>R</strong>ead   Corpus</td>
+<td></td>
+<td>Y</td>
+<td>Y</td>
+<td>Y</td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td><strong>U</strong>pdate Corpus</td>
+<td></td>
+<td>Y</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td><strong>D</strong>elete Corpus</td>
+<td></td>
+<td>Y</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;-</td>
+<td>&mdash;&mdash;&mdash;</td>
+<td>&mdash;&ndash;</td>
+<td>&mdash;&ndash;</td>
+<td>&mdash;&ndash;</td>
+<td>&mdash;&ndash;</td>
+<td>&mdash;&ndash;</td>
+<td>&mdash;&ndash;</td>
+</tr>
+<tr>
+<td><strong>C</strong>reate Medium</td>
+<td></td>
+<td>Y</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td><strong>R</strong>ead   Medium</td>
+<td></td>
+<td>Y</td>
+<td>Y</td>
+<td>Y</td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td><strong>U</strong>pdate Medium</td>
+<td></td>
+<td>Y</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td><strong>D</strong>elete Medium</td>
+<td></td>
+<td>Y</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;-</td>
+<td>&mdash;&mdash;&mdash;</td>
+<td>&mdash;&ndash;</td>
+<td>&mdash;&ndash;</td>
+<td>&mdash;&ndash;</td>
+<td>&mdash;&ndash;</td>
+<td>&mdash;&ndash;</td>
+<td>&mdash;&ndash;</td>
+</tr>
+<tr>
+<td><strong>C</strong>reate Layer</td>
+<td></td>
+<td></td>
+<td>Y</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td><strong>R</strong>ead   Layer</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td>Y</td>
+<td>Y</td>
+<td>Y</td>
+</tr>
+<tr>
+<td><strong>U</strong>pdate Layer</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td>Y</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td><strong>D</strong>elete Layer</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td>Y</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;-</td>
+<td>&mdash;&mdash;&mdash;</td>
+<td>&mdash;&ndash;</td>
+<td>&mdash;&ndash;</td>
+<td>&mdash;&ndash;</td>
+<td>&mdash;&ndash;</td>
+<td>&mdash;&ndash;</td>
+<td>&mdash;&ndash;</td>
+</tr>
+<tr>
+<td><strong>C</strong>reate Annotation</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td>Y</td>
+<td>Y</td>
+<td></td>
+</tr>
+<tr>
+<td><strong>R</strong>ead   Annotation</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td>Y</td>
+<td>Y</td>
+<td>Y</td>
+</tr>
+<tr>
+<td><strong>U</strong>pdate Annotation</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td>Y</td>
+<td>Y</td>
+<td></td>
+</tr>
+<tr>
+<td><strong>D</strong>elete Annotation</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td>Y</td>
+<td>Y</td>
+<td></td>
+</tr>
+</tbody></table>
+
+<ul>
+<li>a user with &#39;admin&rsquo; role can create a corpus; (s)he becomes owner of the corpus and can share this ownership with selected users</li>
+<li>a corpus-owner (3-C = ADMIN permission on the corpus) can manage the corpus, its permissions and the associated media.</li>
+<li>a corpus-writer (2-C = WRITE permission on the corpus) can create layers in the corpus; (s)he becomes owner of the layer and can manage the permissions</li>
+<li>a layer-owner (3-L = ADMIN permission on the layer) can manage the layer, its permissions and the associated annotations.</li>
+<li>a layer-writer (2-L = WRITE permission on the layer) can create and edit annotations</li>
+<li>a layer-reader (1-L = READ permission on the layer) can only read annotations - for access to the corpus description and media (s)he should also generally get corpus-reader (1-C) permissions<br></li>
+<li>an authenticated user has no access to a resource until (s)he is specifically granted permission to it.</li>
+</ul>
+
 <h3 id="resource-id">Resource ID</h3>
 <pre class="highlight python"><code><span class="n">corpora</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">getCorpora</span><span class="p">()</span>
 <span class="n">id_corpora</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">getCorpora</span><span class="p">(</span><span class="n">returns_id</span><span class="o">=</span><span class="n">true</span><span class="p">)</span>
@@ -381,6 +552,56 @@ Each update has the following attributes:</p>
 
 <p>However, methods of the Python and Javascript clients support the <code class="prettyprint">returns_id</code> optional parameter. 
 Setting it to <code class="prettyprint">true</code> will return the resource MongoDB <code class="prettyprint">_id</code> instead of the complete resource.</p>
+
+<h3 id="filters">Filters</h3>
+<pre class="highlight http"><code><span class="nf">GET</span> <span class="nn">/corpus?name='my%20corpus'</span> <span class="k">HTTP</span><span class="o">/</span><span class="m">1.1</span>
+</code></pre>
+<pre class="highlight python"><code><span class="n">corpora</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">getCorpora</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s">'my corpus'</span><span class="p">)</span>
+<span class="k">assert</span> <span class="n">corpora</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s">'my corpus'</span>
+</code></pre>
+<pre class="highlight javascript"><code><span class="nx">client</span><span class="p">.</span><span class="nx">getCorpora</span><span class="p">(</span>
+  <span class="kd">function</span><span class="p">(</span><span class="nx">corpora</span><span class="p">)</span> <span class="p">{</span>
+
+  <span class="p">},</span>
+  <span class="p">{</span><span class="na">filter</span><span class="p">:</span> <span class="p">{</span><span class="na">name</span><span class="p">:</span> <span class="s1">'my corpus'</span><span class="p">}}</span>
+<span class="p">);</span>
+</code></pre>
+
+<p>Most <code class="prettyprint">get{Resource}</code> methods (e.g. <code class="prettyprint">getCorpora</code>, <code class="prettyprint">getLayers</code>, &hellip;) support filtering by resource attribute. </p>
+
+<h3 id="history">History</h3>
+
+<aside class="warning">
+History management should get a major overhaul in next versions.
+</aside>
+<pre class="highlight http"><code><span class="nf">GET</span> <span class="nn">/corpus?history=on</span> <span class="k">HTTP</span><span class="o">/</span><span class="m">1.1</span>
+</code></pre>
+<pre class="highlight python"><code><span class="n">corpus</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">getCorpus</span><span class="p">(</span><span class="n">id_corpus</span><span class="p">,</span> <span class="n">history</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+<span class="n">do_something_with</span><span class="p">(</span><span class="n">corpus</span><span class="o">.</span><span class="n">history</span><span class="p">)</span>
+</code></pre>
+<pre class="highlight javascript"><code><span class="nx">client</span><span class="p">.</span><span class="nx">getCorpus</span><span class="p">(</span>
+  <span class="nx">id_corpus</span><span class="p">,</span> 
+  <span class="kd">function</span> <span class="p">(</span><span class="nx">corpus</span><span class="p">)</span> <span class="p">{</span> 
+    <span class="nx">do_something_with</span><span class="p">(</span><span class="nx">corpus</span><span class="p">.</span><span class="nx">history</span><span class="p">);</span> 
+  <span class="p">},</span>
+  <span class="p">{</span><span class="na">history</span><span class="p">:</span> <span class="nx">True</span><span class="p">}</span>
+<span class="p">);</span>
+</code></pre>
+
+<p>The API keeps track of all changes made to corpora, media, layers and annotations, in a dedicated <code class="prettyprint">history</code> attribute. </p>
+
+<p>The <code class="prettyprint">history</code> is simply a list of updates that were applied to the resource. 
+Each update has the following attributes:</p>
+
+<ul>
+<li><code class="prettyprint">date</code>: when the resource has changed</li>
+<li><code class="prettyprint">id_user</code>: which user applied the change</li>
+<li><code class="prettyprint">changes</code>: the actual modification</li>
+</ul>
+
+<p>However, to avoid sending what may become a very large amount of data with every request, the default behavior is to not send <code class="prettyprint">history</code>. </p>
+
+<p>If you really want to get the history, you need to ask for it explicitely to get it.</p>
 
 <h2 id="authentication">Authentication</h2>
 
@@ -493,7 +714,7 @@ Setting it to <code class="prettyprint">true</code> will return the resource Mon
 <h3 id="create-new-user">create new user</h3>
 
 <aside class="notice">
-Restricted to user with &lsquo;admin&rsquo; role.
+Restricted to user with 'admin&rsquo; role.
 </aside>
 
 <p>POST /user </p>
@@ -1901,7 +2122,7 @@ GET /medium/:id_medium/mp4 HTTP/1.1
 GET /medium/:id_medium/ogv HTTP/1.1
 </code></pre>
 
-<p>## Layers</p>
+<h2 id="layers">Layers</h2>
 
 <h3 id="get-all-layers">get all layers</h3>
 
