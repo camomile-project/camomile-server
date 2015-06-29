@@ -16,63 +16,6 @@ Action      | HTTP command                       | Python/Javascript interface
 **D**elete  | DELETE /*resource*/`:id_resource`  | .deleteResource(`:id_resource`)
 
 
-### History
-
-```http
-GET /corpus?history=on HTTP/1.1
-```
-
-```python
-corpus = client.getCorpus(id_corpus, history=True)
-do_something_with(corpus.history)
-```
-
-```javascript
-client.getCorpus(
-  id_corpus, 
-  function (corpus) { 
-    do_something_with(corpus.history); 
-  },
-  {history: True}
-);
-```
-
-The API keeps track of all changes made to corpora, media, layers and annotations, in a dedicated `history` attribute. 
-
-The `history` is simply a list of updates that were applied to the resource. 
-Each update has the following attributes:
-
-  - `date`: when the resource has changed
-  - `id_user`: which user applied the change
-  - `changes`: the actual modification
-
-
-However, to avoid sending what may become a very large amount of data with every request, the default behavior is to not send `history`. 
-
-If you really want to get the history, you need to ask for it explicitely to get it.
-
-### Filters
-
-```http
-GET /corpus?name='my%20corpus' HTTP/1.1
-```
-
-```python
-corpora = client.getCorpora(name='my corpus')
-assert corpora[0].name == 'my corpus'
-```
-
-```javascript
-client.getCorpora(
-  function(corpora) {
-
-  },
-  {filter: {name: 'my corpus'}}
-);
-```
-
-Most `get{Resource}` methods (e.g. `getCorpora`, `getLayers`, ...) support filtering by resource attribute. 
-
 ### Permissions
 
 ```http
@@ -108,8 +51,40 @@ Three levels of permissions are supported:
 
 `Media` inherit permissions from the `corpus` they belong to.
 
-### Resource ID
+Permissions needed for the main actions are summarized in the table below
+(3-C..1-C are for Corpus-level permissions, 3-L..1-L are for Layer-level permissions)
 
+Action                | 'admin' | 3-C | 2-C | 1-C | 3-L | 2-L | 1-L |
+----------------------|---------|-----|-----|-----|-----|-----|-----|
+**C**reate Corpus     | Y       |     |     |     |     |     |     |
+**R**ead   Corpus     |         | Y   | Y   | Y   |     |     |     |
+**U**pdate Corpus     |         | Y   |     |     |     |     |     |
+**D**elete Corpus     |         | Y   |     |     |     |     |     |
+----------------------|---------|-----|-----|-----|-----|-----|-----|
+**C**reate Medium     |         | Y   |     |     |     |     |     |
+**R**ead   Medium     |         | Y   | Y   | Y   |     |     |     |
+**U**pdate Medium     |         | Y   |     |     |     |     |     |
+**D**elete Medium     |         | Y   |     |     |     |     |     |
+----------------------|---------|-----|-----|-----|-----|-----|-----|
+**C**reate Layer      |         |     | Y   |     |     |     |     |
+**R**ead   Layer      |         |     |     |     | Y   | Y   | Y   |
+**U**pdate Layer      |         |     |     |     | Y   |     |     |
+**D**elete Layer      |         |     |     |     | Y   |     |     |
+----------------------|---------|-----|-----|-----|-----|-----|-----|
+**C**reate Annotation |         |     |     |     | Y   | Y   |     |  
+**R**ead   Annotation |         |     |     |     | Y   | Y   | Y   |
+**U**pdate Annotation |         |     |     |     | Y   | Y   |     |
+**D**elete Annotation |         |     |     |     | Y   | Y   |     |
+
+ - a user with 'admin' role can create a corpus; (s)he becomes owner of the corpus and can share this ownership with selected users
+ - a corpus-owner (3-C = ADMIN permission on the corpus) can manage the corpus, its permissions and the associated media.
+ - a corpus-writer (2-C = WRITE permission on the corpus) can create layers in the corpus; (s)he becomes owner of the layer and can manage the permissions
+ - a layer-owner (3-L = ADMIN permission on the layer) can manage the layer, its permissions and the associated annotations.
+ - a layer-writer (2-L = WRITE permission on the layer) can create and edit annotations
+ - a layer-reader (1-L = READ permission on the layer) can only read annotations - for access to the corpus description and media (s)he should also generally get corpus-reader (1-C) permissions  
+ - an authenticated user has no access to a resource until (s)he is specifically granted permission to it.
+
+### Resource ID
 
 ```python
 corpora = client.getCorpora()
@@ -132,6 +107,69 @@ The default behavior of most entry points is to return the complete resource, ra
 
 However, methods of the Python and Javascript clients support the `returns_id` optional parameter. 
 Setting it to `true` will return the resource MongoDB `_id` instead of the complete resource.
+
+
+### Filters
+
+```http
+GET /corpus?name='my%20corpus' HTTP/1.1
+```
+
+```python
+corpora = client.getCorpora(name='my corpus')
+assert corpora[0].name == 'my corpus'
+```
+
+```javascript
+client.getCorpora(
+  function(corpora) {
+
+  },
+  {filter: {name: 'my corpus'}}
+);
+```
+
+Most `get{Resource}` methods (e.g. `getCorpora`, `getLayers`, ...) support filtering by resource attribute. 
+
+
+### History
+
+<aside class="warning">
+History management should get a major overhaul in next versions.
+</aside>
+
+```http
+GET /corpus?history=on HTTP/1.1
+```
+
+```python
+corpus = client.getCorpus(id_corpus, history=True)
+do_something_with(corpus.history)
+```
+
+```javascript
+client.getCorpus(
+  id_corpus, 
+  function (corpus) { 
+    do_something_with(corpus.history); 
+  },
+  {history: True}
+);
+```
+
+The API keeps track of all changes made to corpora, media, layers and annotations, in a dedicated `history` attribute. 
+
+The `history` is simply a list of updates that were applied to the resource. 
+Each update has the following attributes:
+
+  - `date`: when the resource has changed
+  - `id_user`: which user applied the change
+  - `changes`: the actual modification
+
+
+However, to avoid sending what may become a very large amount of data with every request, the default behavior is to not send `history`. 
+
+If you really want to get the history, you need to ask for it explicitely to get it.
 
 
 ## Authentication
@@ -1305,7 +1343,7 @@ GET /medium/:id_medium/mp4 HTTP/1.1
 GET /medium/:id_medium/ogv HTTP/1.1
 ```
 
- ## Layers
+## Layers
 
 ### get all layers
 
