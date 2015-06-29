@@ -62,18 +62,18 @@ Permissions needed for the CRUD actions are summarized in the table below
 Corpus     | Permission needed
 -----------|---------------------------
 **C**      | 'admin' role              
-**R**      | >= READ to the **corpus**
-**U/D**    | ADMIN to the **corpus**
+**R**      | >= READ to the `corpus`
+**U/D**    | ADMIN to the `corpus` and 'admin' role
 
 Medium     | Permission needed
 -----------|---------------------------
 **C/U**    | ADMIN to the `corpus`  
 **R**      | >= READ to the `corpus`
-**D**      | ADMIN to the `corpus` and 'admin' role
+**D**      | ADMIN to the `corpus`
 
 Layer      | Permission needed
 -----------|---------------------------
-**C**      | >= WRITE to the `corpus` 
+**C**      | >= WRITE to the **corpus**
 **R**      | >= READ to the `layer` 
 **U/D**    | ADMIN to the `layer`    
 
