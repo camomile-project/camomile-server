@@ -60,16 +60,22 @@ Action                | 'admin' | 3-C | 2-C | 1-C | 3-L | 2-L | 1-L |
 **R**ead   Corpus     |         | Y   | Y   | Y   |     |     |     |
 **U**pdate Corpus     |         | Y   |     |     |     |     |     |
 **D**elete Corpus     |         | Y   |     |     |     |     |     |
+
+Action                | 'admin' | 3-C | 2-C | 1-C | 3-L | 2-L | 1-L |
 ----------------------|---------|-----|-----|-----|-----|-----|-----|
 **C**reate Medium     |         | Y   |     |     |     |     |     |
 **R**ead   Medium     |         | Y   | Y   | Y   |     |     |     |
 **U**pdate Medium     |         | Y   |     |     |     |     |     |
 **D**elete Medium     |         | Y   |     |     |     |     |     |
+
+Action                | 'admin' | 3-C | 2-C | 1-C | 3-L | 2-L | 1-L |
 ----------------------|---------|-----|-----|-----|-----|-----|-----|
 **C**reate Layer      |         |     | Y   |     |     |     |     |
 **R**ead   Layer      |         |     |     |     | Y   | Y   | Y   |
 **U**pdate Layer      |         |     |     |     | Y   |     |     |
 **D**elete Layer      |         |     |     |     | Y   |     |     |
+
+Action                | 'admin' | 3-C | 2-C | 1-C | 3-L | 2-L | 1-L |
 ----------------------|---------|-----|-----|-----|-----|-----|-----|
 **C**reate Annotation |         |     |     |     | Y   | Y   |     |  
 **R**ead   Annotation |         |     |     |     | Y   | Y   | Y   |
