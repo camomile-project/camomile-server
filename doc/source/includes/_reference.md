@@ -20,7 +20,6 @@ Action      | HTTP command                       | Python/Javascript interface
 
   - a 'root' user is created when the server is launched; associated password is configured at launch time. The 'root' user can perform all actions and should only be used for creating other users.
   - users with 'admin' role are the only ones allowed to create users, groups, corpora and queues. 'root' has 'admin' role and can create other 'admin' users.
-  - 
   
 ### Permissions
 
@@ -67,38 +66,38 @@ Corpus     | Permission needed
 **U/D**    | ADMIN to the **corpus**
 
 Medium     | Permission needed
-------------------|---------------------------
-**C/U**    | ADMIN to the **corpus**  
-**R**      | >= READ to the **corpus**
-**D**      | ADMIN to the **corpus**  and 'admin' role
+-----------|---------------------------
+**C/U**    | ADMIN to the `corpus`  
+**R**      | >= READ to the `corpus`
+**D**      | ADMIN to the `corpus` and 'admin' role
 
 Layer      | Permission needed
 -----------|---------------------------
-**C**      | >= WRITE to the **corpus** 
-**R**      | >= READ to the **layer**  
-**U/D**    | ADMIN to the **layer**    
+**C**      | >= WRITE to the `corpus` 
+**R**      | >= READ to the `layer` 
+**U/D**    | ADMIN to the `layer`    
 
 Annotation | Permission needed
 -----------|---------------------------
-**C/U/D**  | >= WRITE to the **layer** 
-**R**      | >= READ to the **layer**  
+**C/U/D**  | >= WRITE to the `layer` 
+**R**      | >= READ to the `layer`  
 
-Users      | Permission needed
+User       | Permission needed
 -----------|---------------------------
 **C/U/D**  | 'admin' role              
 **R**      | authenticated user
 
-Groups     | Permission needed
+Group      | Permission needed
 -----------|---------------------------
 **C/U**    | 'admin' role              
 **R**      | authenticated user
 **D**      | 'root' user
 
-Queues     | Permission needed
+Queue      | Permission needed
 -----------|---------------------------
 **C**      | 'admin' role              
-**R**      | WRITE to the **queue** (destructive access)            
-**U/D**    | ADMIN to the **queue**
+**R**      | WRITE to the `queue` (destructive access)            
+**U/D**    | ADMIN to the `queue`
 
  - a user with 'admin' role can create a corpus; (s)he becomes owner of the corpus and can share this ownership with selected users
  - a corpus-owner (3-C = ADMIN permission on the corpus) can manage the corpus, its permissions and the associated media.
