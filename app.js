@@ -173,7 +173,7 @@ app.use(session({
   name: 'camomile.sid',
   proxy: true,
   resave: false,
-  rolling: false,
+  rolling: true,
   saveUninitialized: false,
   secret: cookieSecret,
   store: sessionStore,
