@@ -214,3 +214,7 @@ exports.streamMp4 = function (req, res) {
 exports.streamOgv = function (req, res) {
   streamFormat(req, res, 'ogv');
 };
+
+exports.streamWav = function (req, res) {
+  streamFormat(req, res, 'wav');
+};
