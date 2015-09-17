@@ -108,12 +108,12 @@ exports.update = function (req, res) {
       layer.description = changes.description = req.body.description;
     }
 
-    // update history
-    layer.history.push({
-      date: new Date(),
-      id_user: req.session.user._id,
-      changes: changes
-    });
+    // // update history
+    // layer.history.push({
+    //   date: new Date(),
+    //   id_user: req.session.user._id,
+    //   changes: changes
+    // });
 
     layer.save(_.response.fSendResource(res, Layer));
   });
@@ -124,8 +124,17 @@ exports.update = function (req, res) {
 exports.getAll = function (req, res) {
 
   var filter = {};
+
   if (req.query.name) {
-    filter['name'] = req.query.name;
+    filter.name = req.query.name;
+  }
+
+  if (req.query.fragment_type) {
+    filter.fragment_type = req.query.fragment_type;
+  }
+
+  if (req.query.data_type) {
+    filter.data_type = req.query.data_type;
   }
 
   async.waterfall([

@@ -28,13 +28,14 @@ var User = require('../models/User');
 var Group = require('../models/Group');
 var Corpus = require('../models/Corpus');
 var Layer = require('../models/Layer');
+var Queue = require('../models/Queue');
 var Authentication = require('./Authentication');
 
 // ----------------------------------------------------------------------------
 // ROUTES
 // ----------------------------------------------------------------------------
 
-// retrieve all users
+// retrieve all users (but root)
 exports.getAll = function (req, res) {
 
   var filter = {};
@@ -45,8 +46,24 @@ exports.getAll = function (req, res) {
     filter.role = req.query.role;
   }
 
-  _.request.fGetResources(req, User, filter)(
-    _.response.fSendResources(res, User));
+  async.waterfall([
+
+      // retrieve all users...
+      _.request.fGetResources(req, User, filter),
+
+      // ... but "root"
+      function (users, callback) {
+        var allUsersButRoot = users.filter(
+          function (user) {
+            return user.username !== 'root';
+          });
+        callback(null, allUsersButRoot);
+      }
+    ],
+
+    // send users
+    _.response.fSendResources(res, User)
+  );
 };
 
 // retrieve a specific user
@@ -236,15 +253,19 @@ exports.remove = function (req, res) {
 
   async.waterfall([
 
-      // make sure we are not removing root
+      // make sure we are not removing root, nor ourselves
       function (callback) {
-        User.findById(id_user, function (error, user) {
-          if (user.username === "root") {
-            callback('Access denied.');
-          } else {
-            callback(error);
-          }
-        });
+        if (id_user === req.session.user._id) {
+          callback('One cannot delete their own account.');
+        } else {
+          User.findById(id_user, function (error, user) {
+            if (user.username === "root") {
+              callback('Access denied.');
+            } else {
+              callback(error);
+            }
+          });
+        }
       },
 
       // remove user in all corpora permissions
@@ -282,6 +303,26 @@ exports.remove = function (req, res) {
         update.$unset[path] = '';
 
         Layer.update(filter, update,
+          function (error, number) {
+            callback(error);
+          });
+      },
+
+      // remove user in all queues permissions
+      function (callback) {
+        var path = 'permissions.users.' + id_user;
+
+        var filter = {};
+        filter[path] = {
+          $exists: true
+        };
+
+        var update = {
+          $unset: {}
+        };
+        update.$unset[path] = '';
+
+        Queue.update(filter, update,
           function (error, number) {
             callback(error);
           });

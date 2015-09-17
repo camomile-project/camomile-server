@@ -23,16 +23,15 @@ SOFTWARE.
 */
 
 var _ = require('./utils');
+var async = require('async');
 
 var Queue = require('../models/Queue');
 
 // create a queue
 exports.create = function (req, res) {
 
-  Queue.create(
-    req.body,
-    _.response.fSendResource(res, Queue));
-
+  var id_user = req.session.user._id;
+  Queue.create(id_user, req.body, _.response.fSendResource(res, Queue));
 };
 
 // update a queue
@@ -54,7 +53,7 @@ exports.update = function (req, res) {
     _.response.fSendData(res));
 };
 
-// get all queues
+// get all READable queues
 exports.getAll = function (req, res) {
 
   var filter = {};
@@ -62,7 +61,10 @@ exports.getAll = function (req, res) {
     filter['name'] = req.query.name;
   }
 
-  _.request.fGetResources(req, Queue, filter)(
+  async.waterfall([
+      _.request.fGetResources(req, Queue, filter),
+      _.request.fFilterResources(req, _.READ)
+    ],
     _.response.fSendResources(res, Queue));
 
 };
@@ -92,7 +94,8 @@ exports.push = function (req, res) {
       }
     }, {
       new: true
-    }, _.response.fSendData(res));
+    }, _.response.fSendSuccess(res, 'Successfully pushed.')
+  );
 };
 
 // pop element from the queue
@@ -116,10 +119,166 @@ exports.pop = function (req, res) {
   )
 };
 
+exports.pickLength = function (req, res) {
+  var extra_fields = 'list';
+  _.request.fGetResource(req, Queue, extra_fields)(
+    function (error, queue) {
+      if (error) {
+        _.response.sendError(res, 'Could not get queue content.');
+      } else {
+        _.response.fSendData(res)(error, queue.list.length);
+      }
+    });
+};
+
+exports.pickOne = function (req, res) {
+  var extra_fields = 'list';
+  _.request.fGetResource(req, Queue, extra_fields)(
+    function (error, queue) {
+      if (error) {
+        _.response.sendError(res, 'Could not get queue content.');
+      } else {
+        if (queue.list.length == 0) {
+          _.response.sendError(res, 'Empty queue.', 400);
+        } else {
+          _.response.fSendData(res)(error, queue.list[0]);
+        }
+      }
+    });
+};
+
+exports.pickAll = function (req, res) {
+  var extra_fields = 'list';
+  _.request.fGetResource(req, Queue, extra_fields)(
+    function (error, queue) {
+      if (error) {
+        _.response.sendError(res, 'Could not get queue content.');
+      } else {
+        _.response.fSendData(res)(error, queue.list);
+      }
+    });
+};
+
 // remove a given queue
 exports.remove = function (req, res) {
   Queue.findByIdAndRemove(
     req.params.id_queue,
     _.response.fSendSuccess(res, 'Successfully deleted.')
   );
+};
+
+// get queue rights
+exports.getRights = function (req, res) {
+  Queue.findById(
+    req.params.id_queue,
+    'permissions',
+    function (error, queue) {
+      _.response.fSendData(res)(error, queue.permissions);
+    });
+};
+
+// update user rights
+exports.updateUserRights = function (req, res) {
+
+  if (
+    req.body.right != _.ADMIN &&
+    req.body.right != _.WRITE &&
+    req.body.right != _.READ) {
+    _.response.sendError(
+      res,
+      "Right must be 1 (READ), 2 (WRITE) or 3 (ADMIN).",
+      400);
+    return;
+  }
+
+  var path = 'permissions.users.' + req.params.id_user;
+  var update = {
+    $set: {}
+  };
+  update['$set'][path] = req.body.right;
+
+  Queue.findByIdAndUpdate(
+    req.params.id_queue,
+    update, {
+      new: true
+    },
+    function (error, queue) {
+      _.response.fSendData(res)(error, queue.permissions);
+    }
+  );
+
+};
+
+// update group rights
+exports.updateGroupRights = function (req, res) {
+
+  if (
+    req.body.right != _.ADMIN &&
+    req.body.right != _.WRITE &&
+    req.body.right != _.READ) {
+    _.response.sendError(
+      res,
+      "Right must be 1 (READ), 2 (WRITE) or 3 (ADMIN).",
+      400);
+    return;
+  }
+
+  var path = 'permissions.groups.' + req.params.id_group;
+  var update = {
+    $set: {}
+  };
+  update['$set'][path] = req.body.right;
+
+  Queue.findByIdAndUpdate(
+    req.params.id_queue,
+    update, {
+      new: true
+    },
+    function (error, queue) {
+      _.response.fSendData(res)(error, queue.permissions);
+    }
+  );
+
+};
+
+// remove user rights
+exports.removeUserRights = function (req, res) {
+
+  var path = 'permissions.users.' + req.params.id_user;
+  var update = {
+    $unset: {}
+  };
+  update['$unset'][path] = '';
+
+  Queue.findByIdAndUpdate(
+    req.params.id_queue,
+    update, {
+      new: true
+    },
+    function (error, queue) {
+      _.response.fSendData(res)(error, queue.permissions);
+    }
+  );
+
+};
+
+// remove group rights
+exports.removeGroupRights = function (req, res) {
+
+  var path = 'permissions.groups.' + req.params.id_group;
+  var update = {
+    $unset: {}
+  };
+  update['$unset'][path] = '';
+
+  Queue.findByIdAndUpdate(
+    req.params.id_queue,
+    update, {
+      new: true
+    },
+    function (error, queue) {
+      _.response.fSendData(res)(error, queue.permissions);
+    }
+  );
+
 };

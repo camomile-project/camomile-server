@@ -1,3 +1,19 @@
+### Version 0.6 (2015-09-17)
+
+  - feat: add permissions to queue
+  - feat: non-destructive queue picking
+  - feat: regular users can get the list of users and groups
+  - feat: regular users can get the list of their groups
+  - feat: admin users can remove any account but their own
+  - feat: daily log rotation
+  - feat: filter layers by {fragment|data}_type
+  - feat: get number of annotations in a layer
+  - feat: get number of media in a corpys
+  - BREAKING: getting a queue no longer returns its elements (use new picking routes instead)
+  - BREAKING: only admin users can create queues
+  - BREAKING: queue push returns "success" message instead of queues
+  - fix: delete medium annotations upon medium deletion
+
 ### Version 0.5.6 (2015-05-13)
 
   - fix: delete corpus after its layers and media are removed
@@ -27,7 +43,7 @@
   - BREAKING CHANGE in external API
   - BREAKING CHANGE in internal database
   - wip: unit test
-  - wip: documentation for Javascript and Python clients 
+  - wip: documentation for Javascript and Python clients
 
 ### Version 0.4.1 (2015-02-03)
 
@@ -48,6 +64,5 @@
   - complete route refactoring
 
 ### Version 0.0.1 (2014-05-13)
-  
-  - first public release
 
+  - first public release

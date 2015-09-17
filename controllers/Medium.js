@@ -27,6 +27,7 @@ var async = require('async');
 var _ = require('./utils');
 
 var Medium = require('../models/Medium');
+var Annotation = require('../models/Annotation');
 
 // create medium(a)
 exports.create = function (req, res) {
@@ -131,13 +132,51 @@ exports.getCorpusMedia = function (req, res) {
 
 };
 
-// remove one medium
-exports.remove = function (req, res) {
-  Medium.remove({
-      _id: req.params.id_medium
-    },
-    _.response.fSendSuccess(res, 'Successfully deleted.')
+// get number of media of a specific corpus
+exports.getCorpusMediaCount = function (req, res) {
+
+  var filter = {};
+
+  // only this corpus
+  filter.id_corpus = req.params.id_corpus;
+
+  // filter by name
+  if (req.query.name) {
+    filter.name = req.query.name;
+  }
+
+  _.request.fCountResources(req, Medium, filter)(
+    _.response.fSendData(res)
   );
+
+};
+
+// remove one medium and its annotations
+exports.remove = function (req, res) {
+
+  var id_medium = req.params.id_medium;
+
+  async.parallel([
+
+      // remove annotations
+      function (callback) {
+        Annotation.remove({
+            id_medium: id_medium
+          },
+          callback);
+      },
+
+      // remove medium
+      function (callback) {
+        Medium.remove({
+            _id: id_medium
+          },
+          callback);
+      }
+
+    ],
+    _.response.fSendSuccess(res, 'Successfully deleted.'));
+
 };
 
 var streamFormat = function (req, res, extension) {
@@ -148,9 +187,15 @@ var streamFormat = function (req, res, extension) {
       return;
     }
 
-    var pathToFile = medium.url + '.' + extension;
-    pathToFile = path.join(req.app.get('media'), pathToFile);
-    res.status(200).sendfile(pathToFile);
+    var absolutePathToFile = medium.url + '.' + extension;
+    absolutePathToFile = path.join(req.app.get('media'), absolutePathToFile);
+    res.status(200).sendFile(
+      absolutePathToFile,
+      function (error) {
+        if (error) {
+          res.status(error.status).end();
+        }
+      });
   });
 };
 

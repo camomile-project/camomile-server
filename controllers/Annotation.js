@@ -151,6 +151,33 @@ exports.getLayerAnnotations = function (req, res) {
 
 };
 
+// retrieve number of annotations of a layer
+exports.getLayerAnnotationsCount = function (req, res) {
+
+  var filter = {};
+
+  filter.id_layer = req.params.id_layer;
+
+  // filter by medium
+  if (req.query.id_medium) {
+    filter.id_medium = req.query.id_medium;
+  }
+
+  // filter by fragment
+  if (req.query.fragment) {
+    filter.fragment = req.query.fragment;
+  }
+
+  // filter by data
+  if (req.query.data) {
+    filter.data = req.query.data;
+  }
+
+  _.request.fCountResources(req, Annotation, filter)(
+    _.response.fSendData(res));
+
+};
+
 // remove a given annotation
 exports.remove = function (req, res) {
   Annotation.remove({

@@ -43,7 +43,7 @@ exports.ADMIN = 3;
 // HELPER
 // ----------------------------------------------------------------------------
 
-var getFields = function (model, history) {
+var getFields = function (model, history, extra_fields) {
 
   var modelName = model.modelName;
 
@@ -51,6 +51,10 @@ var getFields = function (model, history) {
 
   if (history === 'on') {
     fields = fields + ' history';
+  }
+
+  if (extra_fields !== undefined) {
+    fields = fields + ' ' + extra_fields;
   }
 
   if (model.modelName === 'User') {
@@ -78,7 +82,7 @@ var getFields = function (model, history) {
   }
 
   if (model.modelName === 'Queue') {
-    return fields + ' name description list';
+    return fields + ' name description permissions';
   }
 
   return fields;
@@ -113,9 +117,9 @@ var hasPermission = function (acl, user, groups, min_right) {
 
 exports.request = {};
 
-exports.request.fGetResource = function (req, model) {
+exports.request.fGetResource = function (req, model, extra_fields) {
 
-  var fields = getFields(model, req.query.history);
+  var fields = getFields(model, req.query.history, extra_fields);
 
   // model = Corpus ==> modelName = Corpus ==> paramName = id_corpus
   var paramName = 'id_' + model.modelName.toLowerCase();
@@ -126,12 +130,20 @@ exports.request.fGetResource = function (req, model) {
 
 };
 
-exports.request.fGetResources = function (req, model, filter) {
+exports.request.fGetResources = function (req, model, filter, extra_fields) {
 
-  var fields = getFields(model, req.query.history);
+  var fields = getFields(model, req.query.history, extra_fields);
 
   return function (callback) {
     model.find(filter, fields, callback);
+  };
+
+};
+
+exports.request.fCountResources = function (req, model, filter) {
+
+  return function (callback) {
+    model.count(filter, callback);
   };
 
 };

@@ -64,6 +64,11 @@ exports.initialize = function (app) {
     Authentication.middleware.isLoggedIn,
     Authentication.me);
 
+  // get groups of logged in user
+  app.get('/me/group',
+    Authentication.middleware.isLoggedIn,
+    Authentication.getGroups);
+
   // update password
   app.put('/me',
     Authentication.middleware.isLoggedIn,
@@ -80,20 +85,20 @@ exports.initialize = function (app) {
   // delete one user
   app.delete('/user/:id_user',
     Authentication.middleware.isLoggedIn,
-    Authentication.middleware.isRoot,
+    Authentication.middleware.isAdmin,
     _.middleware.fExists(mUser),
     User.remove);
 
   // get all users
   app.get('/user',
     Authentication.middleware.isLoggedIn,
-    Authentication.middleware.isAdmin,
+    // Authentication.middleware.isAdmin,
     User.getAll);
 
   // get one user
   app.get('/user/:id_user',
     Authentication.middleware.isLoggedIn,
-    Authentication.middleware.isAdmin,
+    // Authentication.middleware.isAdmin,
     _.middleware.fExists(mUser),
     User.getOne);
 
@@ -116,13 +121,13 @@ exports.initialize = function (app) {
   // get all groups
   app.get('/group',
     Authentication.middleware.isLoggedIn,
-    Authentication.middleware.isAdmin,
+    // Authentication.middleware.isAdmin,
     Group.getAll);
 
   // get one group
   app.get('/group/:id_group',
     Authentication.middleware.isLoggedIn,
-    Authentication.middleware.isAdmin,
+    // Authentication.middleware.isAdmin,
     _.middleware.fExists(mGroup),
     Group.getOne);
 
@@ -247,6 +252,12 @@ exports.initialize = function (app) {
     Authentication.middleware.isLoggedIn,
     _.middleware.fExistsWithRights(mCorpus, _.READ),
     Medium.getCorpusMedia);
+
+  // get number of one corpus' media
+  app.get('/corpus/:id_corpus/medium/count',
+    Authentication.middleware.isLoggedIn,
+    _.middleware.fExistsWithRights(mCorpus, _.READ),
+    Medium.getCorpusMediaCount);
 
   // create new medium(a) in one corpus
   app.post('/corpus/:id_corpus/medium',
@@ -382,6 +393,12 @@ exports.initialize = function (app) {
     _.middleware.fExistsWithRights(mLayer, _.READ),
     Annotation.getLayerAnnotations);
 
+  // get count of one layer's annotations
+  app.get('/layer/:id_layer/annotation/count',
+    Authentication.middleware.isLoggedIn,
+    _.middleware.fExistsWithRights(mLayer, _.READ),
+    Annotation.getLayerAnnotationsCount);
+
   // create new annotation(s) in one layer
   app.post('/layer/:id_layer/annotation',
     Authentication.middleware.isLoggedIn,
@@ -402,46 +419,97 @@ exports.initialize = function (app) {
 
   // QUEUE
 
-  // get all queues
+  // get all READable corpora
   app.get('/queue',
     Authentication.middleware.isLoggedIn,
-    Authentication.middleware.isRoot,
     Queue.getAll);
 
   // get one queue
   app.get('/queue/:id_queue',
     Authentication.middleware.isLoggedIn,
-    _.middleware.fExists(mQueue),
+    _.middleware.fExistsWithRights(mQueue, _.ADMIN),
     Queue.getOne);
 
   // create new queue
   app.post('/queue',
     Authentication.middleware.isLoggedIn,
+    Authentication.middleware.isAdmin,
     Queue.create);
 
   // update one queue
   app.put('/queue/:id_queue',
     Authentication.middleware.isLoggedIn,
-    _.middleware.fExists(mQueue),
+    _.middleware.fExistsWithRights(mQueue, _.ADMIN),
     Queue.update);
 
   // append items to one queue
   app.put('/queue/:id_queue/next',
     Authentication.middleware.isLoggedIn,
-    _.middleware.fExists(mQueue),
+    _.middleware.fExistsWithRights(mQueue, _.WRITE),
     Queue.push);
 
   // pop one item from one queue
   app.get('/queue/:id_queue/next',
     Authentication.middleware.isLoggedIn,
-    _.middleware.fExists(mQueue),
+    _.middleware.fExistsWithRights(mQueue, _.WRITE),
     Queue.pop);
+
+  // get all items from one queue
+  app.get('/queue/:id_queue/first',
+    Authentication.middleware.isLoggedIn,
+    _.middleware.fExistsWithRights(mQueue, _.ADMIN),
+    Queue.pickOne);
+
+  // get number of items in one queue
+  app.get('/queue/:id_queue/length',
+    Authentication.middleware.isLoggedIn,
+    _.middleware.fExistsWithRights(mQueue, _.ADMIN),
+    Queue.pickLength);
+
+  // get all items from one queue
+  app.get('/queue/:id_queue/all',
+    Authentication.middleware.isLoggedIn,
+    _.middleware.fExistsWithRights(mQueue, _.ADMIN),
+    Queue.pickAll);
 
   // remove one queue
   app.delete('/queue/:id_queue',
     Authentication.middleware.isLoggedIn,
-    Authentication.middleware.isAdmin,
-    _.middleware.fExists(mQueue),
+    _.middleware.fExistsWithRights(mQueue, _.ADMIN),
     Queue.remove);
+
+  // get one queue' rights
+  app.get('/queue/:id_queue/permissions',
+    Authentication.middleware.isLoggedIn,
+    _.middleware.fExistsWithRights(mQueue, _.ADMIN),
+    Queue.getRights);
+
+  // give one user rights to one queue
+  app.put('/queue/:id_queue/user/:id_user',
+    Authentication.middleware.isLoggedIn,
+    _.middleware.fExists(mUser),
+    _.middleware.fExistsWithRights(mQueue, _.ADMIN),
+    Queue.updateUserRights);
+
+  // remove one user's rights to one queue
+  app.delete('/queue/:id_queue/user/:id_user',
+    Authentication.middleware.isLoggedIn,
+    _.middleware.fExists(mUser),
+    _.middleware.fExistsWithRights(mQueue, _.ADMIN),
+    Queue.removeUserRights);
+
+  // give one group rights to one queue
+  app.put('/queue/:id_queue/group/:id_group',
+    Authentication.middleware.isLoggedIn,
+    _.middleware.fExists(mGroup),
+    _.middleware.fExistsWithRights(mQueue, _.ADMIN),
+    Queue.updateGroupRights);
+
+  // remove one group's rights to one queue
+  app.delete('/queue/:id_queue/group/:id_group',
+    Authentication.middleware.isLoggedIn,
+    _.middleware.fExists(mGroup),
+    _.middleware.fExistsWithRights(mQueue, _.ADMIN),
+    Queue.removeGroupRights);
 
 };
