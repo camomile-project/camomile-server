@@ -186,11 +186,22 @@ exports.initialize = function (app) {
     Authentication.middleware.isAdmin,
     Corpus.create);
 
-  // update one corpus
+// update one corpus metadata
+  app.put('/corpus/:id_corpus',
+    Authentication.middleware.isLoggedIn,
+    _.middleware.fExistsWithRights(mCorpus, _.ADMIN),
+    Corpus.updateMetadata);
+
+ /* // update one corpus
   app.put('/corpus/:id_corpus',
     Authentication.middleware.isLoggedIn,
     _.middleware.fExistsWithRights(mCorpus, _.ADMIN),
     Corpus.update);
+*/
+  
+
+
+
 
   // delete one corpus
   app.delete('/corpus/:id_corpus',

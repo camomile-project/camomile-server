@@ -40,7 +40,7 @@ exports.create = function (req, res) {
 
 // update a corpus
 exports.update = function (req, res) {
-
+  console.log("updateCorpus()");
   if (
     req.body.name &&
     req.body.name === '') {
@@ -69,6 +69,48 @@ exports.update = function (req, res) {
 
     corpus.save(_.response.fSendResource(res, Corpus));
   });
+};
+
+// update a corpus metadata
+exports.updateMetadata = function (req, res) {
+    console.log("updateCorpusMetadata()");
+    if (
+    req.body.metadata &&
+    req.body.metadata === '') {
+    _.response.sendError(res, 'Invalid metadata.', 400);
+    return;
+    }
+    var path = 'metadata';
+    var update = {
+    			$set: {}
+    };
+    update['$set'][path] = req.body.metadata;
+    
+    Corpus.findByIdAndUpdate(
+    req.params.id_corpus,
+    update, {
+      new: true
+    },
+    function (error, corpus) {
+	
+	var changes = {};
+	console.log(corpus.metadata);
+        if (req.body.metadata) {
+	      //corpus.metadata = Array.prototype.slice.call(corpus.metadata);
+	      //corpus.metadata.push(req.body.metadata);
+	      corpus.metadata=changes.metadata = corpus.metadata;
+        }
+    
+	// update history
+   	 corpus.history.push({
+           date: new Date(),
+           id_user: req.session.user._id,
+           changes: changes
+    });
+    console.log(corpus);
+    corpus.save(_.response.fSendResource(res, Corpus));
+      
+    });
 };
 
 // get all READable corpora
