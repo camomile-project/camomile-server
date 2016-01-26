@@ -187,7 +187,7 @@ exports.initialize = function (app) {
     Corpus.create);
 
 // update one corpus metadata
-  app.put('/corpus/:id_corpus',
+  app.put('/corpus/:id_corpus/metadata',
     Authentication.middleware.isLoggedIn,
     _.middleware.fExistsWithRights(mCorpus, _.ADMIN),
     Corpus.updateMetadata);

@@ -73,7 +73,7 @@ exports.update = function (req, res) {
 
 // update a corpus metadata
 exports.updateMetadata = function (req, res) {
-    console.log("updateCorpusMetadata()");
+   
     if (
     req.body.metadata &&
     req.body.metadata === '') {
