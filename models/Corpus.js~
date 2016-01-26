@@ -23,50 +23,41 @@ SOFTWARE.
 */
 
 var mongoose = require('mongoose');
+var _ = require('../controllers/utils');
+
 var Schema = mongoose.Schema;
 var historySchema = require('./History');
 
-var mediumSchema = new Schema({
-  id_corpus: {
-    type: Schema.Types.ObjectId,
-    ref: 'Corpus'
-  },
+var corpusSchema = new Schema({
   name: {
     type: String,
     required: true,
-    trim: true
+    trim: true,
+    unique: true
   },
   description: {
     type: Schema.Types.Mixed,
     'default': ''
   },
-  url: {
-    type: String,
-    default: ""
-}, history: [historySchema],
-  metadata:{
-    type:Schema.Types.Mixed,
+  history: [historySchema],
+  permissions: {
+    type: Schema.Types.Mixed,
     'default': null
+  },
+  metadata:{
+    type: Schema.Types.Mixed,
+    'default': ''
   }
+
 });
 
-mediumSchema.methods.getPermissions = function (callback) {
-  return this.model('Corpus').findById(
-    this.id_corpus,
-    function (error, corpus) {
-      if (error) {
-        callback(error, {
-          users: {},
-          groups: {}
-        });
-      } else {
-        callback(error, corpus.permissions);
-      }
-    });
+corpusSchema.methods.getPermissions = function (callback) {
+  return callback(null, this.permissions);
 };
 
-mediumSchema.statics.create = function (id_user, id_corpus, data, callback) {
+corpusSchema.statics.create = function (id_user, data, callback) {
 
+  // check corpus name validity
   if (
     data.name === undefined ||
     data.name === '') {
@@ -74,31 +65,44 @@ mediumSchema.statics.create = function (id_user, id_corpus, data, callback) {
     return;
   }
 
-  var medium = new this({
-    id_corpus: id_corpus,
+  var corpus = new this({
     name: data.name,
     description: data.description,
-    url: data.url,
     history: [{
-      data: new Date(),
+      date: new Date(),
       id_user: id_user,
       changes: {
         name: data.name,
-        description: data.description,
-        url: data.url
+        description: data.description
       }
     }],
+    permissions: {
+      users: {},
+      groups: {},
+    },
     metadata:{}
   });
 
-  medium.save(function (error, medium) {
-    if (!error) {
-      medium.history = undefined;
-      medium.__v = undefined;
+  corpus.permissions.users[id_user] = _.ADMIN;
+  corpus.metadata = {'111':'@@@'};
+  console.log(corpus.metadata);
+  corpus.save(function (error, corpus) {
+
+    if (error) {
+      if (error.code === 11000) {
+        callback('Invalid name (duplicate).', null);
+        return;
+      }
+    } else {
+      corpus.history = undefined;
+      corpus.permissions = undefined;
+      corpus.__v = undefined;
     }
-    callback(error, medium);
+
+    callback(error, corpus);
+
   });
 
 };
 
-module.exports = mongoose.model('Medium', mediumSchema);
+module.exports = mongoose.model('Corpus', corpusSchema);
