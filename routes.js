@@ -253,6 +253,12 @@ exports.initialize = function (app) {
     _.middleware.fExistsWithRights(mCorpus, _.READ),
     Medium.getCorpusMedia);
 
+  // get number of one corpus' media
+  app.get('/corpus/:id_corpus/medium/count',
+    Authentication.middleware.isLoggedIn,
+    _.middleware.fExistsWithRights(mCorpus, _.READ),
+    Medium.getCorpusMediaCount);
+
   // create new medium(a) in one corpus
   app.post('/corpus/:id_corpus/medium',
     Authentication.middleware.isLoggedIn,
@@ -386,6 +392,12 @@ exports.initialize = function (app) {
     Authentication.middleware.isLoggedIn,
     _.middleware.fExistsWithRights(mLayer, _.READ),
     Annotation.getLayerAnnotations);
+
+  // get count of one layer's annotations
+  app.get('/layer/:id_layer/annotation/count',
+    Authentication.middleware.isLoggedIn,
+    _.middleware.fExistsWithRights(mLayer, _.READ),
+    Annotation.getLayerAnnotationsCount);
 
   // create new annotation(s) in one layer
   app.post('/layer/:id_layer/annotation',
