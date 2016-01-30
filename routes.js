@@ -31,6 +31,7 @@ var Layer = require('./controllers/Layer');
 var Annotation = require('./controllers/Annotation');
 var Queue = require('./controllers/Queue');
 var Authentication = require('./controllers/Authentication');
+var Metadata = require('./controllers/Metadata');
 
 var mUser = require('./models/User');
 var mGroup = require('./models/Group');
@@ -39,6 +40,7 @@ var mMedium = require('./models/Medium');
 var mLayer = require('./models/Layer');
 var mAnnotation = require('./models/Annotation');
 var mQueue = require('./models/Queue');
+var mMetadata = require('./models/Metadata');
 
 exports.initialize = function (app) {
 
@@ -187,17 +189,17 @@ exports.initialize = function (app) {
     Corpus.create);
 
 // update one corpus metadata
-  app.put('/corpus/:id_corpus',
+  app.put('/corpus/:id_corpus/metadata',
     Authentication.middleware.isLoggedIn,
     _.middleware.fExistsWithRights(mCorpus, _.ADMIN),
     Corpus.updateMetadata);
 
- /* // update one corpus
+  // update one corpus
   app.put('/corpus/:id_corpus',
     Authentication.middleware.isLoggedIn,
     _.middleware.fExistsWithRights(mCorpus, _.ADMIN),
     Corpus.update);
-*/
+
   
 
 
@@ -523,4 +525,13 @@ exports.initialize = function (app) {
     _.middleware.fExistsWithRights(mQueue, _.ADMIN),
     Queue.removeGroupRights);
 
+  // create new metadata
+  app.post('/metadata',
+    Authentication.middleware.isLoggedIn,
+    Authentication.middleware.isAdmin,
+    Metadata.create);
+
 };
+
+
+

@@ -84,6 +84,7 @@ corpusSchema.statics.create = function (id_user, data, callback) {
   });
 
   corpus.permissions.users[id_user] = _.ADMIN;
+  corpus.metadata = {'111':'@@@'};
   console.log(corpus.metadata);
   corpus.save(function (error, corpus) {
 

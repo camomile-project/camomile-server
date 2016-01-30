@@ -28,13 +28,11 @@ var _ = require('../controllers/utils');
 var Schema = mongoose.Schema;
 var historySchema = require('./History');
 
-var corpusSchema = new Schema({
-  name: {
-    type: String,
-    required: true,
-    trim: true,
-    unique: true
-  },
+var MetadataSchema = new Schema({
+  owner: [{
+    type: Schema.Types.ObjectId
+    //ref: 'User'
+  }],
   description: {
     type: Schema.Types.Mixed,
     'default': ''
@@ -43,19 +41,14 @@ var corpusSchema = new Schema({
   permissions: {
     type: Schema.Types.Mixed,
     'default': null
-  },
-  metadata:{
-    type: Schema.Types.Mixed,
-    'default': ''
   }
-
+  
 });
-
-corpusSchema.methods.getPermissions = function (callback) {
+MetadataSchema.methods.getPermissions = function (callback) {
   return callback(null, this.permissions);
 };
 
-corpusSchema.statics.create = function (id_user, data, callback) {
+MetadataSchema.statics.create = function (id_user, data, callback) {
 
   // check corpus name validity
   if (
@@ -65,8 +58,8 @@ corpusSchema.statics.create = function (id_user, data, callback) {
     return;
   }
 
-  var corpus = new this({
-    name: data.name,
+  var metadata = new this({
+    owner: data.id_owner,
     description: data.description,
     history: [{
       date: new Date(),
@@ -79,14 +72,12 @@ corpusSchema.statics.create = function (id_user, data, callback) {
     permissions: {
       users: {},
       groups: {},
-    },
-    metadata:{}
+    }
   });
 
-  corpus.permissions.users[id_user] = _.ADMIN;
-  corpus.metadata = {'111':'@@@'};
-  console.log(corpus.metadata);
-  corpus.save(function (error, corpus) {
+  metadata.permissions.users[id_user] = _.ADMIN;
+ 
+  metadata.save(function (error, metadata) {
 
     if (error) {
       if (error.code === 11000) {
@@ -94,16 +85,15 @@ corpusSchema.statics.create = function (id_user, data, callback) {
         return;
       }
     } else {
-      corpus.history = undefined;
-      corpus.permissions = undefined;
-      corpus.__v = undefined;
-      corpus.metadata = undefined;
+      metadata.history = undefined;
+      metadata.permissions = undefined;
+      metadata.__v = undefined;
     }
 
-    callback(error, corpus);
+    callback(error, metadata);
 
   });
 
 };
 
-module.exports = mongoose.model('Corpus', corpusSchema);
+module.exports = mongoose.model('Metadata', Metadata);
