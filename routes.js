@@ -40,7 +40,6 @@ var mMedium = require('./models/Medium');
 var mLayer = require('./models/Layer');
 var mAnnotation = require('./models/Annotation');
 var mQueue = require('./models/Queue');
-var mMetadata = require('./models/Metadata');
 
 exports.initialize = function (app) {
 
