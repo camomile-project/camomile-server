@@ -524,12 +524,6 @@ exports.initialize = function (app) {
     _.middleware.fExistsWithRights(mQueue, _.ADMIN),
     Queue.removeGroupRights);
 
-  // create new metadata
-  app.post('/metadata',
-    Authentication.middleware.isLoggedIn,
-    Authentication.middleware.isAdmin,
-    Metadata.create);
-
 };
 
 
