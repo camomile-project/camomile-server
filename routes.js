@@ -31,7 +31,7 @@ var Layer = require('./controllers/Layer');
 var Annotation = require('./controllers/Annotation');
 var Queue = require('./controllers/Queue');
 var Authentication = require('./controllers/Authentication');
-var Metadata = require('./controllers/Metadata');
+
 
 var mUser = require('./models/User');
 var mGroup = require('./models/Group');
