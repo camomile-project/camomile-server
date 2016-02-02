@@ -73,15 +73,7 @@ exports.update = function (req, res) {
 
 // update a corpus metadata
 exports.updateMetadata = function (req, res) {
-    console.log("updateCorpusMetadata()");
-/*    if (
-    req.body.metadata &&
-    req.body.metadata === '') {
-    _.response.sendError(res, 'Invalid metadata.', 400);
-    return;
-    }
-*/
-    var path = 'metadata.' + req.body.key;
+    var path ='metadata.' + req.body.key;
     var update = {
     			$set: {}
     };
@@ -93,27 +85,9 @@ exports.updateMetadata = function (req, res) {
 		 new :true
     	},
 	    function (error, corpus) {
-	
-		var changes = {};
-		var metadata = {};
-		if (req.body.key) {
-		      var key= req.body.key;
-		      var value = req.body.value;
-		      metadata[key] = value;
-		      corpus.metadata = metadata;
-		      changes.metadata = metadata;
-		}
-	    
-		// update history
-	   	 corpus.history.push({
-		   date: new Date(),
-		   id_user: req.session.user._id,
-		   changes: changes
-	    });
-	
-	_.response.fSendSuccess(res, req.body.key +' is successfully updated.')(error);
-      
+         _.response.fSendSuccess(res, req.body.key + ' is successfully updated.')(error);
     });
+    
 };
 
 // get all READable corpora
@@ -296,7 +270,6 @@ exports.removeUserRights = function (req, res) {
       _.response.fSendData(res)(error, corpus.permissions);
     }
   );
-
 };
 
 // remove group rights
@@ -307,7 +280,7 @@ exports.removeGroupRights = function (req, res) {
     $unset: {}
   };
   update['$unset'][path] = '';
-
+  
   Corpus.findByIdAndUpdate(
     req.params.id_corpus,
     update, {

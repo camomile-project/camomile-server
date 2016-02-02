@@ -102,8 +102,7 @@ layerSchema.statics.create = function (id_user, id_corpus, data, callback) {
     permissions: {
       users: {},
       groups: {}
-    },
-    metadata:{}
+    }
   });
 
   layer.permissions.users[id_user] = _.ADMIN;

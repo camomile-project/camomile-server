@@ -70,11 +70,11 @@ var getFields = function (model, history, extra_fields) {
   }
 
   if (model.modelName === 'Medium') {
-    return fields + ' name description url id_corpus';
+    return fields + ' name description url id_corpus metadata';
   }
 
   if (model.modelName === 'Layer') {
-    return fields + ' name description id_corpus fragment_type data_type permissions';
+    return fields + ' name description id_corpus fragment_type data_type permissions metadata';
   }
 
   if (model.modelName === 'Annotation') {

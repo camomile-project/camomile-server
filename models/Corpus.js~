@@ -28,26 +28,14 @@ var _ = require('../controllers/utils');
 var Schema = mongoose.Schema;
 var historySchema = require('./History');
 
-var layerSchema = new Schema({
-  id_corpus: {
-    type: Schema.Types.ObjectId,
-    ref: 'CorpusSchema'
-  },
+var corpusSchema = new Schema({
   name: {
     type: String,
-    lowercase: true,
+    required: true,
     trim: true,
-    required: true
+    unique: true
   },
   description: {
-    type: Schema.Types.Mixed,
-    'default': ''
-  },
-  fragment_type: {
-    type: Schema.Types.Mixed,
-    'default': ''
-  },
-  data_type: {
     type: Schema.Types.Mixed,
     'default': ''
   },
@@ -58,16 +46,18 @@ var layerSchema = new Schema({
   },
   metadata:{
     type: Schema.Types.Mixed,
-    'default': ''    
+    'default': ''
   }
+
 });
 
-layerSchema.methods.getPermissions = function (callback) {
+corpusSchema.methods.getPermissions = function (callback) {
   return callback(null, this.permissions);
 };
 
-layerSchema.statics.create = function (id_user, id_corpus, data, callback) {
+corpusSchema.statics.create = function (id_user, data, callback) {
 
+  // check corpus name validity
   if (
     data.name === undefined ||
     data.name === '') {
@@ -75,48 +65,45 @@ layerSchema.statics.create = function (id_user, id_corpus, data, callback) {
     return;
   }
 
-  if (data.fragment_type === undefined) {
-    callback('Invalid fragment type.', null);
-    return;
-  }
-
-  if (data.data_type === undefined) {
-    callback('Invalid data type.', null);
-    return;
-  }
-
-  var layer = new this({
-    id_corpus: id_corpus,
+  var corpus = new this({
     name: data.name,
     description: data.description,
-    fragment_type: data.fragment_type,
-    data_type: data.data_type,
     history: [{
       date: new Date(),
       id_user: id_user,
       changes: {
-        //   name: data.name,
-        //   description: data.description
+        name: data.name,
+        description: data.description
       }
     }],
     permissions: {
       users: {},
-      groups: {}
+      groups: {},
     },
     metadata:{}
   });
 
-  layer.permissions.users[id_user] = _.ADMIN;
+  corpus.permissions.users[id_user] = _.ADMIN;
+  corpus.metadata = {'111':'@@@'};
+  console.log(corpus.metadata);
+  corpus.save(function (error, corpus) {
 
-  layer.save(function (error, layer) {
-    if (!error) {
-      layer.history = undefined;
-      layer.permissions = undefined;
-      layer.__v = undefined;
+    if (error) {
+      if (error.code === 11000) {
+        callback('Invalid name (duplicate).', null);
+        return;
+      }
+    } else {
+      corpus.history = undefined;
+      corpus.permissions = undefined;
+      corpus.__v = undefined;
+      corpus.metadata = undefined;
     }
-    callback(error, layer);
+
+    callback(error, corpus);
+
   });
 
 };
 
-module.exports = mongoose.model('Layer', layerSchema);
+module.exports = mongoose.model('Corpus', corpusSchema);

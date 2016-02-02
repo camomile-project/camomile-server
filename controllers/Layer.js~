@@ -128,7 +128,7 @@ exports.updateMetadata = function (req, res) {
     };
     update['$set'][path] = req.body.value;
     Layer.findByIdAndUpdate(
-   	 req.params.id_layer,
+   	 req.params.id_corpus,
    	 update, {
      		 upsert:true,
 		 new :true

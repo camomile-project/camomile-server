@@ -106,7 +106,7 @@ exports.updateMetadata = function (req, res) {
      		 upsert:true,
 		 new :true
     	},
-	    function (error, medium) {
+	    function (error, corpus) {
 	_.response.fSendSuccess(res, req.body.key +' is successfully updated.')(error);
       
     });
