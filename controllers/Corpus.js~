@@ -85,7 +85,7 @@ exports.updateMetadata = function (req, res) {
     var update = {
     			$set: {}
     };
-    update['$set'][path] = req.body.value;
+    update['$set'][path].push(req.body.value);
     Corpus.findByIdAndUpdate(
    	 req.params.id_corpus,
    	 update, {
