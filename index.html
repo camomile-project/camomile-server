@@ -401,11 +401,11 @@ For a given <em>resource</em> (either corpus, medium, layer, annotation), the co
 </tr>
 <tr>
 <td><strong>R</strong></td>
-<td>&gt;= READ to the <strong>corpus</strong></td>
+<td>&gt;= READ to the <code class="prettyprint">corpus</code></td>
 </tr>
 <tr>
 <td><strong>U/D</strong></td>
-<td>ADMIN to the <strong>corpus</strong></td>
+<td>ADMIN to the <code class="prettyprint">corpus</code> and &#39;admin&rsquo; role</td>
 </tr>
 </tbody></table>
 
@@ -425,7 +425,7 @@ For a given <em>resource</em> (either corpus, medium, layer, annotation), the co
 </tr>
 <tr>
 <td><strong>D</strong></td>
-<td>ADMIN to the <code class="prettyprint">corpus</code> and &#39;admin&rsquo; role</td>
+<td>ADMIN to the <code class="prettyprint">corpus</code></td>
 </tr>
 </tbody></table>
 
@@ -437,7 +437,7 @@ For a given <em>resource</em> (either corpus, medium, layer, annotation), the co
 </thead><tbody>
 <tr>
 <td><strong>C</strong></td>
-<td>&gt;= WRITE to the <code class="prettyprint">corpus</code></td>
+<td>&gt;= WRITE to the <strong>corpus</strong></td>
 </tr>
 <tr>
 <td><strong>R</strong></td>
@@ -2446,7 +2446,7 @@ Restricted to 'root&rsquo; user.
 </tbody></table>
 <pre class="highlight http"><code><span class="nf">GET</span> <span class="nn">/layer/:id_layer/permissions</span> <span class="k">HTTP</span><span class="o">/</span><span class="m">1.1</span>
 </code></pre>
-<pre class="highlight python"><code><span class="n">permission</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">getLayerPermission</span><span class="p">(</span><span class="n">id_layer</span><span class="p">)</span>
+<pre class="highlight python"><code><span class="n">permission</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">getLayerPermissions</span><span class="p">(</span><span class="n">id_layer</span><span class="p">)</span>
 </code></pre>
 
 <blockquote>
@@ -2501,7 +2501,7 @@ Restricted to 'root&rsquo; user.
 </tbody></table>
 <pre class="highlight http"><code><span class="nf">PUT</span> <span class="nn">/layer/:id_layer/user/:id_user</span> <span class="k">HTTP</span><span class="o">/</span><span class="m">1.1</span>
 </code></pre>
-<pre class="highlight python"><code><span class="n">client</span><span class="o">.</span><span class="n">setLayerPermission</span><span class="p">(</span><span class="n">id_layer</span><span class="p">,</span> <span class="n">permission</span><span class="p">,</span> <span class="n">user</span><span class="o">=</span><span class="n">id_user</span><span class="p">)</span>
+<pre class="highlight python"><code><span class="n">client</span><span class="o">.</span><span class="n">setLayerPermissions</span><span class="p">(</span><span class="n">id_layer</span><span class="p">,</span> <span class="n">permission</span><span class="p">,</span> <span class="n">user</span><span class="o">=</span><span class="n">id_user</span><span class="p">)</span>
 </code></pre>
 
 <blockquote>
@@ -2540,7 +2540,7 @@ Restricted to 'root&rsquo; user.
 </tbody></table>
 <pre class="highlight http"><code><span class="nf">DELETE</span> <span class="nn">/layer/:id_layer/user/:id_user</span> <span class="k">HTTP</span><span class="o">/</span><span class="m">1.1</span>
 </code></pre>
-<pre class="highlight python"><code><span class="n">client</span><span class="o">.</span><span class="n">removeLayerPermission</span><span class="p">(</span><span class="n">id_layer</span><span class="p">,</span> <span class="n">permission</span><span class="p">,</span> <span class="n">user</span><span class="o">=</span><span class="n">id_user</span><span class="p">)</span>
+<pre class="highlight python"><code><span class="n">client</span><span class="o">.</span><span class="n">removeLayerPermissions</span><span class="p">(</span><span class="n">id_layer</span><span class="p">,</span> <span class="n">permission</span><span class="p">,</span> <span class="n">user</span><span class="o">=</span><span class="n">id_user</span><span class="p">)</span>
 </code></pre>
 
 <blockquote>
@@ -2595,7 +2595,7 @@ Restricted to 'root&rsquo; user.
 </tbody></table>
 <pre class="highlight http"><code><span class="nf">PUT</span> <span class="nn">/layer/:id_layer/group/:id_group</span> <span class="k">HTTP</span><span class="o">/</span><span class="m">1.1</span>
 </code></pre>
-<pre class="highlight python"><code><span class="n">client</span><span class="o">.</span><span class="n">setLayerPermission</span><span class="p">(</span><span class="n">id_layer</span><span class="p">,</span> <span class="n">permission</span><span class="p">,</span> <span class="n">group</span><span class="o">=</span><span class="n">id_group</span><span class="p">)</span>
+<pre class="highlight python"><code><span class="n">client</span><span class="o">.</span><span class="n">setLayerPermissions</span><span class="p">(</span><span class="n">id_layer</span><span class="p">,</span> <span class="n">permission</span><span class="p">,</span> <span class="n">group</span><span class="o">=</span><span class="n">id_group</span><span class="p">)</span>
 </code></pre>
 
 <blockquote>
@@ -2634,7 +2634,7 @@ Restricted to 'root&rsquo; user.
 </tbody></table>
 <pre class="highlight http"><code><span class="nf">DELETE</span> <span class="nn">/layer/:id_layer/group/:id_group</span> <span class="k">HTTP</span><span class="o">/</span><span class="m">1.1</span>
 </code></pre>
-<pre class="highlight python"><code><span class="n">client</span><span class="o">.</span><span class="n">removeLayerPermission</span><span class="p">(</span><span class="n">id_layer</span><span class="p">,</span> <span class="n">permission</span><span class="p">,</span> <span class="n">group</span><span class="o">=</span><span class="n">id_group</span><span class="p">)</span>
+<pre class="highlight python"><code><span class="n">client</span><span class="o">.</span><span class="n">removeLayerPermissions</span><span class="p">(</span><span class="n">id_layer</span><span class="p">,</span> <span class="n">permission</span><span class="p">,</span> <span class="n">group</span><span class="o">=</span><span class="n">id_group</span><span class="p">)</span>
 </code></pre>
 
 <blockquote>
