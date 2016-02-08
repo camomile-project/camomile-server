@@ -1566,7 +1566,7 @@ GET /layer/:id_layer/permissions HTTP/1.1
 ```
 
 ```python
-permission = client.getLayerPermission(id_layer)
+permission = client.getLayerPermissions(id_layer)
 ```
 
 > Sample JSON response
@@ -1599,7 +1599,7 @@ PUT /layer/:id_layer/user/:id_user HTTP/1.1
 ```
 
 ```python
-client.setLayerPermission(id_layer, permission, user=id_user)
+client.setLayerPermissions(id_layer, permission, user=id_user)
 ```
 
 > Sample JSON response
@@ -1627,7 +1627,7 @@ DELETE /layer/:id_layer/user/:id_user HTTP/1.1
 ```
 
 ```python
-client.removeLayerPermission(id_layer, permission, user=id_user)
+client.removeLayerPermissions(id_layer, permission, user=id_user)
 ```
 
 > Sample JSON response
@@ -1660,7 +1660,7 @@ PUT /layer/:id_layer/group/:id_group HTTP/1.1
 ```
 
 ```python
-client.setLayerPermission(id_layer, permission, group=id_group)
+client.setLayerPermissions(id_layer, permission, group=id_group)
 ```
 
 > Sample JSON response
@@ -1688,7 +1688,7 @@ DELETE /layer/:id_layer/group/:id_group HTTP/1.1
 ```
 
 ```python
-client.removeLayerPermission(id_layer, permission, group=id_group)
+client.removeLayerPermissions(id_layer, permission, group=id_group)
 ```
 
 > Sample JSON response
