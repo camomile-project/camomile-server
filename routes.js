@@ -181,6 +181,7 @@ exports.initialize = function (app) {
     _.middleware.fExistsWithRights(mCorpus, _.READ),
     Corpus.getOne);
 
+
   // create new corpus
   app.post('/corpus',
     Authentication.middleware.isLoggedIn,
@@ -244,6 +245,18 @@ exports.initialize = function (app) {
     _.middleware.fExists(mGroup),
     _.middleware.fExistsWithRights(mCorpus, _.ADMIN),
     Corpus.removeGroupRights);
+
+  // get one corpus's metadata by attribute name
+  app.get('/corpus/:id_corpus/metadata',
+    Authentication.middleware.isLoggedIn,
+    _.middleware.fExistsWithRights(mCorpus, _.READ),
+    Corpus.getMetadata);
+
+  // delete a champ of a corpus's metadata
+  app.delete('/corpus/:id_corpus/metadata',
+    Authentication.middleware.isLoggedIn,
+    _.middleware.fExistsWithRights(mCorpus, _.READ),
+    Corpus.deleteMetadata);
 
   // MEDIUM
 

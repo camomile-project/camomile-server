@@ -40,7 +40,6 @@ exports.create = function (req, res) {
 
 // update a corpus
 exports.update = function (req, res) {
-  console.log("updateCorpus()");
   if (
     req.body.name &&
     req.body.name === '') {
@@ -77,7 +76,7 @@ exports.updateMetadata = function (req, res) {
     var update = {
     			$set: {}
     };
-    update['$set'][path].push(req.body.value);
+    update['$set'][path] = req.body.value;
     Corpus.findByIdAndUpdate(
    	 req.params.id_corpus,
    	 update, {
@@ -86,6 +85,37 @@ exports.updateMetadata = function (req, res) {
     	},
 	    function (error, corpus) {
          _.response.fSendSuccess(res, req.body.key + ' is successfully updated.')(error);
+    });
+    
+};
+
+//get a corpus's metadata
+exports.getMetadata = function (req, res){
+    var name =  req.query.name;
+    Corpus.findById(req.params.id_corpus, function(error, corpus){
+	_.response.fSendData(res)(error, name+ ':'+ corpus.metadata[name]);
+    });
+    
+};
+
+//delete a champ of corpus's metadata
+exports.deleteMetadata = function (req, res){
+  
+    var path ='metadata.' + req.query.name;
+    var update = {
+    			$unset: {}
+    };
+    if(!req.query.name){
+	path = 'metadata';
+    }
+    update['$unset'][path] = "";
+    Corpus.findByIdAndUpdate(
+   	 req.params.id_corpus,
+   	 update, {
+		 new :true
+    	},
+	    function (error, corpus) {
+         _.response.fSendSuccess(res, path + 'is deleted now.')(error);
     });
     
 };
