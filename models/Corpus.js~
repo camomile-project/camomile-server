@@ -51,8 +51,8 @@ var corpusSchema = new Schema({
   }
 */
   metadata:[{
-			//key:{type:String,require:true,unique:true},
-			//value:{type:Schema.Types.Mixed, 'default':null}
+			key:{type:String,require:true,unique:true},
+			value:{type:Schema.Types.Mixed, 'default':null}
 		      }]
 });
 

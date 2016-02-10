@@ -199,12 +199,10 @@ exports.deleteMetadata = function (req, res){
     var name = req.query.name;
     var update = {
     			$unset: {},
-			$pull :{}
+			$pull :{'metadata.list': name}
     };
     if(!req.query.name){
 	path = 'metadata';
-    }else{
-	update['$pull']['metadata.list'] = name;
     }
     update['$unset'][path] = "";
     Corpus.findByIdAndUpdate(
