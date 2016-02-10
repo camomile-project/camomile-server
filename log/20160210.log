@@ -140,3 +140,13 @@
 [10/Feb/2016:11:36:22 +0000] root (127.0.0.1) DELETE /layer/56b1247dc0f461102d26d87c/metadata?name=list1 200 24.388 ms
 [10/Feb/2016:11:36:33 +0000] root (127.0.0.1) DELETE /layer/56b1247dc0f461102d26d87c/metadata?name= 200 41.332 ms
 [10/Feb/2016:11:36:58 +0000] root (127.0.0.1) PUT /layer/56b1247dc0f461102d26d87c/metadata 200 18.444 ms
+[10/Feb/2016:11:57:28 +0000] root (127.0.0.1) POST /login 200 297.947 ms
+[10/Feb/2016:11:58:45 +0000] root (127.0.0.1) PUT /corpus/56a5dbc12d2331100e5c623e/metadata 200 122.457 ms
+[10/Feb/2016:11:58:51 +0000] root (127.0.0.1) PUT /corpus/56a5dbc12d2331100e5c623e/metadata 200 46.841 ms
+[10/Feb/2016:11:59:45 +0000] root (127.0.0.1) DELETE /corpus/56a5dbc12d2331100e5c623e/metadata?name= 200 19.414 ms
+[10/Feb/2016:12:00:13 +0000] root (127.0.0.1) DELETE /corpus/56a5dbc12d2331100e5c623e/metadata?name=name 200 43.514 ms
+[10/Feb/2016:12:00:32 +0000] root (127.0.0.1) PUT /corpus/56a5dbc12d2331100e5c623e/metadata 200 45.665 ms
+[10/Feb/2016:12:01:12 +0000] root (127.0.0.1) PUT /corpus/56a5dbc12d2331100e5c623e/metadata 200 35.127 ms
+[10/Feb/2016:12:01:36 +0000] root (127.0.0.1) PUT /corpus/56a5dbc12d2331100e5c623e/metadata 200 35.469 ms
+[10/Feb/2016:12:01:53 +0000] root (127.0.0.1) PUT /corpus/56a5dbc12d2331100e5c623e/metadata 200 23.973 ms
+[10/Feb/2016:12:11:18 +0000] root (127.0.0.1) PUT /corpus/56a5dbc12d2331100e5c623e/metadata 200 51.431 ms
