@@ -108,18 +108,80 @@ exports.update = function (req, res) {
       layer.description = changes.description = req.body.description;
     }
 
-    // // update history
-    // layer.history.push({
-    //   date: new Date(),
-    //   id_user: req.session.user._id,
-    //   changes: changes
-    // });
+     // update history
+     layer.history.push({
+       date: new Date(),
+       id_user: req.session.user._id,
+       changes: changes
+     });
 
     layer.save(_.response.fSendResource(res, Layer));
   });
 
 };
 
+// update a layer's metadata
+exports.updateMetadata = function (req, res) {
+    var path ='metadata.' + req.body.key;
+    var key = req.body.key;
+    var list = key.split('.')[0];
+    var update = {
+    			$set: {},
+			$addToSet:{'metadata.list':list}
+    };
+    update['$set'][path] = req.body.value;
+    Layer.findByIdAndUpdate(
+   	 req.params.id_layer,
+   	 update, {
+     		 upsert:true,
+		 new :true,
+		 select: 'metadata' 
+    	},
+	    function (error, layer) {
+		_.response.fSendSuccess(res, req.body.key + ' is successfully updated.')(error, layer);
+	});
+};
+
+
+//get layer's metadata
+exports.getMetadata = function (req, res){
+    var fields = '';
+    if(req.query.name){
+    	fields = 'metadata.'+ req.query.name;
+    }else{
+	fields = 'metadata.list';
+    }
+    Layer.findById(req.params.id_layer, fields, function(error, layer){
+	_.response.fSendData(res)(error, layer.metadata);
+    });
+};
+
+
+//delete a layer's metadata
+exports.deleteMetadata = function (req, res){
+  
+    var path ='metadata.' + req.query.name;
+    var name = req.query.name;
+    var update = {
+    			$unset: {},
+			$pull :{}
+    };
+    if(!req.query.name){
+	path = 'metadata';
+    }else{
+	update['$pull']['metadata.list'] = name;
+    }
+    update['$unset'][path] = "";
+    Layer.findByIdAndUpdate(
+   	 req.params.id_layer,
+   	 update, {
+		 new :true,
+		 select: ' metadata.list'
+    	},
+	    function (error, layer) {
+		_.response.fSendSuccess(res, path + ' is deleted now.')(error);
+	});
+};
 // get all READable layers
 exports.getAll = function (req, res) {
 
