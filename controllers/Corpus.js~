@@ -69,29 +69,8 @@ exports.update = function (req, res) {
     corpus.save(_.response.fSendResource(res, Corpus));
   });
 };
-/*
-//*version 1 filter fields on the server
+
 // update a corpus metadata 
-exports.updateMetadata = function (req, res) {
-    var path ='metadata.' + req.body.key;
-    var key = req.body.key;
-    var update = {
-    			$set: {}
-    };
-    update['$set'][path] = req.body.value;
-    Corpus.findByIdAndUpdate(
-   	 req.params.id_corpus,
-   	 update, {
-     		 upsert:true,
-		 new :true,
-		 select: path
-    	},
-	    function (error, corpus) {
-		_.response.fSendSuccess(res, req.body.key + ' is successfully updated.')(error, corpus);
-	});
-};
-*/
-/* version 2 add a list in the metadata*/
 exports.updateMetadata = function (req, res) {
     var path ='metadata.' + req.body.key;
     var key = req.body.key;
@@ -113,45 +92,7 @@ exports.updateMetadata = function (req, res) {
 	});
 };
 
-/*version 3 change the structure of metadata*/
-//repetition
-// update a corpus metadata 
 
-//exports.updateMetadata = function (req, res) {
-/*    var path1 ='metadata.key' + req.body.key;
-    var key = req.body.key;
-    var value = req.body.value;
-   Corpus.findById(req.params.id_corpus,'metadata', function (error, corpus) {
-    // update history
-    corpus.metadata.push({
-      key: key,
-      value: value
-    });
-
-    corpus.save(_.response.fSendResource(res, Corpus));
-   });
-*/
-  /*
-    var path ='metadata';
-    var key = req.body.key;
-    var value = req.body.value;
-    var metadata = {'key':key,'value':value}
-    var update = {
-    			$addToSet: {'metadata':metadata},
-    };
-    Corpus.findByIdAndUpdate(
-   	 req.params.id_corpus,
-   	 update, {
-     		 upsert:true,
-		 new :true,
-	         safe:true,
-		 select: path
-    	},
-	    function (error, corpus) {
-		_.response.fSendSuccess(res, req.body.key + ' is successfully updated.')(error, corpus);
-	});
-};
- */
 //get a corpus's metadata
 exports.getMetadata = function (req, res){
     var fields = '';
@@ -164,45 +105,21 @@ exports.getMetadata = function (req, res){
 	_.response.fSendData(res)(error, corpus.metadata);
     });
 };
-/*
-//delete a champ of corpus's metadata
-exports.deleteMetadata = function (req, res){
-  
-    var path ='metadata.' + req.query.name;
-    var name = req.query.name;
-    var update = {
-    			$unset: {},
-			$set :{}
-    };
-    if(!req.query.name){
-	path = 'metadata';
-    }
-    update['$unset'][path] = "";
-    Corpus.findByIdAndUpdate(
-   	 req.params.id_corpus,
-   	 update, {
-		 new :true,
-		 select: '_id'
-    	},
-	    function (error, corpus) {
-		console.log(corpus);
-		_.response.fSendSuccess(res, path + ' is deleted now.')(error);
-	});
-};
-*/
-/*version 2 add a list in the metadata*/
 
-//delete a champ of corpus's metadata
+
+//delete a corpus's metadata
 exports.deleteMetadata = function (req, res){
   
     var path ='metadata.' + req.query.name;
     var name = req.query.name;
     var update = {
     			$unset: {},
-			$pull :{'metadata.list': name}
+			$pull :{}
     };
     if(!req.query.name){
 	path = 'metadata';
+    }else{
+	update['$pull']['metadata.list'] = name;
     }
     update['$unset'][path] = "";
     Corpus.findByIdAndUpdate(

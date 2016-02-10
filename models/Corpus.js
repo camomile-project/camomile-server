@@ -44,16 +44,10 @@ var corpusSchema = new Schema({
     type: Schema.Types.Mixed,
     'default': null
   },
-/*
   metadata:{
     type: Schema.Types.Mixed,
     'default': null
   }
-*/
-  metadata:[{
-			//key:{type:String,require:true,unique:true},
-			//value:{type:Schema.Types.Mixed, 'default':null}
-		      }]
 });
 
 corpusSchema.methods.getPermissions = function (callback) {
@@ -85,7 +79,7 @@ corpusSchema.statics.create = function (id_user, data, callback) {
       users: {},
       groups: {},
     },
-    metadata:[]
+    metadata:{}
   });
 
   corpus.permissions.users[id_user] = _.ADMIN;
