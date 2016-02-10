@@ -429,13 +429,13 @@ exports.initialize = function (app) {
   // get one layer's metadata 
   app.get('/layer/:id_layer/metadata',
     Authentication.middleware.isLoggedIn,
-    _.middleware.fExistsWithRights(mLayer, _.READ),
+    _.middleware.fExistsWithRights(mCorpus, _.READ),
     Layer.getMetadata);
 
   // delete a layer's metadata
   app.delete('/layer/:id_layer/metadata',
     Authentication.middleware.isLoggedIn,
-    _.middleware.fExistsWithRights(mLayer, _.READ),
+    _.middleware.fExistsWithRights(mCorpus, _.READ),
     Layer.deleteMetadata);
 
   // ANNOTATION

@@ -51,8 +51,8 @@ var mediumSchema = new Schema({
 });
 
 mediumSchema.methods.getPermissions = function (callback) {
-  return this.model('Corpus').findById(
-    this.id_corpus,
+  return this.model('Medium').findById(
+    this.id_medium,
     function (error, corpus) {
       if (error) {
         callback(error, {

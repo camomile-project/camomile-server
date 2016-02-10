@@ -117,6 +117,7 @@ exports.updateMetadata = function (req, res) {
 
 //get a medium's metadata
 exports.getMetadata = function (req, res){
+    console.log("enter getMetadata of medium");
     var fields = '';
     if(req.query.name){
     	fields = 'metadata.'+ req.query.name;

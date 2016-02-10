@@ -130,7 +130,7 @@ exports.updateMetadata = function (req, res) {
 			$addToSet:{'metadata.list':list}
     };
     update['$set'][path] = req.body.value;
-    Layer.findByIdAndUpdate(
+    Corpus.findByIdAndUpdate(
    	 req.params.id_layer,
    	 update, {
      		 upsert:true,
@@ -151,7 +151,7 @@ exports.getMetadata = function (req, res){
     }else{
 	fields = 'metadata.list';
     }
-    Layer.findById(req.params.id_layer, fields, function(error, layer){
+    Corpus.findById(req.params.id_layer, fields, function(error, layer){
 	_.response.fSendData(res)(error, layer.metadata);
     });
 };
@@ -172,7 +172,7 @@ exports.deleteMetadata = function (req, res){
 	update['$pull']['metadata.list'] = name;
     }
     update['$unset'][path] = "";
-    Layer.findByIdAndUpdate(
+    Corpus.findByIdAndUpdate(
    	 req.params.id_layer,
    	 update, {
 		 new :true,
