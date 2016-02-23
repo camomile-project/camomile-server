@@ -1,3 +1,7 @@
+### Version 0.6.1 (2016-02-23)
+
+  - fix: support for `docker 1.10` and `docker-compose 0.6`
+
 ### Version 0.6 (2015-09-17)
 
   - feat: add permissions to queue
