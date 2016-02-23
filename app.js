@@ -59,21 +59,19 @@ var port =
   process.env.PORT ||
   3000;
 
-// CLI || env || linked mongo Docker container || default 
+// CLI || env || linked mongo Docker container
 var mongodb_host =
   program.mongodbHost ||
   process.env.MONGODB_HOST ||
-  process.env.MONGO_PORT_27017_TCP_ADDR ||
-  'localhost';
+  'mongo';
 
-// CLI || env || linked mongo Docker container || default 
+// CLI || env || default
 var mongodb_port =
   program.mongodbPort ||
   process.env.MONGODB_PORT ||
-  process.env.MONGO_PORT_27017_TCP_PORT ||
   27017;
 
-// CLI || env || default 
+// CLI || env || default
 var mongodb_name =
   program.mongodbName ||
   process.env.MONGODB_NAME ||
