@@ -16,7 +16,150 @@ Action      | HTTP command                       | Python/Javascript interface
 **D**elete  | DELETE /*resource*/`:id_resource`  | .deleteResource(`:id_resource`)
 
 
+### Users and groups
+
+  - a 'root' user is created when the server is launched; associated password is configured at launch time. The 'root' user can perform all actions and should only be used for creating other users.
+  - users with 'admin' role are the only ones allowed to create users, groups, corpora and queues. 'root' has 'admin' role and can create other 'admin' users.
+  
+### Permissions
+
+```http
+PUT /corpus/:id_corpus/user/:id_user HTTP/1.1
+
+{"right":3}
+```
+
+```python
+client.setCorpusPermissions(id_corpus, client.ADMIN, user=id_user)
+client.setCorpusPermissions(id_corpus, client.WRITE, user=id_user)
+client.setCorpusPermissions(id_corpus, client.READ, group=id_group)
+```
+
+```javascript
+Camomile.setCorpusPermissionsForUser(
+  id_corpus, id_user, Camomile.ADMIN, callback);
+Camomile.setCorpusPermissionsForUser(
+  id_corpus, id_user, Camomile.WRITE, callback);
+Camomile.setCorpusPermissionsForGroup(
+  id_corpus, id_group, Camomile.READ, callback);
+```
+
+The Camomile platform handles permissions: users may access only the resources for which they have enough permission.
+
+Three levels of permissions are supported: 
+
+  - `3 - ADMIN` admin permissions to the resource
+  - `2 - WRITE` edition permissions to the resource
+  - `1 - READ` read-only
+
+`Annotations` inherit permissions from the `layer` they belong to.
+
+`Media` inherit permissions from the `corpus` they belong to.
+
+Permissions needed for the CRUD actions are summarized in the table below
+
+
+Corpus     | Permission needed
+-----------|---------------------------
+**C**      | 'admin' role              
+**R**      | >= READ to the `corpus`
+**U/D**    | ADMIN to the `corpus` and 'admin' role
+
+Medium     | Permission needed
+-----------|---------------------------
+**C/U**    | ADMIN to the `corpus`  
+**R**      | >= READ to the `corpus`
+**D**      | ADMIN to the `corpus`
+
+Layer      | Permission needed
+-----------|---------------------------
+**C**      | >= WRITE to the **corpus**
+**R**      | >= READ to the `layer` 
+**U/D**    | ADMIN to the `layer`    
+
+Annotation | Permission needed
+-----------|---------------------------
+**C/U/D**  | >= WRITE to the `layer` 
+**R**      | >= READ to the `layer`  
+
+User       | Permission needed
+-----------|---------------------------
+**C/U/D**  | 'admin' role              
+**R**      | authenticated user
+
+Group      | Permission needed
+-----------|---------------------------
+**C/U**    | 'admin' role              
+**R**      | authenticated user
+**D**      | 'root' user
+
+Queue      | Permission needed
+-----------|---------------------------
+**C**      | 'admin' role              
+**R**      | WRITE to the `queue` (destructive access)            
+**U/D**    | ADMIN to the `queue`
+
+ - a user with 'admin' role can create a corpus; (s)he becomes owner of the corpus and can share this ownership with selected users
+ - a corpus-owner (3-C = ADMIN permission on the corpus) can manage the corpus, its permissions and the associated media.
+ - a corpus-writer (2-C = WRITE permission on the corpus) can create layers in the corpus; (s)he becomes owner of the layer and can manage the permissions
+ - a layer-owner (3-L = ADMIN permission on the layer) can manage the layer, its permissions and the associated annotations.
+ - a layer-writer (2-L = WRITE permission on the layer) can create and edit annotations
+ - a layer-reader (1-L = READ permission on the layer) can only read annotations - for access to the corpus description and media (s)he should also generally get corpus-reader (1-C) permissions  
+ - an authenticated user has no access to a resource until (s)he is specifically granted permission to it.
+
+### Resource ID
+
+```python
+corpora = client.getCorpora()
+id_corpora = client.getCorpora(returns_id=true)
+assert corpora[0]._id == id_corpora[0]
+```
+
+```javascript
+client.getCorpora(
+  function(id_corpora) {
+    do_something_with(id_corpora);
+  },
+  {returns_id: True}
+);
+```
+
+Each resource is given a unique identifier (`_id`) by MongoDB upon creation.
+
+The default behavior of most entry points is to return the complete resource, rather than just its `_id`. 
+
+However, methods of the Python and Javascript clients support the `returns_id` optional parameter. 
+Setting it to `true` will return the resource MongoDB `_id` instead of the complete resource.
+
+
+### Filters
+
+```http
+GET /corpus?name='my%20corpus' HTTP/1.1
+```
+
+```python
+corpora = client.getCorpora(name='my corpus')
+assert corpora[0].name == 'my corpus'
+```
+
+```javascript
+client.getCorpora(
+  function(corpora) {
+
+  },
+  {filter: {name: 'my corpus'}}
+);
+```
+
+Most `get{Resource}` methods (e.g. `getCorpora`, `getLayers`, ...) support filtering by resource attribute. 
+
+
 ### History
+
+<aside class="warning">
+History management should get a major overhaul in next versions.
+</aside>
 
 ```http
 GET /corpus?history=on HTTP/1.1
@@ -50,88 +193,6 @@ Each update has the following attributes:
 However, to avoid sending what may become a very large amount of data with every request, the default behavior is to not send `history`. 
 
 If you really want to get the history, you need to ask for it explicitely to get it.
-
-### Filters
-
-```http
-GET /corpus?name='my%20corpus' HTTP/1.1
-```
-
-```python
-corpora = client.getCorpora(name='my corpus')
-assert corpora[0].name == 'my corpus'
-```
-
-```javascript
-client.getCorpora(
-  function(corpora) {
-
-  },
-  {filter: {name: 'my corpus'}}
-);
-```
-
-Most `get{Resource}` methods (e.g. `getCorpora`, `getLayers`, ...) support filtering by resource attribute. 
-
-### Permissions
-
-```http
-PUT /corpus/:id_corpus/user/:id_user HTTP/1.1
-
-{"right":3}
-```
-
-```python
-client.setCorpusPermissions(id_corpus, client.ADMIN, user=id_user)
-client.setCorpusPermissions(id_corpus, client.WRITE, user=id_user)
-client.setCorpusPermissions(id_corpus, client.READ, group=id_group)
-```
-
-```javascript
-Camomile.setCorpusPermissionsForUser(
-  id_corpus, id_user, Camomile.ADMIN, callback);
-Camomile.setCorpusPermissionsForUser(
-  id_corpus, id_user, Camomile.WRITE, callback);
-Camomile.setCorpusPermissionsForGroup(
-  id_corpus, id_group, Camomile.READ, callback);
-```
-
-The Camomile platform handles permissions: a user may access only the resources for which they have enough permission.
-
-Three levels of permissions are supported: 
-
-  - `3 - ADMIN` admin permissions to the resource
-  - `2 - WRITE` edition permissions to the resource
-  - `1 - READ` read-only
-
-`Annotations` inherit permissions from the `layer` they belong to.
-
-`Media` inherit permissions from the `corpus` they belong to.
-
-### Resource ID
-
-
-```python
-corpora = client.getCorpora()
-id_corpora = client.getCorpora(returns_id=true)
-assert corpora[0]._id == id_corpora[0]
-```
-
-```javascript
-client.getCorpora(
-  function(id_corpora) {
-    do_something_with(id_corpora);
-  },
-  {returns_id: True}
-);
-```
-
-Each resource is given a unique identifier (`_id`) by MongoDB upon creation.
-
-The default behavior of most entry points is to return the complete resource, rather than just its `_id`. 
-
-However, methods of the Python and Javascript clients support the `returns_id` optional parameter. 
-Setting it to `true` will return the resource MongoDB `_id` instead of the complete resource.
 
 
 ## Authentication
@@ -468,10 +529,6 @@ id_groups = client.getUserGroups(id_user)
 
 ### get all groups
 
-<aside class="notice">
-Restricted to user with 'admin' role.
-</aside>
-
 GET /group
 
 #### DATA PARAMETERS
@@ -503,10 +560,6 @@ groups = client.getGroups()
 ```
 
 ### get one group
-
-<aside class="notice">
-Restricted to user with 'admin' role.
-</aside>
 
 GET /group/`:id_group`
 
@@ -1305,7 +1358,7 @@ GET /medium/:id_medium/mp4 HTTP/1.1
 GET /medium/:id_medium/ogv HTTP/1.1
 ```
 
- ## Layers
+## Layers
 
 ### get all layers
 
@@ -1513,7 +1566,7 @@ GET /layer/:id_layer/permissions HTTP/1.1
 ```
 
 ```python
-permission = client.getLayerPermission(id_layer)
+permission = client.getLayerPermissions(id_layer)
 ```
 
 > Sample JSON response
@@ -1546,7 +1599,7 @@ PUT /layer/:id_layer/user/:id_user HTTP/1.1
 ```
 
 ```python
-client.setLayerPermission(id_layer, permission, user=id_user)
+client.setLayerPermissions(id_layer, permission, user=id_user)
 ```
 
 > Sample JSON response
@@ -1574,7 +1627,7 @@ DELETE /layer/:id_layer/user/:id_user HTTP/1.1
 ```
 
 ```python
-client.removeLayerPermission(id_layer, permission, user=id_user)
+client.removeLayerPermissions(id_layer, permission, user=id_user)
 ```
 
 > Sample JSON response
@@ -1607,7 +1660,7 @@ PUT /layer/:id_layer/group/:id_group HTTP/1.1
 ```
 
 ```python
-client.setLayerPermission(id_layer, permission, group=id_group)
+client.setLayerPermissions(id_layer, permission, group=id_group)
 ```
 
 > Sample JSON response
@@ -1635,7 +1688,7 @@ DELETE /layer/:id_layer/group/:id_group HTTP/1.1
 ```
 
 ```python
-client.removeLayerPermission(id_layer, permission, group=id_group)
+client.removeLayerPermissions(id_layer, permission, group=id_group)
 ```
 
 > Sample JSON response

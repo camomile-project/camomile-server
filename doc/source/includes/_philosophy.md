@@ -4,25 +4,25 @@
 
 A `medium` is a multimedia document (e.g. an audio file, an image or a video file).
 
-attributes    | description
+attributes    | type
 --------------|------------------------
-`name`        |
-`url`         |
-`description` |
-`history`     |
-`id_corpus`   |
+`name`        | String
+`url`         | String
+`description` | free
+`history`     | list
+`id_corpus`   | id
 
 
 ## Corpus
 
 A `corpus` is simply a collection of `media` (e.g. all eight *Harry Potter* movies) -- nothing more.
 
-attributes    | description
+attributes    | type
 --------------|------------------------
-`name`        |
-`description` |
-`history`     |
-`permissions` |
+`name`        | String
+`description` | free
+`history`     | list
+`permissions` | dict
 
 ## Fragment
 
@@ -36,33 +36,55 @@ An `annotation` is a `fragment` and its associated `metadata` (e.g. the name of 
 
 Once again, a `metadata` can be anything -- be creative!
 
-attributes    | description
+attributes    | type
 --------------|------------------------
-`fragment`    |
-`data`        |
-`history`     |
-`id_layer`    |
-`id_medium`   |
+`fragment`    | free
+`data`        | free
+`history`     | list
+`id_layer`    | id
+`id_medium`   | id
 
 ## Layer
 
 A `layer` is simply a collection of `annotations` sharing the same `fragment` type and `metadata` type.
 
-attributes      | description
+attributes      | type
 ----------------|------------------------
-`name`          |
-`description`   |
-`fragment_type` |
-`data_type`     |
-`history`       |
-`permissions`   |
-`id_corpus`     |
+`name`          | String (lowercase) 
+`description`   | free
+`fragment_type` | free
+`data_type`     | free
+`history`       | list
+`permissions`   | dict
+`id_corpus`     | id
 
 
 ## User
 
 A `user` is a person with an account on the Camomile platform.
 
+attributes      | type
+----------------|------------------------
+`username`      | String (lowercase, unique)
+`description`   | free
+`role`          | "user" or "admin"
+
 ## Group
 
 A `group` is simply a set of `users` -- how extraordinary!
+
+attributes      | type
+----------------|------------------------
+`name`          | String (lowercase, unique)
+`description`   | free
+`users`         | list
+
+## Queue
+
+A `queue` is a list of items
+
+attributes      | type
+----------------|------------------------
+`name`          | String (lowercase, unique)
+`description`   | free
+`list`          | list of items
