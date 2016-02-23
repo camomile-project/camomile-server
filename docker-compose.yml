@@ -1,17 +1,23 @@
-db:
-  image: mongo
-  volumes:
-   - /data/db
+version: '2'
 
-camomile:
-  build: .
-  links:
-   - db:mongo
-  volumes:
-   - /media
-  ports:
-   - "3000:3000"
-  environment:
-   - MEDIA=/media
-   - ROOT_PASSWORD=password
-  command: node /app/app.js
+services:
+
+  db:
+    image: mongo
+    volumes:
+     - ${CMML_DB}:/data/db
+
+  camomile:
+    image: camomile/api
+    links:
+     - db:mongo
+    volumes:
+     - ${CMML_MEDIA}:/media
+     - ${CMML_LOGS}:/logs
+    ports:
+     - "${CMML_PORT}:3000"
+    environment:
+     - ROOT_PASSWORD=${CMML_PASSWORD}
+     - MEDIA=/media
+     - LOG=/logs
+    command: node /app/app.js
