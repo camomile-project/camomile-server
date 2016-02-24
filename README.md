@@ -3,7 +3,7 @@
 ## Installation
 
 The easiest way to setup a Camomile REST API is to use `docker` and `docker-compose`.  
-This was tested with `docker 1.10.2` and `docker-compose 0.6`.
+This was tested with `docker 1.10.2` and `docker-compose 1.6.0`.
 
 **Warning:** `MongoDB` does not work well with `docker` on Mac OS X.
 
