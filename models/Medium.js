@@ -43,7 +43,11 @@ var mediumSchema = new Schema({
   url: {
     type: String,
     default: ""
-}, history: [historySchema]
+}, history: [historySchema],
+  metadata:{
+    type:Schema.Types.Mixed,
+    'default': null
+  }
 });
 
 mediumSchema.methods.getPermissions = function (callback) {
@@ -83,7 +87,8 @@ mediumSchema.statics.create = function (id_user, id_corpus, data, callback) {
         description: data.description,
         url: data.url
       }
-    }]
+    }],
+    metadata:{}
   });
 
   medium.save(function (error, medium) {
