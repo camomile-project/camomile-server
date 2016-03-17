@@ -32,6 +32,7 @@ var Annotation = require('./controllers/Annotation');
 var Queue = require('./controllers/Queue');
 var Authentication = require('./controllers/Authentication');
 
+
 var mUser = require('./models/User');
 var mGroup = require('./models/Group');
 var mCorpus = require('./models/Corpus');
@@ -180,6 +181,7 @@ exports.initialize = function (app) {
     _.middleware.fExistsWithRights(mCorpus, _.READ),
     Corpus.getOne);
 
+
   // create new corpus
   app.post('/corpus',
     Authentication.middleware.isLoggedIn,
@@ -191,6 +193,11 @@ exports.initialize = function (app) {
     Authentication.middleware.isLoggedIn,
     _.middleware.fExistsWithRights(mCorpus, _.ADMIN),
     Corpus.update);
+
+  
+
+
+
 
   // delete one corpus
   app.delete('/corpus/:id_corpus',
@@ -233,6 +240,24 @@ exports.initialize = function (app) {
     _.middleware.fExistsWithRights(mCorpus, _.ADMIN),
     Corpus.removeGroupRights);
 
+  // get one corpus's metadata 
+  app.get('/corpus/:id_corpus/metadata',
+    Authentication.middleware.isLoggedIn,
+    _.middleware.fExistsWithRights(mCorpus, _.READ),
+    Corpus.getMetadata);
+
+// update one corpus metadata
+  app.put('/corpus/:id_corpus/metadata',
+    Authentication.middleware.isLoggedIn,
+    _.middleware.fExistsWithRights(mCorpus, _.ADMIN),
+    Corpus.updateMetadata);
+
+  // delete a corpus's metadata
+  app.delete('/corpus/:id_corpus/metadata',
+    Authentication.middleware.isLoggedIn,
+    _.middleware.fExistsWithRights(mCorpus, _.READ),
+    Corpus.deleteMetadata);
+
   // MEDIUM
 
   // get all media
@@ -271,6 +296,7 @@ exports.initialize = function (app) {
     _.middleware.fExistsWithRights(mMedium, _.ADMIN),
     Medium.update);
 
+
   // delete one medium
   app.delete('/medium/:id_medium',
     Authentication.middleware.isLoggedIn,
@@ -300,6 +326,25 @@ exports.initialize = function (app) {
     Authentication.middleware.isLoggedIn,
     _.middleware.fExistsWithRights(mMedium, _.READ),
     Medium.streamOgv);
+
+  // get one medium's metadata 
+  app.get('/medium/:id_medium/metadata',
+    Authentication.middleware.isLoggedIn,
+    _.middleware.fExistsWithRights(mMedium, _.READ),
+    Medium.getMetadata);
+
+  // update one medium metadata
+  app.put('/medium/:id_medium/metadata',
+    Authentication.middleware.isLoggedIn,
+    _.middleware.fExistsWithRights(mMedium, _.ADMIN),
+    Medium.updateMetadata);
+
+  // delete a medium's metadata
+  app.delete('/medium/:id_medium/metadata',
+    Authentication.middleware.isLoggedIn,
+    _.middleware.fExistsWithRights(mMedium, _.READ),
+    Medium.deleteMetadata);
+
 
   // LAYER
 
@@ -332,6 +377,8 @@ exports.initialize = function (app) {
     Authentication.middleware.isLoggedIn,
     _.middleware.fExistsWithRights(mLayer, _.ADMIN),
     Layer.update);
+
+
 
   // delete one layer
   app.delete('/layer/:id_layer',
@@ -372,6 +419,24 @@ exports.initialize = function (app) {
     _.middleware.fExists(mGroup),
     _.middleware.fExistsWithRights(mLayer, _.ADMIN),
     Layer.removeGroupRights);
+
+  // update one layer metadata
+  app.put('/layer/:id_layer/metadata',
+    Authentication.middleware.isLoggedIn,
+    _.middleware.fExistsWithRights(mLayer, _.ADMIN),
+    Layer.updateMetadata);
+
+  // get one layer's metadata 
+  app.get('/layer/:id_layer/metadata',
+    Authentication.middleware.isLoggedIn,
+    _.middleware.fExistsWithRights(mLayer, _.READ),
+    Layer.getMetadata);
+
+  // delete a layer's metadata
+  app.delete('/layer/:id_layer/metadata',
+    Authentication.middleware.isLoggedIn,
+    _.middleware.fExistsWithRights(mLayer, _.READ),
+    Layer.deleteMetadata);
 
   // ANNOTATION
 
@@ -513,3 +578,6 @@ exports.initialize = function (app) {
     Queue.removeGroupRights);
 
 };
+
+
+

@@ -92,7 +92,68 @@ exports.update = function (req, res) {
     medium.save(_.response.fSendResource(res, Medium));
   });
 };
+// update a medium metadata
+exports.updateMetadata = function (req, res) {
+    var path ='metadata.' + req.body.key;
+    var key = req.body.key;
+    var list = key.split('.')[0];
+    var update = {
+    			$set: {},
+			$addToSet:{'metadata.list':list}
+    };
+    update['$set'][path] = req.body.value;
+    Medium.findByIdAndUpdate(
+   	 req.params.id_medium,
+   	 update, {
+     		 upsert:true,
+		 new :true,
+		 select: 'metadata' 
+    	},
+	    function (error, medium) {
+		_.response.fSendSuccess(res, req.body.key + ' is successfully updated.')(error, medium);
+	});
+};
 
+
+//get a medium's metadata
+exports.getMetadata = function (req, res){
+    var fields = '';
+    if(req.query.name){
+    	fields = 'metadata.'+ req.query.name;
+    }else{
+	fields = 'metadata.list';
+    }
+    Medium.findById(req.params.id_medium, fields, function(error, medium){
+	_.response.fSendData(res)(error, medium.metadata);
+    });
+};
+
+
+//delete a medium's metadata
+exports.deleteMetadata = function (req, res){
+  
+    var path ='metadata.' + req.query.name;
+    var name = req.query.name;
+    var update = {
+    			$unset: {},
+			$pull :{}
+    };
+    if(!req.query.name){
+	path = 'metadata';
+    }else{
+	update['$pull']['metadata.list'] = name;
+    }
+    update['$unset'][path] = "";
+    Medium.findByIdAndUpdate(
+   	 req.params.id_medium,
+   	 update, {
+		 new :true,
+		 select: ' metadata.list'
+    	},
+	    function (error, medium) {
+		_.response.fSendSuccess(res, path + ' is deleted now.')(error);
+	});
+};
 // get all READable media
 exports.getAll = function (req, res) {
 

@@ -40,7 +40,6 @@ exports.create = function (req, res) {
 
 // update a corpus
 exports.update = function (req, res) {
-
   if (
     req.body.name &&
     req.body.name === '') {
@@ -70,6 +69,70 @@ exports.update = function (req, res) {
     corpus.save(_.response.fSendResource(res, Corpus));
   });
 };
+
+// update a corpus metadata 
+exports.updateMetadata = function (req, res) {
+    var path ='metadata.' + req.body.key;
+    var key = req.body.key;
+    var list = key.split('.')[0];
+    var update = {
+    			$set: {},
+			$addToSet:{'metadata.list':list}
+    };
+    update['$set'][path] = req.body.value;
+    Corpus.findByIdAndUpdate(
+   	 req.params.id_corpus,
+   	 update, {
+     		 upsert:true,
+		 new :true,
+		 select: 'metadata' 
+    	},
+	    function (error, corpus) {
+		_.response.fSendSuccess(res, req.body.key + ' is successfully updated.')(error, corpus);
+	});
+};
+
+
+//get a corpus's metadata
+exports.getMetadata = function (req, res){
+    var fields = '';
+    if(req.query.name){
+    	fields = 'metadata.'+ req.query.name;
+    }else{
+	fields = 'metadata.list';
+    }
+    Corpus.findById(req.params.id_corpus, fields, function(error, corpus){
+	_.response.fSendData(res)(error, corpus.metadata);
+    });
+};
+
+
+//delete a corpus's metadata
+exports.deleteMetadata = function (req, res){
+  
+    var path ='metadata.' + req.query.name;
+    var name = req.query.name;
+    var update = {
+    			$unset: {},
+			$pull :{}
+    };
+    if(!req.query.name){
+	path = 'metadata';
+    }else{
+	update['$pull']['metadata.list'] = name;
+    }
+    update['$unset'][path] = "";
+    Corpus.findByIdAndUpdate(
+   	 req.params.id_corpus,
+   	 update, {
+		 new :true,
+		 select: ' metadata.list'
+    	},
+	    function (error, corpus) {
+		_.response.fSendSuccess(res, path + ' is deleted now.')(error);
+	});
+};
+
 
 // get all READable corpora
 exports.getAll = function (req, res) {
@@ -251,7 +314,6 @@ exports.removeUserRights = function (req, res) {
       _.response.fSendData(res)(error, corpus.permissions);
     }
   );
-
 };
 
 // remove group rights
@@ -262,7 +324,7 @@ exports.removeGroupRights = function (req, res) {
     $unset: {}
   };
   update['$unset'][path] = '';
-
+  
   Corpus.findByIdAndUpdate(
     req.params.id_corpus,
     update, {

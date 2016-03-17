@@ -56,6 +56,10 @@ var layerSchema = new Schema({
     type: Schema.Types.Mixed,
     'default': null
   },
+  metadata:{
+    type: Schema.Types.Mixed,
+    'default': ''    
+  }
 });
 
 layerSchema.methods.getPermissions = function (callback) {
@@ -98,7 +102,8 @@ layerSchema.statics.create = function (id_user, id_corpus, data, callback) {
     permissions: {
       users: {},
       groups: {}
-    }
+    },
+    metadata:{}
   });
 
   layer.permissions.users[id_user] = _.ADMIN;
