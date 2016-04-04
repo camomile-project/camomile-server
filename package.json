@@ -30,7 +30,9 @@
     "commander": "^2.8.0",
     "async": "^0.9.0",
     "forever": "^0.14.1",
-    "file-stream-rotator": "^0.0.6"
+    "file-stream-rotator": "^0.0.6",
+    "q": "~1.4.1",
+    "underscore": "~1.8.3"
   },
   "scripts": {
     "start": "app.js"

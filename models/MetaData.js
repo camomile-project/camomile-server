@@ -25,6 +25,7 @@
 var mongoose = require('mongoose');
 var _ = require('underscore');
 var async = require('async');
+var Q = require('q');
 
 var Schema = mongoose.Schema;
 
@@ -39,20 +40,22 @@ var metadataSchema = new Schema({
     value: Schema.Types.Mixed
 }, options);
 
-metadataSchema.statics.create = function (modelName, resource, metadata, callback) {
-
-    var tree = this.constructTree(metadata);
+/**
+ * Create metadata
+ *
+ * @param modelName
+ * @param resource
+ * @param metadata
+ * @param callback
+ */
+metadataSchema.statics.create = function (modelName, resource, metadata) {
+    var deferred = Q.defer();
+    var tree = this.constructTreeSchema(metadata);
+    var model = this.getModelByName(modelName);
     var models = [];
 
-    if (modelName == 'corpus') {
-        model = CorpusMetadata;
-    } else if(modelName == 'layer') {
-        model = LayerMetadata;
-    } else if(modelName == 'medium') {
-        model = MediumMetadata;
-    } else {
-        callback('Model not found.');
-        return;
+    if (model === false) {
+        return Q.reject('Model not found');
     }
 
     tree.forEach(function(item) {
@@ -61,17 +64,64 @@ metadataSchema.statics.create = function (modelName, resource, metadata, callbac
     });
 
     async.parallel(models, function(error, result) {
-        callback(error, result);
+        if (error) {
+            deferred.reject(error);
+        } else {
+            deferred.resolve(result);
+        }
     });
+
+    return deferred.promise;
 };
 
 
+/**
+ * Get metadatas by key
+ *
+ * @param modelName
+ * @param resource
+ * @param key
+ *
+ * @returns {*|promise}
+ */
+metadataSchema.statics.getByKey = function(modelName, resource, key) {
+    var deferred = Q.defer();
+    var t = this;
 
-metadataSchema.buildObject = function(modelName, resource, key, callback) {
-    callback(null, {});
+    key = ',' + key.replace(/\./g,',');
+    var model = this.getModelByName(modelName);
+
+    if (model === false) {
+        return Q.reject({code: 400, msg: 'Model not found.'});
+    }
+
+    var object = {};
+    model.find({path: new RegExp('^' + key)}, function(err, docs) {
+        if (err) {
+            deferred.reject(err);
+        } else {
+            object = t.buildTreeWithDocs(key, docs);
+            if (_.isEmpty(object)) {
+                deferred.reject({code: 404, msg: 'Metadata does not exist.'});
+            } else {
+                deferred.resolve(object);
+            }
+        }
+    });
+
+    return deferred.promise;
 };
 
-metadataSchema.statics.constructTree = function (metadata, parent_path, parent_tree) {
+/**
+ * Construct tree schema with metadata object
+ *
+ * @param metadata
+ * @param parent_path
+ * @param parent_tree
+ *
+ * @returns {*|Array}
+ */
+metadataSchema.statics.constructTreeSchema = function (metadata, parent_path, parent_tree) {
     var t = this;
 
     var tree = parent_tree || [];
@@ -80,8 +130,7 @@ metadataSchema.statics.constructTree = function (metadata, parent_path, parent_t
     Object.keys(metadata).forEach (function(key) {
         // TODO: check if file
         if (_.isObject(metadata[key]) && !_.isArray(metadata[key])) {
-            parent_path += ',' + key;
-            t.constructTree(metadata[key], parent_path, tree);
+            t.constructTreeSchema(metadata[key], parent_path + ',' + key, tree);
         } else {
             tree.push({
                 path: parent_path + ',' + key,
@@ -92,6 +141,68 @@ metadataSchema.statics.constructTree = function (metadata, parent_path, parent_t
 
     return tree;
 };
+
+/**
+ * Build object with docs collection
+ *
+ * @param {array} docs
+ * @param {object} object
+ */
+metadataSchema.statics.buildTreeWithDocs = function (request_key, docs) {
+    var object;
+
+    // TODO: check if file
+    if (docs.length == 1) {
+        object = docs[0].value;
+    } else {
+        object = {};
+
+        docs.forEach(function (item) {
+            var path = item.path.replace(request_key, '');
+            var keys = path.split(',');
+            keys.shift();
+
+            var accessor = object;
+            for (var i = 0; i < keys.length; i++) {
+                var key = keys[i];
+                if (accessor[key] === undefined) {
+                    if (i === (keys.length - 1)) {
+                        accessor[key] = item.value;
+                    } else {
+                        accessor[key] = {};
+                    }
+                }
+
+                accessor = accessor[key];
+            }
+        });
+    }
+
+    return object;
+};
+
+/**
+ * Get Mongoose Model with mode name
+ *
+ * @param {string} modelName
+ *
+ * @returns {boolean}
+ */
+metadataSchema.statics.getModelByName = function(modelName) {
+    modelName = modelName.toLowerCase();
+
+    var model = false;
+
+    if (modelName == 'corpus') {
+        model = CorpusMetadata;
+    } else if(modelName == 'layer') {
+        model = LayerMetadata;
+    } else if(modelName == 'medium') {
+        model = MediumMetadata;
+    }
+
+    return model;
+}
 
 var Metadata = mongoose.model('Metadata', metadataSchema);
 

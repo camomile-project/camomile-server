@@ -29,13 +29,18 @@ var Metadata = require('../models/MetaData').Metadata;
 // get metadata
 exports.get = function (req, res) {
     _.request.fGetResource(req, req.current_resource)(function(error, resource) {
-        Metadata.generateTree(resource, req.params['key'], function(error, result) {
-            if (error) {
-                res.status('400').json(error);
-                return;
+        Metadata.getByKey(
+            req.current_resource.modelName,
+            resource,
+            req.params['key']
+        ).then(function(object) {
+            res.status(200).json(object);
+        }, function(error) {
+            if (error.code !== undefined) {
+                res.status(error.code).json(error.msg);
+            } else {
+                res.status(400).json(error);
             }
-
-            res.status(200).json(result);
         });
     });
 };
@@ -52,31 +57,13 @@ exports.save = function (req, res) {
         }
 
         Metadata.create(
-            req.current_resource.modelName.toLowerCase(),
+            req.current_resource.modelName,
             resource,
-            {
-            actors: {
-                Harry: 'Daniel Radcliffe',
-                Hermione: {
-                    fullName: 'Emma Watson',
-                    picture: {
-                        type: 'image/png',
-                        name: 'plop.png'
-                    }
-                },
-                others: [
-                    'moi',
-                    'toi',
-                    'vous'
-                ]
-            }
-        }, function(error) {
-            if (error) {
-                res.status('400').json(error);
-                return;
-            }
-
+            req.body
+        ).then(function() {
             res.status(201).send();
+        }, function(error) {
+            res.status('400').json(error);
         });
     });
 };
