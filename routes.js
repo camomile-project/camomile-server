@@ -30,6 +30,7 @@ var Medium = require('./controllers/Medium');
 var Layer = require('./controllers/Layer');
 var Annotation = require('./controllers/Annotation');
 var Queue = require('./controllers/Queue');
+var MetaData = require('./controllers/MetaData');
 var Authentication = require('./controllers/Authentication');
 
 var mUser = require('./models/User');
@@ -511,5 +512,19 @@ exports.initialize = function (app) {
     _.middleware.fExists(mGroup),
     _.middleware.fExistsWithRights(mQueue, _.ADMIN),
     Queue.removeGroupRights);
+
+  // METADATA
+
+  app.get('/:resource_type/:resource_id/:key',
+      Authentication.middleware.isLoggedIn,
+      _.middleware.fExistsWithRights(mCorpus, _.READ),
+      MetaData.get
+  );
+
+  app.post('/:resource_type/:resource_id/metadata',
+      Authentication.middleware.isLoggedIn,
+      _.middleware.fExistsWithRights(mCorpus, _.ADMIN),
+      MetaData.save
+  );
 
 };
