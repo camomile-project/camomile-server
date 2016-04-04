@@ -515,15 +515,15 @@ exports.initialize = function (app) {
 
   // METADATA
 
-  app.get('/:resource_type/:resource_id/:key',
+  app.get('/:resource_type/:resource_id/metadata/:key',
       Authentication.middleware.isLoggedIn,
-      _.middleware.fExistsWithRights(mCorpus, _.READ),
+      _.middleware.fExistsWithRights(null, _.READ),
       MetaData.get
   );
 
   app.post('/:resource_type/:resource_id/metadata',
       Authentication.middleware.isLoggedIn,
-      _.middleware.fExistsWithRights(mCorpus, _.ADMIN),
+      _.middleware.fExistsWithRights(null, _.ADMIN),
       MetaData.save
   );
 
