@@ -29,16 +29,20 @@ var Q = require('q');
 
 var Schema = mongoose.Schema;
 
-var options = {discriminatorKey: 'type'};
+var options = {discriminatorKey: 'kind'};
 var metadataSchema = new Schema({
+    type: String,
     path: {
         type: String,
         required: true,
         trim: true,
         unique: true
     },
-    value: Schema.Types.Mixed
+    value: Schema.Types.Mixed,
+    keys: [String]
 }, options);
+
+metadataSchema.index({type: 1, path: 1}, {unique: true});
 
 /**
  * Create metadata
@@ -59,8 +63,8 @@ metadataSchema.statics.create = function (modelName, resource, metadata) {
     }
 
     tree.forEach(function(item) {
-        item[modelName] = resource;
-        models.push(model.findOneAndUpdate.bind(model, {path: item.path}, item, {upsert: true}));
+        item[modelName.toLowerCase()] = resource;
+        models.push(model.update.bind(model, {type: item.type, path: item.path}, item, {upsert: true}));
     });
 
     async.parallel(models, function(error, result) {
@@ -87,27 +91,88 @@ metadataSchema.statics.create = function (modelName, resource, metadata) {
 metadataSchema.statics.getByKey = function(modelName, resource, key) {
     var deferred = Q.defer();
     var t = this;
+    var model,
+        object = {},
+        returnKeys = false;
 
     key = ',' + key.replace(/\./g,',');
-    var model = this.getModelByName(modelName);
+    model = this.getModelByName(modelName);
 
     if (model === false) {
         return Q.reject({code: 400, msg: 'Model not found.'});
     }
 
-    var object = {};
-    model.find({path: new RegExp('^' + key)}, function(err, docs) {
+    var query = {};
+    query[modelName.toLowerCase()] = resource;
+    if (key.slice(-1) === ',') {
+        returnKeys = true;
+        key = key.slice(0, -1);
+        query.type = 'keys';
+        query.path = new RegExp('^' + key + '$');
+    } else {
+        query.type = 'data';
+        query.path = new RegExp('^' + key + ',');
+    }
+
+    model.find(query, function(err, docs) {
         if (err) {
             deferred.reject(err);
+        } else if (docs.length === 0) {
+            deferred.reject({code: 404, msg: 'Metadata does not exist.'});
         } else {
-            object = t.buildTreeWithDocs(key, docs);
-            if (_.isEmpty(object)) {
-                deferred.reject({code: 404, msg: 'Metadata does not exist.'});
+            if (returnKeys) {
+                deferred.resolve(docs[0].keys);
             } else {
+                object = t.buildTreeWithDocs(key, docs);
                 deferred.resolve(object);
             }
         }
     });
+
+    return deferred.promise;
+};
+
+/**
+ * Remove metadata by key
+ *
+ * @param modelName
+ * @param resource
+ * @param key
+ * @returns {*}
+ */
+metadataSchema.statics.removeByKey = function(modelName, resource, key) {
+    var deferred = Q.defer();
+    var model;
+
+    key = ',' + key.replace(/\./g,',');
+    model = this.getModelByName(modelName);
+
+    var removeDatasFind = {};
+    removeDatasFind[modelName.toLowerCase()] = resource;
+    removeDatasFind['path'] = new RegExp('^' + key + ',');
+
+    var removeKeysFind = {};
+    removeKeysFind[modelName.toLowerCase()] = resource;
+    removeKeysFind['type'] = 'keys';
+    removeKeysFind['path'] = key;
+
+    var keys = key.split(',');
+    var current_key = keys.pop(), parent_key = keys.join(',') || ',';
+
+    var updateRootKeysFind = {};
+    updateRootKeysFind[modelName.toLowerCase()] = resource;
+    updateRootKeysFind['type'] = 'keys';
+    updateRootKeysFind['path'] = parent_key;
+
+    Q(model.remove(removeDatasFind).exec())
+        .then(Q(model.remove(removeKeysFind).exec()))
+        .then(Q(model.update(updateRootKeysFind, {$pull: { keys: current_key }}).exec()))
+        .then(function() {
+            return deferred.resolve();
+        }, function(error) {
+            return deferred.reject(error);
+        });
+
 
     return deferred.promise;
 };
@@ -127,16 +192,24 @@ metadataSchema.statics.constructTreeSchema = function (metadata, parent_path, pa
     var tree = parent_tree || [];
     parent_path = parent_path || '';
 
-    Object.keys(metadata).forEach (function(key) {
+    var keys = Object.keys(metadata);
+    keys.forEach (function(key) {
         // TODO: check if file
         if (_.isObject(metadata[key]) && !_.isArray(metadata[key])) {
             t.constructTreeSchema(metadata[key], parent_path + ',' + key, tree);
         } else {
             tree.push({
-                path: parent_path + ',' + key,
+                type: 'data',
+                path: parent_path + ',' + key + ',',
                 value: metadata[key]
             });
         }
+    });
+
+    tree.push({
+        type: 'keys',
+        path: (parent_path || ','),
+        $addToSet: { keys: { $each: keys } }
     });
 
     return tree;
@@ -145,8 +218,10 @@ metadataSchema.statics.constructTreeSchema = function (metadata, parent_path, pa
 /**
  * Build object with docs collection
  *
- * @param {array} docs
- * @param {object} object
+ * @param request_key
+ * @param docs
+ *
+ * @returns {*}
  */
 metadataSchema.statics.buildTreeWithDocs = function (request_key, docs) {
     var object;
@@ -159,6 +234,7 @@ metadataSchema.statics.buildTreeWithDocs = function (request_key, docs) {
 
         docs.forEach(function (item) {
             var path = item.path.replace(request_key, '');
+            path = path.slice(0, -1);
             var keys = path.split(',');
             keys.shift();
 
@@ -182,7 +258,7 @@ metadataSchema.statics.buildTreeWithDocs = function (request_key, docs) {
 };
 
 /**
- * Get Mongoose Model with mode name
+ * Get Mongoose Model with name
  *
  * @param {string} modelName
  *
@@ -202,7 +278,7 @@ metadataSchema.statics.getModelByName = function(modelName) {
     }
 
     return model;
-}
+};
 
 var Metadata = mongoose.model('Metadata', metadataSchema);
 

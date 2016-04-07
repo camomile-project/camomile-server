@@ -67,3 +67,25 @@ exports.save = function (req, res) {
         });
     });
 };
+
+exports.remove = function(req, res) {
+    _.request.fGetResource(req, req.current_resource)(function(error, resource) {
+        if (error) {
+            res.status(404).json({
+                error: error
+            });
+            return;
+        }
+
+        Metadata.removeByKey(
+            req.current_resource.modelName,
+            resource,
+            req.params['key']
+        ).then(function() {
+            res.status(204).send();
+        }, function(error) {
+            res.status(400).json(error);
+
+        });
+    });
+};

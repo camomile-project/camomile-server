@@ -527,4 +527,10 @@ exports.initialize = function (app) {
       MetaData.save
   );
 
+  // remove one queue
+  app.delete('/:resource_type/:resource_id/metadata/:key',
+      Authentication.middleware.isLoggedIn,
+      _.middleware.fExistsWithRights(null, _.ADMIN),
+      MetaData.remove);
+
 };
