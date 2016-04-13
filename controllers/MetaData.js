@@ -23,6 +23,7 @@
  */
 
 var _ = require('../controllers/utils');
+var u = require('underscore');
 
 var Metadata = require('../models/MetaData').Metadata;
 
@@ -34,7 +35,17 @@ exports.get = function (req, res) {
             resource,
             req.params['key']
         ).then(function(object) {
-            res.status(200).json(object);
+            if (u.isObject(object) && object.type && object.type === 'file') {
+                var pathInfos = Metadata.generateFilePath(object.token, object.filename, req.app.get('upload'));
+                res
+                    .sendFile(pathInfos.fullPath, function(error) {
+                        if (error) {
+                            res.status(error.status).end();
+                        }
+                    });
+            } else {
+                res.status(200).json(object);
+            }
         }, function(error) {
             if (error.code !== undefined) {
                 res.status(error.code).json(error.msg);
@@ -59,11 +70,12 @@ exports.save = function (req, res) {
         Metadata.create(
             req.current_resource.modelName,
             resource,
-            req.body
+            req.body,
+            req.app.get('upload')
         ).then(function() {
             res.status(201).send();
         }, function(error) {
-            res.status('400').json(error);
+            res.status(400).json(error);
         });
     });
 };

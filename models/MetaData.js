@@ -26,6 +26,9 @@ var mongoose = require('mongoose');
 var _ = require('underscore');
 var async = require('async');
 var Q = require('q');
+var fs = require('node-fs');
+var path = require('path');
+var crypto = require('crypto');
 
 var Schema = mongoose.Schema;
 
@@ -52,9 +55,9 @@ metadataSchema.index({type: 1, path: 1}, {unique: true});
  * @param metadata
  * @param callback
  */
-metadataSchema.statics.create = function (modelName, resource, metadata) {
+metadataSchema.statics.create = function (modelName, resource, metadata, upload_dir) {
     var deferred = Q.defer();
-    var tree = this.constructTreeSchema(metadata);
+    var tree = this.constructTreeSchema(metadata, upload_dir);
     var model = this.getModelByName(modelName);
     var models = [];
 
@@ -123,7 +126,7 @@ metadataSchema.statics.getByKey = function(modelName, resource, key) {
             if (returnKeys) {
                 deferred.resolve(docs[0].keys);
             } else {
-                object = t.buildTreeWithDocs(key, docs);
+                object = t.buildTreeWithDocs(key, docs, modelName.toLowerCase(), resource._id);
                 deferred.resolve(object);
             }
         }
@@ -186,7 +189,7 @@ metadataSchema.statics.removeByKey = function(modelName, resource, key) {
  *
  * @returns {*|Array}
  */
-metadataSchema.statics.constructTreeSchema = function (metadata, parent_path, parent_tree) {
+metadataSchema.statics.constructTreeSchema = function (metadata, upload_dir,  parent_path, parent_tree) {
     var t = this;
 
     var tree = parent_tree || [];
@@ -194,9 +197,15 @@ metadataSchema.statics.constructTreeSchema = function (metadata, parent_path, pa
 
     var keys = Object.keys(metadata);
     keys.forEach (function(key) {
-        // TODO: check if file
-        if (_.isObject(metadata[key]) && !_.isArray(metadata[key])) {
-            t.constructTreeSchema(metadata[key], parent_path + ',' + key, tree);
+        if (t.isFileObject(metadata[key])) {
+            var data = t.saveFile(metadata[key], upload_dir);
+            tree.push({
+                type: 'data',
+                path: parent_path + ',' + key + ',',
+                value: data
+            });
+        } else if (_.isObject(metadata[key]) && !_.isArray(metadata[key])) {
+            t.constructTreeSchema(metadata[key], upload_dir, parent_path + ',' + key, tree);
         } else {
             tree.push({
                 type: 'data',
@@ -223,12 +232,11 @@ metadataSchema.statics.constructTreeSchema = function (metadata, parent_path, pa
  *
  * @returns {*}
  */
-metadataSchema.statics.buildTreeWithDocs = function (request_key, docs) {
+metadataSchema.statics.buildTreeWithDocs = function (request_key, docs, modelName, id) {
     var object;
 
-    // TODO: check if file
     if (docs.length == 1) {
-        object = docs[0].value;
+        object = constructResponse(request_key, docs[0].value, true);
     } else {
         object = {};
 
@@ -243,7 +251,7 @@ metadataSchema.statics.buildTreeWithDocs = function (request_key, docs) {
                 var key = keys[i];
                 if (accessor[key] === undefined) {
                     if (i === (keys.length - 1)) {
-                        accessor[key] = item.value;
+                        accessor[key] = constructResponse(item.path, item.value);
                     } else {
                         accessor[key] = {};
                     }
@@ -252,6 +260,25 @@ metadataSchema.statics.buildTreeWithDocs = function (request_key, docs) {
                 accessor = accessor[key];
             }
         });
+    }
+
+    function constructResponse(key, value, with_token) {
+        if (_.isObject(value) && value.type && value.type === 'file') {
+            if (value.token && value.filename) {
+                var object = {
+                    type: 'file',
+                    filename: value.filename,
+                    url: ['', modelName, id, 'metadata', key.replace(/\,/g,'.').slice(1, -1)].join('/')
+                };
+
+                if (with_token === true) {
+                    object.token = value.token;
+                }
+                return object;
+            }
+        }
+
+        return value;
     }
 
     return object;
@@ -278,6 +305,79 @@ metadataSchema.statics.getModelByName = function(modelName) {
     }
 
     return model;
+};
+
+/**
+ * Check file object
+ *
+ * @param {object} object
+ *
+ * @returns {boolean}
+ */
+metadataSchema.statics.isFileObject = function(object) {
+    if (object.type && object.type === 'file') {
+        if (object.data && object.filename) {
+            return true;
+        }
+    }
+
+    return false;
+};
+
+/**
+ *
+ * @param token
+ * @param filename
+ * @param upload_dir
+ *
+ * @returns {{rootPath: string, filename: (string|*), fullPath: *}}
+ */
+metadataSchema.statics.generateFilePath = function (token, filename, upload_dir) {
+    var rootPath = path.join(upload_dir, token.substr(0,4).split('').join('/'));
+    filename = token.substr(4,8) + '_' + filename;
+
+    return {
+        rootPath: rootPath,
+        filename: filename,
+        fullPath: path.join(rootPath, filename)
+    };
+};
+
+/**
+ *
+ * @param object
+ * @param upload_dir
+ * @returns {*}
+ */
+metadataSchema.statics.saveFile = function(object, upload_dir) {
+    if (!this.isFileObject(object)) {
+        return false;
+    }
+
+    var buffer = new Buffer(object.data, 'base64');
+    var pWrite = Q.denodeify(fs.writeFile);
+    var pMkdir = Q.denodeify(fs.mkdir);
+
+    var shasum = crypto.createHash('sha1');
+    var token = shasum.update(buffer.toString('binary')).digest('hex');
+    var filePath = this.generateFilePath(token, object.filename, upload_dir);
+
+    pMkdir(filePath.rootPath, 0755, true)
+        .then(function() {
+            return pWrite(filePath.fullPath, buffer);
+        })
+        .then(function pWriteSuccess() {
+            console.log('File created in ' + filePath.fullPath);
+        }, function(error) {
+            console.log(error);
+        });
+
+    return {
+        type: 'file',
+        filename: object.filename,
+        size: buffer.length,
+        token: token
+    };
 };
 
 var Metadata = mongoose.model('Metadata', metadataSchema);
