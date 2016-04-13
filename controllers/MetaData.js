@@ -30,6 +30,13 @@ var Metadata = require('../models/MetaData').Metadata;
 // get metadata
 exports.get = function (req, res) {
     _.request.fGetResource(req, req.current_resource)(function(error, resource) {
+        if (error) {
+            res.status(404).json({
+                error: error
+            });
+            return;
+        }
+
         Metadata.getByKey(
             req.current_resource.modelName,
             resource,
