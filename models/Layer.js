@@ -130,4 +130,11 @@ layerSchema.statics.removeWithEvent = function(datas, callback) {
   });
 };
 
+// SSE Event
+layerSchema.post('save', function(doc) {
+  if (doc.history.length > 0) {
+    SSEChannels.dispatch('layer:' + doc._id, {layer: doc._id, event: {update: Object.keys(doc.history.pop().changes)} });
+  }
+});
+
 module.exports = mongoose.model('Layer', layerSchema);
