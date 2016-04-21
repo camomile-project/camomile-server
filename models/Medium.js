@@ -98,7 +98,6 @@ mediumSchema.statics.create = function (id_user, id_corpus, data, callback) {
 
 };
 
-
 mediumSchema.statics.removeWithEvent = function(datas, callback) {
   var t = this;
 
@@ -113,5 +112,12 @@ mediumSchema.statics.removeWithEvent = function(datas, callback) {
     });
   });
 };
+
+// SSE Event
+mediumSchema.post('save', function(doc) {
+  if (doc.history.length > 0) {
+    SSEChannels.dispatch('medium:' + doc._id, {medium: doc._id, event: {update: Object.keys(doc.history.pop().changes)} });
+  }
+});
 
 module.exports = mongoose.model('Medium', mediumSchema);
