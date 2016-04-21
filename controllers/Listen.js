@@ -36,14 +36,33 @@ exports.post = function(req, res) {
 exports.get = function(req, res) {
     if (!sseChannel.initializeChannel(req, res, req.params.channel_id)) {
         res.status(404).json({error: 'Channel not found'});
-        return;
     }
 };
 
 exports.subscribe = function(req, res) {
-    res.status(201).json('Not implementend');
+    if (req.params.channel_id === undefined || req.params.resource_type === undefined || req.params.resource_id === undefined) {
+        res.status(400).json({error: 'invalid query'});
+        return;
+    }
+
+    if (sseChannel.subscribe(req.params.channel_id, req.params.resource_type, req.params.resource_id)) {
+        res.status(200).json({event: req.params.resource_type + ':' + req.params.resource_id});
+        return;
+    }
+
+    res.status(404).json({error: 'Channel not found'});
 };
 
 exports.unsubscribe = function(req, res) {
-    res.status(400).json('Not implementend');
+    if (req.params.channel_id === undefined || req.params.resource_type === undefined || req.params.resource_id === undefined) {
+        res.status(400).json({error: 'invalid query'});
+        return;
+    }
+
+    if (sseChannel.unsubscribe(req.params.channel_id, req.params.resource_type, req.params.resource_id)) {
+        res.status(204).json({events: ''});
+        return;
+    }
+
+    res.status(404).send();
 };
