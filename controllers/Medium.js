@@ -168,7 +168,7 @@ exports.remove = function (req, res) {
 
       // remove medium
       function (callback) {
-        Medium.remove({
+        Medium.removeWithEvent({
             _id: id_medium
           },
           callback);

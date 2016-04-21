@@ -129,7 +129,7 @@ exports.remove = function (req, res) {
 
               // remove layers
               function (callback) {
-                Layer.remove({
+                Layer.removeWithEvent({
                     _id: {
                       $in: ids_layers
                     }
@@ -143,7 +143,7 @@ exports.remove = function (req, res) {
 
     // remove media
     function (callback) {
-      Medium.remove({
+      Medium.removeWithEvent({
         id_corpus: corpus
       }, callback);
     },

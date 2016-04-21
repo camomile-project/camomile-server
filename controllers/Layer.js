@@ -199,7 +199,7 @@ exports.remove = function (req, res) {
 
       // remove layer
       function (callback) {
-        Layer.remove({
+        Layer.removeWithEvent({
             _id: id_layer
           },
           callback);

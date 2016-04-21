@@ -27,8 +27,9 @@ var _ = require('../controllers/utils');
 
 var Schema = mongoose.Schema;
 var historySchema = require('./History');
+var SSEChannels = require('../lib/SSEChannels');
 
-var layerSchema = new Schema({
+var layerSchema = Schema({
   id_corpus: {
     type: Schema.Types.ObjectId,
     ref: 'CorpusSchema'
@@ -108,10 +109,25 @@ layerSchema.statics.create = function (id_user, id_corpus, data, callback) {
       layer.history = undefined;
       layer.permissions = undefined;
       layer.__v = undefined;
+      SSEChannels.dispatch('corpus:' + id_corpus, { corpus: id_corpus, event: {add_layer: layer._id} });
     }
     callback(error, layer);
   });
+};
 
+layerSchema.statics.removeWithEvent = function(datas, callback) {
+  var t = this;
+
+  t.findById(datas._id, function(err, layer) {
+    t.remove(datas, function(err) {
+      if (err) {
+        callback(err);
+        return;
+      }
+
+      SSEChannels.dispatch('corpus:' + layer.id_corpus, { corpus: layer.id_corpus, event: {delete_layer: layer._id} });
+    });
+  });
 };
 
 module.exports = mongoose.model('Layer', layerSchema);
