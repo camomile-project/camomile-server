@@ -522,13 +522,18 @@ exports.initialize = function (app) {
       MetaData.get
   );
 
+  app.get('/:resource_type/:resource_id/metadata/',
+      Authentication.middleware.isLoggedIn,
+      _.middleware.fExistsWithRights(null, _.READ),
+      MetaData.get
+  );
+
   app.post('/:resource_type/:resource_id/metadata',
       Authentication.middleware.isLoggedIn,
       _.middleware.fExistsWithRights(null, _.ADMIN),
       MetaData.save
   );
 
-  // remove one queue
   app.delete('/:resource_type/:resource_id/metadata/:key',
       Authentication.middleware.isLoggedIn,
       _.middleware.fExistsWithRights(null, _.ADMIN),
@@ -542,7 +547,7 @@ exports.initialize = function (app) {
   );
 
   app.get('/listen/:channel_id',
-      Authentication.middleware.isLoggedIn,
+/*      Authentication.middleware.isLoggedIn,*/
       Listen.get
   );
 

@@ -38,14 +38,15 @@ var metadataSchema = new Schema({
     path: {
         type: String,
         required: true,
-        trim: true,
-        unique: true
+        trim: true
     },
     value: Schema.Types.Mixed,
     keys: [String]
 }, options);
 
-metadataSchema.index({type: 1, path: 1}, {unique: true});
+metadataSchema.index({type: 1, path: 1, kind: 1, corpus: 1}, {sparse: true});
+metadataSchema.index({type: 1, path: 1, kind: 1, layer: 1}, {sparse: true});
+metadataSchema.index({type: 1, path: 1, kind: 1, medium: 1}, {sparse: true});
 
 /**
  * Create metadata
@@ -64,10 +65,15 @@ metadataSchema.statics.create = function (modelName, resource, metadata, upload_
     if (model === false) {
         return Q.reject('Model not found');
     }
-
+    
     tree.forEach(function(item) {
         item[modelName.toLowerCase()] = resource;
-        models.push(model.update.bind(model, {type: item.type, path: item.path}, item, {upsert: true}));
+        var query = {
+            type: item.type,
+            path: item.path
+        };
+        query[modelName.toLowerCase()] = resource;
+        models.push(model.update.bind(model, query, item, {upsert: true}));
     });
 
     async.parallel(models, function(error, result) {
@@ -107,11 +113,11 @@ metadataSchema.statics.getByKey = function(modelName, resource, key) {
 
     var query = {};
     query[modelName.toLowerCase()] = resource;
-    if (key.slice(-1) === ',') {
+    if (key.slice(-1) === ',' || key === ',') {
         returnKeys = true;
         key = key.slice(0, -1);
         query.type = 'keys';
-        query.path = new RegExp('^' + key + '$');
+        query.path = key;//new RegExp('^' + key + '$');
     } else {
         query.type = 'data';
         query.path = new RegExp('^' + key + ',');
@@ -235,7 +241,7 @@ metadataSchema.statics.constructTreeSchema = function (metadata, upload_dir,  pa
 metadataSchema.statics.buildTreeWithDocs = function (request_key, docs, modelName, id) {
     var object;
 
-    if (docs.length == 1) {
+    if (docs.length == 1 && !_.isArray(docs[0].value)) {
         object = constructResponse(request_key, docs[0].value, true);
     } else {
         object = {};

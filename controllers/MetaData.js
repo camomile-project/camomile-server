@@ -40,7 +40,7 @@ exports.get = function (req, res) {
         Metadata.getByKey(
             req.current_resource.modelName,
             resource,
-            req.params['key']
+            req.params['key'] || '.'
         ).then(function(object) {
             if (u.isObject(object) && object.type && object.type === 'file') {
                 var pathInfos = Metadata.generateFilePath(object.token, object.filename, req.app.get('upload'));
