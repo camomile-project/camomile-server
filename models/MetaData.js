@@ -33,7 +33,7 @@ var crypto = require('crypto');
 var Schema = mongoose.Schema;
 
 var options = {discriminatorKey: 'kind'};
-var metadataSchema = new Schema({
+var metadataSchema = Schema({
     type: String,
     path: {
         type: String,
@@ -184,6 +184,22 @@ metadataSchema.statics.removeByKey = function(modelName, resource, key) {
 
 
     return deferred.promise;
+};
+
+/**
+ * Remove all metadata by resource
+ *
+ * @param modelName
+ * @param resource
+ * @param key
+ * @returns {*}
+ */
+metadataSchema.statics.removeByResource = function(modelName, id , callback) {
+    var model = this.getModelByName(modelName);
+    var removeDatasFind = {};
+    removeDatasFind[modelName.toLowerCase()] = id;
+
+    return model.remove(removeDatasFind, callback);
 };
 
 /**

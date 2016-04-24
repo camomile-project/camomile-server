@@ -29,6 +29,7 @@ var Corpus = require('../models/Corpus');
 var Medium = require('../models/Medium');
 var Layer = require('../models/Layer');
 var Annotation = require('../models/Annotation');
+var Metadata = require('../models/MetaData').Metadata;
 
 // create a corpus
 exports.create = function (req, res) {
@@ -135,6 +136,11 @@ exports.remove = function (req, res) {
                     }
                   },
                   callback);
+              },
+
+              // remove metadata
+              function (callback) {
+                Metadata.removeByResource('corpus', corpus, callback);
               }
             ],
             callback);

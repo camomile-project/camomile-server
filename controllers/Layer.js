@@ -27,6 +27,7 @@ var _ = require('../controllers/utils');
 
 var Layer = require('../models/Layer');
 var Annotation = require('../models/Annotation');
+var Metadata = require('../models/MetaData').Metadata;
 
 // ----------------------------------------------------------------------------
 // ROUTES
@@ -203,6 +204,11 @@ exports.remove = function (req, res) {
             _id: id_layer
           },
           callback);
+      },
+
+      // remove metadata
+      function (callback) {
+        Metadata.removeByResource('layer', id_layer, callback);
       }
 
     ],
