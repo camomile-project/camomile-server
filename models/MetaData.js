@@ -257,7 +257,7 @@ metadataSchema.statics.constructTreeSchema = function (metadata, upload_dir,  pa
 metadataSchema.statics.buildTreeWithDocs = function (request_key, docs, modelName, id) {
     var object;
 
-    if (docs.length == 1 && !_.isArray(docs[0].value)) {
+    if (docs.length == 1 && (docs[0].path === request_key + ',')) {
         object = constructResponse(request_key, docs[0].value, true);
     } else {
         object = {};
