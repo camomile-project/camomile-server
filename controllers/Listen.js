@@ -60,7 +60,7 @@ exports.unsubscribe = function(req, res) {
     }
 
     if (sseChannel.unsubscribe(req.params.channel_id, req.params.resource_type, req.params.resource_id)) {
-        res.status(204).json({events: ''});
+        res.status(200).json({success: 'Successfully unwatched.'});
         return;
     }
 

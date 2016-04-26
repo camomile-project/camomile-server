@@ -101,7 +101,7 @@ exports.remove = function(req, res) {
             resource,
             req.params['key']
         ).then(function() {
-            res.status(204).send({success: "Successfully deleted."});
+            res.status(200).send({success: "Successfully deleted."});
         }, function(error) {
             res.status(400).json(error);
 
