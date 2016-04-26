@@ -80,7 +80,7 @@ exports.save = function (req, res) {
             req.body,
             req.app.get('upload')
         ).then(function() {
-            res.status(201).send();
+            res.status(201).send({success: "Successfully created."});
         }, function(error) {
             res.status(400).json(error);
         });
@@ -101,7 +101,7 @@ exports.remove = function(req, res) {
             resource,
             req.params['key']
         ).then(function() {
-            res.status(204).send();
+            res.status(204).send({success: "Successfully deleted."});
         }, function(error) {
             res.status(400).json(error);
 
