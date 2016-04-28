@@ -2403,7 +2403,7 @@ path             | String    | The metadata path, if not set return first level 
 
 
 ```python
-client.getCorpusMetadata(
+client.getCorpusMetadataKeys(
   '555daefff80f910100d741d6', 
   'level1')
 ```
@@ -2707,3 +2707,4 @@ GET /date HTTP/1.1
 ```python
 client.date()
 ```
+
