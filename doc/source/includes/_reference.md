@@ -2368,6 +2368,13 @@ GET /corpus/555daefff80f910100d741d6/metadata/level1 HTTP/1.1
 
 ```
 
+```javascript
+Camomile.getCorpusMetadata('555daefff80f910100d741d6', 'test2.child', function(err, datas) {
+    console.log(datas);
+});
+```
+
+
 > Sample JSON response
 
 ```json
@@ -2399,6 +2406,16 @@ path             | String    | The metadata path, if not set return first level 
 client.getCorpusMetadata(
   '555daefff80f910100d741d6', 
   'level1')
+```
+
+```javascript
+Camomile.getCorpusMetadataKeys('555daefff80f910100d741d6', function(err, datas) {
+    console.log(datas);
+});
+
+Camomile.getCorpusMetadataKeys('555daefff80f910100d741d6', 'level1', function(err, datas) {
+    console.log(datas);
+});
 ```
 
 ```http
@@ -2438,8 +2455,18 @@ client.setCorpusMetadata(
 ```http
 POST /corpus/555daefff80f910100d741d6/metadata/ HTTP/1.1
 
-{'name': 'my metadata', 'level1': {'my_array': ['value1', 'value2']}}
+{"name": "my metadata", "level1": {"my_array": ["value1", "value2"]}}
 
+```
+
+```javascript
+Camomile.setCorpusMetadata(
+    '555daefff80f910100d741d6', 
+    {'name': 'my metadata', 'level1': {'my_array': ['value1', 'value2']}} , 
+    function(err, success) {
+        console.log(success);
+    }
+);
 ```
 
 > Sample JSON response
@@ -2479,6 +2506,21 @@ client.sendCorpusMetadataFile(
   '/path/to/file.ext')
 ```
 
+```javascript
+var inputFile = document.getElementById('file');
+var file = inputFile.files[0];
+
+Camomile.sendCorpusMetadataFile(
+    '555daefff80f910100d741d6', 
+    'level1.mypicture', 
+    file, 
+    function(err, success) {
+        console.log(success);
+    }
+);
+```
+
+
 ```http
 POST /corpus/555daefff80f910100d741d6/metadata/ HTTP/1.1
 
@@ -2516,6 +2558,12 @@ client.deleteCorpusMetadata(
 ```http
 DELETE /corpus/555daefff80f910100d741d6/metadata/level1 HTTP/1.1
 
+```
+
+```javascript
+Camomile.deleteCorpusMetadata('555daefff80f910100d741d6', 'level1', function(err, success) {
+    console.log(success);
+});
 ```
 
 > Sample JSON response
@@ -2591,6 +2639,17 @@ def callback(event):
 client.watchCorpus('555daefff80f910100d741d6', callback)
 ```
 
+```javascript
+Camomile.listen(function(error, channel_id, event) {
+    var unwatchCorpus = event.watchCorpus('555daefff80f910100d741d6', function(error, data) {
+        console.log(data);
+        
+        // For unwatch corpus:
+        unwatchCorpus();
+    });
+});
+```
+
 ```http
 PUT /listen/5/medium/555daefff80f910100d741d6 HTTP/1.1
 
@@ -2648,4 +2707,3 @@ GET /date HTTP/1.1
 ```python
 client.date()
 ```
-
