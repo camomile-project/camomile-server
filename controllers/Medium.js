@@ -203,6 +203,18 @@ exports.stream = function (req, res) {
   streamFormat(req, res, 'webm');
 };
 
+exports.streamJpg = function (req, res) {
+  streamFormat(req, res, 'jpg');
+};
+
+exports.streamJpeg = function (req, res) {
+  streamFormat(req, res, 'jpeg');
+};
+
+exports.streamPng = function (req, res) {
+  streamFormat(req, res, 'png');
+};
+
 exports.streamWebM = function (req, res) {
   streamFormat(req, res, 'webm');
 };

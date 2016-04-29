@@ -234,7 +234,7 @@ User.findOne({
           console.log('Could not set root password. Exiting.');
           process.exit(-1);
         }
-        console.log('Root password successfully set.');
+        console.log('Root password successfully set. Modified server.');
       });
     });
   }
