@@ -109,6 +109,7 @@ mediumSchema.statics.removeWithEvent = function(datas, callback) {
       }
 
       SSEChannels.dispatch('corpus:' + medium.id_corpus, { corpus: medium.id_corpus, event: {delete_medium: medium._id} });
+      callback();
     });
   });
 };

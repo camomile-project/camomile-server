@@ -126,6 +126,7 @@ layerSchema.statics.removeWithEvent = function(datas, callback) {
       }
 
       SSEChannels.dispatch('corpus:' + layer.id_corpus, { corpus: layer.id_corpus, event: {delete_layer: layer._id} });
+      callback();
     });
   });
 };
