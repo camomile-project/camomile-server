@@ -105,7 +105,7 @@ annotationSchema.statics.removeWithEvent = function(datas, callback) {
         return;
       }
 
-      SSEChannels.dispatch('layer:' + layer._id, { layer: layer._id, event: {delete_annotation: annotation._id} });
+      SSEChannels.dispatch('layer:' + annotation.id_layer, { layer: annotation.id_layer, event: {delete_annotation: annotation._id} });
     });
   });
 };
