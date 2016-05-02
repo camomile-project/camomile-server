@@ -3,107 +3,72 @@ var helpers = require('./helpers');
 var server = helpers.server;
 
 describe('Metadata', function() {
-    var corpus_id;
-
-    before(function(done) {
-        helpers.createCorpus(function(err,res) {
-            if (err) {
-                throw err;
-            }
-            corpus_id = res.body._id;
-            done();
-        });
-    });
 
     beforeEach(function(done) {
         helpers.authenticate(done);
     });
 
-    it('should create a metadata and return an empty response with HTTP 201 code', function(done) {
-        server
-            .post('/corpus/' + corpus_id + '/metadata')
-            .send({test_corpus: helpers.metadata_fixtures.test_corpus})
-            .set('Accept', 'application/json')
-            .expect(201, done);
-    });
+    function executeType(resource) {
+        describe (resource, function() {
+            var resource_id;
+            var resource_name = resource.toLowerCase();
+            var fixtures = helpers.metadata_fixtures['test_' + resource_name];
 
-    it('should return a valid json response with "key" parameter', function(done) {
-        server
-            .get('/corpus/' + corpus_id + '/metadata/test_corpus')
-            .set('Accept', 'application/json')
-            .expect('Content-Type', /json/)
-            .expect(200)
-            .end(function(err, res) {
-                if (err) {
-                    throw err;
-                }
-
-                res.body.should.Object();
-                res.body.should.deepEqual(helpers.metadata_fixtures.test_corpus);
-
-                done();
-            });
-    });
-
-    it('should not return an object or array if value of "key" parameter is a string', function(done) {
-        server
-            .get('/corpus/' + corpus_id + '/metadata/test_corpus.value')
-            .set('Accept', 'application/json')
-            .expect('Content-Type', /json/)
-            .expect(200)
-            .end(function(err, res) {
-                if (err) {
-                    throw err;
-                }
-
-                res.body.should.equal(helpers.metadata_fixtures.test_corpus.value);
-
-                done();
-            });
-    });
-
-    it('should return a valid first level keys', function(done) {
-        server
-            .get('/corpus/' + corpus_id + '/metadata/test_corpus.')
-            .set('Accept', 'application/json')
-            .expect('Content-Type', /json/)
-            .expect(200)
-            .end(function(err, res) {
-                if (err) {
-                    throw err;
-                }
-
-                res.body.should.deepEqual(Object.keys(helpers.metadata_fixtures.test_corpus));
+            before(function(done) {
+                helpers['create' + resource](function(err, res) {
+                    if (err) {
+                        throw err;
+                    }
+                    resource_id = res.body._id;
+                    done();
+                });
             });
 
-        server
-            .get('/corpus/' + corpus_id + '/metadata/test_corpus.level.')
-            .set('Accept', 'application/json')
-            .expect('Content-Type', /json/)
-            .expect(200)
-            .end(function(err, res) {
-                if (err) {
-                    throw err;
-                }
-
-                res.body.should.deepEqual(Object.keys(helpers.metadata_fixtures.test_corpus.level));
-
-                done();
-            });
-    });
-
-    it('should remove tree key and update keys of parent level', function(done) {
-        server
-            .delete('/corpus/' + corpus_id + '/metadata/test_corpus.value')
-            .set('Accept', 'application/json')
-            .expect(204)
-            .end(function(err) {
-                if (err) {
-                    throw err;
-                }
-
+            it('should create a metadata and return response with HTTP 201 code', function(done) {
                 server
-                    .get('/corpus/' + corpus_id + '/metadata/test_corpus.')
+                    .post('/' + resource_name + '/' + resource_id + '/metadata')
+                    .send(fixtures)
+                    .set('Accept', 'application/json')
+                    .expect(201, done);
+            });
+
+            it('should return a valid json response with "key" parameter', function(done) {
+                server
+                    .get('/' + resource_name + '/' + resource_id + '/metadata/level')
+                    .set('Accept', 'application/json')
+                    .expect('Content-Type', /json/)
+                    .expect(200)
+                    .end(function(err, res) {
+                        if (err) {
+                            throw err;
+                        }
+                        res.body.should.Object();
+                        res.body.should.deepEqual(fixtures.level);
+
+                        done();
+                    });
+            });
+
+            it('should return a json array if value of "key" parameter is an array', function(done) {
+                server
+                    .get('/' + resource_name + '/' + resource_id + '/metadata/array1')
+                    .set('Accept', 'application/json')
+                    .expect('Content-Type', /json/)
+                    .expect(200)
+                    .end(function(err, res) {
+                        if (err) {
+                            throw err;
+                        }
+                        res.body.should.Array();
+                        res.body.should.deepEqual(fixtures.array1);
+
+                        done();
+                    });
+            });
+
+            it('should return a json string if value of "key" parameter is a string', function(done) {
+                server
+                    .get('/' + resource_name + '/' + resource_id + '/metadata/value')
                     .set('Accept', 'application/json')
                     .expect('Content-Type', /json/)
                     .expect(200)
@@ -112,10 +77,121 @@ describe('Metadata', function() {
                             throw err;
                         }
 
-                        res.body.should.not.deepEqual('value');
+                        res.body.should.equal(fixtures.value);
 
                         done();
                     });
             });
-    });
+
+            it('should return a json object if value of "key" parameter is an object', function(done) {
+                server
+                    .get('/' + resource_name + '/' + resource_id + '/metadata/level.level1')
+                    .set('Accept', 'application/json')
+                    .expect('Content-Type', /json/)
+                    .expect(200)
+                    .end(function(err, res) {
+                        if (err) {
+                            throw err;
+                        }
+
+                        res.body.should.Object();
+                        res.body.should.deepEqual(fixtures.level.level1);
+
+                        done();
+                    });
+            });
+
+
+
+            it('should return a url if value of "key" parameter is an file object', function(done) {
+                server
+                    .get('/' + resource_name + '/' + resource_id + '/metadata/mypicture')
+                    .set('Accept', 'application/json')
+                    .expect('Content-Type', 'image/jpeg')
+                    .expect(200)
+                    .end(done);
+            });
+
+            it('should return a valid first level keys', function(done) {
+                server
+                    .get('/' + resource_name + '/' + resource_id + '/metadata/')
+                    .set('Accept', 'application/json')
+                    .expect('Content-Type', /json/)
+                    .expect(200)
+                    .end(function(err, res) {
+                        if (err) {
+                            throw err;
+                        }
+
+                        res.body.should.deepEqual(Object.keys(fixtures));
+                    });
+
+                server
+                    .get('/' + resource_name + '/' + resource_id + '/metadata/level.')
+                    .set('Accept', 'application/json')
+                    .expect('Content-Type', /json/)
+                    .expect(200)
+                    .end(function(err, res) {
+                        if (err) {
+                            throw err;
+                        }
+
+                        res.body.should.deepEqual(Object.keys(fixtures.level));
+
+                        done();
+                    });
+            });
+
+            it('should remove tree key and update keys of parent level', function(done) {
+                server
+                    .delete('/' + resource_name + '/' + resource_id + '/metadata/value')
+                    .set('Accept', 'application/json')
+                    .expect(200)
+                    .end(function(err) {
+                        if (err) {
+                            throw err;
+                        }
+
+                        server
+                            .get('/' + resource_name + '/' + resource_id + '/metadata/')
+                            .set('Accept', 'application/json')
+                            .expect('Content-Type', /json/)
+                            .expect(200)
+                            .end(function(err, res) {
+                                if (err) {
+                                    throw err;
+                                }
+
+                                res.body.should.not.deepEqual('value');
+
+                                done();
+                            });
+                    });
+            });
+
+            it('should remove metadata if resource is removed', function(done) {
+                server
+                    .delete('/' + resource_name + '/' + resource_id)
+                    .set('Accept', 'application/json')
+                    .expect(200)
+                    .end(function(err) {
+                        if (err) {
+                            throw err;
+                        }
+
+                        server
+                            .get('/' + resource_name + '/' + resource_id + '/metadata/')
+                            .set('Accept', 'application/json')
+                            .expect('Content-Type', /json/)
+                            .expect(400)
+                            .end(done);
+                    });
+            });
+
+        });
+    }
+
+    executeType('Corpus');
+    executeType('Layer');
+    executeType('Medium');
 });
