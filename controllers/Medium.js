@@ -161,7 +161,7 @@ exports.remove = function (req, res) {
 
       // remove annotations
       function (callback) {
-        Annotation.removeWithEvent({
+        Annotation.remove({
             id_medium: id_medium
           },
           callback);
