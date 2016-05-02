@@ -39,6 +39,7 @@
     "start": "app.js"
   },
   "devDependencies": {
+    "eventsource": "^0.2.1",
     "should": "^8.3.0",
     "supertest": "^1.2.0"
   }

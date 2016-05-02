@@ -1,4 +1,7 @@
-var server =require('supertest').agent('http://127.0.0.1:3000');
+var baseUrl = 'http://127.0.0.1:3000';
+var server =require('supertest').agent(baseUrl);
+var EventSource = require('eventsource');
+
 
 var metadata_fixtures = {
     test_corpus: {
@@ -66,6 +69,58 @@ var metadata_fixtures = {
     }
 };
 
+function startSSEChannel(done) {
+    server
+        .post('/listen')
+        .set('Accept', 'application/json')
+        .expect(201)
+        .end(function(err, res) {
+            if (err) {
+                throw err;
+            }
+
+            var es = new EventSource(baseUrl + '/listen/' + res.body.channel_id);
+            es.channel_id = res.body.channel_id;
+            done(null, es);
+        });
+}
+
+function watch(es, resource, id, callback, done){
+
+    var sseCallback = function(msg) {
+        var datas = {
+            type: msg.type,
+            data: JSON.parse(msg.data)
+        };
+        es.removeAllListeners(resource + ':' + id);
+        server
+            .delete('/listen/' + es.channel_id + '/' + resource + '/' + id)
+            .set('Accept', 'application/json')
+            .expect(200)
+            .end(function(err, res) {
+                if (err) {
+                    throw err;
+                }
+
+                callback(datas);
+            });
+    };
+
+
+    server
+        .put('/listen/' + es.channel_id + '/' + resource + '/' + id)
+        .set('Accept', 'application/json')
+        .expect(200)
+        .end(function(err, res) {
+           if (err) {
+               throw err;
+           }
+            es.addEventListener(res.body.event, sseCallback);
+
+            done();
+        });
+}
+
 function authenticate(done) {
     server
         .post('/login')
@@ -112,11 +167,31 @@ function createMedium(done) {
     });
 }
 
+function createQueue(done) {
+    var time = (new Date()).getTime();
+    server
+        .post('/queue')
+        .send({name: 'queue name ' + time})
+        .set('Accept', 'application/json')
+        .expect(200)
+        .end(function(err, res) {
+            if (err) {
+                console.log(res.body);
+                throw err;
+            }
+
+            done(err, res);
+        });
+}
+
 module.exports = {
     server: server,
     metadata_fixtures: metadata_fixtures,
     authenticate: authenticate,
     createCorpus: createCorpus,
     createLayer: createLayer,
-    createMedium: createMedium
+    createMedium: createMedium,
+    createQueue: createQueue,
+    startSSEChannel: startSSEChannel,
+    watch: watch
 };
