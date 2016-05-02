@@ -28,6 +28,7 @@ var _ = require('./utils');
 
 var Medium = require('../models/Medium');
 var Annotation = require('../models/Annotation');
+var Metadata = require('../models/MetaData').Metadata;
 
 // create medium(a)
 exports.create = function (req, res) {
@@ -160,7 +161,7 @@ exports.remove = function (req, res) {
 
       // remove annotations
       function (callback) {
-        Annotation.remove({
+        Annotation.removeWithEvent({
             id_medium: id_medium
           },
           callback);
@@ -168,10 +169,15 @@ exports.remove = function (req, res) {
 
       // remove medium
       function (callback) {
-        Medium.remove({
+        Medium.removeWithEvent({
             _id: id_medium
           },
           callback);
+      },
+
+      // remove metadata
+      function (callback) {
+        Metadata.removeByResource('medium', id_medium, callback);
       }
 
     ],

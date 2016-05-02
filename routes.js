@@ -32,6 +32,7 @@ var Annotation = require('./controllers/Annotation');
 var Queue = require('./controllers/Queue');
 var MetaData = require('./controllers/MetaData');
 var Authentication = require('./controllers/Authentication');
+var Listen = require('./controllers/Listen');
 
 var mUser = require('./models/User');
 var mGroup = require('./models/Group');
@@ -521,16 +522,45 @@ exports.initialize = function (app) {
       MetaData.get
   );
 
+  app.get('/:resource_type/:resource_id/metadata/',
+      Authentication.middleware.isLoggedIn,
+      _.middleware.fExistsWithRights(null, _.READ),
+      MetaData.get
+  );
+
   app.post('/:resource_type/:resource_id/metadata',
       Authentication.middleware.isLoggedIn,
       _.middleware.fExistsWithRights(null, _.ADMIN),
       MetaData.save
   );
 
-  // remove one queue
   app.delete('/:resource_type/:resource_id/metadata/:key',
       Authentication.middleware.isLoggedIn,
       _.middleware.fExistsWithRights(null, _.ADMIN),
       MetaData.remove);
+
+  // SSE
+
+  app.post('/listen',
+      Authentication.middleware.isLoggedIn,
+      Listen.post
+  );
+
+  app.get('/listen/:channel_id',
+/*      Authentication.middleware.isLoggedIn,*/
+      Listen.get
+  );
+
+  app.put('/listen/:channel_id/:resource_type/:resource_id',
+      Authentication.middleware.isLoggedIn,
+      _.middleware.fExistsWithRights(null, _.READ),
+      Listen.subscribe
+  );
+
+  app.delete('/listen/:channel_id/:resource_type/:resource_id',
+      Authentication.middleware.isLoggedIn,
+      _.middleware.fExistsWithRights(null, _.READ),
+      Listen.unsubscribe
+  );
 
 };

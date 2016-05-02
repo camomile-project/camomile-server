@@ -25,8 +25,9 @@ SOFTWARE.
 var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
 var historySchema = require('./History');
+var SSEChannels = require('../lib/SSEChannels');
 
-var mediumSchema = new Schema({
+var mediumSchema = Schema({
   id_corpus: {
     type: Schema.Types.ObjectId,
     ref: 'Corpus'
@@ -90,10 +91,34 @@ mediumSchema.statics.create = function (id_user, id_corpus, data, callback) {
     if (!error) {
       medium.history = undefined;
       medium.__v = undefined;
+      SSEChannels.dispatch('corpus:' + id_corpus, { corpus: id_corpus, event: {add_medium: medium._id} });
     }
     callback(error, medium);
   });
 
 };
+
+mediumSchema.statics.removeWithEvent = function(datas, callback) {
+  var t = this;
+
+  t.findById(datas._id, function(err, medium) {
+    t.remove(datas, function(err) {
+      if (err) {
+        callback(err);
+        return;
+      }
+
+      SSEChannels.dispatch('corpus:' + medium.id_corpus, { corpus: medium.id_corpus, event: {delete_medium: medium._id} });
+      callback();
+    });
+  });
+};
+
+// SSE Event
+mediumSchema.post('save', function(doc) {
+  if (doc.history.length > 0) {
+    SSEChannels.dispatch('medium:' + doc._id, {medium: doc._id, event: {update: Object.keys(doc.history.pop().changes)} });
+  }
+});
 
 module.exports = mongoose.model('Medium', mediumSchema);

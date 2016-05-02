@@ -249,6 +249,8 @@ exports.middleware.fExistsWithRights = function (model, min_right) {
         model = Medium;
       } else if (req.params['resource_type'] == 'layer') {
         model = Layer;
+      } else if (req.params['resource_type'] == 'queue') {
+        model = Queue;
       } else {
         sendError(res, 'Resource not found.');
         return;

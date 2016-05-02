@@ -30,10 +30,17 @@ var Metadata = require('../models/MetaData').Metadata;
 // get metadata
 exports.get = function (req, res) {
     _.request.fGetResource(req, req.current_resource)(function(error, resource) {
+        if (error) {
+            res.status(404).json({
+                error: error
+            });
+            return;
+        }
+
         Metadata.getByKey(
             req.current_resource.modelName,
             resource,
-            req.params['key']
+            req.params['key'] || '.'
         ).then(function(object) {
             if (u.isObject(object) && object.type && object.type === 'file') {
                 var pathInfos = Metadata.generateFilePath(object.token, object.filename, req.app.get('upload'));
@@ -73,7 +80,7 @@ exports.save = function (req, res) {
             req.body,
             req.app.get('upload')
         ).then(function() {
-            res.status(201).send();
+            res.status(201).send({success: "Successfully created."});
         }, function(error) {
             res.status(400).json(error);
         });
@@ -94,7 +101,7 @@ exports.remove = function(req, res) {
             resource,
             req.params['key']
         ).then(function() {
-            res.status(204).send();
+            res.status(200).send({success: "Successfully deleted."});
         }, function(error) {
             res.status(400).json(error);
 

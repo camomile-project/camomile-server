@@ -180,7 +180,7 @@ exports.getLayerAnnotationsCount = function (req, res) {
 
 // remove a given annotation
 exports.remove = function (req, res) {
-  Annotation.remove({
+  Annotation.removeWithEvent({
       _id: req.params.id_annotation
     },
     _.response.fSendSuccess(res, 'Successfully deleted.'));
