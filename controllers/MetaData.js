@@ -55,9 +55,9 @@ exports.get = function (req, res) {
             }
         }, function(error) {
             if (error.code !== undefined) {
-                res.status(error.code).json(error.msg);
+                res.status(error.code).send({error: error.msg});
             } else {
-                res.status(400).json(error);
+                res.status(400).send({error: error});
             }
         });
     });
@@ -82,7 +82,7 @@ exports.save = function (req, res) {
         ).then(function() {
             res.status(201).send({success: "Successfully created."});
         }, function(error) {
-            res.status(400).json(error);
+            res.status(400).send({error: error});
         });
     });
 };
@@ -103,7 +103,7 @@ exports.remove = function(req, res) {
         ).then(function() {
             res.status(200).send({success: "Successfully deleted."});
         }, function(error) {
-            res.status(400).json(error);
+            res.status(400).send({error: error});
 
         });
     });
