@@ -118,7 +118,7 @@ exports.pop = function (req, res) {
     },
     function (error, queue) {
       if (error || queue.list.length > 0) {
-        SSEChannels.dispatch('queue:' + req.params.id_queue, {queue: req.params.id_queue, event: {pop_item: queue.list.length} });
+        SSEChannels.dispatch('queue:' + req.params.id_queue, {queue: req.params.id_queue, event: {pop_item: (queue.list.length - 1 )} });
         _.response.fSendData(res)(error, queue.list[0]);
       } else {
         _.response.sendError(res, 'Empty queue.', 400);
