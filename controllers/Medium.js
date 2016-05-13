@@ -25,6 +25,7 @@ SOFTWARE.
 var path = require('path');
 var async = require('async');
 var _ = require('./utils');
+var glob = require('glob-fs')({ gitignore: true });
 
 var Medium = require('../models/Medium');
 var Annotation = require('../models/Annotation');
@@ -187,8 +188,28 @@ var streamFormat = function (req, res, extension) {
       return;
     }
 
+    console.log(req.app.get('media'));
+    var files = glob.readdirSync('..' + req.app.get('media') + '/' + medium.url + '.*');
+    console.log(files);
     var absolutePathToFile = medium.url + '.' + extension;
     absolutePathToFile = path.join(req.app.get('media'), absolutePathToFile);
+
+    for (i = 0; i < files.length; i++) {
+      var f = files[i];
+      var splited = f.split('.');
+      var ext = splited[splited.length - 1].toLowerCase();
+      var mediapath = splited;
+      mediapath.pop();
+      mediapath = mediapath.join('.');
+      mediapath = mediapath.replace('..', '') + '.' + ext;
+      var b = req.app.get('media') + '/' + medium.url + '.' + extension;
+      console.log(mediapath + ' == ' + b);
+      if (mediapath == b) {
+        console.log('Matched medium');
+        absolutePathToFile = medium.url + '.' + files[i].split('.').pop();
+      }
+    }
+
     res.status(200).sendFile(
       absolutePathToFile,
       function (error) {

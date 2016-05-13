@@ -1,0 +1,5 @@
+export CMML_DB=/home/mrim/huchetn/Documents/mgdb
+export CMML_PASSWORD=admin
+export CMML_MEDIA=/home/mrim/huchetn/public/nmedia
+export CMML_LOGS=/home/mrim/huchetn/Documents/logs
+export CMML_PORT=3000
