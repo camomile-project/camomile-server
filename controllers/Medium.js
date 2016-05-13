@@ -188,24 +188,28 @@ var streamFormat = function (req, res, extension) {
       return;
     }
 
-    console.log(req.app.get('media'));
+    // Fix this code
+    //console.log(req.app.get('media'));
+    // On récupère les fichiers présents dans media, avec le même nom sans extension
     var files = glob.readdirSync('..' + req.app.get('media') + '/' + medium.url + '.*');
-    console.log(files);
+    //console.log(files);
+    // On set le path de base
     var absolutePathToFile = medium.url + '.' + extension;
     absolutePathToFile = path.join(req.app.get('media'), absolutePathToFile);
 
+    // Ensuite pour chaque fichier, on va déterminer si celui-ci correspond à celui recherché
     for (i = 0; i < files.length; i++) {
-      var f = files[i];
-      var splited = f.split('.');
-      var ext = splited[splited.length - 1].toLowerCase();
+      var f = files[i]; // Le filename
+      var splited = f.split('.'); // Tableau contenant chaque partie du filename splité sur les points
+      var ext = splited[splited.length - 1].toLowerCase(); // Extension, en lowercase
       var mediapath = splited;
-      mediapath.pop();
-      mediapath = mediapath.join('.');
-      mediapath = mediapath.replace('..', '') + '.' + ext;
+      mediapath.pop(); // On enlève l'extension
+      mediapath = mediapath.join('.'); // on réunit le tableau en rajoutant les points
+      mediapath = mediapath.replace('..', '') + '.' + ext; // On enlève les ..
       var b = req.app.get('media') + '/' + medium.url + '.' + extension;
-      console.log(mediapath + ' == ' + b);
-      if (mediapath == b) {
-        console.log('Matched medium');
+      //console.log(mediapath + ' == ' + b);
+      if (mediapath == b) { // Si les deux correspondent, on a le fichier
+        //console.log('Matched medium');
         absolutePathToFile = medium.url + '.' + files[i].split('.').pop();
       }
     }
