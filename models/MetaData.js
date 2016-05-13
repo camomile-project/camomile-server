@@ -234,11 +234,13 @@ metadataSchema.statics.removeByResource = function(modelName, id, upload_dir, ca
                 if (_.isObject(doc.value) && doc.value.type && doc.value.type === 'file') {
                  t.removeFile(doc.value, upload_dir);
                 }
-                
+
                 doc.remove();
             });
 
             callback();
+        }, function(error) {
+            callback(error);
         });
 };
 

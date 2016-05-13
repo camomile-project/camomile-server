@@ -177,7 +177,7 @@ exports.remove = function (req, res) {
 
       // remove metadata
       function (callback) {
-        Metadata.removeByResource('medium', id_medium, callback);
+        Metadata.removeByResource('medium', id_medium, req.app.get('upload'), callback);
       }
 
     ],

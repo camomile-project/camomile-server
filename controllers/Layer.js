@@ -208,7 +208,7 @@ exports.remove = function (req, res) {
 
       // remove metadata
       function (callback) {
-        Metadata.removeByResource('layer', id_layer, callback);
+        Metadata.removeByResource('layer', id_layer, req.app.get('upload'), callback);
       }
 
     ],
