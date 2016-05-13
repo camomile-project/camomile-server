@@ -103,11 +103,20 @@ describe('Metadata', function() {
 
 
 
-            it('should return a url if value of "key" parameter is an file object', function(done) {
+            it('should return a file if value of "key" parameter is an file object and query has file parameter', function(done) {
+                server
+                    .get('/' + resource_name + '/' + resource_id + '/metadata/mypicture?file')
+                    .set('Accept', 'image/jpeg')
+                    .expect('Content-Type', 'image/jpeg')
+                    .expect(200)
+                    .end(done);
+            });
+
+            it('should return a file object if value of "key" parameter is an file object', function(done) {
                 server
                     .get('/' + resource_name + '/' + resource_id + '/metadata/mypicture')
                     .set('Accept', 'application/json')
-                    .expect('Content-Type', 'image/jpeg')
+                    .expect('Content-Type', /json/)
                     .expect(200)
                     .end(done);
             });

@@ -44,12 +44,24 @@ exports.get = function (req, res) {
         ).then(function(object) {
             if (u.isObject(object) && object.type && object.type === 'file') {
                 var pathInfos = Metadata.generateFilePath(object.token, object.filename, req.app.get('upload'));
-                res
-                    .sendFile(pathInfos.fullPath, function(error) {
-                        if (error) {
-                            res.status(error.status).end();
-                        }
-                    });
+                if (!u.isUndefined(req.query['file'])) {
+                    res
+                        .sendFile(pathInfos.fullPath, function(error) {
+                            if (error) {
+                                res.status(error.status).end();
+                            }
+                        });
+                } else {
+                    delete object.token;
+                    Metadata
+                        .getEncodedFile(pathInfos.fullPath)
+                        .then(function(encodedFile) {
+                            object.data = encodedFile;
+                            res.status(200).json(object);
+                        }, function(error) {
+                            res.status(400).send({error: error});
+                        });
+                }
             } else {
                 res.status(200).json(object);
             }

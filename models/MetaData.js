@@ -291,10 +291,15 @@ metadataSchema.statics.buildTreeWithDocs = function (request_key, docs, modelNam
     function constructResponse(key, value, with_token) {
         if (_.isObject(value) && value.type && value.type === 'file') {
             if (value.token && value.filename) {
+                var current_key = key.replace(/\,/g,'.').slice(1);
+                if (current_key.slice(-1) === '.') {
+                    current_key = current_key.slice(0, -1);
+                }
+
                 var object = {
                     type: 'file',
                     filename: value.filename,
-                    url: ['', modelName, id, 'metadata', key.replace(/\,/g,'.').slice(1, -1)].join('/')
+                    url: ['', modelName, id, 'metadata', current_key].join('/') + '?file'
                 };
 
                 if (with_token === true) {
@@ -367,6 +372,12 @@ metadataSchema.statics.generateFilePath = function (token, filename, upload_dir)
         filename: filename,
         fullPath: path.join(rootPath, filename)
     };
+};
+
+metadataSchema.statics.getEncodedFile = function(filename) {
+    var pRead = Q.denodeify(fs.readFile);
+
+    return pRead(filename, 'base64');
 };
 
 /**

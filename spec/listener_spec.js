@@ -327,7 +327,7 @@ describe('Listener', function() {
                     msg.type.should.equal('queue:' + queue_id);
                     msg.data.should.Object();
                     msg.data.should.have.keys('queue', 'event');
-                    msg.data.should.deepEqual({queue: queue_id, event: {pop_item: 3}});
+                    msg.data.should.deepEqual({queue: queue_id, event: {pop_item: 2}});
 
                     done();
                 }, function() {
