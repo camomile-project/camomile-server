@@ -111,7 +111,8 @@ exports.remove = function(req, res) {
         Metadata.removeByKey(
             req.current_resource.modelName,
             resource,
-            req.params['key']
+            req.params['key'],
+            req.app.get('upload')
         ).then(function() {
             res.status(200).send({success: "Successfully deleted."});
         }, function(error) {

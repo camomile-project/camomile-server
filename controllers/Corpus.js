@@ -140,7 +140,7 @@ exports.remove = function (req, res) {
 
               // remove metadata
               function (callback) {
-                Metadata.removeByResource('corpus', corpus, callback);
+                Metadata.removeByResource('corpus', corpus, req.app.get('upload'),  callback);
               }
             ],
             callback);

@@ -58,6 +58,7 @@ metadataSchema.index({type: 1, path: 1, kind: 1, medium: 1}, {sparse: true});
  */
 metadataSchema.statics.create = function (modelName, resource, metadata, upload_dir) {
     var deferred = Q.defer();
+    var t = this;
     var tree = this.constructTreeSchema(metadata, upload_dir);
     var model = this.getModelByName(modelName);
     var models = [];
@@ -73,14 +74,22 @@ metadataSchema.statics.create = function (modelName, resource, metadata, upload_
             path: item.path
         };
         query[modelName.toLowerCase()] = resource;
-        models.push(model.update.bind(model, query, item, {upsert: true}));
+        models.push(model.findOneAndUpdate.bind(model, query, item, {upsert: true}));
     });
 
     async.parallel(models, function(error, result) {
         if (error) {
             deferred.reject(error);
         } else {
-            deferred.resolve(result);
+            deferred.resolve();
+
+            _.forEach(result, function(item) {
+                if (item) {
+                    if (_.isObject(item.value) && item.value.type && item.value.type === 'file') {
+                        t.removeFile(item.value, upload_dir);
+                    }
+                }
+            });
         }
     });
 
@@ -153,8 +162,9 @@ metadataSchema.statics.getByKey = function(modelName, resource, key) {
  * @param key
  * @returns {*}
  */
-metadataSchema.statics.removeByKey = function(modelName, resource, key) {
+metadataSchema.statics.removeByKey = function(modelName, resource, key, upload_dir) {
     var deferred = Q.defer();
+    var t = this;
     var model;
 
     key = ',' + key.replace(/\./g,',');
@@ -177,9 +187,20 @@ metadataSchema.statics.removeByKey = function(modelName, resource, key) {
     updateRootKeysFind['type'] = 'keys';
     updateRootKeysFind['path'] = parent_key;
 
-    Q(model.remove(removeDatasFind).exec())
-        .then(Q(model.remove(removeKeysFind).exec()))
-        .then(Q(model.update(updateRootKeysFind, {$pull: { keys: current_key }}).exec()))
+    Q(model.find(removeDatasFind).exec())
+        .then(function(docs) {
+            docs.forEach(function(doc) {
+                if (_.isObject(doc.value) && doc.value.type && doc.value.type === 'file') {
+                    t.removeFile(doc.value, upload_dir);
+                }
+                doc.remove();
+            });
+
+            return Q(model.remove(removeKeysFind).exec());
+        })
+        .then(function() {
+            return Q(model.update(updateRootKeysFind, {$pull: { keys: current_key }}).exec());
+        })
         .then(function() {
             return deferred.resolve();
         }, function(error) {
@@ -198,12 +219,27 @@ metadataSchema.statics.removeByKey = function(modelName, resource, key) {
  * @param key
  * @returns {*}
  */
-metadataSchema.statics.removeByResource = function(modelName, id , callback) {
+metadataSchema.statics.removeByResource = function(modelName, id, upload_dir, callback) {
     var model = this.getModelByName(modelName);
+    var t = this;
     var removeDatasFind = {};
     removeDatasFind[modelName.toLowerCase()] = id;
 
-    return model.remove(removeDatasFind, callback);
+    Q(model.find(removeDatasFind).exec())
+        .then(function(docs) {
+            _.forEach(docs, function(doc) {
+                if (doc.type !== 'data') {
+                    return;
+                }
+                if (_.isObject(doc.value) && doc.value.type && doc.value.type === 'file') {
+                 t.removeFile(doc.value, upload_dir);
+                }
+                
+                doc.remove();
+            });
+
+            callback();
+        });
 };
 
 /**
@@ -415,6 +451,19 @@ metadataSchema.statics.saveFile = function(object, upload_dir) {
         size: buffer.length,
         token: token
     };
+};
+
+metadataSchema.statics.removeFile = function(object, upload_dir) {
+    var filePath = this.generateFilePath(object.token, object.filename, upload_dir);
+    var pAccess = Q.denodeify(fs.access);
+    var pUnlink = Q.denodeify(fs.unlink);
+
+    console.log('Remove file ' + filePath.fullPath);
+
+    return pAccess(filePath.fullPath, fs.F_OK | fs.W_OK)
+        .then(function() {
+            return pUnlink(filePath.fullPath)
+        });
 };
 
 var Metadata = mongoose.model('Metadata', metadataSchema);
