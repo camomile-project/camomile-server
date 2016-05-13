@@ -127,7 +127,11 @@ metadataSchema.statics.getByKey = function(modelName, resource, key) {
         if (err) {
             deferred.reject(err);
         } else if (docs.length === 0) {
-            deferred.reject({code: 404, msg: 'Metadata does not exist.'});
+            if (returnKeys) {
+                deferred.resolve([]);
+            } else {
+                deferred.reject({code: 404, msg: 'Metadata does not exist.'});
+            }
         } else {
             if (returnKeys) {
                 deferred.resolve(docs[0].keys);
