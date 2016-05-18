@@ -1,5 +1,5 @@
-export CMML_DB=/home/mrim/huchetn/Documents/mgdb
-export CMML_PASSWORD=admin
-export CMML_MEDIA=/home/mrim/huchetn/Documents/medias
-export CMML_LOGS=/home/mrim/huchetn/Documents/logs
+export CMML_DB=$HOME/work/stage2016/server/db
+export CMML_LOGS=$HOME/work/stage2016/server/logs
+export CMML_MEDIA=$HOME/work/stage2016/server/media
 export CMML_PORT=3000
+export CMML_PASSWORD=admin
