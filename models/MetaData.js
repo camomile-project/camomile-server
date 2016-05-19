@@ -255,6 +255,7 @@ metadataSchema.statics.removeByResource = function(modelName, id, upload_dir, ca
  */
 metadataSchema.statics.constructTreeSchema = function (metadata, upload_dir,  parent_path, parent_tree, modelName, resource) {
     var t = this;
+    var model = this.getModelByName(modelName);
 
     var tree = parent_tree || [];
     parent_path = parent_path || '';
@@ -262,7 +263,6 @@ metadataSchema.statics.constructTreeSchema = function (metadata, upload_dir,  pa
 
     // Remove parent path if value exist
     if (parent_path !== undefined && parent_path != '') {
-        var model = this.getModelByName(modelName);
         var query = {
             type: 'data',
             path: parent_path + ','
@@ -279,6 +279,7 @@ metadataSchema.statics.constructTreeSchema = function (metadata, upload_dir,  pa
 
     var keys = Object.keys(metadata);
     keys.forEach (function(key) {
+        var removeChildren = false;
         if (t.isFileObject(metadata[key])) {
             var data = t.saveFile(metadata[key], upload_dir);
             tree.push({
@@ -286,6 +287,7 @@ metadataSchema.statics.constructTreeSchema = function (metadata, upload_dir,  pa
                 path: parent_path + ',' + key + ',',
                 value: data
             });
+            removeChildren = true;
         } else if (_.isObject(metadata[key]) && !_.isArray(metadata[key])) {
             t.constructTreeSchema(metadata[key], upload_dir, parent_path + ',' + key, tree, modelName, resource);
         } else {
@@ -293,6 +295,23 @@ metadataSchema.statics.constructTreeSchema = function (metadata, upload_dir,  pa
                 type: 'data',
                 path: parent_path + ',' + key + ',',
                 value: metadata[key]
+            });
+            removeChildren = true;
+        }
+
+        if (removeChildren) {
+            var query = {
+                path: new RegExp('^' + parent_path + ',' + key + '(,.+|$)')
+            };
+            query[modelName.toLowerCase()] = resource;
+            model.find(query, function(err, docs) {
+                if (err) return;
+                docs.forEach(function(doc) {
+                    if (_.isObject(doc.value) && doc.value.type && doc.value.type === 'file') {
+                        t.removeFile(doc.value, upload_dir);
+                    }
+                    doc.remove();
+                });
             });
         }
     });
