@@ -59,7 +59,7 @@ metadataSchema.index({type: 1, path: 1, kind: 1, medium: 1}, {sparse: true});
 metadataSchema.statics.create = function (modelName, resource, metadata, upload_dir) {
     var deferred = Q.defer();
     var t = this;
-    var tree = this.constructTreeSchema(metadata, upload_dir);
+    var tree = this.constructTreeSchema(metadata, upload_dir, undefined, undefined, modelName, resource);
     var model = this.getModelByName(modelName);
     var models = [];
 
@@ -253,11 +253,29 @@ metadataSchema.statics.removeByResource = function(modelName, id, upload_dir, ca
  *
  * @returns {*|Array}
  */
-metadataSchema.statics.constructTreeSchema = function (metadata, upload_dir,  parent_path, parent_tree) {
+metadataSchema.statics.constructTreeSchema = function (metadata, upload_dir,  parent_path, parent_tree, modelName, resource) {
     var t = this;
 
     var tree = parent_tree || [];
     parent_path = parent_path || '';
+
+
+    // Remove parent path if value exist
+    if (parent_path !== undefined && parent_path != '') {
+        var model = this.getModelByName(modelName);
+        var query = {
+            type: 'data',
+            path: parent_path + ','
+        };
+        query[modelName.toLowerCase()] = resource;
+        model.findOneAndRemove(query, function(err, doc) {
+            if (err || !doc) return;
+            if (_.isObject(doc.value) && doc.value.type && doc.value.type === 'file') {
+                t.removeFile(doc.value, upload_dir);
+            }
+        });
+    }
+
 
     var keys = Object.keys(metadata);
     keys.forEach (function(key) {
@@ -269,7 +287,7 @@ metadataSchema.statics.constructTreeSchema = function (metadata, upload_dir,  pa
                 value: data
             });
         } else if (_.isObject(metadata[key]) && !_.isArray(metadata[key])) {
-            t.constructTreeSchema(metadata[key], upload_dir, parent_path + ',' + key, tree);
+            t.constructTreeSchema(metadata[key], upload_dir, parent_path + ',' + key, tree, modelName, resource);
         } else {
             tree.push({
                 type: 'data',
@@ -434,7 +452,7 @@ metadataSchema.statics.saveFile = function(object, upload_dir) {
     var pMkdir = Q.denodeify(fs.mkdir);
 
     var shasum = crypto.createHash('sha1');
-    var token = shasum.update(buffer.toString('binary')).digest('hex');
+    var token = shasum.update(buffer.toString('binary') + (new Date()).getTime()).digest('hex');
     var filePath = this.generateFilePath(token, object.filename, upload_dir);
 
     pMkdir(filePath.rootPath, 0755, true)
