@@ -1,5 +1,0 @@
-export CMML_DB=$HOME/Documents/Public/mgdb
-export CMML_LOGS=$HOME/Documents/Public/logs
-export CMML_MEDIA=$HOME/public/nmedia
-export CMML_PORT=3000
-export CMML_PASSWORD=admin

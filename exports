@@ -1,9 +1,0 @@
-#!/bin/bash
-echo Sourcing the export file... Please wait.
-source exports.txt
-echo Finished sourcing. Launching the Camomile server...
-if [ "$#" -eq "1" ] && [ "$1" == "-d" ]; then
-	docker-compose up -d
-else
-	docker-compose up
-fi
