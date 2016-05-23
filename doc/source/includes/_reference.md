@@ -2357,6 +2357,13 @@ resource_id      | String    | The resource identifier (required)
 path             | String    | The metadata path, if not set return first level keys (optional)
  
 
+#### DATA PARAMETERS FOR FILE
+Parameter        | Type      | Description
+---------------- | --------- | -----------
+type             | String    | set to `file`
+filename         | String    | filename
+data             | String    | Base64 encoded file content (Only set if last level and not ?file parameter)
+
 ```python
 client.getCorpusMetadata(
   '555daefff80f910100d741d6', 
@@ -2365,6 +2372,10 @@ client.getCorpusMetadata(
 
 ```http
 GET /corpus/555daefff80f910100d741d6/metadata/level1 HTTP/1.1
+
+# Or for download file
+
+GET /corpus/555daefff80f910100d741d6/metadata/my.picture?file HTTP/1.1
 
 ```
 
@@ -2383,7 +2394,17 @@ Camomile.getCorpusMetadata('555daefff80f910100d741d6', 'test2.child', function(e
  "myarray": ["value1", "value2"],
  "myobject": {"mykey": "myvalue"}
 }
-``` 
+```
+File
+```json
+{
+ "myfile": {
+    "filename": "myvalue",
+    "type": "file"
+
+ }
+}
+```
 
 
 ### get first level keys
