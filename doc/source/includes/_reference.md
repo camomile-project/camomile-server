@@ -2471,6 +2471,13 @@ resource_id      | String    | The resource identifier (required)
 client.setCorpusMetadata(
   '555daefff80f910100d741d6', 
   {'name': 'my metadata', 'level1': {'my_array': ['value1', 'value2']}})
+
+  #OR
+
+  client.setCorpusMetadata(
+    '555daefff80f910100d741d6',
+    datas="myvalue",
+    path="my.key")
 ```
 
 ```http
