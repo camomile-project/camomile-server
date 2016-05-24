@@ -2339,6 +2339,381 @@ client.removeQueuePermissions(id_queue, group=id_group)
 }
 ```
 
+## Metadata
+
+Metadata is only available for `Corpus`, `Layer` and `Medium`
+
+### get
+
+<aside class="notice">Restricted to user with READ permissions to the main resource.</aside>
+
+GET /:resource_type/:resource_id/metadata/:path
+
+#### QUERY PARAMETERS
+Parameter        | Type      | Description
+---------------- | --------- | -----------
+resource_type    | String    | The resource type (corpus, layer or medium) (required)
+resource_id      | String    | The resource identifier (required)
+path             | String    | The metadata path, if not set return first level keys (optional)
+ 
+
+#### DATA PARAMETERS FOR FILE
+Parameter        | Type      | Description
+---------------- | --------- | -----------
+type             | String    | set to `file`
+filename         | String    | filename
+data             | String    | Base64 encoded file content (Only set if last level and not ?file parameter)
+
+```python
+client.getCorpusMetadata(
+  '555daefff80f910100d741d6', 
+  'level1')
+```
+
+```http
+GET /corpus/555daefff80f910100d741d6/metadata/level1 HTTP/1.1
+
+# Or for download file
+
+GET /corpus/555daefff80f910100d741d6/metadata/my.picture?file HTTP/1.1
+
+```
+
+```javascript
+Camomile.getCorpusMetadata('555daefff80f910100d741d6', 'test2.child', function(err, datas) {
+    console.log(datas);
+});
+```
+
+
+> Sample JSON response
+
+```json
+{
+ "mykey": "value",
+ "myarray": ["value1", "value2"],
+ "myobject": {"mykey": "myvalue"}
+}
+```
+File
+```json
+{
+ "myfile": {
+    "filename": "myvalue",
+    "type": "file"
+
+ }
+}
+```
+
+
+### get first level keys
+
+<aside class="notice">Restricted to user with READ permissions to the main resource.</aside>
+
+GET /:resource_type/:resource_id/metadata/:path**.**
+
+End path with **.**
+
+#### QUERY PARAMETERS
+Parameter        | Type      | Description
+---------------- | --------- | -----------
+resource_type    | String    | The resource type (corpus, layer or medium) (required)
+resource_id      | String    | The resource identifier (required)
+path             | String    | The metadata path, if not set return first level keys (optional)
+
+
+```python
+client.getCorpusMetadataKeys(
+  '555daefff80f910100d741d6', 
+  'level1')
+```
+
+```javascript
+Camomile.getCorpusMetadataKeys('555daefff80f910100d741d6', function(err, datas) {
+    console.log(datas);
+});
+
+Camomile.getCorpusMetadataKeys('555daefff80f910100d741d6', 'level1', function(err, datas) {
+    console.log(datas);
+});
+```
+
+```http
+GET /corpus/555daefff80f910100d741d6/metadata/level1. HTTP/1.1
+
+```
+
+> Sample JSON response
+
+```json
+[
+ "mykey"
+ "myarray"
+ "myobject"
+]
+``` 
+
+### create / update
+
+<aside class="notice">Restricted to user with WRITE permissions to the main resource.</aside>
+
+POST /:resource_type/:resource_id/metadata/
+
+#### QUERY PARAMETERS
+Parameter        | Type      | Description
+---------------- | --------- | -----------
+resource_type    | String    | The resource type (corpus, layer or medium) (required)
+resource_id      | String    | The resource identifier (required)
+
+
+```python
+client.setCorpusMetadata(
+  '555daefff80f910100d741d6', 
+  {'name': 'my metadata', 'level1': {'my_array': ['value1', 'value2']}})
+
+  #OR
+
+  client.setCorpusMetadata(
+    '555daefff80f910100d741d6',
+    datas="myvalue",
+    path="my.key")
+```
+
+```http
+POST /corpus/555daefff80f910100d741d6/metadata/ HTTP/1.1
+
+{"name": "my metadata", "level1": {"my_array": ["value1", "value2"]}}
+
+```
+
+```javascript
+Camomile.setCorpusMetadata(
+    '555daefff80f910100d741d6', 
+    {'name': 'my metadata', 'level1': {'my_array': ['value1', 'value2']}} , 
+    function(err, success) {
+        console.log(success);
+    }
+);
+```
+
+> Sample JSON response
+
+```json
+{
+ "success": "Successfully created."
+}
+```
+
+### create / update file
+
+<aside class="notice">Restricted to user with WRITE permissions to the main resource.</aside>
+
+POST /:resource_type/:resource_id/metadata/
+
+Send base64 encoded file
+
+#### QUERY PARAMETERS
+Parameter        | Type      | Description
+---------------- | --------- | -----------
+resource_type    | String    | The resource type (corpus, layer or medium) (required)
+resource_id      | String    | The resource identifier (required)
+
+#### DATA PARAMETERS
+Parameter        | Type      | Description
+---------------- | --------- | -----------
+type             | String    | set to `file` (required)
+filename         | String    | filename (required)
+data             | String    | Base64 encoded file content (required)
+
+
+```python
+client.sendCorpusMetadataFile(
+  '555daefff80f910100d741d6', 
+  'level1.mypicture',
+  '/path/to/file.ext')
+```
+
+```javascript
+var inputFile = document.getElementById('file');
+var file = inputFile.files[0];
+
+Camomile.sendCorpusMetadataFile(
+    '555daefff80f910100d741d6', 
+    'level1.mypicture', 
+    file, 
+    function(err, success) {
+        console.log(success);
+    }
+);
+```
+
+
+```http
+POST /corpus/555daefff80f910100d741d6/metadata/ HTTP/1.1
+
+{'level1': {'mypicture': {'type': 'file', 'filename': 'file.ext', 'data': '<base64_encoded_file>'}}}
+
+```
+
+> Sample JSON response
+
+```json
+{
+ "success": "Successfully created."
+}
+```
+
+
+### delete
+
+DELETE /corpus/555daefff80f910100d741d6/metadata/:path
+
+<aside class="notice">Restricted to user with WRITE permissions to the main resource.</aside>
+
+Parameter        | Type      | Description
+---------------- | --------- | -----------
+resource_type    | String    | The resource type (corpus, layer or medium) (required)
+resource_id      | String    | The resource identifier (required)
+path             | String    | The metadata path (required)
+
+```python
+client.deleteCorpusMetadata(
+  '555daefff80f910100d741d6', 
+  'level1')
+```
+
+```http
+DELETE /corpus/555daefff80f910100d741d6/metadata/level1 HTTP/1.1
+
+```
+
+```javascript
+Camomile.deleteCorpusMetadata('555daefff80f910100d741d6', 'level1', function(err, success) {
+    console.log(success);
+});
+```
+
+> Sample JSON response
+
+```json
+{
+ "success": "Successfully deleted."
+}
+```
+
+## Server Sent Event
+
+Server Sent Event is only available for `Corpus`, `Layer`, `Medium` and `Queue`
+
+### Available events
+
+**Corpus**
+
+- Add and Remove medium `{'corpus': {:corpus}, 'event': {'add_medium': {:medium}}}`
+- Add and Remove layer `{'corpus': {:corpus}, 'event': {'add_layer': {:layer}}}` 
+- Update corpus attributes `{'corpus': {:corpus}, 'event': {'update': ['description', 'name']}}}`
+
+**Layer**
+
+- Add and Remove annotation `{'layer': {:layer}, 'event': {'add_annotation': {:annotation}}}` 
+- Update layer attributes `{'layer': {:layer}, 'event': {'update': ['name']}}}`
+
+**Medium**
+
+- Update medium attributes `{'medium': {:medium}, 'event': {'update': ['url']}}}`
+
+**Queue**
+
+- Push item in queue `{'queue': {:queue}, 'event': {'push_item': <new_number_of_items_in_queue>}}` 
+- Pop item in queue `{'queue': {:queue}, 'event': {'pop_item': <new_number_of_items_in_queue>}}`
+
+
+### get an available channel
+
+POST /listen
+
+```http
+POST /listen HTTP/1.1
+
+```
+
+> Sample JSON response
+
+```json
+{
+ "channel_id": 10
+}
+```
+
+### Connect to SSE entrypoint
+
+GET /listen/:channel_id
+
+Parameter        | Type      | Description
+---------------- | --------- | -----------
+channel_id       | Integer   | Channel identifier (required)
+
+### Watch resource
+
+<aside class="notice">Restricted to user with READ permissions to the resource.</aside>
+
+PUT /listen/:channel_id/:resource_type/:resource_id
+
+```python
+def callback(event):
+    print event
+
+client.watchCorpus('555daefff80f910100d741d6', callback)
+```
+
+```javascript
+Camomile.listen(function(error, channel_id, event) {
+    var unwatchCorpus = event.watchCorpus('555daefff80f910100d741d6', function(error, data) {
+        console.log(data);
+        
+        // For unwatch corpus:
+        unwatchCorpus();
+    });
+});
+```
+
+```http
+PUT /listen/5/medium/555daefff80f910100d741d6 HTTP/1.1
+
+```
+
+> Sample JSON response
+
+```json
+{
+ "event": "medium:555daefff80f910100d741d6"
+}
+```
+
+### Unwatch resource
+
+<aside class="notice">Restricted to user with READ permissions to the resource.</aside>
+
+DELETE /listen/:channel_id/:resource_type/:resource_id
+
+```python
+client.unwatchCorpus('555daefff80f910100d741d6')
+```
+
+```http
+DELETE /listen/5/medium/555daefff80f910100d741d6 HTTP/1.1
+
+```
+
+> Sample JSON response
+
+```json
+{
+ "success": "Successfully unwatched."
+}
+```
+
 ## Miscellaneous
 
 ### get current date/time

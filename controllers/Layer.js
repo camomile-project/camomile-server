@@ -27,6 +27,7 @@ var _ = require('../controllers/utils');
 
 var Layer = require('../models/Layer');
 var Annotation = require('../models/Annotation');
+var Metadata = require('../models/MetaData').Metadata;
 
 // ----------------------------------------------------------------------------
 // ROUTES
@@ -108,12 +109,12 @@ exports.update = function (req, res) {
       layer.description = changes.description = req.body.description;
     }
 
-    // // update history
-    // layer.history.push({
-    //   date: new Date(),
-    //   id_user: req.session.user._id,
-    //   changes: changes
-    // });
+     // update history
+     layer.history.push({
+       date: new Date(),
+       id_user: req.session.user._id,
+       changes: changes
+     });
 
     layer.save(_.response.fSendResource(res, Layer));
   });
@@ -199,10 +200,15 @@ exports.remove = function (req, res) {
 
       // remove layer
       function (callback) {
-        Layer.remove({
+        Layer.removeWithEvent({
             _id: id_layer
           },
           callback);
+      },
+
+      // remove metadata
+      function (callback) {
+        Metadata.removeByResource('layer', id_layer, req.app.get('upload'), callback);
       }
 
     ],
