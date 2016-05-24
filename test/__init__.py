@@ -30,6 +30,7 @@ def setup():
 
     # create MONGO_DIR
     MONGO_DIR = tempfile.mkdtemp()
+    print(MONGO_DIR)
 
     # launch MongoDB
     sys.stdout.write('Running MongoDB instance... ')
@@ -52,7 +53,7 @@ def setup():
     # launch API
     sys.stdout.write('Running Camomile test instance... ')
     sys.stdout.flush()
-    cmd = ['node', 'app.js', '--root-password', ROOT_PASSWORD]
+    cmd = ['node', 'app.js', '--root-password', ROOT_PASSWORD, '--mongodb-host', 'localhost', '--mongodb-port', '27017']
     NODE_PROCESS = subprocess.Popen(cmd, stdout=subprocess.PIPE)
 
     # testing if server is running
@@ -94,5 +95,3 @@ def teardown():
 
     # delete MONGO_DIR
     shutil.rmtree(MONGO_DIR)
-
-

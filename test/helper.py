@@ -9,6 +9,11 @@ ADMIN_USERNAME = 'admin_user'
 ADMIN_PASSWORD = 'admin_user password'
 ADMIN_DESCRIPTION = 'admin user'
 
+USER0 = None
+USER0_USERNAME = 'regularuser0'
+USER0_PASSWORD = 'regularuser0 password'
+USER0_DESCRIPTION = 'regular user 0'
+
 USER1 = None
 USER1_USERNAME = 'regularuser1'
 USER1_PASSWORD = 'regularuser1 password'
@@ -44,6 +49,11 @@ def initDatabase():
     global ADMIN_PASSWORD
     global ADMIN_DESCRIPTION
 
+    global USER0
+    global USER0_USERNAME
+    global USER0_PASSWORD
+    global USER0_DESCRIPTION
+
     global USER1
     global USER1_USERNAME
     global USER1_PASSWORD
@@ -67,6 +77,8 @@ def initDatabase():
     global GROUP2_NAME
     global GROUP2_DESCRIPTION
 
+    emptyDatabase()
+
     # login as root
     CLIENT.login(ROOT_USERNAME, ROOT_PASSWORD)
 
@@ -75,7 +87,10 @@ def initDatabase():
                               description=ADMIN_DESCRIPTION,
                               role='admin', returns_id=True)
 
-    # create regular users 1, 2 and 3
+    # create regular users 0, 1, 2 and 3
+    USER0 = CLIENT.createUser(USER0_USERNAME, USER0_PASSWORD,
+                              description=USER0_DESCRIPTION,
+                              role='user', returns_id=True)
     USER1 = CLIENT.createUser(USER1_USERNAME, USER1_PASSWORD,
                               description=USER1_DESCRIPTION,
                               role='user', returns_id=True)
@@ -114,6 +129,7 @@ def initDatabase():
 def emptyDatabase():
 
     global ADMIN
+    global USER0
     global USER1
     global USER2
     global USER3
@@ -163,12 +179,11 @@ def error_message(message):
     def error_message_decorator(f):
         @wraps(f)
         def wrapper(self):
-            try:
+            with self.assertRaises(HTTPError) as cm:
                 f(self)
-            except HTTPError, e:
-                actual = e.response.json()
-                self.assertDictEqual(expected, actual)
-            else:
-                raise AssertionError()
+            print('response: ' + str(cm.exception.response.json()))
+            print('expected: ' + str(expected))
+            self.assertDictEqual(cm.exception.response.json(), expected)
+
         return wrapper
     return error_message_decorator

@@ -55,13 +55,13 @@ class TestAsAdmin(TestCase):
             pass
         emptyDatabase()
 
-    @error_message('Access denied (root only).')
-    def testDeleteUser(self):
-        CLIENT.deleteUser('whatever')
+    # @error_message('Access denied (root only).')
+    # def testDeleteUser(self):
+    #     CLIENT.deleteUser('5727137292f2900f241a8493')
 
     @error_message('Access denied (root only).')
     def testDeleteGroup(self):
-        CLIENT.deleteGroup('whatever')
+        CLIENT.deleteGroup('5727137292f2900f241a8493')
 
     @error_message('Access denied (root only).')
     def testGetAllMedia(self):
@@ -75,6 +75,6 @@ class TestAsAdmin(TestCase):
     def testGetAllAnnotations(self):
         CLIENT.getAnnotations()
 
-    @error_message('Access denied (root only).')
-    def testGetAllQueues(self):
-        CLIENT.getQueues()
+    # @error_message('Access denied (root only).')
+    # def testGetAllQueues(self):
+    #     CLIENT.getQueues()
