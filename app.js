@@ -52,6 +52,7 @@ program
   .option('--root-password <dbname>', 'Change/set root password')
   .option('--media <dir>', 'Path to media root directory')
   .option('--log <dir>', 'Path to log directory (default: ' + __dirname + '/log)')
+  .option('--upload <dir>', 'Path to upload root directory (default: ' + __dirname + '/upload)')
   .parse(process.argv);
 
 var port =
@@ -86,6 +87,11 @@ var media =
   process.env.MEDIA ||
   '/media';
 
+var upload =
+    program.upload ||
+    process.env.UPLOAD ||
+    __dirname + '/upload';
+
 // CLI || env || ./log
 var logDirectory =
   program.log ||
@@ -101,6 +107,7 @@ var app = express();
 
 app.set('port', port);
 app.set('media', media);
+app.set('upload', upload);
 
 // === LOGGING ================================================================
 
@@ -156,6 +163,7 @@ app.use(methodOverride());
 
 mongoose.connect('mongodb://' + mongodb_host + ':' + mongodb_port + '/' +
   mongodb_name);
+mongoose.set('debug', false);
 
 var sessionStore = new mongoStore({
   mongooseConnection: mongoose.connection,

@@ -223,11 +223,7 @@ exports.middleware.fExists = function (model) {
 // assume route shaped like this: .../resource/:id_resource/...
 // usage: hasRights(READ, Annotation) is a middleware enforcing read access
 exports.middleware.fExistsWithRights = function (model, min_right) {
-
-  // Corpus ==> 'id_corpus'
-  var id_name = 'id_' + model.modelName.toLowerCase();
-
-  // Annotation ==> Layer
+  /*  // Annotation ==> Layer
   var parentModel;
   if (model.modelName === 'Annotation') {
     parentModel = Layer;
@@ -240,9 +236,32 @@ exports.middleware.fExistsWithRights = function (model, min_right) {
   var id_parentName = '';
   if (parentModel !== undefined) {
     id_parentName = 'id_' + parentModel.modelName.toLowerCase();
-  }
+  }*/
 
   return function (req, res, next) {
+    var id_name;
+
+    // Used for standardized routing permissions (e.g: Metadata)
+    if (req.params['resource_type']) {
+      if (req.params['resource_type'] == 'corpus') {
+        model = Corpus;
+      } else if (req.params['resource_type'] == 'medium') {
+        model = Medium;
+      } else if (req.params['resource_type'] == 'layer') {
+        model = Layer;
+      } else if (req.params['resource_type'] == 'queue') {
+        model = Queue;
+      } else {
+        sendError(res, 'Resource not found.');
+        return;
+      }
+
+      req.current_resource = model;
+      id_name = 'resource_id';
+      req.params['id_' + model.modelName.toLowerCase()] = req.params[id_name];
+    } else {
+      id_name = 'id_' + model.modelName.toLowerCase();
+    }
 
     var getResourcePermissions = function (callback) {
       model.findById(

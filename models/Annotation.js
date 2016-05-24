@@ -26,6 +26,7 @@ var mongoose = require('mongoose');
 
 var Schema = mongoose.Schema;
 var historySchema = require('./History');
+var SSEChannels = require('../lib/SSEChannels');
 
 var annotationSchema = new Schema({
   id_layer: {
@@ -87,10 +88,30 @@ annotationSchema.statics.create = function (id_user, id_layer, data,
     if (!error) {
       annotation.history = undefined;
       annotation.__v = undefined;
+      SSEChannels.dispatch('layer:' + id_layer, { layer: id_layer, event: {add_annotation: annotation._id} });
     }
     callback(error, annotation);
   });
 
+};
+
+annotationSchema.statics.removeWithEvent = function(datas, callback) {
+  var t = this;
+
+  t.findById(datas._id, function(err, annotation) {
+    t.remove(datas, function(err) {
+      if (err) {
+        callback(err);
+        return;
+      }
+
+      if (annotation.id_layer) {
+        SSEChannels.dispatch('layer:' + annotation.id_layer, { layer: annotation.id_layer, event: {delete_annotation: annotation._id} });
+      }
+
+      callback();
+    });
+  });
 };
 
 module.exports = mongoose.model('Annotation', annotationSchema);

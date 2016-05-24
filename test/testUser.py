@@ -145,11 +145,11 @@ class TestUserAsRegularUser(TestCase):
                           description=randomUser['description'],
                           role=randomUser['role'])
 
-    @error_message('Access denied (admin only).')
-    def testGetUsers(self):
-        assert isinstance(CLIENT.getUsers(), list)
+    # @error_message('Access denied (admin only).')
+    # def testGetUsers(self):
+    #     assert isinstance(CLIENT.getUsers(), list)
 
-    @error_message('Access denied (admin only).')
-    def testGetUserByID(self):
-        user = CLIENT.me()
-        assert CLIENT.getUser(user._id).username == USER1_USERNAME
+    # @error_message('Access denied (admin only).')
+    # def testGetUserByID(self):
+    #     user = CLIENT.me()
+    #     assert CLIENT.getUser(user._id).username == USER1_USERNAME

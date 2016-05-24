@@ -26,6 +26,7 @@ var _ = require('./utils');
 var async = require('async');
 
 var Queue = require('../models/Queue');
+var SSEChannels = require('../lib/SSEChannels');
 
 // create a queue
 exports.create = function (req, res) {
@@ -94,7 +95,13 @@ exports.push = function (req, res) {
       }
     }, {
       new: true
-    }, _.response.fSendSuccess(res, 'Successfully pushed.')
+    }, function( err, queue) {
+        if (!err) {
+          SSEChannels.dispatch('queue:' + req.params.id_queue, {queue: req.params.id_queue, event: {push_item: queue.list.length} });
+        }
+
+        _.response.fSendSuccess(res, 'Successfully pushed.')(err, queue);
+      }
   );
 };
 
@@ -111,6 +118,7 @@ exports.pop = function (req, res) {
     },
     function (error, queue) {
       if (error || queue.list.length > 0) {
+        SSEChannels.dispatch('queue:' + req.params.id_queue, {queue: req.params.id_queue, event: {pop_item: (queue.list.length - 1 )} });
         _.response.fSendData(res)(error, queue.list[0]);
       } else {
         _.response.sendError(res, 'Empty queue.', 400);

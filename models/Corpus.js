@@ -27,6 +27,7 @@ var _ = require('../controllers/utils');
 
 var Schema = mongoose.Schema;
 var historySchema = require('./History');
+var SSEChannels = require('../lib/SSEChannels');
 
 var corpusSchema = new Schema({
   name: {
@@ -97,5 +98,12 @@ corpusSchema.statics.create = function (id_user, data, callback) {
   });
 
 };
+
+// SSE Event
+corpusSchema.post('save', function(doc) {
+  if (doc.history.length > 0) {
+    SSEChannels.dispatch('corpus:' + doc._id, {corpus: doc._id, event: {update: Object.keys(doc.history.pop().changes)} });
+  }
+});
 
 module.exports = mongoose.model('Corpus', corpusSchema);
