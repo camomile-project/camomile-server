@@ -3,28 +3,32 @@
 ## Installation
 
 The easiest way to setup a Camomile REST API is to use `docker` and `docker-compose`.  
-This was tested with `docker 1.10.2` and `docker-compose 1.6.0`.
+This was tested with `docker 1.11.1` and `docker-compose 1.6.0`.
 
 **Warning:** `MongoDB` does not work well with `docker` on Mac OS X.
 
-```bash
-# persistent storage for MongoDB
+```shell
+
+# MongoDB directory
 $ export CMML_DB=/where/to/store/mongodb/files
 
-# directory (on host) where CAMOMILE should dump its logs
+# CAMOMILE logging directory
 $ export CMML_LOGS=/where/to/store/camomile/logs
 
-# directory (on host) where media files are stored
+# CAMOMILE media directory
 $ export CMML_MEDIA=/where/media/are/stored
 
-# port (on host) where CAMOMILE REST API is reachable
+# CAMOMILE metadata file directory
+$ export CMML_UPLOAD=/where/to/store/upload
+
+# CAMOMILE port
 $ export CMML_PORT=3000
 
 # CAMOMILE root password
 $ export CMML_PASSWORD=roO7p4s5wOrD
 
-$ git clone https://github.com/camomile-project/camomile-server.git
-$ cd camomiler-server
+$ wget https://raw.githubusercontent.com/camomile-project/camomile-server/master/docker-compose.yml
+
 $ docker-compose up -d
 ```
 
