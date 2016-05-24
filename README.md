@@ -3,7 +3,7 @@
 ## Deployment
 
 The easiest way to setup a Camomile REST API is to use `docker` and `docker-compose`.  
-This was tested with `docker 1.11.1` and `docker-compose 1.6.0`.
+This was tested with `docker 1.10.2` and `docker-compose 1.6.0`.
 
 ```shell
 # Download docker-compose configuration file
