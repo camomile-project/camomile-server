@@ -3,3 +3,4 @@ find_word.py
 doc/build/
 *pyc
 exports.txt
+.idea/
