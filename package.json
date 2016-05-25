@@ -28,6 +28,7 @@
     "express-session": "^1.11.1",
     "file-stream-rotator": "^0.0.6",
     "forever": "^0.14.1",
+    "glob-fs": "^0.1.6",
     "method-override": "^2.3.2",
     "mongoose": "^4.0.1",
     "morgan": "^1.5.2",
