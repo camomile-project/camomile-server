@@ -285,6 +285,12 @@ exports.initialize = function (app) {
     _.middleware.fExistsWithRights(mMedium, _.READ),
     Medium.stream);
 
+  // stream one medium in default format
+  app.get('/medium/:id_medium/image',
+    Authentication.middleware.isLoggedIn,
+    _.middleware.fExistsWithRights(mMedium, _.READ),
+    Medium.streamImage);
+
   // stream one medium in WebM
   app.get('/medium/:id_medium/webm',
     Authentication.middleware.isLoggedIn,
@@ -302,6 +308,24 @@ exports.initialize = function (app) {
     Authentication.middleware.isLoggedIn,
     _.middleware.fExistsWithRights(mMedium, _.READ),
     Medium.streamOgv);
+
+  // stream one medium in png
+  app.get('/medium/:id_medium/png',
+    Authentication.middleware.isLoggedIn,
+    _.middleware.fExistsWithRights(mMedium, _.READ),
+    Medium.streamPng);
+
+  // stream one medium in jpg
+  app.get('/medium/:id_medium/jpg',
+    Authentication.middleware.isLoggedIn,
+    _.middleware.fExistsWithRights(mMedium, _.READ),
+    Medium.streamJpg);
+
+  // stream one medium in jpeg
+  app.get('/medium/:id_medium/jpeg',
+    Authentication.middleware.isLoggedIn,
+    _.middleware.fExistsWithRights(mMedium, _.READ),
+    Medium.streamJpeg);
 
   // LAYER
 

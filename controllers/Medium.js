@@ -25,6 +25,7 @@ SOFTWARE.
 var path = require('path');
 var async = require('async');
 var _ = require('./utils');
+var glob = require('glob-fs')({ gitignore: true });
 
 var Medium = require('../models/Medium');
 var Annotation = require('../models/Annotation');
@@ -195,6 +196,39 @@ var streamFormat = function (req, res, extension) {
 
     var absolutePathToFile = medium.url + '.' + extension;
     absolutePathToFile = path.join(req.app.get('media'), absolutePathToFile);
+
+    var globpath = path.join(req.app.get('media'), medium.url + '.*');
+    try {
+      var files = glob.readdirSync(globpath);
+
+      // Ensuite pour chaque fichier, on va déterminer si celui-ci correspond à celui recherché
+      for (i = 0; i < files.length; i++) {
+        var f = files[i]; // Le filename
+        var fsplited = f.split('.');
+
+        if (fsplited[fsplited.length - 1].toLowerCase() === extension.toLowerCase()) {
+          absolutePathToFile = f;
+        }
+
+        // Backup if the solution above doesn't work
+        /*var splited = f.split('.'); // Tableau contenant chaque partie du filename splité sur les points
+        var ext = splited[splited.length - 1].toLowerCase(); // Extension, en lowercase
+        var mediapath = splited;
+        mediapath.pop(); // On enlève l'extension
+        mediapath = mediapath.join('.'); // on réunit le tableau en rajoutant les points
+        mediapath = mediapath.replace('..', '') + '.' + ext; // On enlève les ..
+        var b = req.app.get('media') + '/' + medium.url + '.' + extension;
+        //console.log(mediapath + ' == ' + b);
+        if (mediapath == b) { // Si les deux correspondent, on a le fichier
+          //console.log('Matched medium');
+          absolutePathToFile = medium.url + '.' + files[i].split('.').pop();
+          absolutePathToFile = path.join(req.app.get('media'), absolutePathToFile);
+        }*/
+      }
+    } catch (e) {
+      console.error('Error: ' + e);
+    }
+
     res.status(200).sendFile(
       absolutePathToFile,
       function (error) {
@@ -219,4 +253,20 @@ exports.streamMp4 = function (req, res) {
 
 exports.streamOgv = function (req, res) {
   streamFormat(req, res, 'ogv');
+};
+
+exports.streamImage = function (req, res) {
+  streamFormat(req, res, 'jpg');
+};
+
+exports.streamJpg = function (req, res) {
+  streamFormat(req, res, 'jpg');
+};
+
+exports.streamJpeg = function (req, res) {
+  streamFormat(req, res, 'jpeg');
+};
+
+exports.streamPng = function (req, res) {
+  streamFormat(req, res, 'png');
 };
