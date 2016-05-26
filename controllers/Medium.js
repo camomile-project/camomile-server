@@ -25,6 +25,7 @@ SOFTWARE.
 var path = require('path');
 var async = require('async');
 var _ = require('./utils');
+var glob = require('glob-fs')({ gitignore: true });
 
 var Medium = require('../models/Medium');
 var Annotation = require('../models/Annotation');
@@ -193,6 +194,25 @@ var streamFormat = function (req, res, extension) {
       return;
     }
 
+    var globpath = '..' + req.app.get('media') + '/' + medium.url + '.*';
+
+    try {
+      var files = glob.readdirSync(globpath);
+
+      // Ensuite pour chaque fichier, on va déterminer si celui-ci correspond à celui recherché
+      for (i = 0; i < files.length; i++) {
+        var f = files[i]; // Le filename
+        var fsplited = f.split('.');
+
+        if (fsplited[fsplited.length - 1].toLowerCase() === extension.toLowerCase()) {
+          absolutePathToFile = f;
+        }
+      }
+    } catch (e) {
+      console.error('Error: ' + e);
+      console.error('Falling back to default medium path');
+    }
+
     var absolutePathToFile = medium.url + '.' + extension;
     absolutePathToFile = path.join(req.app.get('media'), absolutePathToFile);
     res.status(200).sendFile(
@@ -219,4 +239,20 @@ exports.streamMp4 = function (req, res) {
 
 exports.streamOgv = function (req, res) {
   streamFormat(req, res, 'ogv');
+};
+
+exports.streamImage = function (req, res) {
+  streamFormat(req, res, 'jpg');
+};
+
+exports.streamJpg = function (req, res) {
+  streamFormat(req, res, 'jpg');
+};
+
+exports.streamJpeg = function (req, res) {
+  streamFormat(req, res, 'jpeg');
+};
+
+exports.streamPng = function (req, res) {
+  streamFormat(req, res, 'png');
 };
