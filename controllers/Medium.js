@@ -194,14 +194,16 @@ var streamFormat = function (req, res, extension) {
       return;
     }
 
+    var absolutePathToFile = medium.url + '.' + extension;
+    absolutePathToFile = path.join(req.app.get('media'), absolutePathToFile);
+
     var globpath = '..' + req.app.get('media') + '/' + medium.url + '.*';
 
     try {
       var files = glob.readdirSync(globpath);
 
-      // Ensuite pour chaque fichier, on va déterminer si celui-ci correspond à celui recherché
       for (i = 0; i < files.length; i++) {
-        var f = files[i]; // Le filename
+        var f = files[i];
         var fsplited = f.split('.');
 
         if (fsplited[fsplited.length - 1].toLowerCase() === extension.toLowerCase()) {
@@ -211,10 +213,10 @@ var streamFormat = function (req, res, extension) {
     } catch (e) {
       console.error('Error: ' + e);
       console.error('Falling back to default medium path');
+      absolutePathToFile = medium.url + '.' + extension;
+      absolutePathToFile = path.join(req.app.get('media'), absolutePathToFile);
     }
 
-    var absolutePathToFile = medium.url + '.' + extension;
-    absolutePathToFile = path.join(req.app.get('media'), absolutePathToFile);
     res.status(200).sendFile(
       absolutePathToFile,
       function (error) {
