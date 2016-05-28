@@ -2,3 +2,5 @@ node_modules
 find_word.py
 doc/build/
 *pyc
+.idea/
+exports.txt
