@@ -3,13 +3,15 @@ from unittest import TestCase
 import tempfile
 
 from . import CLIENT, ROOT_USERNAME, ROOT_PASSWORD
-from helper import ADMIN_USERNAME, ADMIN_PASSWORD
+from .helper import ADMIN_USERNAME, ADMIN_PASSWORD
 
-from helper import initDatabase
-from helper import success_message, error_message
+from .helper import initDatabase
+from .helper import success_message, error_message
 from requests.exceptions import HTTPError
 
 from base64 import b64decode
+import os.path
+import time
 
 
 class TestCorpusMetadata(TestCase):
@@ -152,6 +154,20 @@ class TestCorpusMetadata(TestCase):
         return CLIENT.sendCorpusMetadataFile(
             self.corpusWithoutMetadata, 'key.subkey', uploaded)
 
+    def testSetAndGetMetadataEmptyFile(self):
+        _, uploaded = tempfile.mkstemp()
+        CLIENT.sendCorpusMetadataFile(
+            self.corpusWithoutMetadata, 'key', uploaded)
+
+        time.sleep(5.0)
+
+        received = CLIENT.getCorpusMetadata(self.corpusWithoutMetadata, path='key')
+
+        received.pop('url')
+        expected = {'type': 'file', 'data': '', 'filename': os.path.basename(uploaded)}
+
+        self.assertDictEqual(received, expected)
+
     def testGetMetadataFile(self):
 
         _, uploaded = tempfile.mkstemp()
@@ -161,8 +177,10 @@ class TestCorpusMetadata(TestCase):
         CLIENT.sendCorpusMetadataFile(
             self.corpusWithoutMetadata, 'key.subkey', uploaded)
 
-        fileContent = CLIENT.getCorpusMetadata(self.corpusWithoutMetadata, path='key.subkey').data
-        assert b64decode(fileContent) == self.LOREM
+        encoded = CLIENT.getCorpusMetadata(self.corpusWithoutMetadata,
+                                           path='key.subkey').data
+        decoded = b64decode(encoded).decode()
+        self.assertEqual(decoded, self.LOREM)
 
     def testOverwriteWholeSubtreeBis(self):
 
@@ -213,6 +231,11 @@ class TestCorpusMetadata(TestCase):
         received = CLIENT.getCorpusMetadata(self.corpusWithoutMetadata, 'key')
         expected = 'value'
         assert received == expected, received
+
+    def testGithubIssueNumber64(self):
+        received = CLIENT.setCorpusMetadata(self.corpusWithoutMetadata,
+                                          path='mymtdata', datas={'gt': 'dzq'})
+        self.assertDictEqual(received, {"success": "Successfully created."})
 
 
 class TestLayerMetadata(TestCase):
@@ -366,8 +389,9 @@ class TestLayerMetadata(TestCase):
         CLIENT.sendLayerMetadataFile(
             self.layerWithoutMetadata, 'key.subkey', uploaded)
 
-        fileContent = CLIENT.getLayerMetadata(self.layerWithoutMetadata, path='key.subkey').data
-        assert b64decode(fileContent) == self.LOREM
+        encoded = CLIENT.getLayerMetadata(self.layerWithoutMetadata, path='key.subkey').data
+        decoded = b64decode(encoded).decode()
+        self.assertEqual(decoded, self.LOREM)
 
 
 class TestMediumMetadata(TestCase):
@@ -521,5 +545,6 @@ class TestMediumMetadata(TestCase):
         CLIENT.sendMediumMetadataFile(
             self.mediumWithoutMetadata, 'key.subkey', uploaded)
 
-        fileContent = CLIENT.getMediumMetadata(self.mediumWithoutMetadata, path='key.subkey').data
-        assert b64decode(fileContent) == self.LOREM, fileContent
+        encoded = CLIENT.getMediumMetadata(self.mediumWithoutMetadata, path='key.subkey').data
+        decoded = b64decode(encoded).decode()
+        self.assertEqual(decoded, self.LOREM)

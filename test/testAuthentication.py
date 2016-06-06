@@ -1,8 +1,8 @@
 from __future__ import unicode_literals
 from . import CLIENT
-from helper import initDatabase, emptyDatabase
-from helper import error_message, success_message
-from helper import USER1_USERNAME, USER1_PASSWORD, USER1_DESCRIPTION
+from .helper import initDatabase, emptyDatabase
+from .helper import error_message, success_message
+from .helper import USER1_USERNAME, USER1_PASSWORD, USER1_DESCRIPTION
 from unittest import TestCase
 
 

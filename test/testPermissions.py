@@ -5,14 +5,14 @@ from unittest import TestCase
 
 
 from . import CLIENT, ROOT_USERNAME, ROOT_PASSWORD
-from helper import ADMIN_USERNAME, ADMIN_PASSWORD
-from helper import USER0_USERNAME, USER0_PASSWORD
-from helper import USER1_USERNAME, USER1_PASSWORD
-from helper import USER2_USERNAME, USER2_PASSWORD
-from helper import USER3_USERNAME, USER3_PASSWORD
+from .helper import ADMIN_USERNAME, ADMIN_PASSWORD
+from .helper import USER0_USERNAME, USER0_PASSWORD
+from .helper import USER1_USERNAME, USER1_PASSWORD
+from .helper import USER2_USERNAME, USER2_PASSWORD
+from .helper import USER3_USERNAME, USER3_PASSWORD
 
-from helper import initDatabase, emptyDatabase
-from helper import success_message, error_message
+from .helper import initDatabase, emptyDatabase
+from .helper import success_message, error_message
 from requests.exceptions import HTTPError
 
 

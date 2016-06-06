@@ -5,10 +5,10 @@ from unittest import TestCase
 
 
 from . import CLIENT, ROOT_USERNAME, ROOT_PASSWORD
-from helper import ADMIN_USERNAME, ADMIN_PASSWORD
-from helper import USER1_USERNAME, USER1_PASSWORD
-from helper import initDatabase, emptyDatabase
-from helper import success_message, error_message
+from .helper import ADMIN_USERNAME, ADMIN_PASSWORD
+from .helper import USER1_USERNAME, USER1_PASSWORD
+from .helper import initDatabase, emptyDatabase
+from .helper import success_message, error_message
 
 
 def createRandomUser(role='user'):
