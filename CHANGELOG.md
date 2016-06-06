@@ -1,3 +1,8 @@
+### Version 0.7 (2016-05-24)
+
+  - feat: {corpus | medium | layer} metadata
+  - feat: {corpus | medium | layer | queue } watch
+
 ### Version 0.6.1 (2016-02-23)
 
   - fix: support for `docker 1.10` and `docker-compose 0.6`

@@ -163,7 +163,7 @@ app.use(methodOverride());
 
 mongoose.connect('mongodb://' + mongodb_host + ':' + mongodb_port + '/' +
   mongodb_name);
-mongoose.set('debug', true);
+mongoose.set('debug', false);
 
 var sessionStore = new mongoStore({
   mongooseConnection: mongoose.connection,

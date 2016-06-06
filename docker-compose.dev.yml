@@ -1,0 +1,37 @@
+# USAGE
+# export CMML_DB=/where/to/store/mongodb/database
+# export CMML_LOGS=/where/to/store/camomile/logs
+# export CMML_MEDIA=/where/media/are/stored
+# export CMML_UPLOAD=/where/to/store/upload
+# export CMML_PORT=3123
+# export CMML_PASSWORD=roO7p4s5wOrD
+# docker-compose -f docker-compose.dev.yml up
+
+version: '2'
+
+services:
+
+  db:
+    image: mongo
+    volumes:
+     - ${CMML_DB}:/data/db
+
+  camomile:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    links:
+     - db:mongo
+    volumes:
+     - ${CMML_MEDIA}:/media
+     - ${CMML_LOGS}:/logs
+     - ${CMML_UPLOAD}:/upload
+     - .:/app
+    ports:
+     - ${CMML_PORT}:3000
+    environment:
+     - ROOT_PASSWORD=${CMML_PASSWORD}
+     - MEDIA=/media
+     - LOG=/logs
+     - UPLOAD=/upload
+    command: node /app/app.js
