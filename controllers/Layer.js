@@ -66,7 +66,7 @@ exports.create = function (req, res) {
               Annotation.create(id_user, layer._id, annotation, callback)
             },
             function (error) {
-              // TODO: remove layer (and its annotations) 
+              // TODO: remove layer (and its annotations)
               //       if something went wrong
               if (error) {
                 console.log('TODO - Remove just created layer.')
@@ -233,10 +233,7 @@ exports.updateUserRights = function (req, res) {
     req.body.right != _.ADMIN &&
     req.body.right != _.WRITE &&
     req.body.right != _.READ) {
-    _.response.sendError(
-      res,
-      "Right must be 1 (READ), 2 (WRITE) or 3 (ADMIN).",
-      400);
+    _.response.sendError(res, 'Right must be 1 (READ), 2 (WRITE) or 3 (ADMIN).', 400);
     return;
   }
 
@@ -265,10 +262,7 @@ exports.updateGroupRights = function (req, res) {
     req.body.right != _.ADMIN &&
     req.body.right != _.WRITE &&
     req.body.right != _.READ) {
-    _.response.sendError(
-      res,
-      "Right must be 1 (READ), 2 (WRITE) or 3 (ADMIN).",
-      400);
+    _.response.sendError(res, 'Right must be 1 (READ), 2 (WRITE) or 3 (ADMIN).', 400);
     return;
   }
 

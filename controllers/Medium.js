@@ -188,8 +188,13 @@ exports.remove = function (req, res) {
 var streamFormat = function (req, res, extension) {
   Medium.findById(req.params.id_medium, function (error, medium) {
 
-    if (error || medium.url === undefined) {
-      _.response.sendError(res, 'Failed stream.');
+    if (error) {
+      _.response.sendError(res, 'Failed stream.', 500);
+      return;
+    }
+
+    if (medium.url === undefined) {
+      _.response.sendError(res, 'Failed stream.', 404);
       return;
     }
 
@@ -199,7 +204,12 @@ var streamFormat = function (req, res, extension) {
       absolutePathToFile,
       function (error) {
         if (error) {
-          res.status(error.status).end();
+          console.log(error);
+          statusCode = error.status;
+          if (statusCode === undefined) {
+            statusCode = 500;
+          }
+          res.status(statusCode).end();
         }
       });
   });

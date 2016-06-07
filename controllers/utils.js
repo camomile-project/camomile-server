@@ -206,12 +206,12 @@ exports.middleware.fExists = function (model) {
     model.findById(req.params[paramName], function (error, resource) {
 
       if (error) {
-        sendError(res, error);
+        sendError(res, error, 500);
         return;
       }
 
       if (!resource) {
-        sendError(res, model.modelName + ' does not exist.');
+        sendError(res, model.modelName + ' does not exist.', 404);
         return;
       }
 
@@ -252,7 +252,7 @@ exports.middleware.fExistsWithRights = function (model, min_right) {
       } else if (req.params['resource_type'] == 'queue') {
         model = Queue;
       } else {
-        sendError(res, 'Resource not found.');
+        sendError(res, 'Incorrect resource type.', 400);
         return;
       }
 
@@ -284,17 +284,17 @@ exports.middleware.fExistsWithRights = function (model, min_right) {
     };
 
     async.parallel(
-      // find groups and resource in parallel    
+      // find groups and resource in parallel
       {
         groups: User.fGetGroups(req.session.user._id),
         permissions: getResourcePermissions,
       },
 
-      // then combine them 
+      // then combine them
       function (error, result) {
 
         if (error) {
-          sendError(res, error);
+          sendError(res, error, 500);
           return;
         }
 
@@ -310,7 +310,7 @@ exports.middleware.fExistsWithRights = function (model, min_right) {
         var permissions = result.permissions;
 
         if (!hasPermission(permissions, user, groups, min_right)) {
-          sendError(res, 'Access denied.');
+          sendError(res, 'Access denied.', 403);
           return;
         }
 
@@ -343,7 +343,7 @@ exports.response = {};
 var sendError = exports.response.sendError = function (res, error, code) {
 
   if (code === undefined) {
-    code = 400;
+    code = 500;
   }
 
   res.status(code).json({
@@ -361,7 +361,7 @@ var sendSuccess = exports.response.sendSuccess = function (res, success) {
 exports.response.fSendSuccess = function (res, success) {
   return function (error) {
     if (error) {
-      sendError(error);
+      sendError(res, error, 500);
       return;
     }
     sendSuccess(res, success);
@@ -373,7 +373,7 @@ var fSendData = exports.response.fSendData = function (res) {
   return function (error, data) {
 
     if (error) {
-      sendError(res, error);
+      sendError(res, error, 500);
       return;
     }
 
@@ -389,7 +389,7 @@ exports.response.fSendResource = function (res, model) {
   return function (error, resource) {
 
     if (error) {
-      sendError(res, error);
+      sendError(res, error, 500);
       return;
     }
 
@@ -411,7 +411,7 @@ exports.response.fSendResources = function (res, model) {
   return function (error, resources) {
 
     if (error) {
-      sendError(res, error);
+      sendError(res, error, 500);
       return;
     }
 

@@ -109,7 +109,7 @@ exports.remove = function (req, res) {
         },
         function (error, layers) {
 
-          // create list of ids 
+          // create list of ids
           var ids_layers = [];
           for (var i = layers.length - 1; i >= 0; i--) {
             ids_layers.push(layers[i]._id);
@@ -182,10 +182,7 @@ exports.updateUserRights = function (req, res) {
     req.body.right != _.ADMIN &&
     req.body.right != _.WRITE &&
     req.body.right != _.READ) {
-    _.response.sendError(
-      res,
-      "Right must be 1 (READ), 2 (WRITE) or 3 (ADMIN).",
-      400);
+    _.response.sendError(res, 'Right must be 1 (READ), 2 (WRITE) or 3 (ADMIN).', 400);
     return;
   }
 
@@ -193,6 +190,7 @@ exports.updateUserRights = function (req, res) {
   var update = {
     $set: {}
   };
+
   update['$set'][path] = req.body.right;
 
   Corpus.findByIdAndUpdate(
@@ -214,10 +212,7 @@ exports.updateGroupRights = function (req, res) {
     req.body.right != _.ADMIN &&
     req.body.right != _.WRITE &&
     req.body.right != _.READ) {
-    _.response.sendError(
-      res,
-      "Right must be 1 (READ), 2 (WRITE) or 3 (ADMIN).",
-      400);
+    _.response.sendError(res, 'Right must be 1 (READ), 2 (WRITE) or 3 (ADMIN).', 400);
     return;
   }
 
