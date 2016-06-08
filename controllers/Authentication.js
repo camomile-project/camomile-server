@@ -34,7 +34,7 @@ exports.helper = {};
 
 var KEYLEN = 128;
 var ITERATIONS = 12000;
-// var DIGEST = 'sha1'; 
+// var DIGEST = 'sha1';
 
 exports.helper.cookieSecret = function () {
   return crypto.randomBytes(64).toString();
@@ -92,7 +92,7 @@ exports.middleware.isLoggedIn = function (req, res, next) {
 // user has admin privileged?
 exports.middleware.isAdmin = function (req, res, next) {
   if (req.session.user.role !== "admin") {
-    _.response.sendError(res, 'Access denied (admin only).', 401);
+    _.response.sendError(res, 'Access denied (admin only).', 403);
     return;
   }
   next();
@@ -101,7 +101,7 @@ exports.middleware.isAdmin = function (req, res, next) {
 // user is root?
 exports.middleware.isRoot = function (req, res, next) {
   if (req.session.user.username !== "root") {
-    _.response.sendError(res, 'Access denied (root only).', 401);
+    _.response.sendError(res, 'Access denied (root only).', 403);
     return;
   }
   next();
@@ -119,7 +119,7 @@ exports.login = function (req, res) {
   // check that both username and password are defined
   if (req.body.username === undefined ||
     req.body.password === undefined) {
-    _.response.sendError(res, failure, 400);
+    _.response.sendError(res, failure, 401);
     return;
   }
 
@@ -130,7 +130,7 @@ exports.login = function (req, res) {
 
     // if error or user does not exist, report authentication failure
     if (error || !user) {
-      _.response.sendError(res, failure, 400);
+      _.response.sendError(res, failure, 401);
       return;
     }
 
@@ -138,7 +138,7 @@ exports.login = function (req, res) {
     getHash(req.body.password, user.salt, function (error, hash) {
 
       if (error || user.hash !== hash) {
-        _.response.sendError(res, failure, 400);
+        _.response.sendError(res, failure, 401);
         return;
       }
 

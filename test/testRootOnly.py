@@ -1,9 +1,10 @@
 from __future__ import unicode_literals
 from . import CLIENT, ROOT_USERNAME, ROOT_PASSWORD
-from helper import ADMIN_USERNAME, ADMIN_PASSWORD
-from helper import initDatabase, emptyDatabase
-from helper import error_message, success_message
+from .helper import ADMIN_USERNAME, ADMIN_PASSWORD
+from .helper import initDatabase, emptyDatabase
+from .helper import success_message
 from unittest import TestCase
+from camomile import CamomileForbidden
 
 
 class TestAsRoot(TestCase):
@@ -55,26 +56,22 @@ class TestAsAdmin(TestCase):
             pass
         emptyDatabase()
 
-    # @error_message('Access denied (root only).')
-    # def testDeleteUser(self):
-    #     CLIENT.deleteUser('5727137292f2900f241a8493')
-
-    @error_message('Access denied (root only).')
     def testDeleteGroup(self):
-        CLIENT.deleteGroup('5727137292f2900f241a8493')
+        with self.assertRaises(CamomileForbidden) as cm:
+            CLIENT.deleteGroup('5727137292f2900f241a8493')
+        self.assertEqual(cm.exception.message, 'Access denied (root only).')
 
-    @error_message('Access denied (root only).')
     def testGetAllMedia(self):
-        CLIENT.getMedia()
+        with self.assertRaises(CamomileForbidden) as cm:
+            CLIENT.getMedia()
+        self.assertEqual(cm.exception.message, 'Access denied (root only).')
 
-    @error_message('Access denied (root only).')
     def testGetAllLayers(self):
-        CLIENT.getLayers()
+        with self.assertRaises(CamomileForbidden) as cm:
+            CLIENT.getLayers()
+        self.assertEqual(cm.exception.message, 'Access denied (root only).')
 
-    @error_message('Access denied (root only).')
     def testGetAllAnnotations(self):
-        CLIENT.getAnnotations()
-
-    # @error_message('Access denied (root only).')
-    # def testGetAllQueues(self):
-    #     CLIENT.getQueues()
+        with self.assertRaises(CamomileForbidden) as cm:
+            CLIENT.getAnnotations()
+        self.assertEqual(cm.exception.message, 'Access denied (root only).')

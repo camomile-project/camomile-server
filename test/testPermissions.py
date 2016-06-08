@@ -5,15 +5,17 @@ from unittest import TestCase
 
 
 from . import CLIENT, ROOT_USERNAME, ROOT_PASSWORD
-from helper import ADMIN_USERNAME, ADMIN_PASSWORD
-from helper import USER0_USERNAME, USER0_PASSWORD
-from helper import USER1_USERNAME, USER1_PASSWORD
-from helper import USER2_USERNAME, USER2_PASSWORD
-from helper import USER3_USERNAME, USER3_PASSWORD
+from .helper import ADMIN_USERNAME, ADMIN_PASSWORD
+from .helper import USER0_USERNAME, USER0_PASSWORD
+from .helper import USER1_USERNAME, USER1_PASSWORD
+from .helper import USER2_USERNAME, USER2_PASSWORD
+from .helper import USER3_USERNAME, USER3_PASSWORD
 
-from helper import initDatabase, emptyDatabase
-from helper import success_message, error_message
+from .helper import initDatabase, emptyDatabase
+from .helper import success_message
 from requests.exceptions import HTTPError
+
+from camomile import CamomileForbidden
 
 
 class TestCorpusPermissions(TestCase):
@@ -38,16 +40,16 @@ class TestCorpusPermissions(TestCase):
     def testCreateCorpus(self):
 
         CLIENT.login(USER0_USERNAME, USER0_PASSWORD)
-        with self.assertRaises(HTTPError) as cm:
+        with self.assertRaises(CamomileForbidden) as cm:
             CLIENT.createCorpus('new corpus')
-        self.assertDictEqual(cm.exception.response.json(), {'error': 'Access denied (admin only).'})
+        self.assertEqual(cm.exception.message, 'Access denied (admin only).')
 
     def testGetCorpus(self):
 
         CLIENT.login(USER0_USERNAME, USER0_PASSWORD)
-        with self.assertRaises(HTTPError) as cm:
+        with self.assertRaises(CamomileForbidden) as cm:
             CLIENT.getCorpus(self.corpus)
-        self.assertDictEqual(cm.exception.response.json(), {'error': 'Access denied.'})
+        self.assertEqual(cm.exception.message, 'Access denied.')
 
         CLIENT.login(USER1_USERNAME, USER1_PASSWORD)
         assert CLIENT.getCorpus(self.corpus)._id == self.corpus
@@ -61,19 +63,19 @@ class TestCorpusPermissions(TestCase):
     def testUpdateCorpus(self):
 
         CLIENT.login(USER0_USERNAME, USER0_PASSWORD)
-        with self.assertRaises(HTTPError) as cm:
+        with self.assertRaises(CamomileForbidden) as cm:
             CLIENT.updateCorpus(self.corpus, name='new_name')
-        self.assertDictEqual(cm.exception.response.json(), {'error': 'Access denied.'})
+        self.assertEqual(cm.exception.message, 'Access denied.')
 
         CLIENT.login(USER1_USERNAME, USER1_PASSWORD)
-        with self.assertRaises(HTTPError) as cm:
+        with self.assertRaises(CamomileForbidden) as cm:
             CLIENT.updateCorpus(self.corpus, name='new_name')
-        self.assertDictEqual(cm.exception.response.json(), {'error': 'Access denied.'})
+        self.assertEqual(cm.exception.message, 'Access denied.')
 
         CLIENT.login(USER2_USERNAME, USER2_PASSWORD)
-        with self.assertRaises(HTTPError) as cm:
+        with self.assertRaises(CamomileForbidden) as cm:
             CLIENT.updateCorpus(self.corpus, name='new_name')
-        self.assertDictEqual(cm.exception.response.json(), {'error': 'Access denied.'})
+        self.assertEqual(cm.exception.message, 'Access denied.')
 
         CLIENT.login(USER3_USERNAME, USER3_PASSWORD)
         assert CLIENT.updateCorpus(self.corpus, name='new_name').name == 'new_name'
@@ -81,16 +83,16 @@ class TestCorpusPermissions(TestCase):
     def testDeleteCorpus(self):
 
         CLIENT.login(USER0_USERNAME, USER0_PASSWORD)
-        with self.assertRaises(HTTPError) as cm:
+        with self.assertRaises(CamomileForbidden) as cm:
             CLIENT.deleteCorpus(self.corpus)
-        self.assertDictEqual(cm.exception.response.json(), {'error': 'Access denied (admin only).'})
+        self.assertEqual(cm.exception.message, 'Access denied (admin only).')
 
     def testGetCorpusMedia(self):
 
         CLIENT.login(USER0_USERNAME, USER0_PASSWORD)
-        with self.assertRaises(HTTPError) as cm:
+        with self.assertRaises(CamomileForbidden) as cm:
             CLIENT.getMedia(corpus=self.corpus, returns_id=True)
-        self.assertDictEqual(cm.exception.response.json(), {'error': 'Access denied.'})
+        self.assertEqual(cm.exception.message, 'Access denied.')
 
         CLIENT.login(USER1_USERNAME, USER1_PASSWORD)
         media = CLIENT.getMedia(corpus=self.corpus, returns_id=True)
@@ -107,19 +109,19 @@ class TestCorpusPermissions(TestCase):
     def testCreateMedium(self):
 
         CLIENT.login(USER0_USERNAME, USER0_PASSWORD)
-        with self.assertRaises(HTTPError) as cm:
+        with self.assertRaises(CamomileForbidden) as cm:
             CLIENT.createMedium(self.corpus, 'medium')
-        self.assertDictEqual(cm.exception.response.json(), {'error': 'Access denied.'})
+        self.assertEqual(cm.exception.message, 'Access denied.')
 
         CLIENT.login(USER1_USERNAME, USER1_PASSWORD)
-        with self.assertRaises(HTTPError) as cm:
+        with self.assertRaises(CamomileForbidden) as cm:
             CLIENT.createMedium(self.corpus, 'medium')
-        self.assertDictEqual(cm.exception.response.json(), {'error': 'Access denied.'})
+        self.assertEqual(cm.exception.message, 'Access denied.')
 
         CLIENT.login(USER2_USERNAME, USER2_PASSWORD)
-        with self.assertRaises(HTTPError) as cm:
+        with self.assertRaises(CamomileForbidden) as cm:
             CLIENT.createMedium(self.corpus, 'medium')
-        self.assertDictEqual(cm.exception.response.json(), {'error': 'Access denied.'})
+        self.assertEqual(cm.exception.message, 'Access denied.')
 
         CLIENT.login(USER3_USERNAME, USER3_PASSWORD)
         medium = CLIENT.createMedium(self.corpus, 'medium')
@@ -128,9 +130,9 @@ class TestCorpusPermissions(TestCase):
     def testGetCorpusLayers(self):
 
         CLIENT.login(USER0_USERNAME, USER0_PASSWORD)
-        with self.assertRaises(HTTPError) as cm:
+        with self.assertRaises(CamomileForbidden) as cm:
             CLIENT.getLayers(corpus=self.corpus, returns_id=True)
-        self.assertDictEqual(cm.exception.response.json(), {'error': 'Access denied.'})
+        self.assertEqual(cm.exception.message, 'Access denied.')
 
         CLIENT.login(USER1_USERNAME, USER1_PASSWORD)
         layers = CLIENT.getLayers(corpus=self.corpus, returns_id=True)
@@ -147,14 +149,14 @@ class TestCorpusPermissions(TestCase):
     def testCreateLayer(self):
 
         CLIENT.login(USER0_USERNAME, USER0_PASSWORD)
-        with self.assertRaises(HTTPError) as cm:
+        with self.assertRaises(CamomileForbidden) as cm:
             CLIENT.createLayer(self.corpus, 'layer', fragment_type='fragment_type', data_type='data_type')
-        self.assertDictEqual(cm.exception.response.json(), {'error': 'Access denied.'})
+        self.assertEqual(cm.exception.message, 'Access denied.')
 
         CLIENT.login(USER1_USERNAME, USER1_PASSWORD)
-        with self.assertRaises(HTTPError) as cm:
+        with self.assertRaises(CamomileForbidden) as cm:
             CLIENT.createLayer(self.corpus, 'layer', fragment_type='fragment_type', data_type='data_type')
-        self.assertDictEqual(cm.exception.response.json(), {'error': 'Access denied.'})
+        self.assertEqual(cm.exception.message, 'Access denied.')
 
         CLIENT.login(USER2_USERNAME, USER2_PASSWORD)
         layer = CLIENT.createLayer(self.corpus, 'layer', fragment_type='fragment_type', data_type='data_type')
@@ -167,9 +169,9 @@ class TestCorpusPermissions(TestCase):
     def testGetMedata(self):
 
         CLIENT.login(USER0_USERNAME, USER0_PASSWORD)
-        with self.assertRaises(HTTPError) as cm:
+        with self.assertRaises(CamomileForbidden) as cm:
             CLIENT.getCorpusMetadata(self.corpus)
-        self.assertDictEqual(cm.exception.response.json(), {'error': 'Access denied.'})
+        self.assertEqual(cm.exception.message, 'Access denied.')
 
         CLIENT.login(USER1_USERNAME, USER1_PASSWORD)
         keys = CLIENT.getCorpusMetadata(self.corpus)
@@ -216,16 +218,16 @@ class TestMediumPermissions(TestCase):
         assert media[0].name == 'medium'
 
         CLIENT.login(ADMIN_USERNAME, ADMIN_PASSWORD)
-        with self.assertRaises(HTTPError) as cm:
+        with self.assertRaises(CamomileForbidden) as cm:
             CLIENT.getMedia()
-        self.assertDictEqual(cm.exception.response.json(), {'error': 'Access denied (root only).'})
+        self.assertEqual(cm.exception.message, 'Access denied (root only).')
 
     def testGetOneMedium(self):
 
         CLIENT.login(USER0_USERNAME, USER0_PASSWORD)
-        with self.assertRaises(HTTPError) as cm:
+        with self.assertRaises(CamomileForbidden) as cm:
             CLIENT.getMedium(self.medium)
-        self.assertDictEqual(cm.exception.response.json(), {'error': 'Access denied.'})
+        self.assertEqual(cm.exception.message, 'Access denied.')
 
         CLIENT.login(USER1_USERNAME, USER1_PASSWORD)
         medium = CLIENT.getMedium(self.medium)
@@ -242,19 +244,19 @@ class TestMediumPermissions(TestCase):
     def testUpdateOneMedium(self):
 
         CLIENT.login(USER0_USERNAME, USER0_PASSWORD)
-        with self.assertRaises(HTTPError) as cm:
+        with self.assertRaises(CamomileForbidden) as cm:
             CLIENT.updateMedium(self.medium, url='url')
-        self.assertDictEqual(cm.exception.response.json(), {'error': 'Access denied.'})
+        self.assertEqual(cm.exception.message, 'Access denied.')
 
         CLIENT.login(USER1_USERNAME, USER1_PASSWORD)
-        with self.assertRaises(HTTPError) as cm:
+        with self.assertRaises(CamomileForbidden) as cm:
             CLIENT.updateMedium(self.medium, url='url')
-        self.assertDictEqual(cm.exception.response.json(), {'error': 'Access denied.'})
+        self.assertEqual(cm.exception.message, 'Access denied.')
 
         CLIENT.login(USER2_USERNAME, USER2_PASSWORD)
-        with self.assertRaises(HTTPError) as cm:
+        with self.assertRaises(CamomileForbidden) as cm:
             CLIENT.updateMedium(self.medium, url='url')
-        self.assertDictEqual(cm.exception.response.json(), {'error': 'Access denied.'})
+        self.assertEqual(cm.exception.message, 'Access denied.')
 
         CLIENT.login(USER3_USERNAME, USER3_PASSWORD)
         medium = CLIENT.updateMedium(self.medium, url='url')
@@ -263,19 +265,19 @@ class TestMediumPermissions(TestCase):
     def testDeleteOneMedium(self):
 
         CLIENT.login(USER0_USERNAME, USER0_PASSWORD)
-        with self.assertRaises(HTTPError) as cm:
+        with self.assertRaises(CamomileForbidden) as cm:
             CLIENT.deleteMedium(self.medium)
-        self.assertDictEqual(cm.exception.response.json(), {'error': 'Access denied.'})
+        self.assertEqual(cm.exception.message, 'Access denied.')
 
         CLIENT.login(USER1_USERNAME, USER1_PASSWORD)
-        with self.assertRaises(HTTPError) as cm:
+        with self.assertRaises(CamomileForbidden) as cm:
             CLIENT.deleteMedium(self.medium)
-        self.assertDictEqual(cm.exception.response.json(), {'error': 'Access denied.'})
+        self.assertEqual(cm.exception.message, 'Access denied.')
 
         CLIENT.login(USER2_USERNAME, USER2_PASSWORD)
-        with self.assertRaises(HTTPError) as cm:
+        with self.assertRaises(CamomileForbidden) as cm:
             CLIENT.deleteMedium(self.medium)
-        self.assertDictEqual(cm.exception.response.json(), {'error': 'Access denied.'})
+        self.assertEqual(cm.exception.message, 'Access denied.')
 
         CLIENT.login(USER3_USERNAME, USER3_PASSWORD)
         result = CLIENT.deleteMedium(self.medium)
@@ -310,16 +312,16 @@ class TestLayerPermissions(TestCase):
         assert layers[0].name == 'layer'
 
         CLIENT.login(ADMIN_USERNAME, ADMIN_PASSWORD)
-        with self.assertRaises(HTTPError) as cm:
+        with self.assertRaises(CamomileForbidden) as cm:
             CLIENT.getLayers()
-        self.assertDictEqual(cm.exception.response.json(), {'error': 'Access denied (root only).'})
+        self.assertEqual(cm.exception.message, 'Access denied (root only).')
 
     def testGetOneLayer(self):
 
         CLIENT.login(USER0_USERNAME, USER0_PASSWORD)
-        with self.assertRaises(HTTPError) as cm:
+        with self.assertRaises(CamomileForbidden) as cm:
             CLIENT.getLayer(self.layer)
-        self.assertDictEqual(cm.exception.response.json(), {'error': 'Access denied.'})
+        self.assertEqual(cm.exception.message, 'Access denied.')
 
         CLIENT.login(USER1_USERNAME, USER1_PASSWORD)
         layer = CLIENT.getLayer(self.layer)
@@ -336,19 +338,19 @@ class TestLayerPermissions(TestCase):
     def testUpdateOneLayer(self):
 
         CLIENT.login(USER0_USERNAME, USER0_PASSWORD)
-        with self.assertRaises(HTTPError) as cm:
+        with self.assertRaises(CamomileForbidden) as cm:
             CLIENT.updateLayer(self.layer, name='new layer name')
-        self.assertDictEqual(cm.exception.response.json(), {'error': 'Access denied.'})
+        self.assertEqual(cm.exception.message, 'Access denied.')
 
         CLIENT.login(USER1_USERNAME, USER1_PASSWORD)
-        with self.assertRaises(HTTPError) as cm:
+        with self.assertRaises(CamomileForbidden) as cm:
             CLIENT.updateLayer(self.layer, name='new layer name')
-        self.assertDictEqual(cm.exception.response.json(), {'error': 'Access denied.'})
+        self.assertEqual(cm.exception.message, 'Access denied.')
 
         CLIENT.login(USER2_USERNAME, USER2_PASSWORD)
-        with self.assertRaises(HTTPError) as cm:
+        with self.assertRaises(CamomileForbidden) as cm:
             CLIENT.updateLayer(self.layer, name='new layer name')
-        self.assertDictEqual(cm.exception.response.json(), {'error': 'Access denied.'})
+        self.assertEqual(cm.exception.message, 'Access denied.')
 
         CLIENT.login(USER3_USERNAME, USER3_PASSWORD)
         layer = CLIENT.updateLayer(self.layer, name='new layer name')
@@ -357,19 +359,19 @@ class TestLayerPermissions(TestCase):
     def testDeleteOneLayer(self):
 
         CLIENT.login(USER0_USERNAME, USER0_PASSWORD)
-        with self.assertRaises(HTTPError) as cm:
+        with self.assertRaises(CamomileForbidden) as cm:
             CLIENT.deleteLayer(self.layer)
-        self.assertDictEqual(cm.exception.response.json(), {'error': 'Access denied.'})
+        self.assertEqual(cm.exception.message, 'Access denied.')
 
         CLIENT.login(USER1_USERNAME, USER1_PASSWORD)
-        with self.assertRaises(HTTPError) as cm:
+        with self.assertRaises(CamomileForbidden) as cm:
             CLIENT.deleteLayer(self.layer)
-        self.assertDictEqual(cm.exception.response.json(), {'error': 'Access denied.'})
+        self.assertEqual(cm.exception.message, 'Access denied.')
 
         CLIENT.login(USER2_USERNAME, USER2_PASSWORD)
-        with self.assertRaises(HTTPError) as cm:
+        with self.assertRaises(CamomileForbidden) as cm:
             CLIENT.deleteLayer(self.layer)
-        self.assertDictEqual(cm.exception.response.json(), {'error': 'Access denied.'})
+        self.assertEqual(cm.exception.message, 'Access denied.')
 
         CLIENT.login(USER3_USERNAME, USER3_PASSWORD)
         result = CLIENT.deleteLayer(self.layer)
@@ -378,9 +380,9 @@ class TestLayerPermissions(TestCase):
     def testGetLayerAnnotations(self):  # READ
 
         CLIENT.login(USER0_USERNAME, USER0_PASSWORD)
-        with self.assertRaises(HTTPError) as cm:
+        with self.assertRaises(CamomileForbidden) as cm:
             CLIENT.getAnnotations(layer=self.layer)
-        self.assertDictEqual(cm.exception.response.json(), {'error': 'Access denied.'})
+        self.assertEqual(cm.exception.message, 'Access denied.')
 
         CLIENT.login(USER1_USERNAME, USER1_PASSWORD)
         annotations = CLIENT.getAnnotations(layer=self.layer)
@@ -397,14 +399,14 @@ class TestLayerPermissions(TestCase):
     def testCreateLayerAnnotation(self):  # WRITE
 
         CLIENT.login(USER0_USERNAME, USER0_PASSWORD)
-        with self.assertRaises(HTTPError) as cm:
+        with self.assertRaises(CamomileForbidden) as cm:
             CLIENT.createAnnotation(self.layer, fragment='fragment', data='data', returns_id=True)
-        self.assertDictEqual(cm.exception.response.json(), {'error': 'Access denied.'})
+        self.assertEqual(cm.exception.message, 'Access denied.')
 
         CLIENT.login(USER1_USERNAME, USER1_PASSWORD)
-        with self.assertRaises(HTTPError) as cm:
+        with self.assertRaises(CamomileForbidden) as cm:
             CLIENT.createAnnotation(self.layer, fragment='fragment', data='data', returns_id=True)
-        self.assertDictEqual(cm.exception.response.json(), {'error': 'Access denied.'})
+        self.assertEqual(cm.exception.message, 'Access denied.')
 
         CLIENT.login(USER2_USERNAME, USER2_PASSWORD)
         annotation = CLIENT.createAnnotation(self.layer, fragment='fragment', data='data')

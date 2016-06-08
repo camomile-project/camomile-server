@@ -132,7 +132,7 @@ exports.pickLength = function (req, res) {
   _.request.fGetResource(req, Queue, extra_fields)(
     function (error, queue) {
       if (error) {
-        _.response.sendError(res, 'Could not get queue content.');
+        _.response.sendError(res, 'Could not get queue content.', 500);
       } else {
         _.response.fSendData(res)(error, queue.list.length);
       }
@@ -144,7 +144,7 @@ exports.pickOne = function (req, res) {
   _.request.fGetResource(req, Queue, extra_fields)(
     function (error, queue) {
       if (error) {
-        _.response.sendError(res, 'Could not get queue content.');
+        _.response.sendError(res, 'Could not get queue content.', 500);
       } else {
         if (queue.list.length == 0) {
           _.response.sendError(res, 'Empty queue.', 400);
@@ -160,7 +160,7 @@ exports.pickAll = function (req, res) {
   _.request.fGetResource(req, Queue, extra_fields)(
     function (error, queue) {
       if (error) {
-        _.response.sendError(res, 'Could not get queue content.');
+        _.response.sendError(res, 'Could not get queue content.', 500);
       } else {
         _.response.fSendData(res)(error, queue.list);
       }
@@ -192,10 +192,7 @@ exports.updateUserRights = function (req, res) {
     req.body.right != _.ADMIN &&
     req.body.right != _.WRITE &&
     req.body.right != _.READ) {
-    _.response.sendError(
-      res,
-      "Right must be 1 (READ), 2 (WRITE) or 3 (ADMIN).",
-      400);
+    _.response.sendError(res, 'Right must be 1 (READ), 2 (WRITE) or 3 (ADMIN).', 400);
     return;
   }
 
@@ -224,10 +221,7 @@ exports.updateGroupRights = function (req, res) {
     req.body.right != _.ADMIN &&
     req.body.right != _.WRITE &&
     req.body.right != _.READ) {
-    _.response.sendError(
-      res,
-      "Right must be 1 (READ), 2 (WRITE) or 3 (ADMIN).",
-      400);
+    _.response.sendError(res, 'Right must be 1 (READ), 2 (WRITE) or 3 (ADMIN).', 400);
     return;
   }
 

@@ -1,10 +1,11 @@
 from __future__ import unicode_literals
 from . import CLIENT
-from helper import initDatabase, emptyDatabase
-from helper import error_message, success_message
-from helper import USER1_USERNAME, USER1_PASSWORD, USER1_DESCRIPTION
+from .helper import initDatabase, emptyDatabase
+from .helper import success_message
+from .helper import USER1_USERNAME, USER1_PASSWORD, USER1_DESCRIPTION
 from unittest import TestCase
 
+from camomile import CamomileUnauthorized
 
 class TestAuthentication(TestCase):
 
@@ -22,13 +23,15 @@ class TestAuthentication(TestCase):
     def testLogin(self):
         return CLIENT.login(USER1_USERNAME, USER1_PASSWORD)
 
-    @error_message('Authentication failed (check your username and password).')
     def testLoginWrongPassword(self):
-        CLIENT.login(USER1_USERNAME, USER1_PASSWORD[::-1])
+        with self.assertRaises(CamomileUnauthorized) as cm:
+            CLIENT.login(USER1_USERNAME, USER1_PASSWORD[::-1])
+        self.assertEqual(cm.exception.message, 'Authentication failed (check your username and password).')
 
-    @error_message('Authentication failed (check your username and password).')
     def testLoginWrongUsername(self):
-        CLIENT.login(USER1_USERNAME[::-1], USER1_PASSWORD)
+        with self.assertRaises(CamomileUnauthorized) as cm:
+            CLIENT.login(USER1_USERNAME[::-1], USER1_PASSWORD)
+        self.assertEqual(cm.exception.message, 'Authentication failed (check your username and password).')
 
     def testMe(self):
         CLIENT.login(USER1_USERNAME, USER1_PASSWORD)

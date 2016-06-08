@@ -3,8 +3,8 @@ from datetime import datetime
 from unittest import TestCase
 
 from . import CLIENT
-from helper import initDatabase, emptyDatabase
-from helper import USER1_USERNAME, USER1_PASSWORD
+from .helper import initDatabase, emptyDatabase
+from .helper import USER1_USERNAME, USER1_PASSWORD
 
 
 class TestUtils(TestCase):

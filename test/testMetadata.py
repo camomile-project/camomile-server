@@ -3,13 +3,17 @@ from unittest import TestCase
 import tempfile
 
 from . import CLIENT, ROOT_USERNAME, ROOT_PASSWORD
-from helper import ADMIN_USERNAME, ADMIN_PASSWORD
+from .helper import ADMIN_USERNAME, ADMIN_PASSWORD
 
-from helper import initDatabase
-from helper import success_message, error_message
+from .helper import initDatabase
+from .helper import success_message
 from requests.exceptions import HTTPError
 
-from base64 import b64decode
+from camomile import CamomileNotFound
+
+from base64 import b64decode, b64encode
+import os.path
+import time
 
 
 class TestCorpusMetadata(TestCase):
@@ -60,9 +64,9 @@ class TestCorpusMetadata(TestCase):
 
     def testGetMetadataByWrongPath(self):
         path = 'key1.sub_key'
-        with self.assertRaises(HTTPError) as cm:
+        with self.assertRaises(CamomileNotFound) as cm:
             CLIENT.getCorpusMetadata(self.corpusWithMetadata, path=path)
-        self.assertDictEqual(cm.exception.response.json(), {'error': 'Metadata does not exist.'})
+        self.assertEqual(cm.exception.message, 'Metadata does not exist.')
 
     def testGetMetadataKeysByWrongPath(self):
         path = 'key1.sub_key'
@@ -152,6 +156,33 @@ class TestCorpusMetadata(TestCase):
         return CLIENT.sendCorpusMetadataFile(
             self.corpusWithoutMetadata, 'key.subkey', uploaded)
 
+    # def testSetAndGetMetadataEmptyFile(self):
+    #     _, uploaded = tempfile.mkstemp()
+    #     CLIENT.sendCorpusMetadataFile(
+    #         self.corpusWithoutMetadata, 'key', uploaded)
+    #
+    #     time.sleep(1.0)
+    #
+    #     received = CLIENT.getCorpusMetadata(self.corpusWithoutMetadata, path='key')
+    #
+    #     received.pop('url')
+    #     expected = {'type': 'file', 'data': '', 'filename': os.path.basename(uploaded)}
+    #
+    #     self.assertDictEqual(received, expected)
+
+    def testGetMetadataFileContent(self):
+
+        _, uploaded = tempfile.mkstemp()
+        with open(uploaded, 'w') as fp:
+            fp.write(self.LOREM)
+
+        CLIENT.sendCorpusMetadataFile(
+            self.corpusWithoutMetadata, 'key.subkey', uploaded)
+
+        result = CLIENT.getCorpusMetadata(self.corpusWithoutMetadata,
+                                           path='key.subkey', file=True)
+        self.assertEqual(result, self.LOREM)
+
     def testGetMetadataFile(self):
 
         _, uploaded = tempfile.mkstemp()
@@ -161,8 +192,23 @@ class TestCorpusMetadata(TestCase):
         CLIENT.sendCorpusMetadataFile(
             self.corpusWithoutMetadata, 'key.subkey', uploaded)
 
-        fileContent = CLIENT.getCorpusMetadata(self.corpusWithoutMetadata, path='key.subkey').data
-        assert b64decode(fileContent) == self.LOREM
+        received = CLIENT.getCorpusMetadata(self.corpusWithoutMetadata,
+                                            path='key.subkey')
+
+        with open(uploaded, 'rb') as f:
+            content = f.read()
+
+        url = '/corpus/{corpus}/metadata/key.subkey?file'.format(
+            corpus=self.corpusWithoutMetadata)
+        filename = os.path.basename(uploaded)
+        data = b64encode(content).decode()
+
+        expected = {'type': 'file',
+                    'filename': filename,
+                    'url': url,
+                    'data': data}
+
+        self.assertDictEqual(expected, received)
 
     def testOverwriteWholeSubtreeBis(self):
 
@@ -211,8 +257,13 @@ class TestCorpusMetadata(TestCase):
                                  'value', path='key')
 
         received = CLIENT.getCorpusMetadata(self.corpusWithoutMetadata, 'key')
-        expected = 'value'
-        assert received == expected, received
+        self.assertEqual(received, 'value')
+
+    def testGithubIssueNumber64(self):
+        with self.assertRaises(TypeError) as cm:
+            _ = CLIENT.setCorpusMetadata(
+                self.corpusWithoutMetadata,
+                path='mymtdata', datas={'gt': 'dzq'})
 
 
 class TestLayerMetadata(TestCase):
@@ -265,9 +316,9 @@ class TestLayerMetadata(TestCase):
 
     def testGetMetadataByWrongPath(self):
         path = 'key1.sub_key'
-        with self.assertRaises(HTTPError) as cm:
+        with self.assertRaises(CamomileNotFound) as cm:
             CLIENT.getLayerMetadata(self.layerWithMetadata, path=path)
-        self.assertDictEqual(cm.exception.response.json(), {'error': 'Metadata does not exist.'})
+        self.assertEqual(cm.exception.message, 'Metadata does not exist.')
 
     def testGetMetadataKeysByWrongPath(self):
         path = 'key1.sub_key'
@@ -366,8 +417,9 @@ class TestLayerMetadata(TestCase):
         CLIENT.sendLayerMetadataFile(
             self.layerWithoutMetadata, 'key.subkey', uploaded)
 
-        fileContent = CLIENT.getLayerMetadata(self.layerWithoutMetadata, path='key.subkey').data
-        assert b64decode(fileContent) == self.LOREM
+        encoded = CLIENT.getLayerMetadata(self.layerWithoutMetadata, path='key.subkey').data
+        decoded = b64decode(encoded).decode()
+        self.assertEqual(decoded, self.LOREM)
 
 
 class TestMediumMetadata(TestCase):
@@ -420,9 +472,9 @@ class TestMediumMetadata(TestCase):
 
     def testGetMetadataByWrongPath(self):
         path = 'key1.sub_key'
-        with self.assertRaises(HTTPError) as cm:
+        with self.assertRaises(CamomileNotFound) as cm:
             CLIENT.getMediumMetadata(self.mediumWithMetadata, path=path)
-        self.assertDictEqual(cm.exception.response.json(), {'error': 'Metadata does not exist.'})
+        self.assertEqual(cm.exception.message, 'Metadata does not exist.')
 
     def testGetMetadataKeysByWrongPath(self):
         path = 'key1.sub_key'
@@ -521,5 +573,6 @@ class TestMediumMetadata(TestCase):
         CLIENT.sendMediumMetadataFile(
             self.mediumWithoutMetadata, 'key.subkey', uploaded)
 
-        fileContent = CLIENT.getMediumMetadata(self.mediumWithoutMetadata, path='key.subkey').data
-        assert b64decode(fileContent) == self.LOREM, fileContent
+        encoded = CLIENT.getMediumMetadata(self.mediumWithoutMetadata, path='key.subkey').data
+        decoded = b64decode(encoded).decode()
+        self.assertEqual(decoded, self.LOREM)

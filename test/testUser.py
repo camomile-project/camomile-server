@@ -5,10 +5,12 @@ from unittest import TestCase
 
 
 from . import CLIENT, ROOT_USERNAME, ROOT_PASSWORD
-from helper import ADMIN_USERNAME, ADMIN_PASSWORD
-from helper import USER1_USERNAME, USER1_PASSWORD
-from helper import initDatabase, emptyDatabase
-from helper import success_message, error_message
+from .helper import ADMIN_USERNAME, ADMIN_PASSWORD
+from .helper import USER1_USERNAME, USER1_PASSWORD
+from .helper import initDatabase, emptyDatabase
+from .helper import success_message
+
+from camomile import CamomileForbidden, CamomileNotFound, CamomileBadRequest, CamomileInternalError
 
 
 def createRandomUser(role='user'):
@@ -75,41 +77,45 @@ class TestUserAsAdmin(TestCase):
         CLIENT.login(randomUser['username'], randomUser['password'])
         self.assertDictEqual(CLIENT.me(), user)
 
-    @error_message('Invalid username.')
     def testInvalidUsername(self):
         randomUser = createRandomUser()
-        CLIENT.createUser('white space',
-                          randomUser['password'],
-                          description=randomUser['description'],
-                          role=randomUser['role'])
+        with self.assertRaises(CamomileBadRequest) as cm:
+            CLIENT.createUser('white space',
+                              randomUser['password'],
+                              description=randomUser['description'],
+                              role=randomUser['role'])
+        self.assertEqual(cm.exception.message, 'Invalid username.')
 
-    @error_message('Invalid password.')
     def testInvalidPassword(self):
         randomUser = createRandomUser()
-        CLIENT.createUser(randomUser['username'],
-                          'short',
-                          description=randomUser['description'],
-                          role=randomUser['role'])
+        with self.assertRaises(CamomileBadRequest) as cm:
+            CLIENT.createUser(randomUser['username'],
+                              'short',
+                              description=randomUser['description'],
+                              role=randomUser['role'])
+        self.assertEqual(cm.exception.message, 'Invalid password.')
 
-    @error_message('Invalid role.')
     def testInvalidRole(self):
         randomUser = createRandomUser()
-        CLIENT.createUser(randomUser['username'],
-                          randomUser['password'],
-                          description=randomUser['description'],
-                          role='god')
+        with self.assertRaises(CamomileBadRequest) as cm:
+            CLIENT.createUser(randomUser['username'],
+                              randomUser['password'],
+                              description=randomUser['description'],
+                              role='god')
+        self.assertEqual(cm.exception.message, 'Invalid role.')
 
-    @error_message('Invalid username (duplicate).')
     def testCreateUserExistingName(self):
         randomUser = createRandomUser()
         CLIENT.createUser(randomUser['username'],
                           randomUser['password'],
                           description=randomUser['description'],
                           role=randomUser['role'])
-        CLIENT.createUser(randomUser['username'],
-                          randomUser['password'],
-                          description=randomUser['description'],
-                          role=randomUser['role'])
+        with self.assertRaises(CamomileInternalError) as cm:
+            CLIENT.createUser(randomUser['username'],
+                              randomUser['password'],
+                              description=randomUser['description'],
+                              role=randomUser['role'])
+        self.assertEqual(cm.exception.message, 'Invalid username (duplicate).')
 
     def testGetUsers(self):
         assert isinstance(CLIENT.getUsers(), list)
@@ -118,10 +124,11 @@ class TestUserAsAdmin(TestCase):
         user = CLIENT.me()
         assert CLIENT.getUser(user._id).username == ADMIN_USERNAME
 
-    @error_message('User does not exist.')
     def testGetUserByWrongID(self):
         user = CLIENT.me()
-        CLIENT.getUser(user._id[::-1])
+        with self.assertRaises(CamomileNotFound) as cm:
+            CLIENT.getUser(user._id[::-1])
+        self.assertEqual(cm.exception.message, 'User does not exist.')
 
 
 class TestUserAsRegularUser(TestCase):
@@ -137,19 +144,11 @@ class TestUserAsRegularUser(TestCase):
             pass
         emptyDatabase()
 
-    @error_message('Access denied (admin only).')
     def testCreateUser(self):
         randomUser = createRandomUser()
-        CLIENT.createUser(randomUser['username'],
-                          randomUser['password'],
-                          description=randomUser['description'],
-                          role=randomUser['role'])
-
-    # @error_message('Access denied (admin only).')
-    # def testGetUsers(self):
-    #     assert isinstance(CLIENT.getUsers(), list)
-
-    # @error_message('Access denied (admin only).')
-    # def testGetUserByID(self):
-    #     user = CLIENT.me()
-    #     assert CLIENT.getUser(user._id).username == USER1_USERNAME
+        with self.assertRaises(CamomileForbidden) as cm:
+            CLIENT.createUser(randomUser['username'],
+                              randomUser['password'],
+                              description=randomUser['description'],
+                              role=randomUser['role'])
+        self.assertEqual(cm.exception.message, 'Access denied (admin only).')
