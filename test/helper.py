@@ -171,19 +171,3 @@ def success_message(message):
         return wrapper
 
     return success_message_decorator
-
-
-def error_message(message):
-    expected = {'error': message}
-
-    def error_message_decorator(f):
-        @wraps(f)
-        def wrapper(self):
-            with self.assertRaises(HTTPError) as cm:
-                f(self)
-            print('response: ' + str(cm.exception.response.json()))
-            print('expected: ' + str(expected))
-            self.assertDictEqual(cm.exception.response.json(), expected)
-
-        return wrapper
-    return error_message_decorator

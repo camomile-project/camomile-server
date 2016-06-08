@@ -6,7 +6,7 @@ from . import CLIENT, ROOT_USERNAME, ROOT_PASSWORD
 from .helper import ADMIN_USERNAME, ADMIN_PASSWORD
 
 from .helper import initDatabase
-from .helper import success_message, error_message
+from .helper import success_message
 
 from time import sleep
 from functools import partial
