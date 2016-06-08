@@ -1,3 +1,11 @@
+### Version 0.7.1 (2016-06-08)
+
+  - fix: fix "watch" timeout
+  - improve: return better HTTP status code
+  - feat: add Python 3 support to functional tests
+  - chore: update functional tests to rely on latest Python client
+  - chore: move documentation to external dedicated repository
+
 ### Version 0.7 (2016-05-24)
 
   - feat: {corpus | medium | layer} metadata
