@@ -1,3 +1,7 @@
+### Version 0.7.2 (2016-08-10)
+
+  - fix: fix "watch" timeout for subsequent clients
+
 ### Version 0.7.1 (2016-06-08)
 
   - fix: fix "watch" timeout
