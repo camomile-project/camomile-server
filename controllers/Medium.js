@@ -204,7 +204,6 @@ var streamFormat = function (req, res, extension) {
       absolutePathToFile,
       function (error) {
         if (error) {
-          console.log(error);
           statusCode = error.status;
           if (statusCode === undefined) {
             statusCode = 500;
