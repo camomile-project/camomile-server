@@ -1,4 +1,8 @@
-### Version 0.7.2 (2016-08-10)
+### Version 0.7.3 (2016-07-07)
+
+  - fix: fix a bug that crashes the server in metadata tree management
+
+### Version 0.7.2 (2016-06-10)
 
   - fix: fix "watch" timeout for subsequent clients
 
