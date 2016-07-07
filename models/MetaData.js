@@ -66,7 +66,7 @@ metadataSchema.statics.create = function (modelName, resource, metadata, upload_
     if (model === false) {
         return Q.reject('Model not found');
     }
-    
+
     tree.forEach(function(item) {
         item[modelName.toLowerCase()] = resource;
         var query = {
@@ -421,7 +421,7 @@ metadataSchema.statics.getModelByName = function(modelName) {
  * @returns {boolean}
  */
 metadataSchema.statics.isFileObject = function(object) {
-    if (object.type && object.type === 'file') {
+    if (object != null && object.type && object.type === 'file') {
         if (object.data && object.filename) {
             return true;
         }
@@ -522,4 +522,3 @@ module.exports = {
     MediumMetadata: MediumMetadata,
     LayerMetadata: LayerMetadata
 };
-
