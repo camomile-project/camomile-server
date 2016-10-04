@@ -45,7 +45,7 @@ var Authentication = require('./controllers/Authentication');
 
 program
   .option('--port <port>', 'Local port to listen to (default: 3000)', parseInt)
-  .option('--mongodb-host <host>', 'MongoDB host (default: localhost)')
+  .option('--mongodb-host <host>', 'MongoDB host (default: mongo)')
   .option('--mongodb-port <port>', 'MongoDB port (default: 27017)', parseInt)
   .option('--mongodb-name <dbname>',
     'MongoDB database name (default: camomile)')
