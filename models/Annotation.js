@@ -95,6 +95,42 @@ annotationSchema.statics.create = function (id_user, id_layer, data,
 
 };
 
+
+annotationSchema.statics.updateWithEvent = function(id_annotation,fragment,data,user_id, callback) {
+  var t = this;
+
+  var changes = {};
+  t.findById(
+
+    id_annotation,
+
+    function (error, annotation) {
+
+      if (fragment) {
+        annotation.fragment = fragment;
+        changes.fragment = fragment;
+      }
+
+      if (data) {
+        annotation.data = data;
+        changes.data = data;
+      }
+
+      annotation.history.push({
+        date: new Date(),
+        id_user: user_id,
+        changes: changes
+      })
+
+      annotation.save(function (error, annotation) {
+        if (!error) {
+          SSEChannels.dispatch('layer:' + annotation.id_layer, { layer: annotation.id_layer, event: {update_annotation: annotation._id} });
+        }
+        callback(error, annotation);
+      });
+    });
+};
+
 annotationSchema.statics.removeWithEvent = function(datas, callback) {
   var t = this;
 
