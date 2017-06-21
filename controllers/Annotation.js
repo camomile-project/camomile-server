@@ -68,32 +68,8 @@ exports.create = function (req, res) {
 
 // update annotation
 exports.update = function (req, res) {
-  var changes = {};
-  Annotation.findById(
-
-    req.params.id_annotation,
-
-    function (error, annotation) {
-
-      if (req.body.fragment) {
-        annotation.fragment = req.body.fragment;
-        changes.fragment = req.body.fragment;
-      }
-
-      if (req.body.data) {
-        annotation.data = req.body.data;
-        changes.data = req.body.data;
-      }
-
-      annotation.history.push({
-        date: new Date(),
-        id_user: req.session.user._id,
-        changes: changes
-      })
-
-      annotation.save(
-        _.response.fSendResources(res, Annotation));
-    });
+  Annotation.updateWithEvent(req.params.id_annotation, req.body.fragment, req.body.data, req.session.user._id,
+    _.response.fSendResources(res, Annotation));
 };
 
 // get all annotations (root only)
