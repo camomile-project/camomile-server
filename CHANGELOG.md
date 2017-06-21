@@ -1,3 +1,8 @@
+### Version 0.8 (2017-06-21)
+
+  - feat: add event for "annotation update"
+  - fix: fix default Mongo host in CLI documentation
+
 ### Version 0.7.3 (2016-07-07)
 
   - fix: fix a bug that crashes the server in metadata tree management
