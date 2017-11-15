@@ -162,14 +162,23 @@ exports.logout = function (req, res) {
 
 // whoami
 exports.me = function (req, res) {
+
   var user = req.session.user;
-  res.status(200)
-    .json({
+
+  // add groups to user and send
+  var callback = function(error, groups) {
+    var data = {
       _id: user._id,
       username: user.username,
       role: user.role,
-      description: user.description
-    });
+      description: user.description,
+      groups: groups,
+    };
+    _.response.fSendData(res)(error, data);
+  };
+
+  User.fGetGroups(user._id)(callback);
+
 };
 
 // get groups of logged in user
