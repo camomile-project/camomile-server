@@ -148,6 +148,8 @@ exports.request.fCountResources = function (req, model, filter) {
 
 };
 
+// returns a function that filters a list of resources
+// based on current user's permission (min_right)
 exports.request.fFilterResources = function (req, min_right) {
 
   // special treatment for (omnipotent) root user
@@ -158,15 +160,21 @@ exports.request.fFilterResources = function (req, min_right) {
   }
 
   var id_user = req.session.user._id;
+
   return function (resources, callback) {
 
     async.waterfall([
+
         // get user groups
         User.fGetGroups(id_user),
+
         // filter according to rights
         function (groups, callback) {
           async.filter(
             resources,
+
+            // check if current user has enough permission
+            // on given resource and callback the answer...
             function (resource, callback) {
               resource.getPermissions(
                 function (error, permissions) {
@@ -178,9 +186,51 @@ exports.request.fFilterResources = function (req, min_right) {
                 }
               );
             },
-            function (filtered) {
-              callback(null, filtered);
-            })
+
+            // remove other users' and groups' permissions
+            function (filtered_resources) {
+              var returned_resources = [];
+
+              // for each resources that passed the permission test
+              for (var r = 0; r < filtered_resources.length; r++) {
+
+                // get the resource
+                var resource = filtered_resources[r];
+
+                if (!('permissions' in resource)) {
+                  returned_resources.push(resource);
+                  continue;
+                }
+
+                // update users permission dictionary to only contain
+                // permission of current user
+                if ('users' in resource.permissions) {
+                  var users_permissions = {};
+                  if (id_user in resource.permissions.users) {
+                    users_permissions[id_user] = resource.permissions.users[id_user];
+                  }
+                  resource.permissions.users = users_permissions;
+                }
+
+                // update groups permission dictionary to only contain
+                // permissions of current user's groups
+                if ('groups' in resource.permissions) {
+                  var groups_permissions = {};
+                  for (var g = 0; g < groups.length; g++) {
+                    var group = groups[g];
+                    if (group in resource.permissions.groups) {
+                      groups_permissions[group] = resource.permissions.groups[group];
+                    }
+                  } // END loop on groups
+                  resource.permissions.groups = groups_permissions;
+                }
+
+                returned_resources.push(resource);
+
+              } // END loop on resources
+
+              callback(null, returned_resources);
+            });  // END filter
         }
       ],
       callback);
@@ -414,19 +464,6 @@ exports.response.fSendResources = function (res, model) {
       sendError(res, error, 500);
       return;
     }
-
-    // remove permissions attributes
-    async.map(
-      resources,
-      function (item, callback) {
-
-        if (modelName === 'Corpus' || modelName === 'Layer') {
-          item.permissions = undefined;
-        }
-        callback(null, item);
-      },
-      fSendData(res)
-    );
-
+    fSendData(res)(null, resources)
   };
 };
