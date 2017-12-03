@@ -198,12 +198,11 @@ exports.update = function (req, res) {
 
   async.waterfall([
 
-      // make sure we are not updating root
+      // "root" user cannot be updated
       function (callback) {
         User.findById(req.params.id_user, function (error, user) {
-          if (user.username === "root" &&
-            req.session.user.username !== "root") {
-            callback('Access denied.', user);
+          if (user.username === "root") {
+            callback('"root" user cannot be updated.', user);
           } else {
             callback(error, user);
           }
