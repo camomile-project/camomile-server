@@ -52,9 +52,9 @@ exports.create = function (req, res) {
     },
     function (error, media) {
       if (only_one) {
-        _.response.fSendResource(res, Medium)(error, media[0]);
+        _.response.fSendData(res)(error, media[0]);
       } else {
-        _.response.fSendResources(res, Medium)(error, media);
+        _.response.fSendData(res)(error, media);
       }
     }
   );
@@ -90,7 +90,7 @@ exports.update = function (req, res) {
       changes: changes
     });
 
-    medium.save(_.response.fSendResource(res, Medium));
+    medium.save(_.response.fSendData(res));
   });
 };
 
@@ -103,14 +103,14 @@ exports.getAll = function (req, res) {
   }
 
   _.request.fGetResources(req, Medium, filter)(
-    _.response.fSendResources(res, Medium));
+    _.response.fSendData(res));
 
 };
 
 // get one specific medium
 exports.getOne = function (req, res) {
   _.request.fGetResource(req, Medium)(
-    _.response.fSendResource(res, Medium)
+    _.response.fSendData(res)
   );
 };
 
@@ -128,7 +128,7 @@ exports.getCorpusMedia = function (req, res) {
   }
 
   _.request.fGetResources(req, Medium, filter)(
-    _.response.fSendResources(res, Medium)
+    _.response.fSendData(res)
   );
 
 };

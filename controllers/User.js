@@ -62,7 +62,7 @@ exports.getAll = function (req, res) {
     ],
 
     // send users
-    _.response.fSendResources(res, User)
+    _.response.fSendData(res)
   );
 };
 
@@ -241,7 +241,7 @@ exports.update = function (req, res) {
       }
     ],
 
-    // send to client 
+    // send to client
     _.response.fSendResource(res, User));
 };
 

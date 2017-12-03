@@ -57,9 +57,9 @@ exports.create = function (req, res) {
     },
     function (error, annotations) {
       if (only_one) {
-        _.response.fSendResource(res, Annotation)(error, annotations[0]);
+        _.response.fSendData(res)(error, annotations[0]);
       } else {
-        _.response.fSendResources(res, Annotation)(error, annotations);
+        _.response.fSendData(res)(error, annotations);
       }
     }
   );
@@ -69,7 +69,7 @@ exports.create = function (req, res) {
 // update annotation
 exports.update = function (req, res) {
   Annotation.updateWithEvent(req.params.id_annotation, req.body.fragment, req.body.data, req.session.user._id,
-    _.response.fSendResources(res, Annotation));
+    _.response.fSendData(res));
 };
 
 // get all annotations (root only)
@@ -90,14 +90,14 @@ exports.getAll = function (req, res) {
   }
 
   _.request.fGetResources(req, Annotation, filter)(
-    _.response.fSendResources(res, Annotation));
+    _.response.fSendData(res));
 
 };
 
 // get one specific medium
 exports.getOne = function (req, res) {
   _.request.fGetResource(req, Annotation)(
-    _.response.fSendResource(res, Annotation));
+    _.response.fSendData(res));
 };
 
 // retrieve all annotations of a layer
@@ -123,7 +123,7 @@ exports.getLayerAnnotations = function (req, res) {
   }
 
   _.request.fGetResources(req, Annotation, filter)(
-    _.response.fSendResources(res, Annotation));
+    _.response.fSendData(res));
 
 };
 

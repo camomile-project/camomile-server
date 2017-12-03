@@ -32,7 +32,7 @@ var SSEChannels = require('../lib/SSEChannels');
 exports.create = function (req, res) {
 
   var id_user = req.session.user._id;
-  Queue.create(id_user, req.body, _.response.fSendResource(res, Queue));
+  Queue.create(id_user, req.body, _.response.fSendData(res));
 };
 
 // update a queue
@@ -66,14 +66,14 @@ exports.getAll = function (req, res) {
       _.request.fGetResources(req, Queue, filter),
       _.request.fFilterResources(req, _.READ)
     ],
-    _.response.fSendResources(res, Queue));
+    _.response.fSendData(res));
 
 };
 
 // get one specific queue
 exports.getOne = function (req, res) {
   _.request.fGetResource(req, Queue)(
-    _.response.fSendResource(res, Queue));
+    _.response.fSendData(res));
 };
 
 // push element into the queue
