@@ -1,7 +1,7 @@
 /*
 The MIT License (MIT)
 
-Copyright (c) 2013-2015 CNRS
+Copyright (c) 2013-2017 CNRS
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -125,7 +125,7 @@ exports.request.fGetResource = function (req, model, extra_fields) {
   var paramName = 'id_' + model.modelName.toLowerCase();
 
   return function (callback) {
-    model.findById(req.params[paramName], fields, callback)
+    model.findById(req.params[paramName], fields, callback);
   };
 
 };
@@ -397,20 +397,34 @@ var sendError = exports.response.sendError = function (res, error, code) {
   }
 
   res.status(code).json({
-    error: error
+      status: "error",
+      data: null,
+      message: error
   });
 
 };
 
 var sendSuccess = exports.response.sendSuccess = function (res, success) {
   res.status(200).json({
-    success: success
+    status: "success",
+    data: null,
+    message: success
+  });
+};
+
+var sendData = exports.response.sendData = function(res, data) {
+
+  res.status(200).json({
+    status: "success",
+    data: data,
+    message: null
   });
 };
 
 exports.response.fSendSuccess = function (res, success) {
   return function (error) {
     if (error) {
+      // TODO - replace this 500 error code by something meaningful...
       sendError(res, error, 500);
       return;
     }
@@ -423,12 +437,12 @@ var fSendData = exports.response.fSendData = function (res) {
   return function (error, data) {
 
     if (error) {
+      // TODO - replace this 500 error code by something meaningful...
       sendError(res, error, 500);
       return;
     }
 
-    res.status(200).json(data);
-
+    sendData(res, data);
   };
 };
 
@@ -439,6 +453,7 @@ exports.response.fSendResource = function (res, model) {
   return function (error, resource) {
 
     if (error) {
+      // TODO - replace this 500 error code by something meaningful...
       sendError(res, error, 500);
       return;
     }
@@ -449,21 +464,11 @@ exports.response.fSendResource = function (res, model) {
       resource.salt = resource.hash = undefined;
     }
 
-    res.status(200).json(resource);
+    res.status(200).json({
+      status: "success",
+      data: resource,
+      message: null
+    });
 
-  };
-};
-
-exports.response.fSendResources = function (res, model) {
-
-  var modelName = model.modelName;
-
-  return function (error, resources) {
-
-    if (error) {
-      sendError(res, error, 500);
-      return;
-    }
-    fSendData(res)(null, resources)
   };
 };

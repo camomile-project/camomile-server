@@ -81,7 +81,7 @@ exports.create = function (req, res) {
       if (only_one) {
         _.response.fSendResource(res, Layer)(error, layers[0]);
       } else {
-        _.response.fSendResources(res, Layer)(error, layers);
+        _.response.fSendData(res)(error, layers);
       }
     }
   );
@@ -150,7 +150,7 @@ exports.getAll = function (req, res) {
       _.request.fGetResources(req, Layer, filter),
       _.request.fFilterResources(req, _.READ)
     ],
-    _.response.fSendResources(res, Layer));
+    _.response.fSendData(res));
 
 };
 
@@ -187,7 +187,7 @@ exports.getCorpusLayers = function (req, res) {
       _.request.fGetResources(req, Layer, filter),
       _.request.fFilterResources(req, _.READ)
     ],
-    _.response.fSendResources(res, Layer));
+    _.response.fSendData(res));
 
 };
 

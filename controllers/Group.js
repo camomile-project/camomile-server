@@ -43,13 +43,13 @@ exports.getAll = function (req, res) {
   }
 
   _.request.fGetResources(req, Group, filter)(
-    _.response.fSendResources(res, Group));
+    _.response.fSendData(res));
 };
 
 // retrieve a specific group
 exports.getOne = function (req, res) {
   _.request.fGetResource(req, Group)(
-    _.response.fSendResource(res, Group));
+    _.response.fSendData(res));
 };
 
 // create a new group
@@ -77,7 +77,7 @@ exports.create = function (req, res) {
     }
 
     // send new group (or error, if any)
-    _.response.fSendResource(res, Group)(error, group)
+    _.response.fSendData(res)(error, group)
   });
 
 };
@@ -89,7 +89,7 @@ exports.update = function (req, res) {
     if (req.body.description) {
       group.description = req.body.description;
     }
-    group.save(_.response.fSendResource(res, Group));
+    group.save(_.response.fSendData(res));
   });
 
 };
@@ -181,7 +181,7 @@ exports.addUser = function (req, res) {
     }, {
       new: true
     },
-    _.response.fSendResource(res, Group)
+    _.response.fSendData(res)
   );
 };
 
@@ -196,6 +196,6 @@ exports.removeUser = function (req, res) {
     }, {
       new: true
     },
-    _.response.fSendResource(res, Group)
+    _.response.fSendData(res)
   );
 };

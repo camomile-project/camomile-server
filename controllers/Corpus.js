@@ -84,7 +84,7 @@ exports.getAll = function (req, res) {
       _.request.fGetResources(req, Corpus, filter),
       _.request.fFilterResources(req, _.READ)
     ],
-    _.response.fSendResources(res, Corpus));
+    _.response.fSendData(res));
 
 };
 
