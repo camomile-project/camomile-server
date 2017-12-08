@@ -36,7 +36,7 @@
     "underscore": "~1.8.3"
   },
   "scripts": {
-    "start": "app.js"
+    "start": "npm install && node app.js"
   },
   "devDependencies": {
     "eventsource": "^0.2.1",

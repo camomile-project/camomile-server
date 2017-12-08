@@ -17,9 +17,7 @@ services:
      - ${CMML_DB}:/data/db
 
   camomile:
-    build:
-      context: .
-      dockerfile: Dockerfile.dev
+    image: node:4
     links:
      - db:mongo
     volumes:
@@ -27,6 +25,7 @@ services:
      - ${CMML_LOGS}:/logs
      - ${CMML_UPLOAD}:/upload
      - .:/app
+    working_dir: /app
     ports:
      - ${CMML_PORT}:3000
     environment:
@@ -34,4 +33,4 @@ services:
      - MEDIA=/media
      - LOG=/logs
      - UPLOAD=/upload
-    command: node /app/app.js
+    command: npm start
