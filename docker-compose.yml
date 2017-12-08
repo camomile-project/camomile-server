@@ -22,4 +22,4 @@ services:
      - MEDIA=/media
      - LOG=/logs
      - UPLOAD=/upload
-    command: node /app/app.js
+    command: npm start
