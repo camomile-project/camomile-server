@@ -57,7 +57,7 @@ var layerSchema = Schema({
     type: Schema.Types.Mixed,
     'default': null
   },
-});
+}, {usePushEach: true});
 
 layerSchema.methods.getPermissions = function (callback) {
   return callback(null, this.permissions);

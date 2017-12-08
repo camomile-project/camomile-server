@@ -42,7 +42,7 @@ var queueSchema = new Schema({
     'default': null
   },
   list: [Schema.Types.Mixed]
-});
+}, {usePushEach: true});
 
 queueSchema.methods.getPermissions = function (callback) {
   return callback(null, this.permissions);

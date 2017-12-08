@@ -45,7 +45,7 @@ var corpusSchema = new Schema({
     type: Schema.Types.Mixed,
     'default': null
   },
-});
+}, {usePushEach: true});
 
 corpusSchema.methods.getPermissions = function (callback) {
   return callback(null, this.permissions);

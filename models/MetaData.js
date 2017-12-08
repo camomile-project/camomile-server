@@ -32,7 +32,8 @@ var crypto = require('crypto');
 
 var Schema = mongoose.Schema;
 
-var options = {discriminatorKey: 'kind'};
+var options = {discriminatorKey: 'kind',
+               usePushEach: true};
 var metadataSchema = Schema({
     type: String,
     path: {

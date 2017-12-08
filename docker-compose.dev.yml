@@ -12,7 +12,7 @@ version: '2'
 services:
 
   db:
-    image: mongo:3.5
+    image: mongo
     volumes:
      - ${CMML_DB}:/data/db
 

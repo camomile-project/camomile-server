@@ -45,7 +45,7 @@ var mediumSchema = Schema({
     type: String,
     default: ""
 }, history: [historySchema]
-});
+}, {usePushEach: true});
 
 mediumSchema.methods.getPermissions = function (callback) {
   return this.model('Corpus').findById(

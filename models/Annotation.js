@@ -47,7 +47,7 @@ var annotationSchema = new Schema({
     'default': ''
   },
   history: [historySchema]
-});
+}, {usePushEach: true});
 
 annotationSchema.methods.getPermissions = function (callback) {
   return this.model('Layer').findById(

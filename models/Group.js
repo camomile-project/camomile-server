@@ -41,6 +41,6 @@ var Group = new Schema({
     type: Schema.Types.ObjectId,
     ref: 'User'
   }]
-});
+}, {usePushEach: true});
 
 module.exports = mongoose.model('Group', Group);
